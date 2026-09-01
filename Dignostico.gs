@@ -2444,10 +2444,8 @@ function registrarNovasInformacoesDiagnostico_(
     return;
   }
 
-
   const diagnosticoId =
     diagnostico.diagnostico_id;
-
 
   // ============================================================
   // DOR
@@ -2466,7 +2464,6 @@ function registrarNovasInformacoesDiagnostico_(
         analise.dor_principal || ''
       ).trim();
 
-
     const impacto =
       String(
         analise.impacto ||
@@ -2474,26 +2471,9 @@ function registrarNovasInformacoesDiagnostico_(
         ''
       ).trim();
 
-
     /*
      * Uma medida ou impacto não pode ser
      * registrada como uma nova dor.
-     *
-     * Exemplo rejeitado:
-     *
-     * dor:
-     * "perde três horas por dia"
-     *
-     * impacto:
-     * "perde três horas por dia"
-     *
-     * Exemplo aceito:
-     *
-     * dor:
-     * "Perda de tempo com processo manual"
-     *
-     * impacto:
-     * "Três horas perdidas por dia"
      */
 
     if (
@@ -2529,7 +2509,6 @@ function registrarNovasInformacoesDiagnostico_(
           ''
       });
 
-
       Logger.log(
         'NOVA DOR REGISTRADA: ' +
         dor
@@ -2550,7 +2529,9 @@ function registrarNovasInformacoesDiagnostico_(
         'IMPACTO ASSOCIADO: ' +
         impacto
       );
+
     }
+
   }
 
 
@@ -2558,16 +2539,28 @@ function registrarNovasInformacoesDiagnostico_(
   // MEDIDAS
   // ============================================================
 
-  const medidas =
+  let medidas =
     extrairMedidasMensagemDiagnostico_(
       mensagemAtual
     );
 
 
   /*
-   * Se a mensagem não trouxe uma medida
-   * detectável diretamente, utilizamos o
-   * volume retornado pela análise.
+   * IMPORTANTE — V5.6
+   *
+   * A IA recebe o volume consolidado como memória.
+   *
+   * Portanto:
+   *
+   *   analise.volume
+   *
+   * NÃO significa automaticamente que existe uma
+   * nova medida nesta mensagem.
+   *
+   * Só utilizamos o volume retornado pela IA como
+   * fallback quando a mensagem não trouxe uma medida
+   * detectável E o volume retornado representa um valor
+   * diferente do último volume já registrado.
    */
 
   if (
@@ -2575,15 +2568,69 @@ function registrarNovasInformacoesDiagnostico_(
     analise.volume
   ) {
 
-    medidas.push({
-      tipo:
-        'VOLUME',
+    const volumeIA =
+      String(
+        analise.volume || ''
+      ).trim();
 
-      texto:
-        String(
-          analise.volume
-        ).trim()
-    });
+    if (volumeIA) {
+
+      const medidasExistentes =
+        obterMedidasDiagnostico_(
+          diagnostico.empresa_id,
+          diagnostico.conversa_id
+        );
+
+      const ultimoVolume =
+        obterUltimoVolumeDiagnostico_(
+          medidasExistentes
+        );
+
+      const volumeIANormalizado =
+        normalizarVolumeDiagnostico_(
+          volumeIA
+        );
+
+      const ultimoVolumeNormalizado =
+        normalizarVolumeDiagnostico_(
+          ultimoVolume
+        );
+
+      /*
+       * Se a IA apenas devolveu o volume que já era
+       * memória consolidada, NÃO criamos nova medida.
+       */
+
+      if (
+        volumeIANormalizado &&
+        volumeIANormalizado !==
+        ultimoVolumeNormalizado
+      ) {
+
+        medidas.push({
+          tipo:
+            'VOLUME',
+
+          texto:
+            volumeIA
+        });
+
+        Logger.log(
+          'NOVO VOLUME DETECTADO PELA IA: ' +
+          volumeIA
+        );
+
+      } else {
+
+        Logger.log(
+          'VOLUME CONSOLIDADO IGNORADO — não é nova informação: ' +
+          volumeIA
+        );
+
+      }
+
+    }
+
   }
 
 
@@ -2598,6 +2645,103 @@ function registrarNovasInformacoesDiagnostico_(
         return;
       }
 
+      const tipo =
+        String(
+          medida.tipo || ''
+        )
+          .trim()
+          .toUpperCase();
+
+      const texto =
+        String(
+          medida.texto || ''
+        ).trim();
+
+
+      if (!tipo || !texto) {
+        return;
+      }
+
+
+      /*
+       * ========================================================
+       * PROTEÇÃO DE IDEMPOTÊNCIA
+       * ========================================================
+       *
+       * Nunca registrar duas vezes a mesma medida para
+       * a mesma conversa.
+       */
+
+      const existentes =
+        obterMedidasDiagnostico_(
+          diagnostico.empresa_id,
+          diagnostico.conversa_id
+        );
+
+
+      const chaveNova =
+        normalizarChaveMedidaDiagnostico_(
+          tipo,
+          texto
+        );
+
+
+      const duplicada =
+        existentes.some(
+          function(existente) {
+
+            if (!existente) {
+              return false;
+            }
+
+            const tipoExistente =
+              String(
+                existente.tipo || ''
+              )
+                .trim()
+                .toUpperCase();
+
+            const textoExistente =
+              String(
+                existente.texto || ''
+              ).trim();
+
+
+            const chaveExistente =
+              normalizarChaveMedidaDiagnostico_(
+                tipoExistente,
+                textoExistente
+              );
+
+
+            return (
+              chaveNova &&
+              chaveExistente &&
+              chaveNova === chaveExistente
+            );
+
+          }
+        );
+
+
+      if (duplicada) {
+
+        Logger.log(
+          'MEDIDA DUPLICADA IGNORADA: ' +
+          tipo +
+          ' | ' +
+          texto
+        );
+
+        return;
+      }
+
+
+      /*
+       * ========================================================
+       * NOVA MEDIDA
+       * ========================================================
+       */
 
       registrarEventoDiagnostico_(
         'MEDIDA_DIAGNOSTICO',
@@ -2609,12 +2753,137 @@ function registrarNovasInformacoesDiagnostico_(
             diagnostico.conversa_id,
 
           valor:
-            medida
+            {
+              tipo:
+                tipo,
+
+              texto:
+                texto
+            }
         }
+      );
+
+
+      Logger.log(
+        'NOVA MEDIDA REGISTRADA: ' +
+        tipo +
+        ' | ' +
+        texto
       );
 
     }
   );
+
+}
+
+
+/**
+ * ============================================================
+ * NORMALIZAR VOLUME
+ * ============================================================
+ *
+ * Cria uma chave de comparação sem alterar o texto original
+ * armazenado.
+ *
+ * Exemplos considerados iguais:
+ *
+ * "80 pedidos por dia"
+ * "80 pedidos/dia"
+ * "80 pedidos diariamente"
+ *
+ * ============================================================
+ */
+
+function normalizarVolumeDiagnostico_(
+  valor
+) {
+
+  let texto =
+    String(
+      valor || ''
+    )
+      .normalize('NFD')
+      .replace(
+        /[\u0300-\u036f]/g,
+        ''
+      )
+      .toLowerCase()
+      .trim();
+
+  if (!texto) {
+    return '';
+  }
+
+
+  texto =
+    texto
+      .replace(
+        /\bdiariamente\b/g,
+        'por dia'
+      )
+      .replace(
+        /\bpor\s*\/\s*dia\b/g,
+        'por dia'
+      )
+      .replace(
+        /\/dia\b/g,
+        ' por dia'
+      )
+      .replace(
+        /\s+/g,
+        ' '
+      )
+      .trim();
+
+
+  return texto;
+
+}
+
+
+/**
+ * ============================================================
+ * NORMALIZAR CHAVE DE MEDIDA
+ * ============================================================
+ *
+ * Não altera o valor salvo.
+ * Serve somente para detectar duplicações.
+ * ============================================================
+ */
+
+function normalizarChaveMedidaDiagnostico_(
+  tipo,
+  texto
+) {
+
+  const tipoNormalizado =
+    String(
+      tipo || ''
+    )
+      .trim()
+      .toUpperCase();
+
+
+  const textoNormalizado =
+    normalizarVolumeDiagnostico_(
+      texto
+    );
+
+
+  if (
+    !tipoNormalizado ||
+    !textoNormalizado
+  ) {
+    return '';
+  }
+
+
+  return (
+    tipoNormalizado +
+    '|' +
+    textoNormalizado
+  );
+
 }
 
 function salvarDorDiagnostico_(dados) {
@@ -4649,7 +4918,6 @@ function registrarEventoDiagnostico_(
 
   let aba;
 
-
   try {
 
     aba =
@@ -4667,6 +4935,147 @@ function registrarEventoDiagnostico_(
   const dadosSeguros =
     dados || {};
 
+
+  /*
+   * ============================================================
+   * PROTEÇÃO CENTRAL CONTRA DUPLICAÇÃO DE MEDIDAS
+   * ============================================================
+   */
+
+  if (
+    String(evento || '')
+      .trim()
+      .toUpperCase() ===
+    'MEDIDA_DIAGNOSTICO'
+  ) {
+
+    let valorMedida =
+      dadosSeguros.valor ||
+      '';
+
+
+    if (
+      typeof valorMedida ===
+      'string'
+    ) {
+
+      try {
+
+        valorMedida =
+          JSON.parse(
+            valorMedida
+          );
+
+      } catch (e) {
+
+        // Mantém string caso não seja JSON.
+
+      }
+
+    }
+
+
+    const tipo =
+      String(
+        valorMedida &&
+        valorMedida.tipo ||
+        ''
+      )
+        .trim()
+        .toUpperCase();
+
+
+    const texto =
+      String(
+        valorMedida &&
+        valorMedida.texto ||
+        ''
+      ).trim();
+
+
+    if (
+      tipo &&
+      texto
+    ) {
+
+      const medidasExistentes =
+        obterMedidasDiagnostico_(
+          dadosSeguros.empresa_id,
+          dadosSeguros.conversa_id
+        );
+
+
+      const chaveNova =
+        normalizarChaveMedidaDiagnostico_(
+          tipo,
+          texto
+        );
+
+
+      const duplicada =
+        medidasExistentes.some(
+          function(medidaExistente) {
+
+            if (!medidaExistente) {
+              return false;
+            }
+
+
+            const tipoExistente =
+              String(
+                medidaExistente.tipo || ''
+              )
+                .trim()
+                .toUpperCase();
+
+
+            const textoExistente =
+              String(
+                medidaExistente.texto || ''
+              ).trim();
+
+
+            const chaveExistente =
+              normalizarChaveMedidaDiagnostico_(
+                tipoExistente,
+                textoExistente
+              );
+
+
+            return (
+              chaveNova &&
+              chaveExistente &&
+              chaveNova ===
+              chaveExistente
+            );
+
+          }
+        );
+
+
+      if (duplicada) {
+
+        Logger.log(
+          'MEDIDA_DIAGNOSTICO DUPLICADA BLOQUEADA: ' +
+          tipo +
+          ' | ' +
+          texto
+        );
+
+        return false;
+
+      }
+
+    }
+
+  }
+
+
+  /*
+   * ============================================================
+   * REGISTRO NORMAL
+   * ============================================================
+   */
 
   let valor =
     dadosSeguros.valor ||
@@ -14772,4 +15181,2556 @@ function testarPersistenciaIntegridadeDiagnosticoV5_6() {
 
 
   return resultado;
+}
+function TESTAR_DUPLICACAO_VOLUME_V56() {
+
+  const empresaId = 'TESTE_V56';
+  const conversaId = 'TESTE_VOLUME_V56';
+
+  const volume = '80 pedidos por dia';
+
+  Logger.log('========================================');
+  Logger.log('TESTE V5.6 — DUPLICAÇÃO DE VOLUME');
+  Logger.log('========================================');
+
+  Logger.log('Empresa: ' + empresaId);
+  Logger.log('Conversa: ' + conversaId);
+  Logger.log('Volume de teste: ' + volume);
+
+  const antes = obterMedidasDiagnostico_(
+    empresaId,
+    conversaId
+  );
+
+  Logger.log(
+    'Medidas existentes antes: ' +
+    JSON.stringify(antes)
+  );
+
+  registrarEventoDiagnostico_(
+    'MEDIDA_DIAGNOSTICO',
+    {
+      empresa_id: empresaId,
+      conversa_id: conversaId,
+      valor: {
+        tipo: 'VOLUME',
+        texto: volume
+      }
+    }
+  );
+
+  const depoisPrimeiro =
+    obterMedidasDiagnostico_(
+      empresaId,
+      conversaId
+    );
+
+  Logger.log(
+    'Depois da primeira gravação: ' +
+    JSON.stringify(depoisPrimeiro)
+  );
+
+  registrarEventoDiagnostico_(
+    'MEDIDA_DIAGNOSTICO',
+    {
+      empresa_id: empresaId,
+      conversa_id: conversaId,
+      valor: {
+        tipo: 'VOLUME',
+        texto: volume
+      }
+    }
+  );
+
+  const depoisSegundo =
+    obterMedidasDiagnostico_(
+      empresaId,
+      conversaId
+    );
+
+  Logger.log(
+    'Depois da segunda tentativa: ' +
+    JSON.stringify(depoisSegundo)
+  );
+
+  Logger.log('========================================');
+
+  if (
+    depoisSegundo.length ===
+    depoisPrimeiro.length
+  ) {
+
+    Logger.log(
+      '✅ TESTE PASSOU'
+    );
+
+    Logger.log(
+      'A segunda gravação foi bloqueada.'
+    );
+
+  } else {
+
+    Logger.log(
+      '❌ TESTE FALHOU'
+    );
+
+    Logger.log(
+      'O VOLUME foi duplicado.'
+    );
+
+  }
+
+  Logger.log('========================================');
+}function TESTAR_FLUXO_VOLUME_MEMORIA_V56() {
+
+  const empresaId = 'TESTE_MEMORIA_V56';
+  const conversaId = 'TESTE_MEMORIA_VOLUME_V56';
+
+  Logger.log('========================================');
+  Logger.log('TESTE FLUXO REAL DE MEMÓRIA V5.6');
+  Logger.log('========================================');
+
+
+  // ============================================================
+  // 1. GARANTE UM VOLUME INICIAL
+  // ============================================================
+
+  Logger.log('');
+  Logger.log('1) Gravando volume inicial: 80 pedidos por dia');
+
+  registrarEventoDiagnostico_(
+    'MEDIDA_DIAGNOSTICO',
+    {
+      empresa_id: empresaId,
+      conversa_id: conversaId,
+
+      valor: {
+        tipo: 'VOLUME',
+        texto: '80 pedidos por dia'
+      }
+    }
+  );
+
+
+  let medidas =
+    obterMedidasDiagnostico_(
+      empresaId,
+      conversaId
+    );
+
+
+  Logger.log(
+    'Medidas após volume inicial: ' +
+    JSON.stringify(medidas)
+  );
+
+
+  // ============================================================
+  // 2. SIMULA IA DEVOLVENDO A MEMÓRIA
+  // ============================================================
+
+  Logger.log('');
+  Logger.log(
+    '2) Simulando IA devolvendo o VOLUME antigo como memória'
+  );
+
+  registrarEventoDiagnostico_(
+    'MEDIDA_DIAGNOSTICO',
+    {
+      empresa_id: empresaId,
+      conversa_id: conversaId,
+
+      valor: {
+        tipo: 'VOLUME',
+        texto: '80 pedidos por dia'
+      }
+    }
+  );
+
+
+  medidas =
+    obterMedidasDiagnostico_(
+      empresaId,
+      conversaId
+    );
+
+
+  Logger.log(
+    'Medidas após memória da IA: ' +
+    JSON.stringify(medidas)
+  );
+
+
+  // ============================================================
+  // 3. VERIFICA DUPLICAÇÃO
+  // ============================================================
+
+  Logger.log('');
+
+  const volumes80 =
+    medidas.filter(
+      function(medida) {
+
+        return (
+          String(
+            medida.tipo || ''
+          )
+            .trim()
+            .toUpperCase() ===
+          'VOLUME'
+          &&
+          String(
+            medida.texto || ''
+          )
+            .trim() ===
+          '80 pedidos por dia'
+        );
+
+      }
+    );
+
+
+  Logger.log(
+    'Quantidade de VOLUMES "80 pedidos por dia": ' +
+    volumes80.length
+  );
+
+
+  if (
+    volumes80.length !== 1
+  ) {
+
+    Logger.log(
+      '❌ FALHA: o volume antigo foi duplicado.'
+    );
+
+    return;
+
+  }
+
+
+  Logger.log(
+    '✅ MEMÓRIA NÃO FOI DUPLICADA.'
+  );
+
+
+  // ============================================================
+  // 4. SIMULA NOVO VOLUME
+  // ============================================================
+
+  Logger.log('');
+  Logger.log(
+    '3) Simulando nova informação: 120 pedidos por dia'
+  );
+
+
+  registrarEventoDiagnostico_(
+    'MEDIDA_DIAGNOSTICO',
+    {
+      empresa_id: empresaId,
+      conversa_id: conversaId,
+
+      valor: {
+        tipo: 'VOLUME',
+        texto: '120 pedidos por dia'
+      }
+    }
+  );
+
+
+  medidas =
+    obterMedidasDiagnostico_(
+      empresaId,
+      conversaId
+    );
+
+
+  Logger.log(
+    'Medidas após novo volume: ' +
+    JSON.stringify(medidas)
+  );
+
+
+  // ============================================================
+  // 5. VERIFICA RESULTADO FINAL
+  // ============================================================
+
+  const volumes =
+    medidas.filter(
+      function(medida) {
+
+        return (
+          String(
+            medida.tipo || ''
+          )
+            .trim()
+            .toUpperCase() ===
+          'VOLUME'
+        );
+
+      }
+    );
+
+
+  Logger.log('');
+  Logger.log(
+    'Quantidade total de VOLUMES: ' +
+    volumes.length
+  );
+
+
+  const tem80 =
+    volumes.some(
+      function(medida) {
+
+        return (
+          String(
+            medida.texto || ''
+          ).trim() ===
+          '80 pedidos por dia'
+        );
+
+      }
+    );
+
+
+  const tem120 =
+    volumes.some(
+      function(medida) {
+
+        return (
+          String(
+            medida.texto || ''
+          ).trim() ===
+          '120 pedidos por dia'
+        );
+
+      }
+    );
+
+
+  Logger.log('');
+  Logger.log('Tem volume 80: ' + tem80);
+  Logger.log('Tem volume 120: ' + tem120);
+
+
+  Logger.log('');
+  Logger.log('========================================');
+
+
+  if (
+    volumes.length === 2 &&
+    tem80 &&
+    tem120
+  ) {
+
+    Logger.log(
+      '✅ TESTE COMPLETO V5.6 PASSOU'
+    );
+
+    Logger.log(
+      'Memória antiga não duplicou e novo volume foi registrado.'
+    );
+
+  } else {
+
+    Logger.log(
+      '❌ TESTE COMPLETO V5.6 FALHOU'
+    );
+
+  }
+
+
+  Logger.log(
+    '========================================'
+  );
+
+}
+function TESTAR_ESTRUTURA_DIAGNOSTICO_V56() {
+
+  Logger.log('========================================');
+  Logger.log('AUDITORIA DA V5.6');
+  Logger.log('========================================');
+
+  const funcoes = [
+    'processarMensagemDiagnostico_',
+    'processarMensagemDiagnostico',
+    'registrarNovasInformacoesDiagnostico_',
+    'registrarEventoDiagnostico_',
+    'obterMedidasDiagnostico_',
+    'extrairMedidasMensagemDiagnostico_',
+    'normalizarChaveMedidaDiagnostico_',
+    'normalizarVolumeDiagnostico_'
+  ];
+
+  funcoes.forEach(function(nome) {
+
+    try {
+
+      const fn = eval(nome);
+
+      Logger.log(
+        '✅ EXISTE: ' + nome
+      );
+
+      Logger.log(
+        '   tipo: ' +
+        typeof fn
+      );
+
+      Logger.log(
+        '   parâmetros: ' +
+        fn.length
+      );
+
+    } catch (erro) {
+
+      Logger.log(
+        '❌ NÃO ENCONTRADA: ' +
+        nome
+      );
+
+    }
+
+  });
+
+  Logger.log('');
+  Logger.log('========================================');
+  Logger.log('FIM DA AUDITORIA');
+  Logger.log('========================================');
+
+}
+function TESTAR_V56_COMPLETO() {
+
+  const inicio = new Date();
+
+  const resultado = {
+    inicio: inicio,
+    testes: [],
+    erros: [],
+    ids: {
+      empresa_id: '',
+      conversa_id: '',
+      diagnostico_id: ''
+    }
+  };
+
+
+  function PASSOU(nome, detalhe) {
+
+    resultado.testes.push({
+      nome: nome,
+      status: 'PASSOU',
+      detalhe: detalhe || ''
+    });
+
+    Logger.log(
+      '✅ PASSOU | ' +
+      nome +
+      (detalhe ? ' | ' + detalhe : '')
+    );
+
+  }
+
+
+  function FALHOU(nome, erro) {
+
+    const mensagem =
+      erro &&
+      erro.message
+        ? erro.message
+        : String(erro || 'Erro desconhecido');
+
+    resultado.testes.push({
+      nome: nome,
+      status: 'FALHOU',
+      detalhe: mensagem
+    });
+
+    resultado.erros.push({
+      nome: nome,
+      erro: mensagem
+    });
+
+    Logger.log(
+      '❌ FALHOU | ' +
+      nome +
+      ' | ' +
+      mensagem
+    );
+
+  }
+
+
+  function executar(nome, funcao) {
+
+    try {
+
+      const retorno = funcao();
+
+      PASSOU(
+        nome,
+        retorno !== undefined
+          ? JSON.stringify(retorno).substring(0, 500)
+          : ''
+      );
+
+      return retorno;
+
+    } catch (erro) {
+
+      FALHOU(
+        nome,
+        erro
+      );
+
+      return null;
+
+    }
+
+  }
+
+
+  Logger.log('');
+  Logger.log('==============================================');
+  Logger.log('       FEEDS SOLUTIONS — V5.6');
+  Logger.log('          TESTE GERAL INTEGRADO');
+  Logger.log('==============================================');
+  Logger.log('');
+
+
+  // ============================================================
+  // 01 — FUNÇÕES CRÍTICAS
+  // ============================================================
+
+  const funcoesCriticas = [
+
+    'iniciarDiagnostico',
+    'processarMensagemDiagnostico',
+    'registrarNovasInformacoesDiagnostico_',
+    'registrarEventoDiagnostico_',
+    'obterMedidasDiagnostico_',
+    'extrairMedidasMensagemDiagnostico_',
+    'normalizarChaveMedidaDiagnostico_',
+    'normalizarVolumeDiagnostico_',
+    'construirContextoDiagnostico_',
+    'construirEntradaDiagnosticoIA_',
+    'normalizarAnaliseDiagnostico_',
+    'ajustarContinuidadeDiagnostico_',
+    'atualizarDiagnosticoComAnalise_',
+    'determinarEstadoDiagnostico_',
+    'obterRespostaConversa_'
+
+  ];
+
+
+  let funcoesOK = 0;
+
+  funcoesCriticas.forEach(function(nome) {
+
+    try {
+
+      const fn = eval(nome);
+
+      if (
+        typeof fn === 'function'
+      ) {
+
+        funcoesOK++;
+
+      } else {
+
+        throw new Error(
+          nome + ' não é uma função.'
+        );
+
+      }
+
+    } catch (erro) {
+
+      FALHOU(
+        'FUNÇÃO ' + nome,
+        erro
+      );
+
+    }
+
+  });
+
+
+  if (
+    funcoesOK ===
+    funcoesCriticas.length
+  ) {
+
+    PASSOU(
+      'ESTRUTURA DAS FUNÇÕES CRÍTICAS',
+      funcoesOK +
+      '/' +
+      funcoesCriticas.length
+    );
+
+  }
+
+
+  // ============================================================
+  // 02 — CONFIGURAÇÃO
+  // ============================================================
+
+  executar(
+    'CONFIGURAÇÃO DO SISTEMA',
+    function() {
+
+      if (
+        typeof SHEETS === 'undefined'
+      ) {
+
+        throw new Error(
+          'Constante SHEETS não encontrada.'
+        );
+
+      }
+
+      const obrigatorias = [
+        'EMPRESAS',
+        'CONVERSAS',
+        'DIAGNOSTICOS',
+        'DORES',
+        'METRICAS'
+      ];
+
+
+      obrigatorias.forEach(function(nome) {
+
+        if (
+          !SHEETS[nome]
+        ) {
+
+          throw new Error(
+            'SHEETS.' +
+            nome +
+            ' não configurada.'
+          );
+
+        }
+
+      });
+
+
+      return {
+        sheets: obrigatorias
+      };
+
+    }
+  );
+
+
+  // ============================================================
+  // 03 — ABAS
+  // ============================================================
+
+  const abasObrigatorias = [
+    'EMPRESAS',
+    'CONVERSAS',
+    'DIAGNOSTICOS',
+    'DORES',
+    'METRICAS'
+  ];
+
+
+  abasObrigatorias.forEach(function(nome) {
+
+    executar(
+      'ABA ' + nome,
+      function() {
+
+        const aba =
+          obterAbaDiagnostico_([
+            nome
+          ]);
+
+        if (
+          !aba
+        ) {
+
+          throw new Error(
+            'Aba não encontrada.'
+          );
+
+        }
+
+        return {
+          nome: aba.getName(),
+          linhas: aba.getLastRow(),
+          colunas: aba.getLastColumn()
+        };
+
+      }
+    );
+
+  });
+
+
+  // ============================================================
+  // 04 — CRIAR DIAGNÓSTICO DE TESTE
+  // ============================================================
+
+  const diagnosticoTeste =
+    executar(
+      'CRIAR DIAGNÓSTICO DE TESTE',
+      function() {
+
+        return iniciarDiagnostico({
+
+          nome:
+            'TESTE V5.6 — NÃO USAR',
+
+          nome_empresa:
+            'TESTE V5.6 — NÃO USAR',
+
+          segmento:
+            'TESTE',
+
+          porte:
+            'TESTE',
+
+          nome_contato:
+            'TESTE AUTOMÁTICO',
+
+          whatsapp:
+            '',
+
+          email:
+            '',
+
+          cidade:
+            'TESTE'
+
+        });
+
+      }
+    );
+
+
+  if (
+    !diagnosticoTeste ||
+    !diagnosticoTeste.empresa_id ||
+    !diagnosticoTeste.conversa_id ||
+    !diagnosticoTeste.diagnostico_id
+  ) {
+
+    Logger.log('');
+    Logger.log(
+      '❌ Não foi possível continuar: criação do diagnóstico falhou.'
+    );
+
+    Logger.log(
+      '=============================================='
+    );
+
+    return resultado;
+
+  }
+
+
+  resultado.ids =
+    diagnosticoTeste;
+
+
+  Logger.log('');
+  Logger.log(
+    'ID EMPRESA: ' +
+    resultado.ids.empresa_id
+  );
+
+  Logger.log(
+    'ID CONVERSA: ' +
+    resultado.ids.conversa_id
+  );
+
+  Logger.log(
+    'ID DIAGNÓSTICO: ' +
+    resultado.ids.diagnostico_id
+  );
+
+
+  // ============================================================
+  // 05 — PROCESSAMENTO REAL DA PRIMEIRA MENSAGEM
+  // ============================================================
+
+  const primeiraMensagem =
+    executar(
+      'PROCESSAR MENSAGEM REAL — VOLUME INICIAL',
+      function() {
+
+        return processarMensagemDiagnostico({
+
+          empresa_id:
+            resultado.ids.empresa_id,
+
+          conversa_id:
+            resultado.ids.conversa_id,
+
+          mensagem:
+            'Nossa empresa processa aproximadamente 80 pedidos por dia.'
+
+        });
+
+      }
+    );
+
+
+  if (
+    primeiraMensagem
+  ) {
+
+    if (
+      primeiraMensagem.sucesso
+    ) {
+
+      PASSOU(
+        'RETORNO DO MOTOR DE DIAGNÓSTICO'
+      );
+
+    } else {
+
+      FALHOU(
+        'RETORNO DO MOTOR DE DIAGNÓSTICO',
+        'A função retornou sem sucesso.'
+      );
+
+    }
+
+  }
+
+
+  // ============================================================
+  // 06 — VERIFICAR VOLUME
+  // ============================================================
+
+  const medidasDepoisPrimeira =
+    executar(
+      'RECUPERAR MEDIDAS APÓS PRIMEIRA MENSAGEM',
+      function() {
+
+        return obterMedidasDiagnostico_(
+          resultado.ids.empresa_id,
+          resultado.ids.conversa_id
+        );
+
+      }
+    );
+
+
+  let volumes80 = [];
+
+
+  if (
+    medidasDepoisPrimeira
+  ) {
+
+    volumes80 =
+      medidasDepoisPrimeira.filter(
+        function(medida) {
+
+          return (
+
+            String(
+              medida.tipo || ''
+            )
+              .trim()
+              .toUpperCase() ===
+            'VOLUME'
+
+            &&
+
+            normalizarVolumeDiagnostico_(
+              medida.texto
+            ) ===
+            normalizarVolumeDiagnostico_(
+              '80 pedidos por dia'
+            )
+
+          );
+
+        }
+      );
+
+
+    if (
+      volumes80.length === 1
+    ) {
+
+      PASSOU(
+        'VOLUME INICIAL',
+        '80 pedidos por dia registrado uma vez.'
+      );
+
+    } else {
+
+      FALHOU(
+        'VOLUME INICIAL',
+        'Quantidade encontrada: ' +
+        volumes80.length
+      );
+
+    }
+
+  }
+
+
+  // ============================================================
+  // 07 — MEMÓRIA / NOVA MENSAGEM SEM VOLUME
+  // ============================================================
+
+  const segundaMensagem =
+    executar(
+      'PROCESSAR MENSAGEM REAL — SEM NOVO VOLUME',
+      function() {
+
+        return processarMensagemDiagnostico({
+
+          empresa_id:
+            resultado.ids.empresa_id,
+
+          conversa_id:
+            resultado.ids.conversa_id,
+
+          mensagem:
+            'Esse volume acontece normalmente durante a operação.'
+
+        });
+
+      }
+    );
+
+
+  const medidasDepoisSegunda =
+    executar(
+      'RECUPERAR MEDIDAS APÓS SEGUNDA MENSAGEM',
+      function() {
+
+        return obterMedidasDiagnostico_(
+          resultado.ids.empresa_id,
+          resultado.ids.conversa_id
+        );
+
+      }
+    );
+
+
+  if (
+    medidasDepoisSegunda
+  ) {
+
+    const volumes80Depois =
+      medidasDepoisSegunda.filter(
+        function(medida) {
+
+          return (
+
+            String(
+              medida.tipo || ''
+            )
+              .trim()
+              .toUpperCase() ===
+            'VOLUME'
+
+            &&
+
+            normalizarVolumeDiagnostico_(
+              medida.texto
+            ) ===
+            normalizarVolumeDiagnostico_(
+              '80 pedidos por dia'
+            )
+
+          );
+
+        }
+      );
+
+
+    if (
+      volumes80Depois.length === 1
+    ) {
+
+      PASSOU(
+        'MEMÓRIA DO VOLUME',
+        'Volume consolidado não foi duplicado.'
+      );
+
+    } else {
+
+      FALHOU(
+        'MEMÓRIA DO VOLUME',
+        'Volume 80 apareceu ' +
+        volumes80Depois.length +
+        ' vezes.'
+      );
+
+    }
+
+  }
+
+
+  // ============================================================
+  // 08 — NOVO VOLUME
+  // ============================================================
+
+  const terceiraMensagem =
+    executar(
+      'PROCESSAR MENSAGEM REAL — NOVO VOLUME',
+      function() {
+
+        return processarMensagemDiagnostico({
+
+          empresa_id:
+            resultado.ids.empresa_id,
+
+          conversa_id:
+            resultado.ids.conversa_id,
+
+          mensagem:
+            'Hoje estamos processando cerca de 120 pedidos por dia.'
+
+        });
+
+      }
+    );
+
+
+  const medidasFinais =
+    executar(
+      'RECUPERAR MEDIDAS FINAIS',
+      function() {
+
+        return obterMedidasDiagnostico_(
+          resultado.ids.empresa_id,
+          resultado.ids.conversa_id
+        );
+
+      }
+    );
+
+
+  if (
+    medidasFinais
+  ) {
+
+    const volumes =
+      medidasFinais.filter(
+        function(medida) {
+
+          return (
+            String(
+              medida.tipo || ''
+            )
+              .trim()
+              .toUpperCase() ===
+            'VOLUME'
+          );
+
+        }
+      );
+
+
+    const tem80 =
+      volumes.some(
+        function(medida) {
+
+          return (
+            normalizarVolumeDiagnostico_(
+              medida.texto
+            ) ===
+            normalizarVolumeDiagnostico_(
+              '80 pedidos por dia'
+            )
+          );
+
+        }
+      );
+
+
+    const tem120 =
+      volumes.some(
+        function(medida) {
+
+          return (
+            normalizarVolumeDiagnostico_(
+              medida.texto
+            ) ===
+            normalizarVolumeDiagnostico_(
+              '120 pedidos por dia'
+            )
+          );
+
+        }
+      );
+
+
+    if (
+      volumes.length === 2 &&
+      tem80 &&
+      tem120
+    ) {
+
+      PASSOU(
+        'EVOLUÇÃO DO VOLUME',
+        '80 → 120 sem duplicação.'
+      );
+
+    } else {
+
+      FALHOU(
+        'EVOLUÇÃO DO VOLUME',
+        'Volumes encontrados: ' +
+        JSON.stringify(volumes)
+      );
+
+    }
+
+  }
+
+
+  // ============================================================
+  // 09 — CONTEXTO
+  // ============================================================
+
+  executar(
+    'CONSTRUÇÃO DO CONTEXTO',
+    function() {
+
+      const diagnostico =
+        obterDiagnosticoAtual_(
+          resultado.ids.empresa_id,
+          resultado.ids.conversa_id
+        );
+
+
+      if (
+        !diagnostico
+      ) {
+
+        throw new Error(
+          'Diagnóstico não recuperado.'
+        );
+
+      }
+
+
+      const contexto =
+        construirContextoDiagnostico_(
+          diagnostico
+        );
+
+
+      if (
+        !contexto
+      ) {
+
+        throw new Error(
+          'Contexto não construído.'
+        );
+
+      }
+
+
+      return {
+        volume:
+          contexto.diagnostico &&
+          contexto.diagnostico.volume,
+
+        medidas:
+          contexto.medidas &&
+          contexto.medidas.length,
+
+        historico:
+          contexto.historico &&
+          contexto.historico.length
+      };
+
+    }
+  );
+
+
+  // ============================================================
+  // 10 — ENTRADA DA IA
+  // ============================================================
+
+  executar(
+    'CONSTRUÇÃO DA ENTRADA DA IA',
+    function() {
+
+      const diagnostico =
+        obterDiagnosticoAtual_(
+          resultado.ids.empresa_id,
+          resultado.ids.conversa_id
+        );
+
+
+      const contexto =
+        construirContextoDiagnostico_(
+          diagnostico
+        );
+
+
+      const entrada =
+        construirEntradaDiagnosticoIA_(
+          'Teste de integridade da V5.6.',
+          contexto
+        );
+
+
+      if (
+        !entrada ||
+        typeof entrada !== 'string'
+      ) {
+
+        throw new Error(
+          'Entrada da IA inválida.'
+        );
+
+      }
+
+
+      if (
+        entrada.indexOf(
+          'DIAGNÓSTICO CONSOLIDADO:'
+        ) === -1
+      ) {
+
+        throw new Error(
+          'Diagnóstico não encontrado na entrada da IA.'
+        );
+
+      }
+
+
+      if (
+        entrada.indexOf(
+          'MEDIDAS JÁ REGISTRADAS:'
+        ) === -1
+      ) {
+
+        throw new Error(
+          'Medidas não encontradas na entrada da IA.'
+        );
+
+      }
+
+
+      return {
+        caracteres:
+          entrada.length,
+
+        possuiVolume:
+          entrada.indexOf(
+            '80 pedidos por dia'
+          ) !== -1 ||
+          entrada.indexOf(
+            '120 pedidos por dia'
+          ) !== -1
+      };
+
+    }
+  );
+
+
+  // ============================================================
+  // 11 — NORMALIZAÇÃO DE VOLUME
+  // ============================================================
+
+  executar(
+    'NORMALIZAÇÃO DE VOLUME',
+    function() {
+
+      const a =
+        normalizarVolumeDiagnostico_(
+          '80 pedidos por dia'
+        );
+
+      const b =
+        normalizarVolumeDiagnostico_(
+          '80 pedidos/dia'
+        );
+
+      const c =
+        normalizarVolumeDiagnostico_(
+          '80 pedidos diariamente'
+        );
+
+
+      if (
+        !a ||
+        !b ||
+        !c
+      ) {
+
+        throw new Error(
+          'Normalização retornou valor vazio.'
+        );
+
+      }
+
+
+      return {
+        original: a,
+        barra: b,
+        diariamente: c
+      };
+
+    }
+  );
+
+
+  // ============================================================
+  // 12 — DEDUPLICAÇÃO DIRETA
+  // ============================================================
+
+  executar(
+    'DEDUPLICAÇÃO CENTRAL',
+    function() {
+
+      const antes =
+        obterMedidasDiagnostico_(
+          resultado.ids.empresa_id,
+          resultado.ids.conversa_id
+        );
+
+
+      registrarEventoDiagnostico_(
+        'MEDIDA_DIAGNOSTICO',
+        {
+
+          empresa_id:
+            resultado.ids.empresa_id,
+
+          conversa_id:
+            resultado.ids.conversa_id,
+
+          valor: {
+
+            tipo:
+              'VOLUME',
+
+            texto:
+              '120 pedidos por dia'
+
+          }
+
+        }
+      );
+
+
+      const depois =
+        obterMedidasDiagnostico_(
+          resultado.ids.empresa_id,
+          resultado.ids.conversa_id
+        );
+
+
+      const quantidade120 =
+        depois.filter(
+          function(medida) {
+
+            return (
+
+              String(
+                medida.tipo || ''
+              )
+                .trim()
+                .toUpperCase() ===
+              'VOLUME'
+
+              &&
+
+              normalizarVolumeDiagnostico_(
+                medida.texto
+              ) ===
+              normalizarVolumeDiagnostico_(
+                '120 pedidos por dia'
+              )
+
+            );
+
+          }
+        ).length;
+
+
+      if (
+        quantidade120 !== 1
+      ) {
+
+        throw new Error(
+          'VOLUME 120 foi duplicado.'
+        );
+
+      }
+
+
+      return {
+        antes:
+          antes.length,
+
+        depois:
+          depois.length,
+
+        volume120:
+          quantidade120
+      };
+
+    }
+  );
+
+
+  // ============================================================
+  // 13 — DIAGNÓSTICO FINAL
+  // ============================================================
+
+  executar(
+    'RECUPERAÇÃO DO DIAGNÓSTICO FINAL',
+    function() {
+
+      const diagnostico =
+        obterDiagnosticoAtual_(
+          resultado.ids.empresa_id,
+          resultado.ids.conversa_id
+        );
+
+
+      if (
+        !diagnostico
+      ) {
+
+        throw new Error(
+          'Diagnóstico final não encontrado.'
+        );
+
+      }
+
+
+      if (
+        diagnostico.empresa_id !==
+        resultado.ids.empresa_id
+      ) {
+
+        throw new Error(
+          'empresa_id inconsistente.'
+        );
+
+      }
+
+
+      if (
+        diagnostico.conversa_id !==
+        resultado.ids.conversa_id
+      ) {
+
+        throw new Error(
+          'conversa_id inconsistente.'
+        );
+
+      }
+
+
+      return {
+
+        diagnostico_id:
+          diagnostico.diagnostico_id,
+
+        estado:
+          diagnostico.status_diagnostico,
+
+        volume:
+          diagnostico.volume ||
+          '(volume armazenado em METRICAS)'
+
+      };
+
+    }
+  );
+
+
+  // ============================================================
+  // 14 — RELATÓRIO
+  // ============================================================
+
+  const total =
+    resultado.testes.length;
+
+  const passaram =
+    resultado.testes.filter(
+      function(t) {
+        return t.status === 'PASSOU';
+      }
+    ).length;
+
+  const falharam =
+    resultado.testes.filter(
+      function(t) {
+        return t.status === 'FALHOU';
+      }
+    ).length;
+
+
+  const fim = new Date();
+
+  const duracao =
+    fim.getTime() -
+    inicio.getTime();
+
+
+  Logger.log('');
+  Logger.log('==============================================');
+  Logger.log('              RESULTADO FINAL');
+  Logger.log('==============================================');
+
+  Logger.log(
+    'TOTAL DE TESTES: ' +
+    total
+  );
+
+  Logger.log(
+    'PASSARAM: ' +
+    passaram
+  );
+
+  Logger.log(
+    'FALHARAM: ' +
+    falharam
+  );
+
+  Logger.log(
+    'DURAÇÃO: ' +
+    duracao +
+    ' ms'
+  );
+
+
+  Logger.log('');
+  Logger.log('----------------------------------------------');
+
+
+  resultado.testes.forEach(
+    function(teste, indice) {
+
+      Logger.log(
+        String(indice + 1).padStart(2, '0') +
+        ' | ' +
+        teste.status +
+        ' | ' +
+        teste.nome +
+        (
+          teste.detalhe
+            ? ' | ' + teste.detalhe
+            : ''
+        )
+      );
+
+    }
+  );
+
+
+  Logger.log('');
+  Logger.log('----------------------------------------------');
+
+
+  if (
+    falharam === 0 &&
+    total > 0
+  ) {
+
+    Logger.log(
+      '🟢 V5.6 — TESTE GERAL PASSOU'
+    );
+
+    Logger.log(
+      'Todos os testes executados nesta bateria passaram.'
+    );
+
+  } else {
+
+    Logger.log(
+      '🔴 V5.6 — TESTE GERAL FALHOU'
+    );
+
+    Logger.log(
+      'NÃO evoluir a versão até corrigir os testes.'
+    );
+
+  }
+
+
+  Logger.log('==============================================');
+  Logger.log('');
+
+
+  // ============================================================
+  // LIMPEZA DOS DADOS DE TESTE
+  // ============================================================
+
+  Logger.log(
+    '⚠️ INICIANDO LIMPEZA DOS DADOS DE TESTE...'
+  );
+
+
+  try {
+
+    if (
+      resultado.ids.empresa_id
+    ) {
+
+      limparDadosTesteV56_(
+        resultado.ids.empresa_id,
+        resultado.ids.conversa_id,
+        resultado.ids.diagnostico_id
+      );
+
+      Logger.log(
+        '✅ DADOS DE TESTE REMOVIDOS.'
+      );
+
+    }
+
+  } catch (erroLimpeza) {
+
+    Logger.log(
+      '⚠️ ATENÇÃO: não foi possível limpar automaticamente os dados de teste.'
+    );
+
+    Logger.log(
+      erroLimpeza.message ||
+      String(erroLimpeza)
+    );
+
+  }
+
+
+  return {
+
+    sucesso:
+      falharam === 0,
+
+    total:
+      total,
+
+    passaram:
+      passaram,
+
+    falharam:
+      falharam,
+
+    duracao_ms:
+      duracao,
+
+    ids_teste:
+      resultado.ids,
+
+    detalhes:
+      resultado.testes
+
+  };
+
+}
+function limparDadosTesteV56_(
+  empresaId,
+  conversaId,
+  diagnosticoId
+) {
+
+  const criterios = [
+    String(empresaId || ''),
+    String(conversaId || ''),
+    String(diagnosticoId || '')
+  ].filter(function(valor) {
+    return valor !== '';
+  });
+
+
+  if (
+    criterios.length === 0
+  ) {
+
+    return;
+
+  }
+
+
+  const nomesAbas = [
+    'EMPRESAS',
+    'CONVERSAS',
+    'DIAGNOSTICOS',
+    'DORES',
+    'METRICAS',
+    'DIAGNOSTICO_SOLUCOES',
+    'LEADS',
+    'FEEDBACK'
+  ];
+
+
+  nomesAbas.forEach(function(nomeAba) {
+
+    try {
+
+      const aba =
+        obterAbaDiagnostico_([
+          nomeAba
+        ]);
+
+
+      const valores =
+        aba.getDataRange().getValues();
+
+
+      if (
+        valores.length <= 1
+      ) {
+
+        return;
+
+      }
+
+
+      const cabecalhos =
+        valores[0].map(function(valor) {
+
+          return String(
+            valor || ''
+          )
+            .trim()
+            .toLowerCase();
+
+        });
+
+
+      const colunasChave = [
+        'empresa_id',
+        'conversa_id',
+        'diagnostico_id'
+      ];
+
+
+      const indices =
+        colunasChave
+          .map(function(nome) {
+
+            return cabecalhos.indexOf(
+              nome
+            );
+
+          })
+          .filter(function(indice) {
+
+            return indice !== -1;
+
+          });
+
+
+      if (
+        indices.length === 0
+      ) {
+
+        return;
+
+      }
+
+
+      for (
+        let i = valores.length - 1;
+        i >= 1;
+        i--
+      ) {
+
+        const linha =
+          valores[i];
+
+
+        const pertenceAoTeste =
+          indices.some(
+            function(indice) {
+
+              return criterios.indexOf(
+                String(
+                  linha[indice] || ''
+                )
+              ) !== -1;
+
+            }
+          );
+
+
+        if (
+          pertenceAoTeste
+        ) {
+
+          aba.deleteRow(
+            i + 1
+          );
+
+        }
+
+      }
+
+    } catch (erro) {
+
+      Logger.log(
+        'Limpeza ignorada em ' +
+        nomeAba +
+        ': ' +
+        (
+          erro.message ||
+          String(erro)
+        )
+      );
+
+    }
+
+  });
+
+}
+function TESTAR_ESTADOS_V56() {
+
+  Logger.log('');
+  Logger.log('==============================================');
+  Logger.log(' FEEDS SOLUTIONS — MATRIZ DE ESTADOS V5.6');
+  Logger.log('==============================================');
+  Logger.log('');
+
+
+  const casos = [
+
+    {
+      nome: '01 — Nada informado',
+
+      diagnostico: {
+        processo_nome: '',
+        dor_principal: '',
+        frequencia: '',
+        impacto_nivel: '',
+        objetivo: ''
+      },
+
+      analise: {
+        informacao_faltante: ''
+      },
+
+      esperado: 'INICIO'
+    },
+
+
+    {
+      nome: '02 — Somente processo',
+
+      diagnostico: {
+        processo_nome: 'Processamento de pedidos',
+        dor_principal: '',
+        frequencia: '',
+        impacto_nivel: '',
+        objetivo: ''
+      },
+
+      analise: {
+        informacao_faltante: ''
+      },
+
+      esperado: 'DESCOBERTA'
+    },
+
+
+    {
+      nome: '03 — Somente dor',
+
+      diagnostico: {
+        processo_nome: '',
+        dor_principal: 'Erros de digitação',
+        frequencia: '',
+        impacto_nivel: '',
+        objetivo: ''
+      },
+
+      analise: {
+        informacao_faltante: ''
+      },
+
+      esperado: 'DESCOBERTA'
+    },
+
+
+    {
+      nome: '04 — Processo + dor',
+
+      diagnostico: {
+        processo_nome: 'Processamento de pedidos',
+        dor_principal: 'Erros de digitação',
+        frequencia: '',
+        impacto_nivel: '',
+        objetivo: ''
+      },
+
+      analise: {
+        informacao_faltante:
+          'Frequência e impacto'
+      },
+
+      esperado: 'INVESTIGACAO'
+    },
+
+
+    {
+      nome: '05 — Processo + dor + frequência',
+
+      diagnostico: {
+        processo_nome: 'Processamento de pedidos',
+        dor_principal: 'Erros de digitação',
+        frequencia: 'Diária',
+        impacto_nivel: '',
+        objetivo: ''
+      },
+
+      analise: {
+        informacao_faltante:
+          'Impacto'
+      },
+
+      esperado: 'INVESTIGACAO'
+    },
+
+
+    {
+      nome: '06 — Processo + dor + frequência + impacto',
+
+      diagnostico: {
+        processo_nome: 'Processamento de pedidos',
+        dor_principal: 'Erros de digitação',
+        frequencia: 'Diária',
+        impacto_nivel: 'Alto',
+        objetivo: ''
+      },
+
+      analise: {
+        informacao_faltante:
+          'Objetivo'
+      },
+
+      esperado: 'INVESTIGACAO'
+    },
+
+
+    {
+      nome: '07 — Diagnóstico mínimo completo',
+
+      diagnostico: {
+        processo_nome: 'Processamento de pedidos',
+        dor_principal: 'Erros de digitação',
+        frequencia: 'Diária',
+        impacto_nivel: 'Alto',
+        objetivo: 'Reduzir erros'
+      },
+
+      analise: {
+        informacao_faltante: ''
+      },
+
+      esperado: 'PRONTO_PARA_ANALISE'
+    },
+
+
+    {
+      nome: '08 — Completo + informação complementar',
+
+      diagnostico: {
+        processo_nome: 'Processamento de pedidos',
+        dor_principal: 'Erros de digitação',
+        frequencia: 'Diária',
+        impacto_nivel: 'Alto',
+        objetivo: 'Reduzir erros'
+      },
+
+      analise: {
+        informacao_faltante:
+          'Quantas pessoas participam do processo?'
+      },
+
+      esperado: 'PRONTO_PARA_ANALISE'
+    },
+
+
+    {
+      nome: '09 — Sem frequência',
+
+      diagnostico: {
+        processo_nome: 'Processamento de pedidos',
+        dor_principal: 'Erros de digitação',
+        frequencia: '',
+        impacto_nivel: 'Alto',
+        objetivo: 'Reduzir erros'
+      },
+
+      analise: {
+        informacao_faltante: ''
+      },
+
+      esperado: 'INVESTIGACAO'
+    },
+
+
+    {
+      nome: '10 — Sem impacto',
+
+      diagnostico: {
+        processo_nome: 'Processamento de pedidos',
+        dor_principal: 'Erros de digitação',
+        frequencia: 'Diária',
+        impacto_nivel: '',
+        objetivo: 'Reduzir erros'
+      },
+
+      analise: {
+        informacao_faltante: ''
+      },
+
+      esperado: 'INVESTIGACAO'
+    }
+
+  ];
+
+
+  let passou = 0;
+  let falhou = 0;
+
+
+  casos.forEach(function(caso) {
+
+    try {
+
+      const resultado =
+        determinarEstadoDiagnostico_(
+          caso.diagnostico,
+          caso.analise
+        );
+
+
+      const esperado =
+        DIAGNOSTICO_ESTADOS[
+          caso.esperado
+        ];
+
+
+      const ok =
+        resultado === esperado;
+
+
+      if (ok) {
+
+        passou++;
+
+        Logger.log(
+          '✅ PASSOU | ' +
+          caso.nome +
+          ' | esperado=' +
+          caso.esperado +
+          ' | obtido=' +
+          resultado
+        );
+
+      } else {
+
+        falhou++;
+
+        Logger.log(
+          '❌ FALHOU | ' +
+          caso.nome +
+          ' | esperado=' +
+          caso.esperado +
+          ' | obtido=' +
+          resultado
+        );
+
+      }
+
+    } catch (erro) {
+
+      falhou++;
+
+      Logger.log(
+        '❌ ERRO | ' +
+        caso.nome +
+        ' | ' +
+        (
+          erro.message ||
+          String(erro)
+        )
+      );
+
+    }
+
+  });
+
+
+  Logger.log('');
+  Logger.log('==============================================');
+  Logger.log('RESULTADO');
+  Logger.log('==============================================');
+
+  Logger.log(
+    'TOTAL: ' +
+    casos.length
+  );
+
+  Logger.log(
+    'PASSARAM: ' +
+    passou
+  );
+
+  Logger.log(
+    'FALHARAM: ' +
+    falhou
+  );
+
+
+  if (
+    falhou === 0
+  ) {
+
+    Logger.log(
+      '🟢 MATRIZ ATUAL PASSOU'
+    );
+
+  } else {
+
+    Logger.log(
+      '🔴 MATRIZ ATUAL POSSUI DIVERGÊNCIAS'
+    );
+
+  }
+
+  Logger.log(
+    '=============================================='
+  );
+
+}
+function TESTAR_LACUNAS_DIAGNOSTICO_V56() {
+
+  Logger.log('');
+  Logger.log('==============================================');
+  Logger.log(' FEEDS SOLUTIONS — TESTE DE LACUNAS V5.6');
+  Logger.log('==============================================');
+  Logger.log('');
+
+  const casos = [
+
+    {
+      nome: '01 — Qual é o impacto?',
+      texto: 'Qual é o impacto desse problema?',
+      esperado: true
+    },
+
+    {
+      nome: '02 — Qual a frequência?',
+      texto: 'Com que frequência esse problema acontece?',
+      esperado: true
+    },
+
+    {
+      nome: '03 — Qual o objetivo?',
+      texto: 'Qual é o principal objetivo da empresa?',
+      esperado: true
+    },
+
+    {
+      nome: '04 — Quantas pessoas participam?',
+      texto: 'Quantas pessoas participam desse processo?',
+      esperado: false
+    },
+
+    {
+      nome: '05 — Qual sistema vocês usam?',
+      texto: 'Qual sistema vocês utilizam atualmente?',
+      esperado: false
+    },
+
+    {
+      nome: '06 — Quem é responsável?',
+      texto: 'Quem é responsável por esse processo?',
+      esperado: false
+    },
+
+    {
+      nome: '07 — Qual o valor financeiro?',
+      texto: 'Qual é o impacto financeiro desse problema?',
+      esperado: true
+    },
+
+    {
+      nome: '08 — Qual o prazo?',
+      texto: 'Qual é o prazo para resolver esse problema?',
+      esperado: false
+    },
+
+    {
+      nome: '09 — Como fazem hoje?',
+      texto: 'Como vocês fazem esse processo atualmente?',
+      esperado: false
+    },
+
+    {
+      nome: '10 — Existe outra informação?',
+      texto: 'Existe alguma outra informação importante?',
+      esperado: false
+    },
+
+    {
+      nome: '11 — Quantos pedidos?',
+      texto: 'Quantos pedidos vocês processam por dia?',
+      esperado: false
+    },
+
+    {
+      nome: '12 — Quanto tempo perde?',
+      texto: 'Quanto tempo vocês perdem com esse problema?',
+      esperado: true
+    },
+
+    {
+      nome: '13 — Qual a causa?',
+      texto: 'Qual é a causa desse problema?',
+      esperado: true
+    },
+
+    {
+      nome: '14 — Qual o resultado esperado?',
+      texto: 'Qual resultado vocês esperam alcançar?',
+      esperado: true
+    },
+
+    {
+      nome: '15 — Qual ferramenta?',
+      texto: 'Qual ferramenta vocês utilizam?',
+      esperado: false
+    }
+
+  ];
+
+
+  let passou = 0;
+  let falhou = 0;
+
+
+  casos.forEach(function(caso) {
+
+    try {
+
+      const resultado =
+        informacaoFaltanteEhEssencialDiagnostico_(
+          caso.texto
+        );
+
+
+      const ok =
+        resultado === caso.esperado;
+
+
+      if (ok) {
+
+        passou++;
+
+        Logger.log(
+          '✅ PASSOU | ' +
+          caso.nome +
+          ' | esperado=' +
+          caso.esperado +
+          ' | obtido=' +
+          resultado
+        );
+
+      } else {
+
+        falhou++;
+
+        Logger.log(
+          '❌ FALHOU | ' +
+          caso.nome +
+          ' | esperado=' +
+          caso.esperado +
+          ' | obtido=' +
+          resultado
+        );
+
+      }
+
+    } catch (erro) {
+
+      falhou++;
+
+      Logger.log(
+        '❌ ERRO | ' +
+        caso.nome +
+        ' | ' +
+        (
+          erro.message ||
+          String(erro)
+        )
+      );
+
+    }
+
+  });
+
+
+  Logger.log('');
+  Logger.log('==============================================');
+  Logger.log('RESULTADO');
+  Logger.log('==============================================');
+
+  Logger.log(
+    'TOTAL: ' +
+    casos.length
+  );
+
+  Logger.log(
+    'PASSARAM: ' +
+    passou
+  );
+
+  Logger.log(
+    'FALHARAM: ' +
+    falhou
+  );
+
+
+  if (falhou === 0) {
+
+    Logger.log(
+      '🟢 TESTE DE LACUNAS PASSOU'
+    );
+
+  } else {
+
+    Logger.log(
+      '🔴 TESTE DE LACUNAS POSSUI DIVERGÊNCIAS'
+    );
+
+  }
+
+  Logger.log(
+    '=============================================='
+  );
+
+}
+
+function informacaoFaltanteEhEssencialDiagnostico_(
+  informacao
+) {
+
+  const texto =
+    normalizarTextoDiagnostico_(
+      String(
+        informacao || ''
+      ).trim()
+    );
+
+
+  if (!texto) {
+    return false;
+  }
+
+
+  /*
+   * ============================================================
+   * INFORMAÇÕES ESSENCIAIS PARA CONCLUIR O DIAGNÓSTICO
+   * ============================================================
+   *
+   * true  = lacuna essencial
+   * false = lacuna complementar
+   *
+   * IMPORTANTE:
+   * Tanto a informação recebida quanto cada termo da lista
+   * passam pela MESMA normalização antes da comparação.
+   *
+   * ============================================================
+   */
+
+
+  const termosEssenciais = [
+
+    // ----------------------------------------------------------
+    // IMPACTO
+    // ----------------------------------------------------------
+
+    'impacto',
+    'impacto financeiro',
+    'impacto operacional',
+    'prejuizo',
+    'prejuizo financeiro',
+    'custo do problema',
+    'quanto custa',
+    'quanto perde',
+    'tempo perdido',
+    'tempo voces perdem',
+    'tempo perdido por dia',
+    'tempo perdido por semana',
+    'tempo perdido por mes',
+
+
+    // ----------------------------------------------------------
+    // FREQUÊNCIA
+    // ----------------------------------------------------------
+
+    'frequencia',
+    'com que frequencia',
+    'quantas vezes',
+    'acontece por dia',
+    'acontece por semana',
+    'acontece por mes',
+    'quantas vezes acontece',
+
+
+    // ----------------------------------------------------------
+    // OBJETIVO / RESULTADO
+    // ----------------------------------------------------------
+
+    'objetivo',
+    'principal objetivo',
+    'resultado esperado',
+    'resultados esperados',
+    'resultado que espera',
+    'resultado que esperam',
+    'resultado que deseja',
+    'resultado que desejam',
+    'resultado que pretende',
+    'resultado que pretendem',
+    'o que pretende',
+    'o que pretendem',
+    'o que gostaria',
+    'o que gostariam',
+    'o que quer',
+    'o que querem',
+    'o que deseja',
+    'o que desejam',
+    'o que espera',
+    'o que esperam',
+
+
+    // ----------------------------------------------------------
+    // CAUSA
+    // ----------------------------------------------------------
+
+    'causa',
+    'causa do problema',
+    'por que acontece',
+    'porque acontece',
+    'motivo do problema',
+    'origem do problema'
+
+  ];
+
+
+  return termosEssenciais.some(
+    function(termo) {
+
+      const termoNormalizado =
+        normalizarTextoDiagnostico_(
+          termo
+        );
+
+
+      if (!termoNormalizado) {
+        return false;
+      }
+
+
+      return texto.indexOf(
+        termoNormalizado
+      ) !== -1;
+
+    }
+  );
+
+}
+function TESTAR_NORMALIZACAO_RESULTADO_V56() {
+
+  const entrada =
+    'Qual o resultado esperado?';
+
+  const texto =
+    normalizarTextoDiagnostico_(
+      entrada
+    );
+
+  const termo =
+    normalizarTextoDiagnostico_(
+      'resultado esperado'
+    );
+
+  const posicao =
+    texto.indexOf(
+      termo
+    );
+
+  const resultado =
+    posicao !== -1;
+
+
+  Logger.log(
+    '=============================================='
+  );
+
+  Logger.log(
+    'TESTE DE NORMALIZAÇÃO — RESULTADO ESPERADO'
+  );
+
+  Logger.log(
+    '=============================================='
+  );
+
+  Logger.log(
+    'Entrada original: [' +
+    entrada +
+    ']'
+  );
+
+  Logger.log(
+    'Texto normalizado: [' +
+    texto +
+    ']'
+  );
+
+  Logger.log(
+    'Termo normalizado: [' +
+    termo +
+    ']'
+  );
+
+  Logger.log(
+    'Posição encontrada: ' +
+    posicao
+  );
+
+  Logger.log(
+    'Resultado: ' +
+    resultado
+  );
+
+
+  if (
+    resultado === true
+  ) {
+
+    Logger.log(
+      '✅ PASSOU — a comparação funciona.'
+    );
+
+  } else {
+
+    Logger.log(
+      '❌ FALHOU — a comparação não encontrou o termo.'
+    );
+
+  }
+
+  Logger.log(
+    '=============================================='
+  );
+
 }
