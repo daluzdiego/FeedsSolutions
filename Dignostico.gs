@@ -2509,11 +2509,7 @@ function registrarNovasInformacoesDiagnostico_(
           ''
       });
 
-      Logger.log(
-        'NOVA DOR REGISTRADA: ' +
-        dor
-      );
-
+      
     } else {
 
       Logger.log(
@@ -3396,24 +3392,162 @@ function determinarEstadoDiagnostico_(
   analise
 ) {
 
+  const dados =
+    diagnostico || {};
 
-  const possuiProcesso = !!String(diagnostico.processo_nome || '').trim();
-  const possuiDor = !!String(diagnostico.dor_principal || '').trim();
-  const possuiFrequencia = !!String(diagnostico.frequencia || '').trim();
-  const possuiImpacto = !!String(diagnostico.impacto_nivel || '').trim();
-  const possuiInformacaoFaltante = !!String(analise && analise.informacao_faltante || '').trim();
+  const analiseAtual =
+    analise || {};
 
-  if (!possuiProcesso && !possuiDor) return DIAGNOSTICO_ESTADOS.INICIO;
-  if (!possuiProcesso || !possuiDor) return DIAGNOSTICO_ESTADOS.DESCOBERTA;
 
-  // O diagnóstico só pode avançar quando não há uma lacuna relevante.
-  // Volume é uma medida registrada separadamente; não é obrigatório
-  // estar em DIAGNOSTICOS para manter o contrato V1.
-  if (!possuiFrequencia || !possuiImpacto || possuiInformacaoFaltante) {
-    return DIAGNOSTICO_ESTADOS.INVESTIGACAO;
+  // ============================================================
+  // PRESENÇA DOS ELEMENTOS FUNDAMENTAIS
+  // ============================================================
+
+  const possuiProcesso =
+    !!String(
+      dados.processo_nome || ''
+    ).trim();
+
+
+  const possuiDor =
+    !!String(
+      dados.dor_principal || ''
+    ).trim();
+
+
+  const possuiFrequencia =
+    !!String(
+      dados.frequencia || ''
+    ).trim();
+
+
+  const possuiImpacto =
+    !!String(
+      dados.impacto_nivel || ''
+    ).trim();
+
+
+  const possuiObjetivo =
+    !!String(
+      dados.objetivo || ''
+    ).trim();
+
+
+  const informacaoFaltante =
+    String(
+      analiseAtual.informacao_faltante || ''
+    ).trim();
+
+
+  // ============================================================
+  // 1. INÍCIO
+  // ============================================================
+  //
+  // Ainda não existe nenhum dos dois elementos fundamentais.
+  //
+  // ============================================================
+
+  if (
+    !possuiProcesso &&
+    !possuiDor
+  ) {
+
+    return DIAGNOSTICO_ESTADOS.INICIO;
+
   }
 
+
+  // ============================================================
+  // 2. DESCOBERTA
+  // ============================================================
+  //
+  // Já existe alguma informação fundamental, mas ainda não
+  // temos PROCESSO + DOR.
+  //
+  // ============================================================
+
+  if (
+    !possuiProcesso ||
+    !possuiDor
+  ) {
+
+    return DIAGNOSTICO_ESTADOS.DESCOBERTA;
+
+  }
+
+
+  // ============================================================
+  // 3. INVESTIGAÇÃO — DADOS ESSENCIAIS AUSENTES
+  // ============================================================
+  //
+  // PROCESSO + DOR já existem.
+  //
+  // Porém, para o diagnóstico mínimo ficar pronto, ainda
+  // precisamos de:
+  //
+  // - frequência
+  // - impacto
+  // - objetivo
+  //
+  // O VOLUME NÃO é obrigatório para avançar.
+  //
+  // ============================================================
+
+  if (
+    !possuiFrequencia ||
+    !possuiImpacto ||
+    !possuiObjetivo
+  ) {
+
+    return DIAGNOSTICO_ESTADOS.INVESTIGACAO;
+
+  }
+
+
+  // ============================================================
+  // 4. INFORMAÇÃO FALTANTE
+  // ============================================================
+  //
+  // Se todos os elementos essenciais já existem, a informação
+  // faltante só deve bloquear o diagnóstico se for realmente
+  // ESSENCIAL.
+  //
+  // Informações complementares não impedem o avanço.
+  //
+  // ============================================================
+
+  if (
+    informacaoFaltante &&
+    informacaoFaltanteEhEssencialDiagnostico_(
+      informacaoFaltante
+    )
+  ) {
+
+    return DIAGNOSTICO_ESTADOS.INVESTIGACAO;
+
+  }
+
+
+  // ============================================================
+  // 5. PRONTO PARA ANÁLISE
+  // ============================================================
+  //
+  // Temos:
+  //
+  // PROCESSO
+  // DOR
+  // FREQUÊNCIA
+  // IMPACTO
+  // OBJETIVO
+  //
+  // E não existe nenhuma lacuna essencial bloqueando o avanço.
+  //
+  // VOLUME continua sendo uma métrica complementar.
+  //
+  // ============================================================
+
   return DIAGNOSTICO_ESTADOS.PRONTO_PARA_ANALISE;
+
 }
 
 /**
@@ -17400,7 +17534,7 @@ function TESTAR_LACUNAS_DIAGNOSTICO_V56() {
 
     {
       nome: '14 — Qual o resultado esperado?',
-      texto: 'Qual resultado vocês esperam alcançar?',
+      texto: 'Qual é o resultado esperado?',
       esperado: true
     },
 
@@ -17733,4 +17867,5302 @@ function TESTAR_NORMALIZACAO_RESULTADO_V56() {
     '=============================================='
   );
 
+}
+
+function TESTAR_FLUXO_COMPLETO_PRONTO_V56() {
+
+  Logger.log('');
+  Logger.log('==============================================');
+  Logger.log(' FEEDS SOLUTIONS — FLUXO COMPLETO V5.6');
+  Logger.log('       TESTE ATÉ PRONTO PARA ANÁLISE');
+  Logger.log('==============================================');
+  Logger.log('');
+
+  let ids = null;
+
+  try {
+
+    // ==========================================================
+    // 1. CRIAR DIAGNÓSTICO DE TESTE
+    // ==========================================================
+
+    Logger.log(
+      '1) Criando diagnóstico de teste...'
+    );
+
+    const inicio =
+      iniciarDiagnostico({
+
+        nome:
+          'TESTE FLUXO COMPLETO V5.6',
+
+        nome_empresa:
+          'TESTE FLUXO COMPLETO V5.6',
+
+        segmento:
+          'TESTE',
+
+        porte:
+          'TESTE',
+
+        nome_contato:
+          'TESTE AUTOMÁTICO',
+
+        whatsapp:
+          '',
+
+        email:
+          '',
+
+        cidade:
+          'TESTE'
+
+      });
+
+
+    if (
+      !inicio ||
+      !inicio.empresa_id ||
+      !inicio.conversa_id ||
+      !inicio.diagnostico_id
+    ) {
+
+      throw new Error(
+        'Não foi possível criar o diagnóstico de teste.'
+      );
+
+    }
+
+
+    ids = inicio;
+
+
+    Logger.log(
+      '✅ Diagnóstico criado.'
+    );
+
+    Logger.log(
+      'Empresa: ' +
+      ids.empresa_id
+    );
+
+    Logger.log(
+      'Conversa: ' +
+      ids.conversa_id
+    );
+
+    Logger.log(
+      'Diagnóstico: ' +
+      ids.diagnostico_id
+    );
+
+
+    // ==========================================================
+    // 2. MENSAGEM COMPLETA
+    // ==========================================================
+
+    const mensagem =
+      'Nosso processo principal é conferir e lançar pedidos. ' +
+      'Temos erros de digitação e retrabalho nesse processo. ' +
+      'Isso acontece diariamente. ' +
+      'Processamos 120 pedidos por dia. ' +
+      'Perdemos aproximadamente 3 horas por dia com esse problema. ' +
+      'Nosso objetivo é reduzir os erros e diminuir o retrabalho.';
+
+
+    Logger.log('');
+    Logger.log(
+      '2) Enviando mensagem completa...'
+    );
+
+    Logger.log(
+      'Mensagem: ' +
+      mensagem
+    );
+
+
+    // ==========================================================
+    // 3. PROCESSAR FLUXO REAL
+    // ==========================================================
+
+    const resposta =
+      processarMensagemDiagnostico({
+
+        empresa_id:
+          ids.empresa_id,
+
+        conversa_id:
+          ids.conversa_id,
+
+        mensagem:
+          mensagem
+
+      });
+
+
+    if (
+      !resposta ||
+      !resposta.sucesso
+    ) {
+
+      throw new Error(
+        'O processamento da mensagem não retornou sucesso.'
+      );
+
+    }
+
+
+    Logger.log('');
+    Logger.log(
+      '✅ Mensagem processada.'
+    );
+
+    Logger.log(
+      'Estado retornado: ' +
+      resposta.estado
+    );
+
+
+    // ==========================================================
+    // 4. RECUPERAR DIAGNÓSTICO CONSOLIDADO
+    // ==========================================================
+
+    const diagnostico =
+      obterDiagnosticoAtual_(
+        ids.empresa_id,
+        ids.conversa_id
+      );
+
+
+    if (
+      !diagnostico
+    ) {
+
+      throw new Error(
+        'Diagnóstico consolidado não encontrado.'
+      );
+
+    }
+
+
+    Logger.log('');
+    Logger.log(
+      '3) Diagnóstico consolidado:'
+    );
+
+    Logger.log(
+      'Processo: ' +
+      (
+        diagnostico.processo_nome ||
+        '(vazio)'
+      )
+    );
+
+    Logger.log(
+      'Dor: ' +
+      (
+        diagnostico.dor_principal ||
+        '(vazio)'
+      )
+    );
+
+    Logger.log(
+      'Frequência: ' +
+      (
+        diagnostico.frequencia ||
+        '(vazio)'
+      )
+    );
+
+    Logger.log(
+      'Impacto: ' +
+      (
+        diagnostico.impacto_nivel ||
+        '(vazio)'
+      )
+    );
+
+    Logger.log(
+      'Objetivo: ' +
+      (
+        diagnostico.objetivo ||
+        '(vazio)'
+      )
+    );
+
+    Logger.log(
+      'Estado: ' +
+      diagnostico.status_diagnostico
+    );
+
+
+    // ==========================================================
+    // 5. VALIDAR CAMPOS ESSENCIAIS
+    // ==========================================================
+
+    const campos = {
+
+      processo:
+        String(
+          diagnostico.processo_nome || ''
+        ).trim(),
+
+      dor:
+        String(
+          diagnostico.dor_principal || ''
+        ).trim(),
+
+      frequencia:
+        String(
+          diagnostico.frequencia || ''
+        ).trim(),
+
+      impacto:
+        String(
+          diagnostico.impacto_nivel || ''
+        ).trim(),
+
+      objetivo:
+        String(
+          diagnostico.objetivo || ''
+        ).trim()
+
+    };
+
+
+    const faltantes = [];
+
+
+    Object.keys(campos).forEach(
+      function(campo) {
+
+        if (
+          !campos[campo]
+        ) {
+
+          faltantes.push(
+            campo
+          );
+
+        }
+
+      }
+    );
+
+
+    if (
+      faltantes.length > 0
+    ) {
+
+      throw new Error(
+        'Campos essenciais não consolidados: ' +
+        faltantes.join(', ')
+      );
+
+    }
+
+
+    Logger.log('');
+    Logger.log(
+      '✅ Todos os campos essenciais foram consolidados.'
+    );
+
+
+    // ==========================================================
+    // 6. VALIDAR ESTADO
+    // ==========================================================
+
+    if (
+      diagnostico.status_diagnostico !==
+      DIAGNOSTICO_ESTADOS.PRONTO_PARA_ANALISE
+    ) {
+
+      throw new Error(
+        'Estado incorreto. Esperado PRONTO_PARA_ANALISE, ' +
+        'obtido ' +
+        diagnostico.status_diagnostico
+      );
+
+    }
+
+
+    Logger.log(
+      '✅ Estado PRONTO_PARA_ANALISE confirmado.'
+    );
+
+
+    // ==========================================================
+    // 7. VALIDAR VOLUME NAS MÉTRICAS
+    // ==========================================================
+
+    const medidas =
+      obterMedidasDiagnostico_(
+        ids.empresa_id,
+        ids.conversa_id
+      );
+
+
+    const volumes =
+      (medidas || []).filter(
+        function(medida) {
+
+          return (
+            String(
+              medida.tipo || ''
+            )
+              .trim()
+              .toUpperCase() ===
+            'VOLUME'
+          );
+
+        }
+      );
+
+
+    const volume120 =
+      volumes.filter(
+        function(medida) {
+
+          return (
+            normalizarVolumeDiagnostico_(
+              medida.texto
+            ) ===
+            normalizarVolumeDiagnostico_(
+              '120 pedidos por dia'
+            )
+          );
+
+        }
+      );
+
+
+    if (
+      volume120.length !== 1
+    ) {
+
+      throw new Error(
+        'VOLUME 120 não está exatamente uma vez nas métricas. ' +
+        'Quantidade: ' +
+        volume120.length
+      );
+
+    }
+
+
+    Logger.log(
+      '✅ VOLUME 120 registrado exatamente uma vez.'
+    );
+
+
+    // ==========================================================
+    // 8. RESULTADO
+    // ==========================================================
+
+    Logger.log('');
+    Logger.log(
+      '=============================================='
+    );
+
+    Logger.log(
+      '🟢 FLUXO COMPLETO ATÉ PRONTO PARA ANÁLISE'
+    );
+
+    Logger.log(
+      '=============================================='
+    );
+
+    Logger.log(
+      'Processo: OK'
+    );
+
+    Logger.log(
+      'Dor: OK'
+    );
+
+    Logger.log(
+      'Frequência: OK'
+    );
+
+    Logger.log(
+      'Impacto: OK'
+    );
+
+    Logger.log(
+      'Objetivo: OK'
+    );
+
+    Logger.log(
+      'Volume: OK'
+    );
+
+    Logger.log(
+      'Estado: PRONTO_PARA_ANALISE'
+    );
+
+    Logger.log(
+      '=============================================='
+    );
+
+
+    return {
+
+      sucesso:
+        true,
+
+      estado:
+        diagnostico.status_diagnostico,
+
+      diagnostico_id:
+        ids.diagnostico_id,
+
+      campos:
+        campos,
+
+      volumes:
+        volumes
+
+    };
+
+
+  } catch (erro) {
+
+    Logger.log('');
+    Logger.log(
+      '=============================================='
+    );
+
+    Logger.log(
+      '🔴 FLUXO COMPLETO FALHOU'
+    );
+
+    Logger.log(
+      erro.message ||
+      String(erro)
+    );
+
+    Logger.log(
+      '=============================================='
+    );
+
+
+    return {
+
+      sucesso:
+        false,
+
+      erro:
+        erro.message ||
+        String(erro)
+
+    };
+
+
+  } finally {
+
+    // ==========================================================
+    // LIMPEZA
+    // ==========================================================
+
+    if (
+      ids &&
+      ids.empresa_id
+    ) {
+
+      Logger.log('');
+      Logger.log(
+        'Limpando dados do teste...'
+      );
+
+
+      try {
+
+        limparDadosTesteV56_(
+          ids.empresa_id,
+          ids.conversa_id,
+          ids.diagnostico_id
+        );
+
+
+        Logger.log(
+          '✅ Dados do teste removidos.'
+        );
+
+      } catch (erroLimpeza) {
+
+        Logger.log(
+          '⚠️ Falha na limpeza: ' +
+          (
+            erroLimpeza.message ||
+            String(erroLimpeza)
+          )
+        );
+
+      }
+
+    }
+
+  }
+
+}
+
+function TESTAR_DOR_SEM_DUPLICACAO_V56() {
+
+  Logger.log('');
+  Logger.log('==============================================');
+  Logger.log(' FEEDS SOLUTIONS — DOR V5.6');
+  Logger.log('      TESTE DE NÃO DUPLICAÇÃO');
+  Logger.log('==============================================');
+  Logger.log('');
+
+  let ids = null;
+
+  try {
+
+    // ==========================================================
+    // 1. CRIAR DIAGNÓSTICO
+    // ==========================================================
+
+    const inicio =
+      iniciarDiagnostico({
+
+        nome:
+          'TESTE DOR V5.6',
+
+        nome_empresa:
+          'TESTE DOR V5.6',
+
+        segmento:
+          'TESTE',
+
+        porte:
+          'TESTE',
+
+        nome_contato:
+          'TESTE',
+
+        cidade:
+          'TESTE'
+
+      });
+
+
+    ids = inicio;
+
+
+    Logger.log(
+      '✅ Diagnóstico criado: ' +
+      ids.diagnostico_id
+    );
+
+
+    // ==========================================================
+    // 2. PROCESSAR UMA MENSAGEM COM UMA ÚNICA DOR
+    // ==========================================================
+
+    const mensagem =
+      'O processo é conferir e lançar pedidos. ' +
+      'Temos erros de digitação e retrabalho todos os dias. ' +
+      'Isso consome aproximadamente 3 horas por dia. ' +
+      'Processamos 120 pedidos por dia. ' +
+      'Queremos reduzir esses erros e o retrabalho.';
+
+
+    const resposta =
+      processarMensagemDiagnostico({
+
+        empresa_id:
+          ids.empresa_id,
+
+        conversa_id:
+          ids.conversa_id,
+
+        mensagem:
+          mensagem
+
+      });
+
+
+    if (
+      !resposta ||
+      !resposta.sucesso
+    ) {
+
+      throw new Error(
+        'Processamento da mensagem falhou.'
+      );
+
+    }
+
+
+    Logger.log(
+      '✅ Mensagem processada.'
+    );
+
+
+    // ==========================================================
+    // 3. RECUPERAR DORES
+    // ==========================================================
+
+    const dores =
+      obterDoresDiagnostico_(
+        ids.diagnostico_id
+      );
+
+
+    Logger.log('');
+    Logger.log(
+      'DORES ENCONTRADAS: ' +
+      dores.length
+    );
+
+
+    dores.forEach(
+      function(dor, indice) {
+
+        Logger.log(
+          (
+            indice + 1
+          ) +
+          ' | ' +
+          (
+            dor.descricao ||
+            ''
+          )
+        );
+
+      }
+    );
+
+
+    // ==========================================================
+    // 4. VALIDAR QUANTIDADE
+    // ==========================================================
+
+    if (
+      dores.length !== 1
+    ) {
+
+      throw new Error(
+        'ERRO: esperado exatamente 1 registro de dor, ' +
+        'mas foram encontrados ' +
+        dores.length
+      );
+
+    }
+
+
+    Logger.log(
+      '✅ EXATAMENTE 1 DOR REGISTRADA.'
+    );
+
+
+    // ==========================================================
+    // 5. VALIDAR DESCRIÇÃO
+    // ==========================================================
+
+    const descricao =
+      normalizarTextoDiagnostico_(
+        dores[0].descricao
+      );
+
+
+    if (
+      descricao.indexOf(
+        'erros de digitacao'
+      ) === -1 &&
+      descricao.indexOf(
+        'retrabalho'
+      ) === -1
+    ) {
+
+      throw new Error(
+        'A dor registrada não corresponde à mensagem.'
+      );
+
+    }
+
+
+    Logger.log(
+      '✅ DOR CORRETA REGISTRADA.'
+    );
+
+
+    // ==========================================================
+    // RESULTADO
+    // ==========================================================
+
+    Logger.log('');
+    Logger.log(
+      '=============================================='
+    );
+
+    Logger.log(
+      '🟢 TESTE DE DOR PASSOU'
+    );
+
+    Logger.log(
+      '1 mensagem'
+    );
+
+    Logger.log(
+      '1 dor'
+    );
+
+    Logger.log(
+      '0 duplicações'
+    );
+
+    Logger.log(
+      '=============================================='
+    );
+
+
+  } catch (erro) {
+
+    Logger.log('');
+    Logger.log(
+      '=============================================='
+    );
+
+    Logger.log(
+      '🔴 TESTE DE DOR FALHOU'
+    );
+
+    Logger.log(
+      erro.message ||
+      String(erro)
+    );
+
+    Logger.log(
+      '=============================================='
+    );
+
+
+  } finally {
+
+    // ==========================================================
+    // LIMPEZA
+    // ==========================================================
+
+    if (
+      ids &&
+      ids.empresa_id
+    ) {
+
+      try {
+
+        limparDadosTesteV56_(
+          ids.empresa_id,
+          ids.conversa_id,
+          ids.diagnostico_id
+        );
+
+        Logger.log(
+          '✅ Dados de teste removidos.'
+        );
+
+      } catch (erroLimpeza) {
+
+        Logger.log(
+          '⚠️ Falha na limpeza: ' +
+          (
+            erroLimpeza.message ||
+            String(erroLimpeza)
+          )
+        );
+
+      }
+
+    }
+
+  }
+
+}
+function TESTAR_OPORTUNIDADE_DIAGNOSTICO_V57() {
+
+  Logger.log('');
+  Logger.log('==============================================');
+  Logger.log(' FEEDS SOLUTIONS — MOTOR DE OPORTUNIDADES');
+  Logger.log('                 V5.7');
+  Logger.log('==============================================');
+  Logger.log('');
+
+
+  let passou = 0;
+  let falhou = 0;
+
+
+  // ============================================================
+  // CASO 01
+  // DIAGNÓSTICO COMPLETO
+  // ============================================================
+
+  const caso01 = {
+
+    processo_nome:
+      'Conferir e lançar pedidos',
+
+    dor_principal:
+      'Erros de digitação e retrabalho',
+
+    frequencia:
+      'Diária',
+
+    volume:
+      '120 pedidos por dia',
+
+    impacto_nivel:
+      '3 horas por dia',
+
+    objetivo:
+      'Reduzir erros e retrabalho'
+
+  };
+
+
+  Logger.log(
+    '01 — Diagnóstico completo'
+  );
+
+
+  try {
+
+    const oportunidade =
+      construirOportunidadeDiagnosticoV57_(
+        caso01
+      );
+
+
+    const camposObrigatorios = [
+
+      'processo',
+      'dor',
+      'frequencia',
+      'volume',
+      'impacto',
+      'objetivo',
+      'descricao',
+      'prioridade',
+      'justificativa'
+
+    ];
+
+
+    const faltantes = [];
+
+
+    camposObrigatorios.forEach(
+      function(campo) {
+
+        if (
+          !String(
+            oportunidade[campo] || ''
+          ).trim()
+        ) {
+
+          faltantes.push(
+            campo
+          );
+
+        }
+
+      }
+    );
+
+
+    if (
+      faltantes.length > 0
+    ) {
+
+      throw new Error(
+        'Campos ausentes: ' +
+        faltantes.join(', ')
+      );
+
+    }
+
+
+    // ----------------------------------------------------------
+    // VALIDAR CÓPIA DOS DADOS
+    // ----------------------------------------------------------
+
+    if (
+      oportunidade.processo !==
+      caso01.processo_nome
+    ) {
+
+      throw new Error(
+        'Processo não corresponde ao diagnóstico.'
+      );
+
+    }
+
+
+    if (
+      oportunidade.dor !==
+      caso01.dor_principal
+    ) {
+
+      throw new Error(
+        'Dor não corresponde ao diagnóstico.'
+      );
+
+    }
+
+
+    if (
+      oportunidade.frequencia !==
+      caso01.frequencia
+    ) {
+
+      throw new Error(
+        'Frequência não corresponde ao diagnóstico.'
+      );
+
+    }
+
+
+    if (
+      oportunidade.volume !==
+      caso01.volume
+    ) {
+
+      throw new Error(
+        'Volume não corresponde ao diagnóstico.'
+      );
+
+    }
+
+
+    if (
+      oportunidade.impacto !==
+      caso01.impacto_nivel
+    ) {
+
+      throw new Error(
+        'Impacto não corresponde ao diagnóstico.'
+      );
+
+    }
+
+
+    if (
+      oportunidade.objetivo !==
+      caso01.objetivo
+    ) {
+
+      throw new Error(
+        'Objetivo não corresponde ao diagnóstico.'
+      );
+
+    }
+
+
+    // ----------------------------------------------------------
+    // PROIBIR SOLUÇÃO ANTECIPADA
+    // ----------------------------------------------------------
+
+    const descricao =
+      String(
+        oportunidade.descricao || ''
+      ).toLowerCase();
+
+
+    const termosSolucao = [
+
+      'automatizar',
+      'automação',
+      'automacao',
+      'sistema',
+      'software',
+      'chatbot',
+      'integração',
+      'integracao',
+      'erp',
+      'api',
+      'robô',
+      'robo',
+      'aplicativo',
+      'plataforma'
+
+    ];
+
+
+    const encontrouSolucao =
+      termosSolucao.some(
+        function(termo) {
+
+          return descricao.indexOf(
+            termo
+          ) !== -1;
+
+        }
+      );
+
+
+    if (
+      encontrouSolucao
+    ) {
+
+      throw new Error(
+        'A oportunidade antecipou uma solução: ' +
+        oportunidade.descricao
+      );
+
+    }
+
+
+    Logger.log(
+      'Processo: ' +
+      oportunidade.processo
+    );
+
+    Logger.log(
+      'Dor: ' +
+      oportunidade.dor
+    );
+
+    Logger.log(
+      'Frequência: ' +
+      oportunidade.frequencia
+    );
+
+    Logger.log(
+      'Volume: ' +
+      oportunidade.volume
+    );
+
+    Logger.log(
+      'Impacto: ' +
+      oportunidade.impacto
+    );
+
+    Logger.log(
+      'Objetivo: ' +
+      oportunidade.objetivo
+    );
+
+    Logger.log(
+      'Descrição: ' +
+      oportunidade.descricao
+    );
+
+    Logger.log(
+      'Prioridade: ' +
+      oportunidade.prioridade
+    );
+
+    Logger.log(
+      'Justificativa: ' +
+      oportunidade.justificativa
+    );
+
+
+    Logger.log(
+      '✅ CASO 01 PASSOU'
+    );
+
+    passou++;
+
+
+  } catch (erro) {
+
+    Logger.log(
+      '❌ CASO 01 FALHOU: ' +
+      (
+        erro.message ||
+        String(erro)
+      )
+    );
+
+    falhou++;
+
+  }
+
+
+  // ============================================================
+  // CASO 02
+  // DIAGNÓSTICO INCOMPLETO
+  // ============================================================
+
+  Logger.log('');
+  Logger.log(
+    '02 — Diagnóstico incompleto'
+  );
+
+
+  try {
+
+    const caso02 = {
+
+      processo_nome:
+        'Processamento de pedidos',
+
+      dor_principal:
+        'Erros de digitação',
+
+      frequencia:
+        'Diária',
+
+      volume:
+        '120 pedidos por dia',
+
+      impacto_nivel:
+        '',
+
+      objetivo:
+        'Reduzir erros'
+
+    };
+
+
+    const oportunidade02 =
+      construirOportunidadeDiagnosticoV57_(
+        caso02
+      );
+
+
+    if (
+      oportunidade02 !== null
+    ) {
+
+      throw new Error(
+        'Diagnóstico incompleto gerou oportunidade.'
+      );
+
+    }
+
+
+    Logger.log(
+      '✅ Diagnóstico incompleto corretamente bloqueado.'
+    );
+
+    passou++;
+
+
+  } catch (erro) {
+
+    Logger.log(
+      '❌ CASO 02 FALHOU: ' +
+      (
+        erro.message ||
+        String(erro)
+      )
+    );
+
+    falhou++;
+
+  }
+
+
+  // ============================================================
+  // CASO 03
+  // SEM DOR
+  // ============================================================
+
+  Logger.log('');
+  Logger.log(
+    '03 — Diagnóstico sem dor'
+  );
+
+
+  try {
+
+    const caso03 = {
+
+      processo_nome:
+        'Processamento de pedidos',
+
+      dor_principal:
+        '',
+
+      frequencia:
+        'Diária',
+
+      volume:
+        '120 pedidos por dia',
+
+      impacto_nivel:
+        '3 horas por dia',
+
+      objetivo:
+        'Reduzir tempo'
+
+    };
+
+
+    const oportunidade03 =
+      construirOportunidadeDiagnosticoV57_(
+        caso03
+      );
+
+
+    if (
+      oportunidade03 !== null
+    ) {
+
+      throw new Error(
+        'Diagnóstico sem dor gerou oportunidade.'
+      );
+
+    }
+
+
+    Logger.log(
+      '✅ Diagnóstico sem dor corretamente bloqueado.'
+    );
+
+    passou++;
+
+
+  } catch (erro) {
+
+    Logger.log(
+      '❌ CASO 03 FALHOU: ' +
+      (
+        erro.message ||
+        String(erro)
+      )
+    );
+
+    falhou++;
+
+  }
+
+
+  // ============================================================
+  // RESULTADO
+  // ============================================================
+
+  Logger.log('');
+  Logger.log(
+    '=============================================='
+  );
+
+  Logger.log(
+    'RESULTADO V5.7'
+  );
+
+  Logger.log(
+    '=============================================='
+  );
+
+  Logger.log(
+    'TOTAL: 3'
+  );
+
+  Logger.log(
+    'PASSARAM: ' +
+    passou
+  );
+
+  Logger.log(
+    'FALHARAM: ' +
+    falhou
+  );
+
+
+  if (
+    falhou === 0
+  ) {
+
+    Logger.log(
+      '🟢 TESTE DE OPORTUNIDADE V5.7 PASSOU'
+    );
+
+  } else {
+
+    Logger.log(
+      '🔴 TESTE DE OPORTUNIDADE V5.7 POSSUI FALHAS'
+    );
+
+  }
+
+
+  Logger.log(
+    '=============================================='
+  );
+
+}
+
+function construirOportunidadeDiagnosticoV57_(
+  diagnostico
+) {
+
+  const dados =
+    diagnostico || {};
+
+
+  const processo =
+    String(
+      dados.processo_nome || ''
+    ).trim();
+
+
+  const dor =
+    String(
+      dados.dor_principal || ''
+    ).trim();
+
+
+  const frequencia =
+    String(
+      dados.frequencia || ''
+    ).trim();
+
+
+  const volume =
+    String(
+      dados.volume || ''
+    ).trim();
+
+
+  const impacto =
+    String(
+      dados.impacto_nivel || ''
+    ).trim();
+
+
+  const objetivo =
+    String(
+      dados.objetivo || ''
+    ).trim();
+
+
+  // ============================================================
+  // DIAGNÓSTICO MÍNIMO NECESSÁRIO
+  // ============================================================
+
+  if (
+    !processo ||
+    !dor ||
+    !frequencia ||
+    !impacto ||
+    !objetivo
+  ) {
+
+    return null;
+
+  }
+
+
+  // ============================================================
+  // DESCRIÇÃO DA OPORTUNIDADE
+  // ============================================================
+
+  let descricao =
+    'Reduzir o problema de ' +
+    dor +
+    ' no processo de ' +
+    processo +
+    '.';
+
+
+  // ============================================================
+  // PRIORIDADE
+  // ============================================================
+
+  let prioridade =
+    'Média';
+
+
+  const impactoNormalizado =
+    normalizarTextoDiagnostico_(
+      impacto
+    );
+
+
+  const volumeNormalizado =
+    normalizarTextoDiagnostico_(
+      volume
+    );
+
+
+  if (
+    /alto|alta|grave|grande/.test(
+      impactoNormalizado
+    )
+  ) {
+
+    prioridade =
+      'Alta';
+
+  }
+
+
+  if (
+    volume &&
+    /\b\d+\b/.test(
+      volumeNormalizado
+    ) &&
+    (
+      /por dia/.test(
+        volumeNormalizado
+      ) ||
+      /diario/.test(
+        volumeNormalizado
+      )
+    )
+  ) {
+
+    prioridade =
+      'Alta';
+
+  }
+
+
+  // ============================================================
+  // JUSTIFICATIVA
+  // ============================================================
+
+  const partes =
+    [];
+
+
+  if (volume) {
+
+    partes.push(
+      volume
+    );
+
+  }
+
+
+  partes.push(
+    frequencia
+  );
+
+
+  partes.push(
+    impacto
+  );
+
+
+  const justificativa =
+    'A oportunidade está relacionada a ' +
+    dor +
+    '. ' +
+    (
+      partes.length
+        ? 'O diagnóstico registra ' +
+          partes.join(' e ') +
+          '. '
+        : ''
+    ) +
+    'O objetivo informado é ' +
+    objetivo +
+    '.';
+
+
+  // ============================================================
+  // RETORNO
+  // ============================================================
+
+  return {
+
+    processo:
+      processo,
+
+    dor:
+      dor,
+
+    frequencia:
+      frequencia,
+
+    volume:
+      volume,
+
+    impacto:
+      impacto,
+
+    objetivo:
+      objetivo,
+
+    descricao:
+      descricao,
+
+    prioridade:
+      prioridade,
+
+    justificativa:
+      justificativa
+
+  };
+
+}
+function TESTAR_OPORTUNIDADE_ROBUSTEZ_V57() {
+
+  Logger.log('');
+  Logger.log('==============================================');
+  Logger.log(' FEEDS SOLUTIONS — ROBUSTEZ DO MOTOR');
+  Logger.log('                 V5.7');
+  Logger.log('==============================================');
+  Logger.log('');
+
+  let passou = 0;
+  let falhou = 0;
+
+
+  const casos = [
+
+    {
+      nome: '01 — Completo',
+      diagnostico: {
+        processo_nome: 'Conferir pedidos',
+        dor_principal: 'Erros de digitação',
+        frequencia: 'Diária',
+        volume: '120 pedidos por dia',
+        impacto_nivel: '3 horas por dia',
+        objetivo: 'Reduzir erros'
+      },
+      esperado: true
+    },
+
+
+    {
+      nome: '02 — Sem volume',
+      diagnostico: {
+        processo_nome: 'Conferir pedidos',
+        dor_principal: 'Erros de digitação',
+        frequencia: 'Diária',
+        volume: '',
+        impacto_nivel: '3 horas por dia',
+        objetivo: 'Reduzir erros'
+      },
+      esperado: true
+    },
+
+
+    {
+      nome: '03 — Impacto baixo',
+      diagnostico: {
+        processo_nome: 'Conferir pedidos',
+        dor_principal: 'Pequenos erros',
+        frequencia: 'Semanal',
+        volume: '10 pedidos por semana',
+        impacto_nivel: 'Baixo',
+        objetivo: 'Melhorar precisão'
+      },
+      esperado: true
+    },
+
+
+    {
+      nome: '04 — Impacto alto',
+      diagnostico: {
+        processo_nome: 'Processamento de pedidos',
+        dor_principal: 'Retrabalho',
+        frequencia: 'Diária',
+        volume: '500 pedidos por dia',
+        impacto_nivel: 'Alto',
+        objetivo: 'Reduzir retrabalho'
+      },
+      esperado: true
+    },
+
+
+    {
+      nome: '05 — Volume alto',
+      diagnostico: {
+        processo_nome: 'Atendimento',
+        dor_principal: 'Demora no atendimento',
+        frequencia: 'Diária',
+        volume: '1000 clientes por dia',
+        impacto_nivel: 'Médio',
+        objetivo: 'Agilizar atendimento'
+      },
+      esperado: true
+    },
+
+
+    {
+      nome: '06 — Sem volume + impacto alto',
+      diagnostico: {
+        processo_nome: 'Financeiro',
+        dor_principal: 'Retrabalho financeiro',
+        frequencia: 'Mensal',
+        volume: '',
+        impacto_nivel: 'Alto',
+        objetivo: 'Reduzir retrabalho'
+      },
+      esperado: true
+    },
+
+
+    {
+      nome: '07 — Objetivo diferente',
+      diagnostico: {
+        processo_nome: 'Estoque',
+        dor_principal: 'Erros de controle',
+        frequencia: 'Diária',
+        volume: '80 movimentações por dia',
+        impacto_nivel: 'Médio',
+        objetivo: 'Aumentar confiabilidade'
+      },
+      esperado: true
+    },
+
+
+    {
+      nome: '08 — Dor diferente',
+      diagnostico: {
+        processo_nome: 'Vendas',
+        dor_principal: 'Atrasos no processo',
+        frequencia: 'Semanal',
+        volume: '40 vendas por semana',
+        impacto_nivel: 'Médio',
+        objetivo: 'Acelerar vendas'
+      },
+      esperado: true
+    },
+
+
+    {
+      nome: '09 — Sem impacto',
+      diagnostico: {
+        processo_nome: 'Pedidos',
+        dor_principal: 'Erros',
+        frequencia: 'Diária',
+        volume: '100 pedidos por dia',
+        impacto_nivel: '',
+        objetivo: 'Reduzir erros'
+      },
+      esperado: false
+    },
+
+
+    {
+      nome: '10 — Sem objetivo',
+      diagnostico: {
+        processo_nome: 'Pedidos',
+        dor_principal: 'Erros',
+        frequencia: 'Diária',
+        volume: '100 pedidos por dia',
+        impacto_nivel: 'Alto',
+        objetivo: ''
+      },
+      esperado: false
+    }
+
+  ];
+
+
+  casos.forEach(function(caso) {
+
+    Logger.log('');
+    Logger.log(caso.nome);
+
+
+    try {
+
+      const oportunidade =
+        construirOportunidadeDiagnosticoV57_(
+          caso.diagnostico
+        );
+
+
+      const existe =
+        oportunidade !== null;
+
+
+      if (
+        existe !== caso.esperado
+      ) {
+
+        throw new Error(
+          'Existência incorreta. ' +
+          'Esperado=' +
+          caso.esperado +
+          ' obtido=' +
+          existe
+        );
+
+      }
+
+
+      if (
+        oportunidade
+      ) {
+
+        // ------------------------------------------------------
+        // VALIDAR CAMPOS
+        // ------------------------------------------------------
+
+        const campos = [
+          'processo',
+          'dor',
+          'frequencia',
+          'impacto',
+          'objetivo',
+          'descricao',
+          'prioridade',
+          'justificativa'
+        ];
+
+
+        campos.forEach(
+          function(campo) {
+
+            if (
+              !String(
+                oportunidade[campo] || ''
+              ).trim()
+            ) {
+
+              throw new Error(
+                'Campo vazio: ' +
+                campo
+              );
+
+            }
+
+          }
+        );
+
+
+        // ------------------------------------------------------
+        // VALIDAR QUE NÃO INVENTOU SOLUÇÃO
+        // ------------------------------------------------------
+
+        const texto =
+          (
+            oportunidade.descricao +
+            ' ' +
+            oportunidade.justificativa
+          ).toLowerCase();
+
+
+        const termosProibidos = [
+
+          'automatizar',
+          'automação',
+          'automacao',
+          'software',
+          'sistema',
+          'chatbot',
+          'erp',
+          'api',
+          'robô',
+          'robo',
+          'aplicativo',
+          'plataforma',
+          'integração',
+          'integracao'
+
+        ];
+
+
+        const encontrou =
+          termosProibidos.some(
+            function(termo) {
+
+              return texto.indexOf(
+                termo
+              ) !== -1;
+
+            }
+          );
+
+
+        if (
+          encontrou
+        ) {
+
+          throw new Error(
+            'Oportunidade antecipou solução.'
+          );
+
+        }
+
+
+        // ------------------------------------------------------
+        // VALIDAR PRIORIDADE
+        // ------------------------------------------------------
+
+        const prioridades = [
+          'Baixa',
+          'Média',
+          'Alta'
+        ];
+
+
+        if (
+          prioridades.indexOf(
+            oportunidade.prioridade
+          ) === -1
+        ) {
+
+          throw new Error(
+            'Prioridade inválida: ' +
+            oportunidade.prioridade
+          );
+
+        }
+
+      }
+
+
+      Logger.log(
+        '✅ PASSOU'
+      );
+
+      passou++;
+
+
+    } catch (erro) {
+
+      Logger.log(
+        '❌ FALHOU: ' +
+        (
+          erro.message ||
+          String(erro)
+        )
+      );
+
+      falhou++;
+
+    }
+
+  });
+
+
+  Logger.log('');
+  Logger.log(
+    '=============================================='
+  );
+
+  Logger.log(
+    'RESULTADO DA ROBUSTEZ V5.7'
+  );
+
+  Logger.log(
+    '=============================================='
+  );
+
+  Logger.log(
+    'TOTAL: ' +
+    casos.length
+  );
+
+  Logger.log(
+    'PASSARAM: ' +
+    passou
+  );
+
+  Logger.log(
+    'FALHARAM: ' +
+    falhou
+  );
+
+
+  if (
+    falhou === 0
+  ) {
+
+    Logger.log(
+      '🟢 ROBUSTEZ V5.7 PASSOU'
+    );
+
+  } else {
+
+    Logger.log(
+      '🔴 ROBUSTEZ V5.7 POSSUI FALHAS'
+    );
+
+  }
+
+
+  Logger.log(
+    '=============================================='
+  );
+
+}
+function TESTAR_QUALIDADE_OPORTUNIDADE_V571() {
+
+  Logger.log('');
+  Logger.log('==============================================');
+  Logger.log(' FEEDS SOLUTIONS — QUALIDADE DA OPORTUNIDADE');
+  Logger.log('                 V5.7.1');
+  Logger.log('==============================================');
+  Logger.log('');
+
+  let passou = 0;
+  let falhou = 0;
+
+
+  const casos = [
+
+    {
+      nome: '01 — Caso principal',
+
+      diagnostico: {
+        processo_nome:
+          'Conferir e lançar pedidos',
+
+        dor_principal:
+          'Erros de digitação e retrabalho',
+
+        frequencia:
+          'Diária',
+
+        volume:
+          '120 pedidos por dia',
+
+        impacto_nivel:
+          '3 horas por dia',
+
+        objetivo:
+          'Reduzir erros e retrabalho'
+      },
+
+      proibidos: [
+        'r$',
+        'economia',
+        'economizar',
+        '%',
+        'percentual',
+        'redução de 50%',
+        'redução de 30%',
+        'sistema',
+        'software',
+        'automação',
+        'automacao',
+        'chatbot',
+        'erp',
+        'api',
+        'robô',
+        'robo',
+        'plataforma'
+      ]
+    },
+
+
+    {
+      nome: '02 — Caso sem volume',
+
+      diagnostico: {
+        processo_nome:
+          'Atendimento',
+
+        dor_principal:
+          'Demora no atendimento',
+
+        frequencia:
+          'Diária',
+
+        volume:
+          '',
+
+        impacto_nivel:
+          '2 horas por dia',
+
+        objetivo:
+          'Agilizar o atendimento'
+      },
+
+      proibidos: [
+        '120',
+        '500',
+        '1000',
+        'r$',
+        '%',
+        'automação',
+        'automacao',
+        'sistema',
+        'software'
+      ]
+    },
+
+
+    {
+      nome: '03 — Caso de estoque',
+
+      diagnostico: {
+        processo_nome:
+          'Controle de estoque',
+
+        dor_principal:
+          'Erros de controle',
+
+        frequencia:
+          'Semanal',
+
+        volume:
+          '80 movimentações por semana',
+
+        impacto_nivel:
+          'Médio',
+
+        objetivo:
+          'Aumentar a confiabilidade'
+      },
+
+      proibidos: [
+        'r$',
+        '%',
+        'automação',
+        'automacao',
+        'software',
+        'sistema',
+        'erp'
+      ]
+    },
+
+
+    {
+      nome: '04 — Caso de baixo impacto',
+
+      diagnostico: {
+        processo_nome:
+          'Conferência de documentos',
+
+        dor_principal:
+          'Pequenos erros',
+
+        frequencia:
+          'Mensal',
+
+        volume:
+          '20 documentos por mês',
+
+        impacto_nivel:
+          'Baixo',
+
+        objetivo:
+          'Melhorar a precisão'
+      },
+
+      proibidos: [
+        'alta',
+        'grave',
+        'crítico',
+        'critico',
+        'r$',
+        '%',
+        'automação',
+        'automacao',
+        'software'
+      ]
+    }
+
+  ];
+
+
+  casos.forEach(function(caso) {
+
+    Logger.log('');
+    Logger.log(caso.nome);
+
+
+    try {
+
+      const oportunidade =
+        construirOportunidadeDiagnosticoV57_(
+          caso.diagnostico
+        );
+
+
+      if (
+        !oportunidade
+      ) {
+
+        throw new Error(
+          'Oportunidade não foi criada.'
+        );
+
+      }
+
+
+      const descricao =
+        String(
+          oportunidade.descricao || ''
+        ).trim();
+
+
+      const justificativa =
+        String(
+          oportunidade.justificativa || ''
+        ).trim();
+
+
+      const texto =
+        (
+          descricao +
+          ' ' +
+          justificativa
+        ).toLowerCase();
+
+
+      // ========================================================
+      // 1. TEXTO NÃO PODE ESTAR VAZIO
+      // ========================================================
+
+      if (
+        !descricao
+      ) {
+
+        throw new Error(
+          'Descrição vazia.'
+        );
+
+      }
+
+
+      if (
+        !justificativa
+      ) {
+
+        throw new Error(
+          'Justificativa vazia.'
+        );
+
+      }
+
+
+      // ========================================================
+      // 2. NÃO PODE INVENTAR DADOS
+      // ========================================================
+
+      caso.proibidos.forEach(
+        function(termo) {
+
+          if (
+            texto.indexOf(
+              termo
+            ) !== -1
+          ) {
+
+            throw new Error(
+              'Informação/solução não sustentada encontrada: ' +
+              termo
+            );
+
+          }
+
+        }
+      );
+
+
+      // ========================================================
+      // 3. PRECISA ESTAR RELACIONADA AO DIAGNÓSTICO
+      // ========================================================
+
+      const dor =
+        String(
+          caso.diagnostico.dor_principal
+        ).toLowerCase();
+
+
+      const processo =
+        String(
+          caso.diagnostico.processo_nome
+        ).toLowerCase();
+
+
+      if (
+        texto.indexOf(
+          dor
+        ) === -1
+      ) {
+
+        throw new Error(
+          'A oportunidade não menciona a dor diagnosticada.'
+        );
+
+      }
+
+
+      if (
+        texto.indexOf(
+          processo
+        ) === -1
+      ) {
+
+        throw new Error(
+          'A oportunidade não menciona o processo diagnosticado.'
+        );
+
+      }
+
+
+      // ========================================================
+      // 4. NÃO PODE CRIAR NÚMEROS NOVOS
+      // ========================================================
+
+      const numeros =
+        texto.match(
+          /\b\d+(?:[.,]\d+)?\b/g
+        ) || [];
+
+
+      numeros.forEach(
+        function(numero) {
+
+          const permitido =
+            (
+              String(
+                caso.diagnostico.volume || ''
+              ).indexOf(
+                numero
+              ) !== -1
+            ) ||
+            (
+              String(
+                caso.diagnostico.impacto_nivel || ''
+              ).indexOf(
+                numero
+              ) !== -1
+            );
+
+
+          if (
+            !permitido
+          ) {
+
+            throw new Error(
+              'Número não presente no diagnóstico: ' +
+              numero
+            );
+
+          }
+
+        }
+      );
+
+
+      // ========================================================
+      // 5. PRIORIDADE VÁLIDA
+      // ========================================================
+
+      const prioridades = [
+        'Baixa',
+        'Média',
+        'Alta'
+      ];
+
+
+      if (
+        prioridades.indexOf(
+          oportunidade.prioridade
+        ) === -1
+      ) {
+
+        throw new Error(
+          'Prioridade inválida: ' +
+          oportunidade.prioridade
+        );
+
+      }
+
+
+      Logger.log(
+        'Descrição: ' +
+        descricao
+      );
+
+      Logger.log(
+        'Justificativa: ' +
+        justificativa
+      );
+
+      Logger.log(
+        'Prioridade: ' +
+        oportunidade.prioridade
+      );
+
+      Logger.log(
+        '✅ PASSOU'
+      );
+
+
+      passou++;
+
+
+    } catch (erro) {
+
+      Logger.log(
+        '❌ FALHOU: ' +
+        (
+          erro.message ||
+          String(erro)
+        )
+      );
+
+      falhou++;
+
+    }
+
+  });
+
+
+  Logger.log('');
+  Logger.log(
+    '=============================================='
+  );
+
+  Logger.log(
+    'RESULTADO V5.7.1'
+  );
+
+  Logger.log(
+    '=============================================='
+  );
+
+  Logger.log(
+    'TOTAL: ' +
+    casos.length
+  );
+
+  Logger.log(
+    'PASSARAM: ' +
+    passou
+  );
+
+  Logger.log(
+    'FALHARAM: ' +
+    falhou
+  );
+
+
+  if (
+    falhou === 0
+  ) {
+
+    Logger.log(
+      '🟢 QUALIDADE V5.7.1 PASSOU'
+    );
+
+  } else {
+
+    Logger.log(
+      '🔴 QUALIDADE V5.7.1 POSSUI FALHAS'
+    );
+
+  }
+
+
+  Logger.log(
+    '=============================================='
+  );
+
+}
+function TESTAR_OPORTUNIDADE_APOS_ATUALIZACAO_V57() {
+
+  Logger.log('');
+  Logger.log('==============================================');
+  Logger.log(' FEEDS SOLUTIONS — ATUALIZAÇÃO DE OPORTUNIDADE');
+  Logger.log('                 V5.7');
+  Logger.log('==============================================');
+  Logger.log('');
+
+  let passou = 0;
+  let falhou = 0;
+
+
+  // ============================================================
+  // DIAGNÓSTICO INICIAL
+  // ============================================================
+
+  const diagnosticoInicial = {
+
+    processo_nome:
+      'Conferir pedidos',
+
+    dor_principal:
+      'Erros de digitação',
+
+    frequencia:
+      'Diária',
+
+    volume:
+      '80 pedidos por dia',
+
+    impacto_nivel:
+      '2 horas por dia',
+
+    objetivo:
+      'Reduzir erros'
+
+  };
+
+
+  // ============================================================
+  // PRIMEIRA OPORTUNIDADE
+  // ============================================================
+
+  Logger.log(
+    '01 — Construindo oportunidade inicial'
+  );
+
+
+  try {
+
+    const oportunidadeInicial =
+      construirOportunidadeDiagnosticoV57_(
+        diagnosticoInicial
+      );
+
+
+    if (
+      !oportunidadeInicial
+    ) {
+
+      throw new Error(
+        'Oportunidade inicial não foi criada.'
+      );
+
+    }
+
+
+    if (
+      oportunidadeInicial.volume !==
+      '80 pedidos por dia'
+    ) {
+
+      throw new Error(
+        'Volume inicial incorreto.'
+      );
+
+    }
+
+
+    if (
+      oportunidadeInicial.impacto !==
+      '2 horas por dia'
+    ) {
+
+      throw new Error(
+        'Impacto inicial incorreto.'
+      );
+
+    }
+
+
+    Logger.log(
+      'Volume inicial: ' +
+      oportunidadeInicial.volume
+    );
+
+    Logger.log(
+      'Impacto inicial: ' +
+      oportunidadeInicial.impacto
+    );
+
+    Logger.log(
+      '✅ OPORTUNIDADE INICIAL OK'
+    );
+
+
+    passou++;
+
+
+  } catch (erro) {
+
+    Logger.log(
+      '❌ FALHOU: ' +
+      (
+        erro.message ||
+        String(erro)
+      )
+    );
+
+    falhou++;
+
+  }
+
+
+  // ============================================================
+  // ATUALIZAÇÃO DO DIAGNÓSTICO
+  // ============================================================
+
+  const diagnosticoAtualizado = {
+
+    processo_nome:
+      'Conferir pedidos',
+
+    dor_principal:
+      'Erros de digitação e retrabalho',
+
+    frequencia:
+      'Diária',
+
+    volume:
+      '120 pedidos por dia',
+
+    impacto_nivel:
+      '3 horas por dia',
+
+    objetivo:
+      'Reduzir erros e retrabalho'
+
+  };
+
+
+  // ============================================================
+  // SEGUNDA OPORTUNIDADE
+  // ============================================================
+
+  Logger.log('');
+  Logger.log(
+    '02 — Reconstruindo após atualização'
+  );
+
+
+  try {
+
+    const oportunidadeAtualizada =
+      construirOportunidadeDiagnosticoV57_(
+        diagnosticoAtualizado
+      );
+
+
+    if (
+      !oportunidadeAtualizada
+    ) {
+
+      throw new Error(
+        'Oportunidade atualizada não foi criada.'
+      );
+
+    }
+
+
+    // ----------------------------------------------------------
+    // VOLUME NOVO
+    // ----------------------------------------------------------
+
+    if (
+      oportunidadeAtualizada.volume !==
+      '120 pedidos por dia'
+    ) {
+
+      throw new Error(
+        'A oportunidade não incorporou o novo volume.'
+      );
+
+    }
+
+
+    // ----------------------------------------------------------
+    // IMPACTO NOVO
+    // ----------------------------------------------------------
+
+    if (
+      oportunidadeAtualizada.impacto !==
+      '3 horas por dia'
+    ) {
+
+      throw new Error(
+        'A oportunidade não incorporou o novo impacto.'
+      );
+
+    }
+
+
+    // ----------------------------------------------------------
+    // NOVA DOR
+    // ----------------------------------------------------------
+
+    if (
+      oportunidadeAtualizada.dor !==
+      'Erros de digitação e retrabalho'
+    ) {
+
+      throw new Error(
+        'A oportunidade não incorporou a nova dor.'
+      );
+
+    }
+
+
+    // ----------------------------------------------------------
+    // GARANTIR QUE O VALOR ANTIGO NÃO APARECE
+    // ----------------------------------------------------------
+
+    const texto =
+      (
+        oportunidadeAtualizada.descricao +
+        ' ' +
+        oportunidadeAtualizada.justificativa +
+        ' ' +
+        oportunidadeAtualizada.volume +
+        ' ' +
+        oportunidadeAtualizada.impacto
+      ).toLowerCase();
+
+
+    if (
+      texto.indexOf(
+        '80 pedidos por dia'
+      ) !== -1
+    ) {
+
+      throw new Error(
+        'A oportunidade atualizada ainda contém o volume antigo.'
+      );
+
+    }
+
+
+    if (
+      texto.indexOf(
+        '2 horas por dia'
+      ) !== -1
+    ) {
+
+      throw new Error(
+        'A oportunidade atualizada ainda contém o impacto antigo.'
+      );
+
+    }
+
+
+    Logger.log(
+      'Novo volume: ' +
+      oportunidadeAtualizada.volume
+    );
+
+    Logger.log(
+      'Novo impacto: ' +
+      oportunidadeAtualizada.impacto
+    );
+
+    Logger.log(
+      'Nova dor: ' +
+      oportunidadeAtualizada.dor
+    );
+
+    Logger.log(
+      '✅ OPORTUNIDADE ATUALIZADA CORRETAMENTE'
+    );
+
+
+    passou++;
+
+
+  } catch (erro) {
+
+    Logger.log(
+      '❌ FALHOU: ' +
+      (
+        erro.message ||
+        String(erro)
+      )
+    );
+
+    falhou++;
+
+  }
+
+
+  // ============================================================
+  // RESULTADO
+  // ============================================================
+
+  Logger.log('');
+  Logger.log(
+    '=============================================='
+  );
+
+  Logger.log(
+    'RESULTADO — ATUALIZAÇÃO V5.7'
+  );
+
+  Logger.log(
+    '=============================================='
+  );
+
+  Logger.log(
+    'TOTAL: 2'
+  );
+
+  Logger.log(
+    'PASSARAM: ' +
+    passou
+  );
+
+  Logger.log(
+    'FALHARAM: ' +
+    falhou
+  );
+
+
+  if (
+    falhou === 0
+  ) {
+
+    Logger.log(
+      '🟢 ATUALIZAÇÃO DE OPORTUNIDADE PASSOU'
+    );
+
+  } else {
+
+    Logger.log(
+      '🔴 ATUALIZAÇÃO DE OPORTUNIDADE POSSUI FALHAS'
+    );
+
+  }
+
+
+  Logger.log(
+    '=============================================='
+  );
+
+}
+function TESTAR_RASTREABILIDADE_OPORTUNIDADE_V57() {
+
+  Logger.log('');
+  Logger.log('==============================================');
+  Logger.log(' FEEDS SOLUTIONS — RASTREABILIDADE');
+  Logger.log('                 V5.7');
+  Logger.log('==============================================');
+  Logger.log('');
+
+  let passou = 0;
+  let falhou = 0;
+
+
+  // ============================================================
+  // CASO 01 — VALORES DEVEM VIR DO DIAGNÓSTICO
+  // ============================================================
+
+  Logger.log(
+    '01 — Valores devem ser rastreáveis ao diagnóstico'
+  );
+
+
+  try {
+
+    const diagnostico = {
+
+      processo_nome:
+        'Conferir pedidos',
+
+      dor_principal:
+        'Erros de digitação',
+
+      frequencia:
+        'Diária',
+
+      volume:
+        '120 pedidos por dia',
+
+      impacto_nivel:
+        '3 horas por dia',
+
+      objetivo:
+        'Reduzir erros'
+
+    };
+
+
+    const oportunidade =
+      construirOportunidadeDiagnosticoV57_(
+        diagnostico
+      );
+
+
+    if (
+      oportunidade.volume !==
+      diagnostico.volume
+    ) {
+
+      throw new Error(
+        'Volume não corresponde ao diagnóstico.'
+      );
+
+    }
+
+
+    if (
+      oportunidade.impacto !==
+      diagnostico.impacto_nivel
+    ) {
+
+      throw new Error(
+        'Impacto não corresponde ao diagnóstico.'
+      );
+
+    }
+
+
+    if (
+      oportunidade.processo !==
+      diagnostico.processo_nome
+    ) {
+
+      throw new Error(
+        'Processo não corresponde ao diagnóstico.'
+      );
+
+    }
+
+
+    if (
+      oportunidade.dor !==
+      diagnostico.dor_principal
+    ) {
+
+      throw new Error(
+        'Dor não corresponde ao diagnóstico.'
+      );
+
+    }
+
+
+    if (
+      oportunidade.frequencia !==
+      diagnostico.frequencia
+    ) {
+
+      throw new Error(
+        'Frequência não corresponde ao diagnóstico.'
+      );
+
+    }
+
+
+    if (
+      oportunidade.objetivo !==
+      diagnostico.objetivo
+    ) {
+
+      throw new Error(
+        'Objetivo não corresponde ao diagnóstico.'
+      );
+
+    }
+
+
+    Logger.log(
+      '✅ PASSOU'
+    );
+
+    passou++;
+
+
+  } catch (erro) {
+
+    Logger.log(
+      '❌ FALHOU: ' +
+      (
+        erro.message ||
+        String(erro)
+      )
+    );
+
+    falhou++;
+
+  }
+
+
+  // ============================================================
+  // CASO 02 — ALTERAÇÃO DO DIAGNÓSTICO
+  // ============================================================
+
+  Logger.log('');
+  Logger.log(
+    '02 — Alteração do diagnóstico deve alterar oportunidade'
+  );
+
+
+  try {
+
+    const diagnostico = {
+
+      processo_nome:
+        'Conferir pedidos',
+
+      dor_principal:
+        'Erros de digitação',
+
+      frequencia:
+        'Diária',
+
+      volume:
+        '250 pedidos por dia',
+
+      impacto_nivel:
+        '5 horas por dia',
+
+      objetivo:
+        'Reduzir erros'
+
+    };
+
+
+    const oportunidade =
+      construirOportunidadeDiagnosticoV57_(
+        diagnostico
+      );
+
+
+    if (
+      oportunidade.volume !==
+      '250 pedidos por dia'
+    ) {
+
+      throw new Error(
+        'Novo volume não foi propagado.'
+      );
+
+    }
+
+
+    if (
+      oportunidade.impacto !==
+      '5 horas por dia'
+    ) {
+
+      throw new Error(
+        'Novo impacto não foi propagado.'
+      );
+
+    }
+
+
+    Logger.log(
+      'Novo volume: ' +
+      oportunidade.volume
+    );
+
+    Logger.log(
+      'Novo impacto: ' +
+      oportunidade.impacto
+    );
+
+    Logger.log(
+      '✅ PASSOU'
+    );
+
+    passou++;
+
+
+  } catch (erro) {
+
+    Logger.log(
+      '❌ FALHOU: ' +
+      (
+        erro.message ||
+        String(erro)
+      )
+    );
+
+    falhou++;
+
+  }
+
+
+  // ============================================================
+  // CASO 03 — AUSÊNCIA DE VOLUME NÃO PODE INVENTAR VALOR
+  // ============================================================
+
+  Logger.log('');
+  Logger.log(
+    '03 — Ausência de volume não pode inventar valor'
+  );
+
+
+  try {
+
+    const diagnostico = {
+
+      processo_nome:
+        'Atendimento',
+
+      dor_principal:
+        'Demora no atendimento',
+
+      frequencia:
+        'Diária',
+
+      volume:
+        '',
+
+      impacto_nivel:
+        '2 horas por dia',
+
+      objetivo:
+        'Agilizar atendimento'
+
+    };
+
+
+    const oportunidade =
+      construirOportunidadeDiagnosticoV57_(
+        diagnostico
+      );
+
+
+    if (
+      !oportunidade
+    ) {
+
+      throw new Error(
+        'Diagnóstico válido não gerou oportunidade.'
+      );
+
+    }
+
+
+    if (
+      oportunidade.volume
+    ) {
+
+      throw new Error(
+        'Volume foi inventado mesmo estando ausente.'
+      );
+
+    }
+
+
+    if (
+      String(
+        oportunidade.descricao
+      ).match(
+        /\b\d+\b/
+      )
+    ) {
+
+      throw new Error(
+        'Descrição inventou número sem suporte no diagnóstico.'
+      );
+
+    }
+
+
+    Logger.log(
+      'Volume: [' +
+      oportunidade.volume +
+      ']'
+    );
+
+    Logger.log(
+      '✅ PASSOU'
+    );
+
+    passou++;
+
+
+  } catch (erro) {
+
+    Logger.log(
+      '❌ FALHOU: ' +
+      (
+        erro.message ||
+        String(erro)
+      )
+    );
+
+    falhou++;
+
+  }
+
+
+  // ============================================================
+  // RESULTADO
+  // ============================================================
+
+  Logger.log('');
+  Logger.log(
+    '=============================================='
+  );
+
+  Logger.log(
+    'RESULTADO DE RASTREABILIDADE V5.7'
+  );
+
+  Logger.log(
+    '=============================================='
+  );
+
+  Logger.log(
+    'TOTAL: 3'
+  );
+
+  Logger.log(
+    'PASSARAM: ' +
+    passou
+  );
+
+  Logger.log(
+    'FALHARAM: ' +
+    falhou
+  );
+
+
+  if (
+    falhou === 0
+  ) {
+
+    Logger.log(
+      '🟢 RASTREABILIDADE V5.7 PASSOU'
+    );
+
+  } else {
+
+    Logger.log(
+      '🔴 RASTREABILIDADE V5.7 POSSUI FALHAS'
+    );
+
+  }
+
+
+  Logger.log(
+    '=============================================='
+  );
+
+}
+
+function TESTAR_INTEGRACAO_DIAGNOSTICO_OPORTUNIDADE_V57() {
+
+  Logger.log('');
+  Logger.log('==============================================');
+  Logger.log(' FEEDS SOLUTIONS — INTEGRAÇÃO');
+  Logger.log(' DIAGNÓSTICO → OPORTUNIDADE — V5.7');
+  Logger.log('==============================================');
+  Logger.log('');
+
+  let passou = 0;
+  let falhou = 0;
+
+
+  // ============================================================
+  // FUNÇÃO LOCAL DE INTEGRAÇÃO
+  // ============================================================
+
+  function gerarOportunidadeSePronto_(diagnostico) {
+
+    if (
+      !diagnostico
+    ) {
+      return null;
+    }
+
+
+    const estado =
+      determinarEstadoDiagnostico_(
+        diagnostico,
+        {}
+      );
+
+
+    if (
+      estado !==
+      DIAGNOSTICO_ESTADOS.PRONTO_PARA_ANALISE
+    ) {
+
+      return null;
+
+    }
+
+
+    return construirOportunidadeDiagnosticoV57_(
+      diagnostico
+    );
+
+  }
+
+
+  // ============================================================
+  // CASO 01 — INICIO
+  // ============================================================
+
+  Logger.log(
+    '01 — INICIO não pode gerar oportunidade'
+  );
+
+
+  try {
+
+    const diagnostico = {
+
+      processo_nome: '',
+      dor_principal: '',
+      frequencia: '',
+      volume: '',
+      impacto_nivel: '',
+      objetivo: ''
+
+    };
+
+
+    const oportunidade =
+      gerarOportunidadeSePronto_(
+        diagnostico
+      );
+
+
+    if (
+      oportunidade !== null
+    ) {
+
+      throw new Error(
+        'INICIO gerou oportunidade indevidamente.'
+      );
+
+    }
+
+
+    Logger.log(
+      '✅ PASSOU'
+    );
+
+    passou++;
+
+
+  } catch (erro) {
+
+    Logger.log(
+      '❌ FALHOU: ' +
+      (
+        erro.message ||
+        String(erro)
+      )
+    );
+
+    falhou++;
+
+  }
+
+
+  // ============================================================
+  // CASO 02 — DESCOBERTA
+  // ============================================================
+
+  Logger.log('');
+  Logger.log(
+    '02 — DESCOBERTA não pode gerar oportunidade'
+  );
+
+
+  try {
+
+    const diagnostico = {
+
+      processo_nome:
+        'Conferir pedidos',
+
+      dor_principal:
+        '',
+
+      frequencia: '',
+      volume: '',
+      impacto_nivel: '',
+      objetivo: ''
+
+    };
+
+
+    const oportunidade =
+      gerarOportunidadeSePronto_(
+        diagnostico
+      );
+
+
+    if (
+      oportunidade !== null
+    ) {
+
+      throw new Error(
+        'DESCOBERTA gerou oportunidade indevidamente.'
+      );
+
+    }
+
+
+    Logger.log(
+      '✅ PASSOU'
+    );
+
+    passou++;
+
+
+  } catch (erro) {
+
+    Logger.log(
+      '❌ FALHOU: ' +
+      (
+        erro.message ||
+        String(erro)
+      )
+    );
+
+    falhou++;
+
+  }
+
+
+  // ============================================================
+  // CASO 03 — INVESTIGAÇÃO
+  // ============================================================
+
+  Logger.log('');
+  Logger.log(
+    '03 — INVESTIGACAO não pode gerar oportunidade'
+  );
+
+
+  try {
+
+    const diagnostico = {
+
+      processo_nome:
+        'Conferir pedidos',
+
+      dor_principal:
+        'Erros de digitação',
+
+      frequencia:
+        'Diária',
+
+      volume:
+        '120 pedidos por dia',
+
+      impacto_nivel:
+        '',
+
+      objetivo:
+        'Reduzir erros'
+
+    };
+
+
+    const oportunidade =
+      gerarOportunidadeSePronto_(
+        diagnostico
+      );
+
+
+    if (
+      oportunidade !== null
+    ) {
+
+      throw new Error(
+        'INVESTIGACAO gerou oportunidade indevidamente.'
+      );
+
+    }
+
+
+    Logger.log(
+      '✅ PASSOU'
+    );
+
+    passou++;
+
+
+  } catch (erro) {
+
+    Logger.log(
+      '❌ FALHOU: ' +
+      (
+        erro.message ||
+        String(erro)
+      )
+    );
+
+    falhou++;
+
+  }
+
+
+  // ============================================================
+  // CASO 04 — PRONTO PARA ANÁLISE
+  // ============================================================
+
+  Logger.log('');
+  Logger.log(
+    '04 — PRONTO_PARA_ANALISE deve gerar oportunidade'
+  );
+
+
+  try {
+
+    const diagnostico = {
+
+      processo_nome:
+        'Conferir e lançar pedidos',
+
+      dor_principal:
+        'Erros de digitação e retrabalho',
+
+      frequencia:
+        'Diária',
+
+      volume:
+        '120 pedidos por dia',
+
+      impacto_nivel:
+        '3 horas por dia',
+
+      objetivo:
+        'Reduzir erros e retrabalho'
+
+    };
+
+
+    const estado =
+      determinarEstadoDiagnostico_(
+        diagnostico,
+        {}
+      );
+
+
+    if (
+      estado !==
+      DIAGNOSTICO_ESTADOS.PRONTO_PARA_ANALISE
+    ) {
+
+      throw new Error(
+        'Diagnóstico completo não chegou a PRONTO_PARA_ANALISE.'
+      );
+
+    }
+
+
+    const oportunidade =
+      gerarOportunidadeSePronto_(
+        diagnostico
+      );
+
+
+    if (
+      !oportunidade
+    ) {
+
+      throw new Error(
+        'Diagnóstico pronto não gerou oportunidade.'
+      );
+
+    }
+
+
+    if (
+      oportunidade.processo !==
+      diagnostico.processo_nome
+    ) {
+
+      throw new Error(
+        'Processo da oportunidade divergiu.'
+      );
+
+    }
+
+
+    if (
+      oportunidade.dor !==
+      diagnostico.dor_principal
+    ) {
+
+      throw new Error(
+        'Dor da oportunidade divergiu.'
+      );
+
+    }
+
+
+    if (
+      oportunidade.volume !==
+      diagnostico.volume
+    ) {
+
+      throw new Error(
+        'Volume da oportunidade divergiu.'
+      );
+
+    }
+
+
+    if (
+      oportunidade.impacto !==
+      diagnostico.impacto_nivel
+    ) {
+
+      throw new Error(
+        'Impacto da oportunidade divergiu.'
+      );
+
+    }
+
+
+    Logger.log(
+      'Estado: ' +
+      estado
+    );
+
+    Logger.log(
+      'Oportunidade criada: SIM'
+    );
+
+    Logger.log(
+      '✅ PASSOU'
+    );
+
+    passou++;
+
+
+  } catch (erro) {
+
+    Logger.log(
+      '❌ FALHOU: ' +
+      (
+        erro.message ||
+        String(erro)
+      )
+    );
+
+    falhou++;
+
+  }
+
+
+  // ============================================================
+  // CASO 05 — ATUALIZAÇÃO
+  // ============================================================
+
+  Logger.log('');
+  Logger.log(
+    '05 — Oportunidade deve acompanhar atualização'
+  );
+
+
+  try {
+
+    const diagnosticoInicial = {
+
+      processo_nome:
+        'Conferir pedidos',
+
+      dor_principal:
+        'Erros de digitação',
+
+      frequencia:
+        'Diária',
+
+      volume:
+        '80 pedidos por dia',
+
+      impacto_nivel:
+        '2 horas por dia',
+
+      objetivo:
+        'Reduzir erros'
+
+    };
+
+
+    const diagnosticoAtualizado = {
+
+      processo_nome:
+        'Conferir e lançar pedidos',
+
+      dor_principal:
+        'Erros de digitação e retrabalho',
+
+      frequencia:
+        'Diária',
+
+      volume:
+        '120 pedidos por dia',
+
+      impacto_nivel:
+        '3 horas por dia',
+
+      objetivo:
+        'Reduzir erros e retrabalho'
+
+    };
+
+
+    const oportunidadeInicial =
+      gerarOportunidadeSePronto_(
+        diagnosticoInicial
+      );
+
+
+    if (
+      !oportunidadeInicial
+    ) {
+
+      throw new Error(
+        'Oportunidade inicial não foi criada.'
+      );
+
+    }
+
+
+    const oportunidadeAtualizada =
+      gerarOportunidadeSePronto_(
+        diagnosticoAtualizado
+      );
+
+
+    if (
+      !oportunidadeAtualizada
+    ) {
+
+      throw new Error(
+        'Oportunidade atualizada não foi criada.'
+      );
+
+    }
+
+
+    if (
+      oportunidadeAtualizada.volume !==
+      '120 pedidos por dia'
+    ) {
+
+      throw new Error(
+        'Oportunidade não recebeu novo volume.'
+      );
+
+    }
+
+
+    if (
+      oportunidadeAtualizada.impacto !==
+      '3 horas por dia'
+    ) {
+
+      throw new Error(
+        'Oportunidade não recebeu novo impacto.'
+      );
+
+    }
+
+
+    if (
+      oportunidadeAtualizada.dor !==
+      'Erros de digitação e retrabalho'
+    ) {
+
+      throw new Error(
+        'Oportunidade não recebeu nova dor.'
+      );
+
+    }
+
+
+    Logger.log(
+      'Volume anterior: ' +
+      oportunidadeInicial.volume
+    );
+
+    Logger.log(
+      'Volume atual: ' +
+      oportunidadeAtualizada.volume
+    );
+
+    Logger.log(
+      'Impacto anterior: ' +
+      oportunidadeInicial.impacto
+    );
+
+    Logger.log(
+      'Impacto atual: ' +
+      oportunidadeAtualizada.impacto
+    );
+
+    Logger.log(
+      '✅ PASSOU'
+    );
+
+    passou++;
+
+
+  } catch (erro) {
+
+    Logger.log(
+      '❌ FALHOU: ' +
+      (
+        erro.message ||
+        String(erro)
+      )
+    );
+
+    falhou++;
+
+  }
+
+
+  // ============================================================
+  // RESULTADO
+  // ============================================================
+
+  Logger.log('');
+  Logger.log(
+    '=============================================='
+  );
+
+  Logger.log(
+    'RESULTADO DA INTEGRAÇÃO V5.7'
+  );
+
+  Logger.log(
+    '=============================================='
+  );
+
+  Logger.log(
+    'TOTAL: 5'
+  );
+
+  Logger.log(
+    'PASSARAM: ' +
+    passou
+  );
+
+  Logger.log(
+    'FALHARAM: ' +
+    falhou
+  );
+
+
+  if (
+    falhou === 0
+  ) {
+
+    Logger.log(
+      '🟢 INTEGRAÇÃO DIAGNÓSTICO → OPORTUNIDADE PASSOU'
+    );
+
+  } else {
+
+    Logger.log(
+      '🔴 INTEGRAÇÃO DIAGNÓSTICO → OPORTUNIDADE POSSUI FALHAS'
+    );
+
+  }
+
+
+  Logger.log(
+    '=============================================='
+  );
+
+}
+
+/**
+ * V5.7 — Motor real de integração
+ * Diagnóstico → Oportunidade
+ *
+ * Regras:
+ * - Só gera oportunidade quando o diagnóstico está pronto.
+ * - Não grava dados.
+ * - Não altera o diagnóstico.
+ * - Não utiliza IA.
+ */
+function construirOportunidadeSeProntoDiagnosticoV57_(diagnostico) {
+
+  if (!diagnostico) {
+    return null;
+  }
+
+  const estado =
+    determinarEstadoDiagnostico_(
+      diagnostico,
+      {}
+    );
+
+  if (
+    String(estado || '').trim().toUpperCase() !==
+    String(
+      DIAGNOSTICO_ESTADOS.PRONTO_PARA_ANALISE
+    ).trim().toUpperCase()
+  ) {
+    return null;
+  }
+
+  return construirOportunidadeDiagnosticoV57_(
+    diagnostico
+  );
+}
+
+function TESTAR_MOTOR_REAL_OPORTUNIDADE_V57() {
+
+  Logger.log('');
+  Logger.log('==============================================');
+  Logger.log(' FEEDS SOLUTIONS — MOTOR REAL DE OPORTUNIDADE');
+  Logger.log(' V5.7');
+  Logger.log('==============================================');
+  Logger.log('');
+
+  let passou = 0;
+  let falhou = 0;
+
+
+  function testar_(numero, descricao, callback) {
+
+    Logger.log(
+      numero + ' — ' + descricao
+    );
+
+    try {
+
+      callback();
+
+      Logger.log('✅ PASSOU');
+      passou++;
+
+    } catch (erro) {
+
+      Logger.log(
+        '❌ FALHOU: ' +
+        (
+          erro.message ||
+          String(erro)
+        )
+      );
+
+      falhou++;
+    }
+
+    Logger.log('');
+  }
+
+
+  // ============================================================
+  // 01 — INICIO
+  // ============================================================
+
+  testar_(
+    '01',
+    'INICIO não gera oportunidade',
+    function() {
+
+      const diagnostico = {
+
+        processo_nome: '',
+        dor_principal: '',
+        frequencia: '',
+        volume: '',
+        impacto_nivel: '',
+        objetivo: ''
+
+      };
+
+      const resultado =
+        construirOportunidadeSeProntoDiagnosticoV57_(
+          diagnostico
+        );
+
+      if (resultado !== null) {
+
+        throw new Error(
+          'O motor gerou oportunidade em INICIO.'
+        );
+
+      }
+    }
+  );
+
+
+  // ============================================================
+  // 02 — DESCOBERTA
+  // ============================================================
+
+  testar_(
+    '02',
+    'DESCOBERTA não gera oportunidade',
+    function() {
+
+      const diagnostico = {
+
+        processo_nome:
+          'Conferir pedidos',
+
+        dor_principal:
+          '',
+
+        frequencia: '',
+        volume: '',
+        impacto_nivel: '',
+        objetivo: ''
+
+      };
+
+      const resultado =
+        construirOportunidadeSeProntoDiagnosticoV57_(
+          diagnostico
+        );
+
+      if (resultado !== null) {
+
+        throw new Error(
+          'O motor gerou oportunidade em DESCOBERTA.'
+        );
+
+      }
+    }
+  );
+
+
+  // ============================================================
+  // 03 — INVESTIGACAO
+  // ============================================================
+
+  testar_(
+    '03',
+    'INVESTIGACAO não gera oportunidade',
+    function() {
+
+      const diagnostico = {
+
+        processo_nome:
+          'Conferir pedidos',
+
+        dor_principal:
+          'Erros de digitação',
+
+        frequencia:
+          'Diária',
+
+        volume:
+          '120 pedidos por dia',
+
+        impacto_nivel:
+          '',
+
+        objetivo:
+          'Reduzir erros'
+
+      };
+
+      const resultado =
+        construirOportunidadeSeProntoDiagnosticoV57_(
+          diagnostico
+        );
+
+      if (resultado !== null) {
+
+        throw new Error(
+          'O motor gerou oportunidade em INVESTIGACAO.'
+        );
+
+      }
+    }
+  );
+
+
+  // ============================================================
+  // 04 — PRONTO
+  // ============================================================
+
+  testar_(
+    '04',
+    'PRONTO_PARA_ANALISE gera oportunidade',
+    function() {
+
+      const diagnostico = {
+
+        processo_nome:
+          'Conferir e lançar pedidos',
+
+        dor_principal:
+          'Erros de digitação e retrabalho',
+
+        frequencia:
+          'Diária',
+
+        volume:
+          '120 pedidos por dia',
+
+        impacto_nivel:
+          '3 horas por dia',
+
+        objetivo:
+          'Reduzir erros e retrabalho'
+
+      };
+
+      const resultado =
+        construirOportunidadeSeProntoDiagnosticoV57_(
+          diagnostico
+        );
+
+      if (!resultado) {
+
+        throw new Error(
+          'O motor não gerou oportunidade.'
+        );
+
+      }
+
+      if (
+        resultado.processo !==
+        diagnostico.processo_nome
+      ) {
+
+        throw new Error(
+          'Processo não foi preservado.'
+        );
+
+      }
+
+      if (
+        resultado.dor !==
+        diagnostico.dor_principal
+      ) {
+
+        throw new Error(
+          'Dor não foi preservada.'
+        );
+
+      }
+
+      if (
+        resultado.volume !==
+        diagnostico.volume
+      ) {
+
+        throw new Error(
+          'Volume não foi preservado.'
+        );
+
+      }
+
+      if (
+        resultado.impacto !==
+        diagnostico.impacto_nivel
+      ) {
+
+        throw new Error(
+          'Impacto não foi preservado.'
+        );
+
+      }
+
+      if (
+        resultado.objetivo !==
+        diagnostico.objetivo
+      ) {
+
+        throw new Error(
+          'Objetivo não foi preservado.'
+        );
+
+      }
+    }
+  );
+
+
+  // ============================================================
+  // 05 — DIAGNÓSTICO INCOMPLETO NÃO PODE SER FORÇADO
+  // ============================================================
+
+  testar_(
+    '05',
+    'Diagnóstico incompleto continua bloqueado',
+    function() {
+
+      const diagnostico = {
+
+        processo_nome:
+          'Conferir pedidos',
+
+        dor_principal:
+          'Erros de digitação',
+
+        frequencia:
+          'Diária',
+
+        volume:
+          '120 pedidos por dia',
+
+        impacto_nivel:
+          '3 horas por dia',
+
+        objetivo:
+          ''
+
+      };
+
+      const resultado =
+        construirOportunidadeSeProntoDiagnosticoV57_(
+          diagnostico
+        );
+
+      if (resultado !== null) {
+
+        throw new Error(
+          'O motor ignorou a ausência do objetivo.'
+        );
+
+      }
+    }
+  );
+
+
+  // ============================================================
+  // 06 — SEM DOR
+  // ============================================================
+
+  testar_(
+    '06',
+    'Diagnóstico sem dor continua bloqueado',
+    function() {
+
+      const diagnostico = {
+
+        processo_nome:
+          'Conferir e lançar pedidos',
+
+        dor_principal:
+          '',
+
+        frequencia:
+          'Diária',
+
+        volume:
+          '120 pedidos por dia',
+
+        impacto_nivel:
+          '3 horas por dia',
+
+        objetivo:
+          'Reduzir erros'
+
+      };
+
+      const resultado =
+        construirOportunidadeSeProntoDiagnosticoV57_(
+          diagnostico
+        );
+
+      if (resultado !== null) {
+
+        throw new Error(
+          'O motor criou oportunidade sem dor.'
+        );
+
+      }
+    }
+  );
+
+
+  // ============================================================
+  // 07 — SEM PROCESSO
+  // ============================================================
+
+  testar_(
+    '07',
+    'Diagnóstico sem processo continua bloqueado',
+    function() {
+
+      const diagnostico = {
+
+        processo_nome:
+          '',
+
+        dor_principal:
+          'Erros de digitação',
+
+        frequencia:
+          'Diária',
+
+        volume:
+          '120 pedidos por dia',
+
+        impacto_nivel:
+          '3 horas por dia',
+
+        objetivo:
+          'Reduzir erros'
+
+      };
+
+      const resultado =
+        construirOportunidadeSeProntoDiagnosticoV57_(
+          diagnostico
+        );
+
+      if (resultado !== null) {
+
+        throw new Error(
+          'O motor criou oportunidade sem processo.'
+        );
+
+      }
+    }
+  );
+
+
+  // ============================================================
+  // 08 — SEM IMPACTO
+  // ============================================================
+
+  testar_(
+    '08',
+    'Diagnóstico sem impacto continua bloqueado',
+    function() {
+
+      const diagnostico = {
+
+        processo_nome:
+          'Conferir pedidos',
+
+        dor_principal:
+          'Erros de digitação',
+
+        frequencia:
+          'Diária',
+
+        volume:
+          '120 pedidos por dia',
+
+        impacto_nivel:
+          '',
+
+        objetivo:
+          'Reduzir erros'
+
+      };
+
+      const resultado =
+        construirOportunidadeSeProntoDiagnosticoV57_(
+          diagnostico
+        );
+
+      if (resultado !== null) {
+
+        throw new Error(
+          'O motor criou oportunidade sem impacto.'
+        );
+
+      }
+    }
+  );
+
+
+  // ============================================================
+  // 09 — SEM FREQUÊNCIA
+  // ============================================================
+
+  testar_(
+    '09',
+    'Diagnóstico sem frequência continua bloqueado',
+    function() {
+
+      const diagnostico = {
+
+        processo_nome:
+          'Conferir pedidos',
+
+        dor_principal:
+          'Erros de digitação',
+
+        frequencia:
+          '',
+
+        volume:
+          '120 pedidos por dia',
+
+        impacto_nivel:
+          '3 horas por dia',
+
+        objetivo:
+          'Reduzir erros'
+
+      };
+
+      const resultado =
+        construirOportunidadeSeProntoDiagnosticoV57_(
+          diagnostico
+        );
+
+      if (resultado !== null) {
+
+        throw new Error(
+          'O motor criou oportunidade sem frequência.'
+        );
+
+      }
+    }
+  );
+
+
+  // ============================================================
+  // 10 — SEM EFEITO COLATERAL
+  // ============================================================
+
+  testar_(
+    '10',
+    'Motor não altera o diagnóstico original',
+    function() {
+
+      const diagnostico = {
+
+        processo_nome:
+          'Conferir pedidos',
+
+        dor_principal:
+          'Erros de digitação',
+
+        frequencia:
+          'Diária',
+
+        volume:
+          '120 pedidos por dia',
+
+        impacto_nivel:
+          '3 horas por dia',
+
+        objetivo:
+          'Reduzir erros'
+
+      };
+
+      const antes =
+        JSON.stringify(diagnostico);
+
+      const resultado =
+        construirOportunidadeSeProntoDiagnosticoV57_(
+          diagnostico
+        );
+
+      if (!resultado) {
+
+        throw new Error(
+          'Oportunidade não foi criada.'
+        );
+
+      }
+
+      const depois =
+        JSON.stringify(diagnostico);
+
+      if (
+        antes !== depois
+      ) {
+
+        throw new Error(
+          'O motor alterou o diagnóstico original.'
+        );
+
+      }
+    }
+  );
+
+
+  // ============================================================
+  // RESULTADO
+  // ============================================================
+
+  Logger.log(
+    '=============================================='
+  );
+
+  Logger.log(
+    'RESULTADO DO MOTOR REAL V5.7'
+  );
+
+  Logger.log(
+    '=============================================='
+  );
+
+  Logger.log(
+    'TOTAL: 10'
+  );
+
+  Logger.log(
+    'PASSARAM: ' +
+    passou
+  );
+
+  Logger.log(
+    'FALHARAM: ' +
+    falhou
+  );
+
+
+  if (falhou === 0) {
+
+    Logger.log(
+      '🟢 MOTOR REAL DE OPORTUNIDADE APROVADO'
+    );
+
+  } else {
+
+    Logger.log(
+      '🔴 MOTOR REAL DE OPORTUNIDADE POSSUI FALHAS'
+    );
+
+  }
+
+  Logger.log(
+    '=============================================='
+  );
+}
+/**
+ * V5.7 — Atualiza uma oportunidade existente
+ * ou cria uma nova quando necessário.
+ *
+ * Esta função ainda NÃO é chamada pelo fluxo principal.
+ *
+ * Regras:
+ * - Diagnóstico precisa estar pronto.
+ * - Uma oportunidade por diagnóstico/conversa.
+ * - Reprocessamento não cria duplicata.
+ * - Atualização substitui os dados antigos pelos atuais.
+ *
+ * IMPORTANTE:
+ * Esta primeira versão trabalha em memória.
+ * A persistência em planilha será criada somente após
+ * os testes de idempotência passarem.
+ */
+function processarOportunidadeDiagnosticoV57_(diagnostico, oportunidadeExistente) {
+
+  if (!diagnostico) {
+    return null;
+  }
+
+
+  const oportunidade =
+    construirOportunidadeSeProntoDiagnosticoV57_(
+      diagnostico
+    );
+
+
+  // Diagnóstico ainda não está pronto.
+  if (!oportunidade) {
+    return null;
+  }
+
+
+  // Não existe oportunidade anterior:
+  // criar a primeira.
+  if (!oportunidadeExistente) {
+
+    return {
+      acao: 'CRIAR',
+      oportunidade: oportunidade
+    };
+
+  }
+
+
+  // Já existe:
+  // atualizar com o diagnóstico atual.
+  return {
+    acao: 'ATUALIZAR',
+    oportunidade: oportunidade
+  };
+}
+
+function TESTAR_PERSISTENCIA_IDEMPOTENCIA_OPORTUNIDADE_V57() {
+
+  Logger.log('');
+  Logger.log('==============================================');
+  Logger.log(' FEEDS SOLUTIONS — PERSISTÊNCIA / IDEMPOTÊNCIA');
+  Logger.log(' OPORTUNIDADE — V5.7');
+  Logger.log('==============================================');
+  Logger.log('');
+
+  let passou = 0;
+  let falhou = 0;
+
+
+  function testar_(numero, descricao, callback) {
+
+    Logger.log(
+      numero + ' — ' + descricao
+    );
+
+    try {
+
+      callback();
+
+      Logger.log('✅ PASSOU');
+      passou++;
+
+    } catch (erro) {
+
+      Logger.log(
+        '❌ FALHOU: ' +
+        (
+          erro.message ||
+          String(erro)
+        )
+      );
+
+      falhou++;
+    }
+
+    Logger.log('');
+  }
+
+
+  // ============================================================
+  // DIAGNÓSTICO BASE
+  // ============================================================
+
+  const diagnosticoCompleto = {
+
+    processo_nome:
+      'Conferir e lançar pedidos',
+
+    dor_principal:
+      'Erros de digitação e retrabalho',
+
+    frequencia:
+      'Diária',
+
+    volume:
+      '120 pedidos por dia',
+
+    impacto_nivel:
+      '3 horas por dia',
+
+    objetivo:
+      'Reduzir erros e retrabalho'
+
+  };
+
+
+  // ============================================================
+  // 01 — PRIMEIRA EXECUÇÃO
+  // ============================================================
+
+  testar_(
+    '01',
+    'Primeira execução deve CRIAR',
+    function() {
+
+      const resultado =
+        processarOportunidadeDiagnosticoV57_(
+          diagnosticoCompleto,
+          null
+        );
+
+
+      if (!resultado) {
+
+        throw new Error(
+          'Nenhum resultado foi retornado.'
+        );
+
+      }
+
+
+      if (
+        resultado.acao !==
+        'CRIAR'
+      ) {
+
+        throw new Error(
+          'Ação esperada: CRIAR. Recebida: ' +
+          resultado.acao
+        );
+
+      }
+
+
+      if (
+        !resultado.oportunidade
+      ) {
+
+        throw new Error(
+          'Oportunidade não foi criada.'
+        );
+
+      }
+
+    }
+  );
+
+
+  // ============================================================
+  // 02 — SEGUNDA EXECUÇÃO
+  // ============================================================
+
+  testar_(
+    '02',
+    'Reprocessamento deve ATUALIZAR, não criar',
+    function() {
+
+      const primeira =
+        processarOportunidadeDiagnosticoV57_(
+          diagnosticoCompleto,
+          null
+        );
+
+
+      const segunda =
+        processarOportunidadeDiagnosticoV57_(
+          diagnosticoCompleto,
+          primeira.oportunidade
+        );
+
+
+      if (!segunda) {
+
+        throw new Error(
+          'Segundo processamento não retornou resultado.'
+        );
+
+      }
+
+
+      if (
+        segunda.acao !==
+        'ATUALIZAR'
+      ) {
+
+        throw new Error(
+          'Reprocessamento criou nova oportunidade.'
+        );
+
+      }
+
+    }
+  );
+
+
+  // ============================================================
+  // 03 — MESMA OPORTUNIDADE
+  // ============================================================
+
+  testar_(
+    '03',
+    'Reprocessamento mantém os mesmos dados',
+    function() {
+
+      const primeira =
+        processarOportunidadeDiagnosticoV57_(
+          diagnosticoCompleto,
+          null
+        );
+
+
+      const segunda =
+        processarOportunidadeDiagnosticoV57_(
+          diagnosticoCompleto,
+          primeira.oportunidade
+        );
+
+
+      const campos = [
+        'processo',
+        'dor',
+        'frequencia',
+        'volume',
+        'impacto',
+        'objetivo'
+      ];
+
+
+      campos.forEach(function(campo) {
+
+        if (
+          primeira.oportunidade[campo] !==
+          segunda.oportunidade[campo]
+        ) {
+
+          throw new Error(
+            'Campo ' +
+            campo +
+            ' mudou indevidamente.'
+          );
+
+        }
+
+      });
+
+    }
+  );
+
+
+  // ============================================================
+  // 04 — ATUALIZAÇÃO DE VOLUME
+  // ============================================================
+
+  testar_(
+    '04',
+    'Atualização deve substituir o volume antigo',
+    function() {
+
+      const primeiraDiagnostico = {
+
+        processo_nome:
+          'Conferir pedidos',
+
+        dor_principal:
+          'Erros de digitação',
+
+        frequencia:
+          'Diária',
+
+        volume:
+          '80 pedidos por dia',
+
+        impacto_nivel:
+          '2 horas por dia',
+
+        objetivo:
+          'Reduzir erros'
+
+      };
+
+
+      const segundaDiagnostico = {
+
+        processo_nome:
+          'Conferir pedidos',
+
+        dor_principal:
+          'Erros de digitação',
+
+        frequencia:
+          'Diária',
+
+        volume:
+          '120 pedidos por dia',
+
+        impacto_nivel:
+          '2 horas por dia',
+
+        objetivo:
+          'Reduzir erros'
+
+      };
+
+
+      const primeira =
+        processarOportunidadeDiagnosticoV57_(
+          primeiraDiagnostico,
+          null
+        );
+
+
+      const segunda =
+        processarOportunidadeDiagnosticoV57_(
+          segundaDiagnostico,
+          primeira.oportunidade
+        );
+
+
+      if (
+        segunda.acao !==
+        'ATUALIZAR'
+      ) {
+
+        throw new Error(
+          'Atualização não foi identificada.'
+        );
+
+      }
+
+
+      if (
+        segunda.oportunidade.volume !==
+        '120 pedidos por dia'
+      ) {
+
+        throw new Error(
+          'Novo volume não foi aplicado.'
+        );
+
+      }
+
+
+      if (
+        segunda.oportunidade.volume.indexOf(
+          '80'
+        ) !== -1
+      ) {
+
+        throw new Error(
+          'Volume antigo permaneceu na oportunidade.'
+        );
+
+      }
+
+    }
+  );
+
+
+  // ============================================================
+  // 05 — ATUALIZAÇÃO DE IMPACTO
+  // ============================================================
+
+  testar_(
+    '05',
+    'Atualização deve substituir o impacto antigo',
+    function() {
+
+      const primeiraDiagnostico = {
+
+        processo_nome:
+          'Conferir pedidos',
+
+        dor_principal:
+          'Erros de digitação',
+
+        frequencia:
+          'Diária',
+
+        volume:
+          '120 pedidos por dia',
+
+        impacto_nivel:
+          '2 horas por dia',
+
+        objetivo:
+          'Reduzir erros'
+
+      };
+
+
+      const segundaDiagnostico = {
+
+        processo_nome:
+          'Conferir pedidos',
+
+        dor_principal:
+          'Erros de digitação',
+
+        frequencia:
+          'Diária',
+
+        volume:
+          '120 pedidos por dia',
+
+        impacto_nivel:
+          '3 horas por dia',
+
+        objetivo:
+          'Reduzir erros'
+
+      };
+
+
+      const primeira =
+        processarOportunidadeDiagnosticoV57_(
+          primeiraDiagnostico,
+          null
+        );
+
+
+      const segunda =
+        processarOportunidadeDiagnosticoV57_(
+          segundaDiagnostico,
+          primeira.oportunidade
+        );
+
+
+      if (
+        segunda.oportunidade.impacto !==
+        '3 horas por dia'
+      ) {
+
+        throw new Error(
+          'Novo impacto não foi aplicado.'
+        );
+
+      }
+
+
+      if (
+        segunda.oportunidade.impacto.indexOf(
+          '2 horas'
+        ) !== -1
+      ) {
+
+        throw new Error(
+          'Impacto antigo permaneceu.'
+        );
+
+      }
+
+    }
+  );
+
+
+  // ============================================================
+  // 06 — ATUALIZAÇÃO DA DOR
+  // ============================================================
+
+  testar_(
+    '06',
+    'Atualização deve substituir a dor antiga',
+    function() {
+
+      const primeiraDiagnostico = {
+
+        processo_nome:
+          'Conferir pedidos',
+
+        dor_principal:
+          'Erros de digitação',
+
+        frequencia:
+          'Diária',
+
+        volume:
+          '120 pedidos por dia',
+
+        impacto_nivel:
+          '3 horas por dia',
+
+        objetivo:
+          'Reduzir erros'
+
+      };
+
+
+      const segundaDiagnostico = {
+
+        processo_nome:
+          'Conferir pedidos',
+
+        dor_principal:
+          'Erros de digitação e retrabalho',
+
+        frequencia:
+          'Diária',
+
+        volume:
+          '120 pedidos por dia',
+
+        impacto_nivel:
+          '3 horas por dia',
+
+        objetivo:
+          'Reduzir erros e retrabalho'
+
+      };
+
+
+      const primeira =
+        processarOportunidadeDiagnosticoV57_(
+          primeiraDiagnostico,
+          null
+        );
+
+
+      const segunda =
+        processarOportunidadeDiagnosticoV57_(
+          segundaDiagnostico,
+          primeira.oportunidade
+        );
+
+
+      if (
+        segunda.oportunidade.dor !==
+        'Erros de digitação e retrabalho'
+      ) {
+
+        throw new Error(
+          'Nova dor não foi aplicada.'
+        );
+
+      }
+
+    }
+  );
+
+
+  // ============================================================
+  // 07 — DIAGNÓSTICO INCOMPLETO
+  // ============================================================
+
+  testar_(
+    '07',
+    'Diagnóstico incompleto não cria oportunidade',
+    function() {
+
+      const diagnostico = {
+
+        processo_nome:
+          'Conferir pedidos',
+
+        dor_principal:
+          'Erros de digitação',
+
+        frequencia:
+          'Diária',
+
+        volume:
+          '120 pedidos por dia',
+
+        impacto_nivel:
+          '',
+
+        objetivo:
+          'Reduzir erros'
+
+      };
+
+
+      const resultado =
+        processarOportunidadeDiagnosticoV57_(
+          diagnostico,
+          null
+        );
+
+
+      if (
+        resultado !== null
+      ) {
+
+        throw new Error(
+          'Diagnóstico incompleto gerou oportunidade.'
+        );
+
+      }
+
+    }
+  );
+
+
+  // ============================================================
+  // 08 — DIAGNÓSTICO INCOMPLETO COM OPORTUNIDADE EXISTENTE
+  // ============================================================
+
+  testar_(
+    '08',
+    'Diagnóstico incompleto não deve destruir oportunidade existente',
+    function() {
+
+      const oportunidadeExistente = {
+
+        processo:
+          'Conferir pedidos',
+
+        dor:
+          'Erros de digitação',
+
+        frequencia:
+          'Diária',
+
+        volume:
+          '120 pedidos por dia',
+
+        impacto:
+          '3 horas por dia',
+
+        objetivo:
+          'Reduzir erros'
+
+      };
+
+
+      const diagnosticoIncompleto = {
+
+        processo_nome:
+          'Conferir pedidos',
+
+        dor_principal:
+          'Erros de digitação',
+
+        frequencia:
+          'Diária',
+
+        volume:
+          '120 pedidos por dia',
+
+        impacto_nivel:
+          '',
+
+        objetivo:
+          'Reduzir erros'
+
+      };
+
+
+      const resultado =
+        processarOportunidadeDiagnosticoV57_(
+          diagnosticoIncompleto,
+          oportunidadeExistente
+        );
+
+
+      if (
+        resultado !== null
+      ) {
+
+        throw new Error(
+          'Diagnóstico incompleto deveria permanecer sem processamento.'
+        );
+
+      }
+
+    }
+  );
+
+
+  // ============================================================
+  // 09 — NÃO ALTERAR OBJETO EXISTENTE
+  // ============================================================
+
+  testar_(
+    '09',
+    'Processamento não altera a oportunidade existente',
+    function() {
+
+      const diagnostico = {
+
+        processo_nome:
+          'Conferir pedidos',
+
+        dor_principal:
+          'Erros de digitação',
+
+        frequencia:
+          'Diária',
+
+        volume:
+          '120 pedidos por dia',
+
+        impacto_nivel:
+          '3 horas por dia',
+
+        objetivo:
+          'Reduzir erros'
+
+      };
+
+
+      const existente = {
+
+        processo:
+          'Conferir pedidos',
+
+        dor:
+          'Erros de digitação',
+
+        frequencia:
+          'Diária',
+
+        volume:
+          '80 pedidos por dia',
+
+        impacto:
+          '2 horas por dia',
+
+        objetivo:
+          'Reduzir erros'
+
+      };
+
+
+      const antes =
+        JSON.stringify(existente);
+
+
+      const resultado =
+        processarOportunidadeDiagnosticoV57_(
+          diagnostico,
+          existente
+        );
+
+
+      if (!resultado) {
+
+        throw new Error(
+          'Processamento não retornou resultado.'
+        );
+
+      }
+
+
+      const depois =
+        JSON.stringify(existente);
+
+
+      if (
+        antes !== depois
+      ) {
+
+        throw new Error(
+          'A oportunidade existente foi alterada diretamente.'
+        );
+
+      }
+
+    }
+  );
+
+
+  // ============================================================
+  // 10 — NULL
+  // ============================================================
+
+  testar_(
+    '10',
+    'Diagnóstico nulo não causa erro',
+    function() {
+
+      const resultado =
+        processarOportunidadeDiagnosticoV57_(
+          null,
+          null
+        );
+
+
+      if (
+        resultado !== null
+      ) {
+
+        throw new Error(
+          'Diagnóstico nulo deveria retornar null.'
+        );
+
+      }
+
+    }
+  );
+
+
+  // ============================================================
+  // RESULTADO
+  // ============================================================
+
+  Logger.log(
+    '=============================================='
+  );
+
+  Logger.log(
+    'RESULTADO DA PERSISTÊNCIA / IDEMPOTÊNCIA V5.7'
+  );
+
+  Logger.log(
+    '=============================================='
+  );
+
+  Logger.log(
+    'TOTAL: 10'
+  );
+
+  Logger.log(
+    'PASSARAM: ' +
+    passou
+  );
+
+  Logger.log(
+    'FALHARAM: ' +
+    falhou
+  );
+
+
+  if (
+    falhou === 0
+  ) {
+
+    Logger.log(
+      '🟢 PERSISTÊNCIA / IDEMPOTÊNCIA APROVADA'
+    );
+
+  } else {
+
+    Logger.log(
+      '🔴 PERSISTÊNCIA / IDEMPOTÊNCIA POSSUI FALHAS'
+    );
+
+  }
+
+
+  Logger.log(
+    '=============================================='
+  );
 }
