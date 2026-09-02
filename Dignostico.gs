@@ -289,20 +289,16 @@ function processarMensagemDiagnostico(dados) {
 
   }
 
-
   const empresaId =
     dados.empresa_id;
 
-
   const conversaId =
     dados.conversa_id;
-
 
   const mensagem =
     limparMensagemDiagnostico_(
       dados.mensagem
     );
-
 
   if (!empresaId) {
 
@@ -312,7 +308,6 @@ function processarMensagemDiagnostico(dados) {
 
   }
 
-
   if (!conversaId) {
 
     throw new Error(
@@ -320,7 +315,6 @@ function processarMensagemDiagnostico(dados) {
     );
 
   }
-
 
   if (!mensagem) {
 
@@ -331,10 +325,10 @@ function processarMensagemDiagnostico(dados) {
   }
 
 
-  /**
-   * ----------------------------------------------------------
+  /*
+   * ============================================================
    * 1. RECUPERAR DIAGNÓSTICO
-   * ----------------------------------------------------------
+   * ============================================================
    */
 
   const diagnostico =
@@ -342,7 +336,6 @@ function processarMensagemDiagnostico(dados) {
       empresaId,
       conversaId
     );
-
 
   if (!diagnostico) {
 
@@ -353,10 +346,10 @@ function processarMensagemDiagnostico(dados) {
   }
 
 
-  /**
-   * ----------------------------------------------------------
+  /*
+   * ============================================================
    * 2. SALVAR MENSAGEM DO EMPRESÁRIO
-   * ----------------------------------------------------------
+   * ============================================================
    */
 
   salvarMensagemDiagnostico_({
@@ -387,10 +380,10 @@ function processarMensagemDiagnostico(dados) {
   });
 
 
-  /**
-   * ----------------------------------------------------------
+  /*
+   * ============================================================
    * 3. RECUPERAR CONTEXTO
-   * ----------------------------------------------------------
+   * ============================================================
    */
 
   const contexto =
@@ -399,10 +392,10 @@ function processarMensagemDiagnostico(dados) {
     );
 
 
-  /**
-   * ----------------------------------------------------------
+  /*
+   * ============================================================
    * 4. CONSTRUIR ENTRADA PARA IA
-   * ----------------------------------------------------------
+   * ============================================================
    */
 
   const entradaIA =
@@ -412,19 +405,16 @@ function processarMensagemDiagnostico(dados) {
     );
 
 
-  /**
-   * ----------------------------------------------------------
+  /*
+   * ============================================================
    * 5. ANALISAR COM GEMINI
-   * ----------------------------------------------------------
-   *
-   * Função fornecida pelo IA.gs.
+   * ============================================================
    */
 
   const analise =
     analisarMensagemDiagnostico_(
       entradaIA
     );
-
 
   if (
     !analise ||
@@ -438,17 +428,10 @@ function processarMensagemDiagnostico(dados) {
   }
 
 
-  /**
-   * ----------------------------------------------------------
+  /*
+   * ============================================================
    * 6. NORMALIZAR E VALIDAR ANÁLISE
-   * ----------------------------------------------------------
-   *
-   * A IA interpreta linguagem.
-   * O motor controla a integridade dos dados.
-   *
-   * Portanto, não gravamos diretamente os campos vindos
-   * da IA. Primeiro corrigimos classificações óbvias e
-   * preservamos fatos já conhecidos.
+   * ============================================================
    */
 
   const analiseNormalizada =
@@ -459,8 +442,11 @@ function processarMensagemDiagnostico(dados) {
     );
 
 
-  // A IA pode retornar vazio em uma rodada posterior.
-  // O motor nunca perde uma medida confirmada já existente.
+  /*
+   * A IA pode retornar vazio em uma rodada posterior.
+   * O motor nunca perde uma medida confirmada.
+   */
+
   if (
     !analiseNormalizada.volume &&
     contexto.diagnostico &&
@@ -473,10 +459,10 @@ function processarMensagemDiagnostico(dados) {
   }
 
 
-  /**
-   * ----------------------------------------------------------
+  /*
+   * ============================================================
    * 7. CONTROLAR CONTINUIDADE
-   * ----------------------------------------------------------
+   * ============================================================
    */
 
   const analiseContinuidade =
@@ -487,10 +473,10 @@ function processarMensagemDiagnostico(dados) {
     );
 
 
-  /**
-   * ----------------------------------------------------------
+  /*
+   * ============================================================
    * 8. ATUALIZAR DIAGNÓSTICO
-   * ----------------------------------------------------------
+   * ============================================================
    */
 
   const novoDiagnostico =
@@ -500,10 +486,10 @@ function processarMensagemDiagnostico(dados) {
     );
 
 
-  /**
-   * ----------------------------------------------------------
+  /*
+   * ============================================================
    * 9. DETERMINAR ESTADO
-   * ----------------------------------------------------------
+   * ============================================================
    */
 
   const novoEstado =
@@ -512,19 +498,17 @@ function processarMensagemDiagnostico(dados) {
       analiseContinuidade
     );
 
-
   novoDiagnostico.status_diagnostico =
     novoEstado;
-
 
   novoDiagnostico.atualizado_em =
     new Date();
 
 
-  /**
-   * ----------------------------------------------------------
+  /*
+   * ============================================================
    * 10. SALVAR DIAGNÓSTICO
-   * ----------------------------------------------------------
+   * ============================================================
    */
 
   atualizarDiagnostico_(
@@ -532,8 +516,12 @@ function processarMensagemDiagnostico(dados) {
   );
 
 
-  // Persistência separada: novas dores e medidas não substituem
-  // o diagnóstico consolidado.
+  /*
+   * Persistência separada:
+   * novas dores e medidas não substituem
+   * o diagnóstico consolidado.
+   */
+
   registrarNovasInformacoesDiagnostico_(
     novoDiagnostico,
     analiseContinuidade,
@@ -541,19 +529,10 @@ function processarMensagemDiagnostico(dados) {
   );
 
 
-  /**
-   * ----------------------------------------------------------
-   * V5.7 — GERAR / ATUALIZAR OPORTUNIDADE
-   * ----------------------------------------------------------
-   *
-   * Só acontece depois que:
-   *
-   * 1. o diagnóstico foi atualizado;
-   * 2. novas dores/medidas foram persistidas;
-   * 3. o estado foi determinado.
-   *
-   * O próprio motor bloqueia qualquer diagnóstico
-   * que ainda não esteja pronto para análise.
+  /*
+   * ============================================================
+   * V5.7 — OPORTUNIDADE
+   * ============================================================
    */
 
   const oportunidadeV57 =
@@ -562,23 +541,10 @@ function processarMensagemDiagnostico(dados) {
     );
 
 
-  /**
-   * ----------------------------------------------------------
-   * V5.8 — GERAR / ATUALIZAR ANÁLISE DIAGNÓSTICA
-   * ----------------------------------------------------------
-   *
-   * A análise só é persistida quando o diagnóstico
-   * possui todos os elementos essenciais.
-   *
-   * A função persistirAnaliseDiagnosticaV58_()
-   * controla:
-   *
-   * - criação;
-   * - atualização;
-   * - idempotência;
-   * - rastreabilidade.
-   *
-   * Diagnóstico incompleto retorna null.
+  /*
+   * ============================================================
+   * V5.8 — ANÁLISE DIAGNÓSTICA
+   * ============================================================
    */
 
   const analiseDiagnosticaV58 =
@@ -586,15 +552,29 @@ function processarMensagemDiagnostico(dados) {
       novoDiagnostico
     );
 
-const solucoesDiagnosticoV595 =
-  integrarSolucoesDiagnosticoV595_(
-    novoDiagnostico
-  );
 
-  /**
-   * ----------------------------------------------------------
+  /*
+   * ============================================================
+   * V5.9.5 — MOTOR DE SOLUÇÕES
+   * ============================================================
+   *
+   * Só executa quando o diagnóstico estiver pronto.
+   *
+   * Não cria soluções.
+   * Apenas consulta soluções ativas,
+   * calcula compatibilidade e persiste relações.
+   */
+
+  const solucoesDiagnosticoV595 =
+    integrarSolucoesDiagnosticoV595_(
+      novoDiagnostico
+    );
+
+
+  /*
+   * ============================================================
    * 11. ATUALIZAR ÚLTIMA INTERAÇÃO DA EMPRESA
-   * ----------------------------------------------------------
+   * ============================================================
    */
 
   atualizarUltimaInteracaoEmpresa_(
@@ -602,10 +582,10 @@ const solucoesDiagnosticoV595 =
   );
 
 
-  /**
-   * ----------------------------------------------------------
+  /*
+   * ============================================================
    * 12. DETERMINAR RESPOSTA
-   * ----------------------------------------------------------
+   * ============================================================
    */
 
   const resposta =
@@ -615,17 +595,13 @@ const solucoesDiagnosticoV595 =
     );
 
 
-  /**
-   * ----------------------------------------------------------
+  /*
+   * ============================================================
    * 13. SALVAR RESPOSTA DO SISTEMA
-   * ----------------------------------------------------------
-   *
-   * Só grava se realmente houver uma resposta.
+   * ============================================================
    */
 
-  if (
-    resposta
-  ) {
+  if (resposta) {
 
     salvarMensagemDiagnostico_({
 
@@ -657,10 +633,10 @@ const solucoesDiagnosticoV595 =
   }
 
 
-  /**
-   * ----------------------------------------------------------
+  /*
+   * ============================================================
    * 14. MÉTRICA
-   * ----------------------------------------------------------
+   * ============================================================
    */
 
   registrarEventoDiagnostico_(
@@ -688,10 +664,10 @@ const solucoesDiagnosticoV595 =
   );
 
 
-  /**
-   * ----------------------------------------------------------
+  /*
+   * ============================================================
    * 15. RETORNO PARA INTERFACE
-   * ----------------------------------------------------------
+   * ============================================================
    */
 
   return {
@@ -723,6 +699,7 @@ const solucoesDiagnosticoV595 =
     oportunidade:
       oportunidadeV57
         ? {
+
             acao:
               oportunidadeV57.acao,
 
@@ -731,12 +708,14 @@ const solucoesDiagnosticoV595 =
 
             linha:
               oportunidadeV57.linha
+
           }
         : null,
 
     analise_diagnostica:
       analiseDiagnosticaV58
         ? {
+
             acao:
               analiseDiagnosticaV58.acao,
 
@@ -751,6 +730,26 @@ const solucoesDiagnosticoV595 =
 
             analise:
               analiseDiagnosticaV58.analise
+
+          }
+        : null,
+
+    solucoes:
+      solucoesDiagnosticoV595
+        ? {
+
+            acao:
+              solucoesDiagnosticoV595.acao,
+
+            diagnostico_id:
+              solucoesDiagnosticoV595.diagnostico_id,
+
+            total:
+              solucoesDiagnosticoV595.total,
+
+            relacoes:
+              solucoesDiagnosticoV595.relacoes
+
           }
         : null
 
@@ -31504,650 +31503,6 @@ let resultado = null;
 
     });
 
-
-    /*
-     * ========================================================
-     * TESTE 8
-     * IDEMPOTÊNCIA
-     * ========================================================
-     */
-
-    const segundaPersistencia =
-      persistirRelacoesDiagnosticoSolucoesV594_(
-        diagnostico
-      );
-
-
-    console.log(
-      'TESTE 8 — SEGUNDA PERSISTÊNCIA:'
-    );
-
-    console.log(
-      JSON.stringify(
-        segundaPersistencia,
-        null,
-        2
-      )
-    );
-
-
-    if (
-      segundaPersistencia.length !== 2
-    ) {
-      throw new Error(
-        'FALHA TESTE 8: segunda persistência deveria retornar 2 relações.'
-      );
-    }
-
-
-    const atualizadas =
-      segundaPersistencia.filter(function(item) {
-
-        return (
-          item.acao ===
-          'ATUALIZAR'
-        );
-
-      });
-
-
-    if (
-      atualizadas.length !== 2
-    ) {
-      throw new Error(
-        'FALHA TESTE 8: segunda execução deveria ser 100% ATUALIZAR.'
-      );
-    }
-
-
-    /*
-     * ========================================================
-     * TESTE 9
-     * MESMOS IDs
-     * ========================================================
-     */
-
-    segundaPersistencia.forEach(function(item) {
-
-      const primeira =
-        primeiraPersistencia.find(function(original) {
-
-          return (
-            original.solucao_id ===
-            item.solucao_id
-          );
-
-        });
-
-
-      if (
-        !primeira
-      ) {
-        throw new Error(
-          'FALHA TESTE 9: relação original não encontrada.'
-        );
-      }
-
-
-      if (
-        primeira.relacao_id !==
-        item.relacao_id
-      ) {
-        throw new Error(
-          'FALHA TESTE 9: relacao_id mudou no reprocessamento.'
-        );
-      }
-
-    });
-
-
-    /*
-     * ========================================================
-     * TESTE 10
-     * ZERO DUPLICAÇÃO FÍSICA
-     * ========================================================
-     */
-
-    const quantidadePerfeita =
-      contarRelacoesDiagnosticoSolucaoV594_(
-        diagnostico.diagnostico_id,
-        'V594-PERFEITA'
-      );
-
-
-    const quantidadeParcial =
-      contarRelacoesDiagnosticoSolucaoV594_(
-        diagnostico.diagnostico_id,
-        'V594-PARCIAL'
-      );
-
-
-    if (
-      quantidadePerfeita !== 1
-    ) {
-      throw new Error(
-        'FALHA TESTE 10: solução perfeita possui ' +
-        quantidadePerfeita +
-        ' registros físicos; esperado 1.'
-      );
-    }
-
-
-    if (
-      quantidadeParcial !== 1
-    ) {
-      throw new Error(
-        'FALHA TESTE 10: solução parcial possui ' +
-        quantidadeParcial +
-        ' registros físicos; esperado 1.'
-      );
-    }
-
-
-    /*
-     * ========================================================
-     * TESTE 11
-     * UMA ÚNICA PRINCIPAL
-     * ========================================================
-     */
-
-    const dadosRelacoes =
-      sheetRelacoes
-        .getDataRange()
-        .getValues();
-
-
-    const cabecalhos =
-      dadosRelacoes[0];
-
-
-    const colunaDiagnostico =
-      cabecalhos.indexOf(
-        'diagnostico_id'
-      );
-
-    const colunaPrincipal =
-      cabecalhos.indexOf(
-        'principal'
-      );
-
-
-    let totalPrincipais = 0;
-
-
-    for (
-      let i = 1;
-      i < dadosRelacoes.length;
-      i++
-    ) {
-
-      if (
-        String(
-          dadosRelacoes[i][colunaDiagnostico] || ''
-        ).trim() ===
-        diagnostico.diagnostico_id
-      ) {
-
-        const principal =
-          dadosRelacoes[i][colunaPrincipal];
-
-        if (
-          principal === true ||
-          String(
-            principal || ''
-          ).toUpperCase() === 'TRUE'
-        ) {
-          totalPrincipais++;
-        }
-      }
-    }
-
-
-    if (
-      totalPrincipais !== 1
-    ) {
-      throw new Error(
-        'FALHA TESTE 11: devem existir exatamente 1 principal. Encontradas: ' +
-        totalPrincipais
-      );
-    }
-
-
-    /*
-     * ========================================================
-     * RESULTADO
-     * ========================================================
-     */
-
-    resultado = {
-
-      sucesso:
-        true,
-
-      testes:
-        11,
-
-      relacoes_criadas:
-        criadas.length,
-
-      relacoes_atualizadas:
-        atualizadas.length,
-
-      relacao_perfeita:
-        relacaoFisicaPerfeita.dados,
-
-      quantidade_fisica_perfeita:
-        quantidadePerfeita,
-
-      quantidade_fisica_parcial:
-        quantidadeParcial,
-
-      total_principais:
-        totalPrincipais
-
-    };
-
-
-    console.log(
-      'TESTAR_PERSISTENCIA_RELACOES_V594: PASSOU'
-    );
-
-
-    return resultado;
-
-
-  } finally {
-
-    /*
-     * ========================================================
-     * LIMPEZA
-     * ========================================================
-     */
-
-    limparSolucoesTesteV593_(
-      sheetSolucoes
-    );
-
-
-    /*
-     * Remove as relações V5.9.4.
-     */
-    const dados =
-      sheetRelacoes
-        .getDataRange()
-        .getValues();
-
-
-    if (
-      dados.length > 1
-    ) {
-
-      for (
-        let i = dados.length - 1;
-        i >= 1;
-        i--
-      ) {
-
-        const diagnosticoId =
-          String(
-            dados[i][1] || ''
-          ).trim();
-
-        if (
-          diagnosticoId ===
-          'DIAG-V594'
-        ) {
-
-          sheetRelacoes.deleteRow(
-            i + 1
-          );
-        }
-      }
-    }
-
-
-    console.log(
-      'LIMPEZA V5.9.4 CONCLUÍDA'
-    );
-  }
-}
-
-/**
- * ============================================================
- * V5.9.5 — INTEGRAÇÃO DO MOTOR DE SOLUÇÕES
- * ============================================================
- *
- * Integra:
- * DIAGNÓSTICO → ANÁLISE → SOLUÇÕES → RELAÇÕES
- *
- * Regras:
- * - Só executa com diagnóstico PRONTO_PARA_ANALISE
- * - Usa somente soluções ATIVAS
- * - Não cria soluções
- * - Não altera diagnóstico
- * - Não persiste incompatíveis
- * - Mantém idempotência através da V5.9.4
- */
-
-/**
- * Executa o Motor de Soluções para um diagnóstico pronto.
- *
- * @param {Object} diagnostico
- * @return {Object|null}
- */
-function processarSolucoesDiagnosticoV595_(diagnostico) {
-
-  if (!diagnostico) {
-    return null;
-  }
-
-  const estado =
-    String(
-      diagnostico.status_diagnostico || ''
-    ).trim();
-
-  if (
-    estado !==
-    DIAGNOSTICO_ESTADOS.PRONTO_PARA_ANALISE
-  ) {
-    return null;
-  }
-
-  const resultado =
-    persistirRelacoesDiagnosticoSolucoesV594_(
-      diagnostico
-    );
-
-  if (!resultado) {
-    return null;
-  }
-
-  return {
-    acao:
-      resultado.acao || '',
-    diagnostico_id:
-      diagnostico.diagnostico_id || '',
-    total:
-      Number(resultado.total || 0),
-    relacoes:
-      resultado.relacoes || []
-  };
-}
-
-
-/**
- * Executa a integração somente quando o diagnóstico
- * estiver pronto para análise.
- *
- * Função intermediária para o fluxo principal.
- *
- * @param {Object} diagnostico
- * @return {Object|null}
- */
-function integrarSolucoesDiagnosticoV595_(diagnostico) {
-
-  if (!diagnostico) {
-    return null;
-  }
-
-  return processarSolucoesDiagnosticoV595_(
-    diagnostico
-  );
-}
-
-/**
- * ============================================================
- * TESTE V5.9.5 — INTEGRAÇÃO REAL
- * ============================================================
- */
-function const resultadoFluxo =() {
-
-  const resultados = [];
-
-  function teste(nome, condicao, detalhe) {
-    resultados.push({
-      teste: nome,
-      passou: !!condicao,
-      detalhe: detalhe || ''
-    });
-  }
-
-  let empresa = null;
-  let diagnostico = null;
-
-  try {
-
-    Logger.log(
-      '===================================================='
-    );
-    Logger.log(
-      'V5.9.5 — INTEGRAÇÃO REAL DO MOTOR DE SOLUÇÕES'
-    );
-    Logger.log(
-      '===================================================='
-    );
-
-    /**
-     * --------------------------------------------------------
-     * 1. CRIAR SOLUÇÕES TEMPORÁRIAS
-     * --------------------------------------------------------
-     */
-
-    const abaSolucoes =
-      obterAba_(SHEETS.SOLUCOES);
-
-    const cabecalhos =
-      abaSolucoes
-        .getRange(
-          1,
-          1,
-          1,
-          abaSolucoes.getLastColumn()
-        )
-        .getValues()[0];
-
-    const mapa = {};
-
-    cabecalhos.forEach(function(cabecalho, indice) {
-      mapa[cabecalho] = indice;
-    });
-
-    const solucoesTeste = [
-      {
-        solucao_id: 'V595-PERFEITA',
-        familia: 'PROCESSOS',
-        nome: 'Padronização de conferência e lançamento',
-        descricao:
-          'Padronizar a conferência e o lançamento de pedidos para reduzir erros de digitação e retrabalho.',
-        status: 'ATIVA',
-        nivel_complexidade: 'MÉDIA',
-        repetibilidade: 'ALTA',
-        pode_oferecer: 'SIM',
-        versao: 'V595'
-      },
-      {
-        solucao_id: 'V595-INCOMPATIVEL',
-        familia: 'OUTRO',
-        nome: 'Gestão de frota',
-        descricao:
-          'Controle de veículos e manutenção de frota.',
-        status: 'ATIVA',
-        nivel_complexidade: 'MÉDIA',
-        repetibilidade: 'ALTA',
-        pode_oferecer: 'SIM',
-        versao: 'V595'
-      },
-      {
-        solucao_id: 'V595-INATIVA',
-        familia: 'PROCESSOS',
-        nome: 'Padronização de conferência',
-        descricao:
-          'Padronização de conferência e lançamento.',
-        status: 'INATIVA',
-        nivel_complexidade: 'MÉDIA',
-        repetibilidade: 'ALTA',
-        pode_oferecer: 'SIM',
-        versao: 'V595'
-      }
-    ];
-
-    solucoesTeste.forEach(function(solucao) {
-
-      const linha =
-        new Array(cabecalhos.length)
-          .fill('');
-
-      Object.keys(solucao).forEach(function(campo) {
-
-        if (
-          Object.prototype.hasOwnProperty.call(
-            mapa,
-            campo
-          )
-        ) {
-          linha[mapa[campo]] =
-            solucao[campo];
-        }
-      });
-
-      abaSolucoes.appendRow(linha);
-    });
-
-    teste(
-      '1 — Soluções temporárias criadas',
-      solucoesTeste.length === 3,
-      '3 soluções V595'
-    );
-
-
-    /**
-     * --------------------------------------------------------
-     * 2. EXECUTAR FLUXO REAL
-     * --------------------------------------------------------
-     */
-
-    const empresaTeste =
-      'Empresa Teste V595';
-
-    const resultadoFluxo =
-      processarMensagemDiagnostico({
-        empresa_id: '',
-        conversa_id: '',
-        mensagem:
-          'Nosso processo principal é conferir e lançar pedidos. Temos erros de digitação e retrabalho nesse processo. Isso acontece diariamente. Processamos 120 pedidos por dia. Perdemos aproximadamente 3 horas por dia com esse problema. Nosso objetivo é reduzir os erros e diminuir o retrabalho.'
-      });
-
-    teste(
-      '2 — Fluxo principal executado',
-      !!resultadoFluxo,
-      resultadoFluxo
-        ? 'Retorno recebido'
-        : 'Sem retorno'
-    );
-
-
-    /**
-     * --------------------------------------------------------
-     * 3. DIAGNÓSTICO
-     * --------------------------------------------------------
-     */
-
-    diagnostico =
-      resultadoFluxo &&
-      resultadoFluxo.diagnostico
-        ? resultadoFluxo.diagnostico
-        : null;
-
-    if (!diagnostico) {
-
-      /**
-       * Alguns fluxos retornam os dados diretamente
-       * sem encapsular o diagnóstico.
-       */
-      if (
-        resultadoFluxo &&
-        resultadoFluxo.diagnostico_id
-      ) {
-
-        diagnostico =
-          buscarDiagnostico_(
-            resultadoFluxo.diagnostico_id
-          );
-      }
-    }
-
-    teste(
-      '3 — Diagnóstico encontrado',
-      !!diagnostico,
-      diagnostico
-        ? diagnostico.diagnostico_id
-        : 'Diagnóstico não encontrado'
-    );
-
-
-    if (!diagnostico) {
-      throw new Error(
-        'O teste não conseguiu recuperar o diagnóstico real.'
-      );
-    }
-
-
-    /**
-     * --------------------------------------------------------
-     * 4. ESTADO
-     * --------------------------------------------------------
-     */
-
-    teste(
-      '4 — Diagnóstico PRONTO_PARA_ANALISE',
-      diagnostico.estado ===
-        DIAGNOSTICO_ESTADOS.PRONTO_PARA_ANALISE,
-      diagnostico.estado || ''
-    );
-
-
-    /**
-     * --------------------------------------------------------
-     * 5. SOLUÇÕES NO RETORNO DO FLUXO
-     * --------------------------------------------------------
-     */
-
-    const solucoesRetorno =
-      resultadoFluxo
-        ? resultadoFluxo.solucoes
-        : null;
-
-    teste(
-      '5 — Motor V5.9.5 retornou resultado',
-      !!solucoesRetorno,
-      solucoesRetorno
-        ? JSON.stringify(solucoesRetorno)
-        : 'Nenhum resultado'
-    );
-
-
-    /**
-     * --------------------------------------------------------
-     * 6. UMA SOLUÇÃO PRINCIPAL
-     * --------------------------------------------------------
-     */
-
-    const relacoes =
-      solucoesRetorno &&
-      Array.isArray(solucoesRetorno.relacoes)
-        ? solucoesRetorno.relacoes
-        : [];
-
-    const principais =
-      relacoes.filter(function(relacao) {
-        return (
-          String(
-            relacao.principal || ''
-          ).toUpperCase() === 'SIM' ||
-          relacao.principal === true
-        );
-      });
-
     teste(
       '6 — Exatamente uma solução principal',
       principais.length === 1,
@@ -32161,14 +31516,7 @@ function const resultadoFluxo =() {
      * --------------------------------------------------------
      */
 
-    const perfeita =
-      relacoes.find(function(relacao) {
-        return (
-          relacao.solucao_id ===
-          'V595-PERFEITA'
-        );
-      });
-
+   
     teste(
       '7 — Solução perfeita encontrada',
       !!perfeita,
@@ -32543,6 +31891,367 @@ function const resultadoFluxo =() {
       'LIMPEZA V5.9.5 CONCLUÍDA'
     );
   }
+}
+
+function processarSolucoesDiagnosticoV595_(diagnostico) {
+
+  if (!diagnostico) {
+    return null;
+  }
+
+
+  const estado =
+    String(
+      diagnostico.status_diagnostico || ''
+    )
+      .trim()
+      .toUpperCase();
+
+
+  const estadoPronto =
+    String(
+      DIAGNOSTICO_ESTADOS.PRONTO_PARA_ANALISE
+    )
+      .trim()
+      .toUpperCase();
+
+
+  if (
+    estado !== estadoPronto
+  ) {
+
+    return null;
+
+  }
+
+
+  const resultado =
+    persistirRelacoesDiagnosticoSolucoesV594_(
+      diagnostico
+    );
+
+
+  if (
+    !Array.isArray(resultado) ||
+    !resultado.length
+  ) {
+
+    return null;
+
+  }
+
+
+  /*
+   * A V5.9.4 retorna um array.
+   *
+   * Cada item possui:
+   *
+   * acao
+   * relacao_id
+   * diagnostico_id
+   * solucao_id
+   * linha
+   * relacao
+   *
+   * Para o fluxo principal, expomos a relação
+   * diretamente.
+   */
+
+  const relacoes =
+    resultado.map(
+      function(item) {
+
+        const relacao =
+          item &&
+          item.relacao
+            ? item.relacao
+            : {};
+
+        return Object.assign(
+          {},
+          relacao,
+          {
+
+            acao:
+              item.acao || '',
+
+            relacao_id:
+              item.relacao_id || '',
+
+            diagnostico_id:
+              item.diagnostico_id ||
+              diagnostico.diagnostico_id ||
+              '',
+
+            solucao_id:
+              item.solucao_id ||
+              relacao.solucao_id ||
+              '',
+
+            linha:
+              item.linha || ''
+
+          }
+        );
+
+      }
+    );
+
+
+  const possuiCriacao =
+    resultado.some(
+      function(item) {
+
+        return (
+          item &&
+          item.acao === 'CRIAR'
+        );
+
+      }
+    );
+
+
+  const possuiAtualizacao =
+    resultado.some(
+      function(item) {
+
+        return (
+          item &&
+          item.acao === 'ATUALIZAR'
+        );
+
+      }
+    );
+
+
+  let acao = '';
+
+
+  if (
+    possuiCriacao &&
+    possuiAtualizacao
+  ) {
+
+    acao = 'MISTO';
+
+  } else if (
+    possuiCriacao
+  ) {
+
+    acao = 'CRIAR';
+
+  } else if (
+    possuiAtualizacao
+  ) {
+
+    acao = 'ATUALIZAR';
+
+  }
+
+
+  return {
+
+    acao:
+      acao,
+
+    diagnostico_id:
+      diagnostico.diagnostico_id || '',
+
+    total:
+      relacoes.length,
+
+    relacoes:
+      relacoes
+
+  };
+
+}
+
+
+function processarSolucoesDiagnosticoV595_(diagnostico) {
+
+  if (!diagnostico) {
+    return null;
+  }
+
+
+  const estado =
+    String(
+      diagnostico.status_diagnostico || ''
+    )
+      .trim()
+      .toUpperCase();
+
+
+  const estadoPronto =
+    String(
+      DIAGNOSTICO_ESTADOS.PRONTO_PARA_ANALISE
+    )
+      .trim()
+      .toUpperCase();
+
+
+  if (
+    estado !== estadoPronto
+  ) {
+
+    return null;
+
+  }
+
+
+  const resultado =
+    persistirRelacoesDiagnosticoSolucoesV594_(
+      diagnostico
+    );
+
+
+  if (
+    !Array.isArray(resultado) ||
+    !resultado.length
+  ) {
+
+    return null;
+
+  }
+
+
+  /*
+   * A V5.9.4 retorna um array.
+   *
+   * Cada item possui:
+   *
+   * acao
+   * relacao_id
+   * diagnostico_id
+   * solucao_id
+   * linha
+   * relacao
+   *
+   * Para o fluxo principal, expomos a relação
+   * diretamente.
+   */
+
+  const relacoes =
+    resultado.map(
+      function(item) {
+
+        const relacao =
+          item &&
+          item.relacao
+            ? item.relacao
+            : {};
+
+        return Object.assign(
+          {},
+          relacao,
+          {
+
+            acao:
+              item.acao || '',
+
+            relacao_id:
+              item.relacao_id || '',
+
+            diagnostico_id:
+              item.diagnostico_id ||
+              diagnostico.diagnostico_id ||
+              '',
+
+            solucao_id:
+              item.solucao_id ||
+              relacao.solucao_id ||
+              '',
+
+            linha:
+              item.linha || ''
+
+          }
+        );
+
+      }
+    );
+
+
+  const possuiCriacao =
+    resultado.some(
+      function(item) {
+
+        return (
+          item &&
+          item.acao === 'CRIAR'
+        );
+
+      }
+    );
+
+
+  const possuiAtualizacao =
+    resultado.some(
+      function(item) {
+
+        return (
+          item &&
+          item.acao === 'ATUALIZAR'
+        );
+
+      }
+    );
+
+
+  let acao = '';
+
+
+  if (
+    possuiCriacao &&
+    possuiAtualizacao
+  ) {
+
+    acao = 'MISTO';
+
+  } else if (
+    possuiCriacao
+  ) {
+
+    acao = 'CRIAR';
+
+  } else if (
+    possuiAtualizacao
+  ) {
+
+    acao = 'ATUALIZAR';
+
+  }
+
+
+  return {
+
+    acao:
+      acao,
+
+    diagnostico_id:
+      diagnostico.diagnostico_id || '',
+
+    total:
+      relacoes.length,
+
+    relacoes:
+      relacoes
+
+  };
+
+}
+
+function integrarSolucoesDiagnosticoV595_(diagnostico) {
+
+  if (!diagnostico) {
+    return null;
+  }
+
+  return processarSolucoesDiagnosticoV595_(
+    diagnostico
+  );
+
 }
 
 function TESTAR_INTEGRACAO_REAL_V595() {
