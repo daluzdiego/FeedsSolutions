@@ -73,23 +73,45 @@ function criarEstruturaMVP() {
     ],
 
     // ========================================================
-    // 4. DORES
-    // ========================================================
-    'DORES': [
-      'dor_id',
-      'diagnostico_id',
-      'categoria',
-      'descricao',
-      'frequencia',
-      'impacto',
-      'confirmada_cliente',
-      'confianca'
-    ],
+// 4. DORES
+// ========================================================
+'DORES': [
+  'dor_id',
+  'diagnostico_id',
+  'categoria',
+  'descricao',
+  'frequencia',
+  'impacto',
+  'confirmada_cliente',
+  'confianca'
+],
 
-    // ========================================================
-    // 5. SOLUCOES
-    // ========================================================
-    'SOLUCOES': [
+// ========================================================
+// 5. OPORTUNIDADES
+// ========================================================
+'OPORTUNIDADES': [
+  'oportunidade_id',
+  'diagnostico_id',
+  'empresa_id',
+  'conversa_id',
+  'processo',
+  'dor',
+  'frequencia',
+  'volume',
+  'impacto',
+  'objetivo',
+  'descricao',
+  'prioridade',
+  'justificativa',
+  'status',
+  'criado_em',
+  'atualizado_em'
+],
+
+// ========================================================
+// 6. SOLUCOES
+// ========================================================
+'SOLUCOES': [
       'solucao_id',
       'familia',
       'nome',
@@ -102,7 +124,7 @@ function criarEstruturaMVP() {
     ],
 
     // ========================================================
-    // 6. DIAGNOSTICO_SOLUCOES
+    // 7. DIAGNOSTICO_SOLUCOES
     // ========================================================
     'DIAGNOSTICO_SOLUCOES': [
       'relacao_id',
@@ -116,7 +138,7 @@ function criarEstruturaMVP() {
     ],
 
     // ========================================================
-    // 7. LEADS
+    // 8. LEADS
     // ========================================================
     'LEADS': [
       'lead_id',
@@ -133,7 +155,7 @@ function criarEstruturaMVP() {
     ],
 
     // ========================================================
-    // 8. FEEDBACK
+    // 9. FEEDBACK
     // ========================================================
     'FEEDBACK': [
       'feedback_id',
@@ -144,7 +166,7 @@ function criarEstruturaMVP() {
     ],
 
     // ========================================================
-    // 9. METRICAS
+    // 10. METRICAS
     // ========================================================
     'METRICAS': [
       'evento_id',
@@ -156,7 +178,7 @@ function criarEstruturaMVP() {
     ],
 
     // ========================================================
-    // 10. CONFIG
+    // 11. CONFIG
     // ========================================================
     'CONFIG': [
       'parametro',
@@ -282,11 +304,20 @@ function criarEstruturaMVP() {
   // MENSAGEM FINAL
   // ==========================================================
 
+try {
+
   SpreadsheetApp.getUi().alert(
     'Estrutura criada com sucesso!',
-    'As 10 abas do MVP V1 foram criadas/configuradas.',
+    'Estrutura do MVP criada/configurada.',
     SpreadsheetApp.getUi().ButtonSet.OK
   );
+
+} catch (erro) {
+
+  Logger.log(
+    'Estrutura criada/configurada com sucesso.'
+  );
+
 }
 
 
@@ -331,17 +362,18 @@ function configurarAbaConfig(ss) {
 function organizarAbas(ss) {
 
   const ordem = [
-    'EMPRESAS',
-    'CONVERSAS',
-    'DIAGNOSTICOS',
-    'DORES',
-    'SOLUCOES',
-    'DIAGNOSTICO_SOLUCOES',
-    'LEADS',
-    'FEEDBACK',
-    'METRICAS',
-    'CONFIG'
-  ];
+  'EMPRESAS',
+  'CONVERSAS',
+  'DIAGNOSTICOS',
+  'DORES',
+  'OPORTUNIDADES',
+  'SOLUCOES',
+  'DIAGNOSTICO_SOLUCOES',
+  'LEADS',
+  'FEEDBACK',
+  'METRICAS',
+  'CONFIG'
+];
 
   ordem.forEach(function(nomeAba, index) {
 
@@ -356,5 +388,4 @@ function organizarAbas(ss) {
     }
 
   });
-
-}
+}}
