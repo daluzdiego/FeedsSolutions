@@ -73,45 +73,70 @@ function criarEstruturaMVP() {
     ],
 
     // ========================================================
-// 4. DORES
-// ========================================================
-'DORES': [
-  'dor_id',
-  'diagnostico_id',
-  'categoria',
-  'descricao',
-  'frequencia',
-  'impacto',
-  'confirmada_cliente',
-  'confianca'
-],
+    // 4. DORES
+    // ========================================================
+    'DORES': [
+      'dor_id',
+      'diagnostico_id',
+      'categoria',
+      'descricao',
+      'frequencia',
+      'impacto',
+      'confirmada_cliente',
+      'confianca'
+    ],
 
-// ========================================================
-// 5. OPORTUNIDADES
-// ========================================================
-'OPORTUNIDADES': [
-  'oportunidade_id',
-  'diagnostico_id',
-  'empresa_id',
-  'conversa_id',
-  'processo',
-  'dor',
-  'frequencia',
-  'volume',
-  'impacto',
-  'objetivo',
-  'descricao',
-  'prioridade',
-  'justificativa',
-  'status',
-  'criado_em',
-  'atualizado_em'
-],
+    // ========================================================
+    // 5. OPORTUNIDADES
+    // ========================================================
+    'OPORTUNIDADES': [
+      'oportunidade_id',
+      'diagnostico_id',
+      'empresa_id',
+      'conversa_id',
+      'processo',
+      'dor',
+      'frequencia',
+      'volume',
+      'impacto',
+      'objetivo',
+      'descricao',
+      'prioridade',
+      'justificativa',
+      'status',
+      'criado_em',
+      'atualizado_em'
+    ],
 
-// ========================================================
-// 6. SOLUCOES
-// ========================================================
-'SOLUCOES': [
+    // ========================================================
+    // 6. ANALISES DIAGNOSTICAS — V5.8
+    // ========================================================
+    'ANALISES_DIAGNOSTICAS': [
+      'analise_id',
+      'diagnostico_id',
+      'empresa_id',
+      'conversa_id',
+      'versao',
+      'processo',
+      'problema',
+      'frequencia',
+      'volume',
+      'impacto',
+      'objetivo',
+      'resumo',
+      'oportunidade',
+      'prioridade',
+      'evidencias',
+      'lacunas',
+      'confianca',
+      'criado_em',
+      'atualizado_em'
+    ],
+
+    // ========================================================
+    // 7. SOLUCOES
+    // ========================================================
+    'SOLUCOES': [
       'solucao_id',
       'familia',
       'nome',
@@ -124,7 +149,7 @@ function criarEstruturaMVP() {
     ],
 
     // ========================================================
-    // 7. DIAGNOSTICO_SOLUCOES
+    // 8. DIAGNOSTICO_SOLUCOES
     // ========================================================
     'DIAGNOSTICO_SOLUCOES': [
       'relacao_id',
@@ -138,7 +163,7 @@ function criarEstruturaMVP() {
     ],
 
     // ========================================================
-    // 8. LEADS
+    // 9. LEADS
     // ========================================================
     'LEADS': [
       'lead_id',
@@ -155,7 +180,7 @@ function criarEstruturaMVP() {
     ],
 
     // ========================================================
-    // 9. FEEDBACK
+    // 10. FEEDBACK
     // ========================================================
     'FEEDBACK': [
       'feedback_id',
@@ -166,7 +191,7 @@ function criarEstruturaMVP() {
     ],
 
     // ========================================================
-    // 10. METRICAS
+    // 11. METRICAS
     // ========================================================
     'METRICAS': [
       'evento_id',
@@ -178,7 +203,7 @@ function criarEstruturaMVP() {
     ],
 
     // ========================================================
-    // 11. CONFIG
+    // 12. CONFIG
     // ========================================================
     'CONFIG': [
       'parametro',
@@ -193,95 +218,185 @@ function criarEstruturaMVP() {
 
   Object.keys(estruturas).forEach(function(nomeAba) {
 
-    let sheet = ss.getSheetByName(nomeAba);
+    let sheet =
+      ss.getSheetByName(nomeAba);
 
     // Se não existir, cria.
     if (!sheet) {
-      sheet = ss.insertSheet(nomeAba);
+
+      sheet =
+        ss.insertSheet(nomeAba);
+
     }
 
-    const cabecalhos = estruturas[nomeAba];
+    const cabecalhos =
+      estruturas[nomeAba];
+
 
     // Garante que exista espaço suficiente.
-    if (sheet.getMaxColumns() < cabecalhos.length) {
+    if (
+      sheet.getMaxColumns() <
+      cabecalhos.length
+    ) {
+
       sheet.insertColumnsAfter(
         sheet.getMaxColumns(),
-        cabecalhos.length - sheet.getMaxColumns()
+        cabecalhos.length -
+        sheet.getMaxColumns()
       );
+
     }
+
 
     // Se a primeira linha estiver vazia,
     // escreve os cabeçalhos.
-    const primeiraLinha = sheet
-      .getRange(1, 1, 1, cabecalhos.length)
-      .getValues()[0];
+    const primeiraLinha =
+      sheet
+        .getRange(
+          1,
+          1,
+          1,
+          cabecalhos.length
+        )
+        .getValues()[0];
 
-    const estaVazia = primeiraLinha.every(function(valor) {
-      return valor === '';
-    });
+
+    const estaVazia =
+      primeiraLinha.every(
+        function(valor) {
+
+          return valor === '';
+
+        }
+      );
+
 
     if (estaVazia) {
+
       sheet
-        .getRange(1, 1, 1, cabecalhos.length)
-        .setValues([cabecalhos]);
+        .getRange(
+          1,
+          1,
+          1,
+          cabecalhos.length
+        )
+        .setValues([
+          cabecalhos
+        ]);
+
     } else {
 
       // Se já existe estrutura, não sobrescreve.
       // Apenas verifica se os cabeçalhos esperados estão presentes.
       const faltantes = [];
 
-      cabecalhos.forEach(function(cabecalho) {
 
-        if (primeiraLinha.indexOf(cabecalho) === -1) {
-          faltantes.push(cabecalho);
+      cabecalhos.forEach(
+        function(cabecalho) {
+
+          if (
+            primeiraLinha.indexOf(
+              cabecalho
+            ) === -1
+          ) {
+
+            faltantes.push(
+              cabecalho
+            );
+
+          }
+
         }
+      );
 
-      });
 
-      if (faltantes.length > 0) {
+      if (
+        faltantes.length > 0
+      ) {
 
-        const ultimaColuna = Math.max(
-          sheet.getLastColumn(),
-          cabecalhos.length
-        );
+        const ultimaColuna =
+          Math.max(
+            sheet.getLastColumn(),
+            cabecalhos.length
+          );
 
-        if (sheet.getMaxColumns() < ultimaColuna + faltantes.length) {
+
+        if (
+          sheet.getMaxColumns() <
+          ultimaColuna +
+          faltantes.length
+        ) {
+
           sheet.insertColumnsAfter(
             sheet.getMaxColumns(),
-            (ultimaColuna + faltantes.length) - sheet.getMaxColumns()
+            (
+              ultimaColuna +
+              faltantes.length
+            ) -
+            sheet.getMaxColumns()
           );
+
         }
 
-        faltantes.forEach(function(cabecalho) {
 
-          const colunaNova = sheet.getLastColumn() + 1;
+        faltantes.forEach(
+          function(cabecalho) {
 
-          sheet
-            .getRange(1, colunaNova)
-            .setValue(cabecalho);
+            const colunaNova =
+              sheet.getLastColumn() + 1;
 
-        });
+
+            sheet
+              .getRange(
+                1,
+                colunaNova
+              )
+              .setValue(
+                cabecalho
+              );
+
+          }
+        );
+
       }
+
     }
+
 
     // ========================================================
     // FORMATAÇÃO
     // ========================================================
 
-    const ultimaColuna = sheet.getLastColumn();
+    const ultimaColuna =
+      sheet.getLastColumn();
 
-    if (ultimaColuna > 0) {
 
-      const header = sheet.getRange(1, 1, 1, ultimaColuna);
+    if (
+      ultimaColuna > 0
+    ) {
+
+      const header =
+        sheet.getRange(
+          1,
+          1,
+          1,
+          ultimaColuna
+        );
+
 
       header
         .setFontWeight('bold')
         .setHorizontalAlignment('center');
 
+
       sheet.setFrozenRows(1);
 
+
       // Auto resize inicial
-      sheet.autoResizeColumns(1, ultimaColuna);
+      sheet.autoResizeColumns(
+        1,
+        ultimaColuna
+      );
 
     }
 
@@ -292,31 +407,39 @@ function criarEstruturaMVP() {
   // CONFIGURAÇÕES INICIAIS
   // ==========================================================
 
-  configurarAbaConfig(ss);
+  configurarAbaConfig(
+    ss
+  );
+
 
   // ==========================================================
   // ORGANIZAÇÃO DAS ABAS
   // ==========================================================
 
-  organizarAbas(ss);
+  organizarAbas(
+    ss
+  );
+
 
   // ==========================================================
   // MENSAGEM FINAL
   // ==========================================================
 
-try {
+  try {
 
-  SpreadsheetApp.getUi().alert(
-    'Estrutura criada com sucesso!',
-    'Estrutura do MVP criada/configurada.',
-    SpreadsheetApp.getUi().ButtonSet.OK
-  );
+    SpreadsheetApp.getUi().alert(
+      'Estrutura criada com sucesso!',
+      'Estrutura do MVP criada/configurada.',
+      SpreadsheetApp.getUi().ButtonSet.OK
+    );
 
-} catch (erro) {
+  } catch (erro) {
 
-  Logger.log(
-    'Estrutura criada/configurada com sucesso.'
-  );
+    Logger.log(
+      'Estrutura criada/configurada com sucesso.'
+    );
+
+  }
 
 }
 
@@ -329,24 +452,55 @@ try {
 
 function configurarAbaConfig(ss) {
 
-  const sheet = ss.getSheetByName('CONFIG');
+  const sheet =
+    ss.getSheetByName(
+      'CONFIG'
+    );
+
 
   if (!sheet) return;
 
+
   const configuracoes = [
 
-    ['VERSAO_MOTOR', 'V1'],
-    ['VERSAO_CATALOGO', 'V1'],
-    ['STATUS_SISTEMA', 'DESENVOLVIMENTO'],
-    ['MODO_MVP', 'ATIVO']
+    [
+      'VERSAO_MOTOR',
+      'V1'
+    ],
+
+    [
+      'VERSAO_CATALOGO',
+      'V1'
+    ],
+
+    [
+      'STATUS_SISTEMA',
+      'DESENVOLVIMENTO'
+    ],
+
+    [
+      'MODO_MVP',
+      'ATIVO'
+    ]
+
   ];
 
+
   // Só adiciona se a CONFIG ainda estiver sem dados.
-  if (sheet.getLastRow() <= 1) {
+  if (
+    sheet.getLastRow() <= 1
+  ) {
 
     sheet
-      .getRange(2, 1, configuracoes.length, 2)
-      .setValues(configuracoes);
+      .getRange(
+        2,
+        1,
+        configuracoes.length,
+        2
+      )
+      .setValues(
+        configuracoes
+      );
 
   }
 
@@ -362,30 +516,60 @@ function configurarAbaConfig(ss) {
 function organizarAbas(ss) {
 
   const ordem = [
-  'EMPRESAS',
-  'CONVERSAS',
-  'DIAGNOSTICOS',
-  'DORES',
-  'OPORTUNIDADES',
-  'SOLUCOES',
-  'DIAGNOSTICO_SOLUCOES',
-  'LEADS',
-  'FEEDBACK',
-  'METRICAS',
-  'CONFIG'
-];
 
-  ordem.forEach(function(nomeAba, index) {
+    'EMPRESAS',
 
-    const sheet = ss.getSheetByName(nomeAba);
+    'CONVERSAS',
 
-    if (sheet) {
+    'DIAGNOSTICOS',
 
-      ss.setActiveSheet(sheet);
+    'DORES',
 
-      ss.moveActiveSheet(index + 1);
+    'OPORTUNIDADES',
+
+    'ANALISES_DIAGNOSTICAS',
+
+    'SOLUCOES',
+
+    'DIAGNOSTICO_SOLUCOES',
+
+    'LEADS',
+
+    'FEEDBACK',
+
+    'METRICAS',
+
+    'CONFIG'
+
+  ];
+
+
+  ordem.forEach(
+    function(
+      nomeAba,
+      index
+    ) {
+
+      const sheet =
+        ss.getSheetByName(
+          nomeAba
+        );
+
+
+      if (sheet) {
+
+        ss.setActiveSheet(
+          sheet
+        );
+
+
+        ss.moveActiveSheet(
+          index + 1
+        );
+
+      }
 
     }
+  );
 
-  });
-}}
+}
