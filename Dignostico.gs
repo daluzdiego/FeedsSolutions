@@ -32258,18 +32258,111 @@ function TESTAR_INTEGRACAO_REAL_V595() {
 
   const resultados = [];
 
-  function teste(nome, condicao, detalhe) {
+  let inicio = null;
+  let diagnostico = null;
+
+
+  function teste(
+    nome,
+    condicao,
+    detalhe
+  ) {
 
     resultados.push({
-      teste: nome,
-      passou: !!condicao,
-      detalhe: detalhe || ''
+
+      teste:
+        nome,
+
+      passou:
+        !!condicao,
+
+      detalhe:
+        detalhe || ''
+
     });
 
   }
 
-  let inicio = null;
-  let diagnostico = null;
+
+  function limparPorCampo(
+    nomeAba,
+    campo,
+    valor
+  ) {
+
+    try {
+
+      const sheet =
+        obterAba_(
+          nomeAba
+        );
+
+      if (!sheet) {
+        return;
+      }
+
+      const dados =
+        sheet
+          .getDataRange()
+          .getValues();
+
+      if (
+        dados.length <= 1
+      ) {
+        return;
+      }
+
+      const cabecalhos =
+        dados[0];
+
+      const coluna =
+        cabecalhos.indexOf(
+          campo
+        );
+
+      if (
+        coluna < 0
+      ) {
+        return;
+      }
+
+      for (
+        let i =
+          dados.length - 1;
+        i >= 1;
+        i--
+      ) {
+
+        if (
+          String(
+            dados[i][coluna] || ''
+          ).trim() ===
+          String(
+            valor || ''
+          ).trim()
+        ) {
+
+          sheet.deleteRow(
+            i + 1
+          );
+
+        }
+
+      }
+
+    } catch (erro) {
+
+      Logger.log(
+        'Falha limpeza ' +
+        nomeAba +
+        ': ' +
+        erro.message
+      );
+
+    }
+
+  }
+
 
   try {
 
@@ -32288,12 +32381,15 @@ function TESTAR_INTEGRACAO_REAL_V595() {
 
     /*
      * ==========================================================
-     * 1. CRIAR SOLUÇÕES TEMPORÁRIAS
+     * 1 — CATÁLOGO TEMPORÁRIO
      * ==========================================================
      */
 
     const abaSolucoes =
-      obterAba_(SHEETS.SOLUCOES);
+      obterAba_(
+        SHEETS.SOLUCOES
+      );
+
 
     const dadosCabecalhos =
       abaSolucoes
@@ -32305,15 +32401,22 @@ function TESTAR_INTEGRACAO_REAL_V595() {
         )
         .getValues();
 
+
     const cabecalhos =
       dadosCabecalhos[0];
 
+
     const mapa = {};
 
-    cabecalhos.forEach(
-      function(cabecalho, indice) {
 
-        mapa[cabecalho] = indice;
+    cabecalhos.forEach(
+      function(
+        cabecalho,
+        indice
+      ) {
+
+        mapa[cabecalho] =
+          indice;
 
       }
     );
@@ -32322,6 +32425,7 @@ function TESTAR_INTEGRACAO_REAL_V595() {
     const solucoesTeste = [
 
       {
+
         solucao_id:
           'V595-PERFEITA',
 
@@ -32329,10 +32433,10 @@ function TESTAR_INTEGRACAO_REAL_V595() {
           'PROCESSOS',
 
         nome:
-          'Padronização de conferência e lançamento',
+          'Conferência e lançamento de pedidos',
 
         descricao:
-          'Padronizar a conferência e o lançamento de pedidos para reduzir erros de digitação e retrabalho.',
+          'Padronização da conferência e lançamento de pedidos para reduzir erros de digitação e retrabalho.',
 
         status:
           'ATIVA',
@@ -32348,9 +32452,11 @@ function TESTAR_INTEGRACAO_REAL_V595() {
 
         versao:
           'V595'
+
       },
 
       {
+
         solucao_id:
           'V595-INCOMPATIVEL',
 
@@ -32361,7 +32467,7 @@ function TESTAR_INTEGRACAO_REAL_V595() {
           'Gestão de frota',
 
         descricao:
-          'Controle de veículos e manutenção de frota.',
+          'Controle de veículos, manutenção e abastecimento de frota.',
 
         status:
           'ATIVA',
@@ -32377,9 +32483,11 @@ function TESTAR_INTEGRACAO_REAL_V595() {
 
         versao:
           'V595'
+
       },
 
       {
+
         solucao_id:
           'V595-INATIVA',
 
@@ -32387,10 +32495,10 @@ function TESTAR_INTEGRACAO_REAL_V595() {
           'PROCESSOS',
 
         nome:
-          'Padronização de conferência',
+          'Conferência de pedidos',
 
         descricao:
-          'Padronização de conferência e lançamento.',
+          'Padronização da conferência e lançamento de pedidos.',
 
         status:
           'INATIVA',
@@ -32406,6 +32514,7 @@ function TESTAR_INTEGRACAO_REAL_V595() {
 
         versao:
           'V595'
+
       }
 
     ];
@@ -32417,20 +32526,25 @@ function TESTAR_INTEGRACAO_REAL_V595() {
         const linha =
           new Array(
             cabecalhos.length
-          ).fill('');
+          )
+            .fill('');
+
 
         Object.keys(solucao)
           .forEach(
             function(campo) {
 
               if (
-                Object.prototype.hasOwnProperty.call(
-                  mapa,
-                  campo
-                )
+                Object.prototype
+                  .hasOwnProperty.call(
+                    mapa,
+                    campo
+                  )
               ) {
 
-                linha[mapa[campo]] =
+                linha[
+                  mapa[campo]
+                ] =
                   solucao[campo];
 
               }
@@ -32438,14 +32552,17 @@ function TESTAR_INTEGRACAO_REAL_V595() {
             }
           );
 
-        abaSolucoes.appendRow(linha);
+
+        abaSolucoes.appendRow(
+          linha
+        );
 
       }
     );
 
 
     teste(
-      '1 — Soluções temporárias criadas',
+      '1 — Catálogo temporário criado',
       solucoesTeste.length === 3,
       '3 soluções V595'
     );
@@ -32453,7 +32570,7 @@ function TESTAR_INTEGRACAO_REAL_V595() {
 
     /*
      * ==========================================================
-     * 2. INICIAR DIAGNÓSTICO REAL
+     * 2 — INICIAR DIAGNÓSTICO
      * ==========================================================
      */
 
@@ -32483,25 +32600,34 @@ function TESTAR_INTEGRACAO_REAL_V595() {
 
         cidade:
           ''
+
       });
 
 
     teste(
-      '2 — Diagnóstico iniciado',
+      '2 — Diagnóstico iniciado corretamente',
       !!inicio &&
+      !!inicio.sucesso &&
       !!inicio.empresa_id &&
       !!inicio.conversa_id &&
       !!inicio.diagnostico_id,
       inicio
-        ? JSON.stringify(inicio)
-        : 'Falha ao iniciar diagnóstico'
+        ? JSON.stringify(
+            inicio
+          )
+        : 'Falha'
     );
 
 
-    if (!inicio) {
+    if (
+      !inicio ||
+      !inicio.empresa_id ||
+      !inicio.conversa_id ||
+      !inicio.diagnostico_id
+    ) {
 
       throw new Error(
-        'Não foi possível iniciar o diagnóstico de teste.'
+        'Não foi possível iniciar o diagnóstico V5.9.5.'
       );
 
     }
@@ -32509,9 +32635,18 @@ function TESTAR_INTEGRACAO_REAL_V595() {
 
     /*
      * ==========================================================
-     * 3. EXECUTAR FLUXO PRINCIPAL
+     * 3 — PROCESSAR MENSAGEM REAL
      * ==========================================================
      */
+
+    const mensagem =
+      'Nosso processo principal é conferir e lançar pedidos. ' +
+      'Temos erros de digitação e retrabalho nesse processo. ' +
+      'Isso acontece diariamente. ' +
+      'Processamos 120 pedidos por dia. ' +
+      'Perdemos aproximadamente 3 horas por dia com esse problema. ' +
+      'Nosso objetivo é reduzir os erros e diminuir o retrabalho.';
+
 
     const resultadoFluxo =
       processarMensagemDiagnostico({
@@ -32523,7 +32658,7 @@ function TESTAR_INTEGRACAO_REAL_V595() {
           inicio.conversa_id,
 
         mensagem:
-          'Nosso processo principal é conferir e lançar pedidos. Temos erros de digitação e retrabalho nesse processo. Isso acontece diariamente. Processamos 120 pedidos por dia. Perdemos aproximadamente 3 horas por dia com esse problema. Nosso objetivo é reduzir os erros e diminuir o retrabalho.'
+          mensagem
 
       });
 
@@ -32540,141 +32675,133 @@ function TESTAR_INTEGRACAO_REAL_V595() {
 
     /*
      * ==========================================================
-     * 4. DIAGNÓSTICO
+     * 4 — DIAGNÓSTICO PRONTO
      * ==========================================================
      */
 
     diagnostico =
-      resultadoFluxo &&
-      resultadoFluxo.diagnostico
-        ? resultadoFluxo.diagnostico
-        : null;
-
-
-    if (
-      !diagnostico &&
-      resultadoFluxo &&
-      resultadoFluxo.diagnostico_id
-    ) {
-
-      diagnostico =
-        buscarDiagnostico_(
-          resultadoFluxo.diagnostico_id
-        );
-
-    }
+      resultadoFluxo.diagnostico;
 
 
     teste(
-      '4 — Diagnóstico encontrado',
+      '4 — Diagnóstico retornado',
       !!diagnostico,
       diagnostico
         ? diagnostico.diagnostico_id
-        : 'Não encontrado'
+        : 'Não retornado'
     );
 
 
     if (!diagnostico) {
 
       throw new Error(
-        'Diagnóstico real não encontrado.'
+        'Diagnóstico não retornado pelo fluxo.'
       );
 
     }
 
 
-    /*
-     * ==========================================================
-     * 5. ESTADO
-     * ==========================================================
-     */
+    const estado =
+      String(
+        diagnostico.status_diagnostico || ''
+      )
+        .trim()
+        .toUpperCase();
+
 
     teste(
       '5 — Diagnóstico PRONTO_PARA_ANALISE',
+      estado ===
       String(
-        diagnostico.status_diagnostico || ''
-      ) ===
-      DIAGNOSTICO_ESTADOS.PRONTO_PARA_ANALISE,
-      diagnostico.status_diagnostico || ''
+        DIAGNOSTICO_ESTADOS.PRONTO_PARA_ANALISE
+      )
+        .trim()
+        .toUpperCase(),
+      estado
     );
 
 
     /*
      * ==========================================================
-     * 6. MOTOR DE SOLUÇÕES
+     * 5 — OPORTUNIDADE
      * ==========================================================
      */
 
-    const solucoesRetorno =
-      resultadoFluxo
-        ? resultadoFluxo.solucoes
-        : null;
+    teste(
+      '6 — Oportunidade V5.7 retornada',
+      !!resultadoFluxo.oportunidade,
+      resultadoFluxo.oportunidade
+        ? JSON.stringify(
+            resultadoFluxo.oportunidade
+          )
+        : 'Não retornada'
+    );
+
+
+    /*
+     * ==========================================================
+     * 6 — ANÁLISE V5.8
+     * ==========================================================
+     */
+
+    teste(
+      '7 — Análise V5.8 retornada',
+      !!resultadoFluxo.analise_diagnostica,
+      resultadoFluxo.analise_diagnostica
+        ? 'V5.8 presente'
+        : 'Não retornada'
+    );
+
+
+    /*
+     * ==========================================================
+     * 7 — MOTOR V5.9.5
+     * ==========================================================
+     */
+
+    const solucoes =
+      resultadoFluxo.solucoes;
 
 
     teste(
-      '6 — Motor V5.9.5 integrado ao fluxo',
-      !!solucoesRetorno,
-      solucoesRetorno
-        ? JSON.stringify(solucoesRetorno)
+      '8 — Motor V5.9.5 integrado',
+      !!solucoes,
+      solucoes
+        ? JSON.stringify(
+            solucoes
+          )
         : 'Nenhum resultado'
     );
 
 
-    /*
-     * ==========================================================
-     * 7. RELAÇÕES
-     * ==========================================================
-     */
+    if (!solucoes) {
+
+      throw new Error(
+        'O fluxo principal não retornou soluções V5.9.5.'
+      );
+
+    }
+
 
     const relacoes =
-      solucoesRetorno &&
       Array.isArray(
-        solucoesRetorno.relacoes
+        solucoes.relacoes
       )
-        ? solucoesRetorno.relacoes
+        ? solucoes.relacoes
         : [];
 
 
     teste(
-      '7 — Relações retornadas',
+      '9 — Relações compatíveis retornadas',
       relacoes.length >= 1,
-      'Total: ' + relacoes.length
+      'Total: ' +
+      relacoes.length
     );
 
 
     /*
      * ==========================================================
-     * 8. SOLUÇÃO PRINCIPAL
-     * ==========================================================
-     */
-
-    const principais =
-      relacoes.filter(
-        function(relacao) {
-
-          return (
-            String(
-              relacao.principal || ''
-            ).toUpperCase() === 'SIM'
-            ||
-            relacao.principal === true
-          );
-
-        }
-      );
-
-
-    teste(
-      '8 — Exatamente uma solução principal',
-      principais.length === 1,
-      'Principais: ' +
-      principais.length
-    );
-
-
-    /*
-     * ==========================================================
-     * 9. SOLUÇÃO PERFEITA
+     * 8 — SOLUÇÃO PERFEITA
      * ==========================================================
      */
 
@@ -32692,16 +32819,18 @@ function TESTAR_INTEGRACAO_REAL_V595() {
 
 
     teste(
-      '9 — Solução perfeita encontrada',
+      '10 — Solução perfeita encontrada',
       !!perfeita,
       perfeita
-        ? JSON.stringify(perfeita)
+        ? JSON.stringify(
+            perfeita
+          )
         : 'Não encontrada'
     );
 
 
     teste(
-      '10 — Solução perfeita = 100/100',
+      '11 — Solução perfeita = 100/100',
       perfeita &&
       Number(
         perfeita.pontuacao
@@ -32715,20 +32844,35 @@ function TESTAR_INTEGRACAO_REAL_V595() {
 
 
     teste(
-      '11 — Solução perfeita = ALTA',
+      '12 — Solução perfeita = ALTA',
       perfeita &&
       String(
         perfeita.compatibilidade || ''
-      ).toUpperCase() === 'ALTA',
+      )
+        .trim()
+        .toUpperCase() ===
+      'ALTA',
       perfeita
         ? perfeita.compatibilidade
         : 'N/A'
     );
 
 
+    teste(
+      '13 — Solução perfeita é principal',
+      perfeita &&
+      perfeita.principal === true,
+      perfeita
+        ? String(
+            perfeita.principal
+          )
+        : 'N/A'
+    );
+
+
     /*
      * ==========================================================
-     * 10. INCOMPATÍVEL
+     * 9 — INCOMPATÍVEL
      * ==========================================================
      */
 
@@ -32746,7 +32890,7 @@ function TESTAR_INTEGRACAO_REAL_V595() {
 
 
     teste(
-      '12 — Incompatível não persistida',
+      '14 — Solução incompatível não persistida',
       !incompatibilidade,
       incompatibilidade
         ? 'ERRO'
@@ -32756,7 +32900,7 @@ function TESTAR_INTEGRACAO_REAL_V595() {
 
     /*
      * ==========================================================
-     * 11. INATIVA
+     * 10 — INATIVA
      * ==========================================================
      */
 
@@ -32774,7 +32918,7 @@ function TESTAR_INTEGRACAO_REAL_V595() {
 
 
     teste(
-      '13 — Solução inativa não persistida',
+      '15 — Solução inativa não persistida',
       !inativa,
       inativa
         ? 'ERRO'
@@ -32784,7 +32928,7 @@ function TESTAR_INTEGRACAO_REAL_V595() {
 
     /*
      * ==========================================================
-     * 12. PERSISTÊNCIA FÍSICA
+     * 11 — PERSISTÊNCIA FÍSICA
      * ==========================================================
      */
 
@@ -32804,7 +32948,7 @@ function TESTAR_INTEGRACAO_REAL_V595() {
       dadosRelacoes[0];
 
 
-    const idxDiag =
+    const idxDiagnostico =
       cabRelacoes.indexOf(
         'diagnostico_id'
       );
@@ -32824,11 +32968,12 @@ function TESTAR_INTEGRACAO_REAL_V595() {
 
             return (
               String(
-                linha[idxDiag] || ''
-              ) ===
+                linha[idxDiagnostico] ||
+                ''
+              ).trim() ===
               String(
                 diagnostico.diagnostico_id
-              )
+              ).trim()
             );
 
           }
@@ -32836,7 +32981,7 @@ function TESTAR_INTEGRACAO_REAL_V595() {
 
 
     teste(
-      '14 — Relação física criada',
+      '16 — Relações físicas criadas',
       fisicas.length >= 1,
       'Registros: ' +
       fisicas.length
@@ -32845,7 +32990,7 @@ function TESTAR_INTEGRACAO_REAL_V595() {
 
     /*
      * ==========================================================
-     * 13. RASTREABILIDADE
+     * 12 — RASTREABILIDADE
      * ==========================================================
      */
 
@@ -32855,14 +33000,16 @@ function TESTAR_INTEGRACAO_REAL_V595() {
 
           return (
             String(
-              linha[idxDiag] || ''
-            ) ===
+              linha[idxDiagnostico] ||
+              ''
+            ).trim() ===
             String(
               diagnostico.diagnostico_id
-            )
+            ).trim()
             &&
             String(
-              linha[idxSolucao] || ''
+              linha[idxSolucao] ||
+              ''
             ).trim() !== ''
           );
 
@@ -32871,21 +33018,21 @@ function TESTAR_INTEGRACAO_REAL_V595() {
 
 
     teste(
-      '15 — Relações rastreáveis',
+      '17 — Relações fisicamente rastreáveis',
       rastreavel,
       rastreavel
-        ? 'Diagnóstico + solução'
+        ? 'OK'
         : 'Falha'
     );
 
 
     /*
      * ==========================================================
-     * 14. IDEMPOTÊNCIA
+     * 13 — IDEMPOTÊNCIA
      * ==========================================================
      */
 
-    const antes =
+    const quantidadeAntes =
       fisicas.length;
 
 
@@ -32895,25 +33042,26 @@ function TESTAR_INTEGRACAO_REAL_V595() {
       );
 
 
-    const depoisDados =
+    const dadosDepois =
       abaRelacoes
         .getDataRange()
         .getValues();
 
 
-    const depois =
-      depoisDados
+    const quantidadeDepois =
+      dadosDepois
         .slice(1)
         .filter(
           function(linha) {
 
             return (
               String(
-                linha[idxDiag] || ''
-              ) ===
+                linha[idxDiagnostico] ||
+                ''
+              ).trim() ===
               String(
                 diagnostico.diagnostico_id
-              )
+              ).trim()
             );
 
           }
@@ -32922,29 +33070,28 @@ function TESTAR_INTEGRACAO_REAL_V595() {
 
 
     teste(
-      '16 — Segunda execução realizada',
+      '18 — Segunda execução realizada',
       !!segundaExecucao,
       segundaExecucao
-        ? JSON.stringify(
-            segundaExecucao
-          )
+        ? 'OK'
         : 'Sem retorno'
     );
 
 
     teste(
-      '17 — Idempotência física',
-      antes === depois,
+      '19 — Idempotência física',
+      quantidadeAntes ===
+      quantidadeDepois,
       'Antes: ' +
-      antes +
+      quantidadeAntes +
       ' | Depois: ' +
-      depois
+      quantidadeDepois
     );
 
 
     /*
      * ==========================================================
-     * RESULTADO FINAL
+     * RESULTADO
      * ==========================================================
      */
 
@@ -32968,26 +33115,27 @@ function TESTAR_INTEGRACAO_REAL_V595() {
 
 
     resultados.forEach(
-      function(item, indice) {
+      function(
+        item,
+        indice
+      ) {
 
         Logger.log(
+
           (
             item.passou
               ? 'PASSOU'
               : 'FALHOU'
           )
+
           +
-          ' — TESTE '
-          +
-          (indice + 1)
-          +
-          ': '
-          +
-          item.teste
-          +
-          ' — '
-          +
+          ' — TESTE ' +
+          (indice + 1) +
+          ': ' +
+          item.teste +
+          ' — ' +
           item.detalhe
+
         );
 
       }
@@ -33031,52 +33179,57 @@ function TESTAR_INTEGRACAO_REAL_V595() {
 
     /*
      * ==========================================================
-     * LIMPAR SOLUÇÕES DE TESTE
+     * LIMPEZA DO CATÁLOGO
      * ==========================================================
      */
 
     try {
 
-      const abaSolucoes =
+      const aba =
         obterAba_(
           SHEETS.SOLUCOES
         );
 
 
       const dados =
-        abaSolucoes
+        aba
           .getDataRange()
           .getValues();
 
 
-      if (dados.length > 1) {
+      if (
+        dados.length > 1
+      ) {
 
-        const cabecalhos =
+        const cab =
           dados[0];
 
-        const idxId =
-          cabecalhos.indexOf(
+        const idx =
+          cab.indexOf(
             'solucao_id'
           );
 
 
         for (
-          let i = dados.length - 1;
+          let i =
+            dados.length - 1;
           i >= 1;
           i--
         ) {
 
           const id =
             String(
-              dados[i][idxId] || ''
+              dados[i][idx] || ''
             );
 
 
           if (
-            id.indexOf('V595-') === 0
+            id.indexOf(
+              'V595-'
+            ) === 0
           ) {
 
-            abaSolucoes.deleteRow(
+            aba.deleteRow(
               i + 1
             );
 
@@ -33089,7 +33242,7 @@ function TESTAR_INTEGRACAO_REAL_V595() {
     } catch (erro) {
 
       Logger.log(
-        'Erro limpeza SOLUCOES: ' +
+        'Erro limpeza soluções: ' +
         erro.message
       );
 
@@ -33098,69 +33251,58 @@ function TESTAR_INTEGRACAO_REAL_V595() {
 
     /*
      * ==========================================================
-     * LIMPAR RELAÇÕES DE TESTE
+     * LIMPEZA DOS DADOS DO DIAGNÓSTICO DE TESTE
      * ==========================================================
      */
 
-    try {
+    if (inicio) {
 
-      if (diagnostico) {
+      limparPorCampo(
+        SHEETS.DIAGNOSTICO_SOLUCOES,
+        'diagnostico_id',
+        inicio.diagnostico_id
+      );
 
-        const abaRelacoes =
-          obterAba_(
-            SHEETS.DIAGNOSTICO_SOLUCOES
-          );
+      limparPorCampo(
+        SHEETS.ANALISES_DIAGNOSTICAS,
+        'diagnostico_id',
+        inicio.diagnostico_id
+      );
 
+      limparPorCampo(
+        SHEETS.OPORTUNIDADES,
+        'diagnostico_id',
+        inicio.diagnostico_id
+      );
 
-        const dados =
-          abaRelacoes
-            .getDataRange()
-            .getValues();
+      limparPorCampo(
+        SHEETS.DORES,
+        'diagnostico_id',
+        inicio.diagnostico_id
+      );
 
+      limparPorCampo(
+        SHEETS.DIAGNOSTICOS,
+        'diagnostico_id',
+        inicio.diagnostico_id
+      );
 
-        if (dados.length > 1) {
+      limparPorCampo(
+        SHEETS.CONVERSAS,
+        'conversa_id',
+        inicio.conversa_id
+      );
 
-          const cabecalhos =
-            dados[0];
+      limparPorCampo(
+        SHEETS.METRICAS,
+        'conversa_id',
+        inicio.conversa_id
+      );
 
-          const idxDiag =
-            cabecalhos.indexOf(
-              'diagnostico_id'
-            );
-
-
-          for (
-            let i = dados.length - 1;
-            i >= 1;
-            i--
-          ) {
-
-            if (
-              String(
-                dados[i][idxDiag] || ''
-              ) ===
-              String(
-                diagnostico.diagnostico_id
-              )
-            ) {
-
-              abaRelacoes.deleteRow(
-                i + 1
-              );
-
-            }
-
-          }
-
-        }
-
-      }
-
-    } catch (erro) {
-
-      Logger.log(
-        'Erro limpeza RELACOES: ' +
-        erro.message
+      limparPorCampo(
+        SHEETS.EMPRESAS,
+        'empresa_id',
+        inicio.empresa_id
       );
 
     }
