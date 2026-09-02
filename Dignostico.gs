@@ -586,6 +586,10 @@ function processarMensagemDiagnostico(dados) {
       novoDiagnostico
     );
 
+const solucoesDiagnosticoV595 =
+  integrarSolucoesDiagnosticoV595_(
+    novoDiagnostico
+  );
 
   /**
    * ----------------------------------------------------------
@@ -28500,4 +28504,4040 @@ function TESTAR_PERSISTENCIA_INTEGRADA_V58() {
 
   }
 
+}
+
+/* ============================================================
+ * V5.9 — MOTOR DE COMPATIBILIDADE DE SOLUÇÕES
+ * ============================================================
+ *
+ * Objetivo:
+ * Relacionar um diagnóstico confirmado às soluções ativas
+ * existentes na aba SOLUCOES.
+ *
+ * Princípios:
+ * - Determinístico
+ * - Sem IA
+ * - Sem alteração do diagnóstico
+ * - Sem criação automática de soluções
+ * - Explicável
+ * - Idempotente na persistência
+ * ============================================================ */
+
+
+/**
+ * Normaliza texto para comparação.
+ */
+function normalizarTextoSolucaoV59_(texto) {
+  return String(texto || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+
+/**
+ * Remove palavras muito comuns que não ajudam
+ * na comparação de compatibilidade.
+ */
+function obterTermosRelevantesSolucaoV59_(texto) {
+
+  const stopwords = {
+    a: true,
+    as: true,
+    o: true,
+    os: true,
+    um: true,
+    uma: true,
+    uns: true,
+    umas: true,
+    de: true,
+    da: true,
+    do: true,
+    das: true,
+    dos: true,
+    em: true,
+    no: true,
+    na: true,
+    nos: true,
+    nas: true,
+    por: true,
+    para: true,
+    com: true,
+    sem: true,
+    e: true,
+    ou: true,
+    que: true,
+    se: true,
+    ao: true,
+    aos: true,
+    pela: true,
+    pelo: true,
+    pelas: true,
+    pelos: true,
+    mais: true,
+    menos: true,
+    muito: true,
+    muita: true,
+    muitos: true,
+    muitas: true,
+    problema: true,
+    problemas: true
+  };
+
+  return normalizarTextoSolucaoV59_(texto)
+    .split(' ')
+    .filter(function(termo) {
+      return termo.length >= 3 && !stopwords[termo];
+    });
+}
+
+
+/**
+ * Calcula interseção entre termos.
+ */
+function calcularTermosComunsSolucaoV59_(
+  termosDiagnostico,
+  termosSolucao
+) {
+
+  const mapa = {};
+
+  termosSolucao.forEach(function(termo) {
+    mapa[termo] = true;
+  });
+
+  const encontrados = [];
+
+  termosDiagnostico.forEach(function(termo) {
+    if (mapa[termo] && encontrados.indexOf(termo) === -1) {
+      encontrados.push(termo);
+    }
+  });
+
+  return encontrados;
+}
+
+
+/**
+ * Calcula compatibilidade entre um campo do diagnóstico
+ * e um conjunto de textos da solução.
+ */
+function calcularCorrespondenciaSolucaoV59_(
+  textoDiagnostico,
+  textoSolucao
+) {
+
+  const diagnosticoNormalizado =
+    normalizarTextoSolucaoV59_(textoDiagnostico);
+
+  const solucaoNormalizada =
+    normalizarTextoSolucaoV59_(textoSolucao);
+
+  if (!diagnosticoNormalizado || !solucaoNormalizada) {
+    return {
+      pontos: 0,
+      termos: []
+    };
+  }
+
+  /*
+   * Correspondência textual direta.
+   */
+  if (
+    solucaoNormalizada.indexOf(
+      diagnosticoNormalizado
+    ) !== -1 ||
+    diagnosticoNormalizado.indexOf(
+      solucaoNormalizada
+    ) !== -1
+  ) {
+    return {
+      pontos: 100,
+      termos: obterTermosRelevantesSolucaoV59_(
+        diagnosticoNormalizado
+      )
+    };
+  }
+
+  const termosDiagnostico =
+    obterTermosRelevantesSolucaoV59_(
+      diagnosticoNormalizado
+    );
+
+  const termosSolucao =
+    obterTermosRelevantesSolucaoV59_(
+      solucaoNormalizada
+    );
+
+  if (!termosDiagnostico.length || !termosSolucao.length) {
+    return {
+      pontos: 0,
+      termos: []
+    };
+  }
+
+  const termosComuns =
+    calcularTermosComunsSolucaoV59_(
+      termosDiagnostico,
+      termosSolucao
+    );
+
+  if (!termosComuns.length) {
+    return {
+      pontos: 0,
+      termos: []
+    };
+  }
+
+  const percentual =
+    Math.round(
+      (
+        termosComuns.length /
+        Math.max(
+          1,
+          Math.min(
+            termosDiagnostico.length,
+            termosSolucao.length
+          )
+        )
+      ) * 100
+    );
+
+  return {
+    pontos: Math.min(100, percentual),
+    termos: termosComuns
+  };
+}
+
+
+/**
+ * Calcula a compatibilidade completa entre diagnóstico
+ * e uma solução.
+ */
+function calcularCompatibilidadeSolucaoV59_(
+  diagnostico,
+  solucao
+) {
+
+  const dadosDiagnostico = diagnostico || {};
+  const dadosSolucao = solucao || {};
+
+  const processo =
+    String(
+      dadosDiagnostico.processo_nome ||
+      dadosDiagnostico.processo ||
+      ''
+    ).trim();
+
+  const dor =
+    String(
+      dadosDiagnostico.dor_principal ||
+      dadosDiagnostico.dor ||
+      ''
+    ).trim();
+
+  const objetivo =
+    String(
+      dadosDiagnostico.objetivo ||
+      ''
+    ).trim();
+
+  const nomeSolucao =
+    String(
+      dadosSolucao.nome ||
+      ''
+    ).trim();
+
+  const descricaoSolucao =
+    String(
+      dadosSolucao.descricao ||
+      ''
+    ).trim();
+
+  const familiaSolucao =
+    String(
+      dadosSolucao.familia ||
+      ''
+    ).trim();
+
+  const textoSolucao = [
+    nomeSolucao,
+    descricaoSolucao,
+    familiaSolucao
+  ]
+    .filter(Boolean)
+    .join(' ');
+
+
+  /*
+   * ==========================================================
+   * CORRESPONDÊNCIAS
+   * ==========================================================
+   */
+
+  const correspondenciaProcesso =
+    calcularCorrespondenciaSolucaoV59_(
+      processo,
+      textoSolucao
+    );
+
+  const correspondenciaDor =
+    calcularCorrespondenciaSolucaoV59_(
+      dor,
+      textoSolucao
+    );
+
+  const correspondenciaObjetivo =
+    calcularCorrespondenciaSolucaoV59_(
+      objetivo,
+      textoSolucao
+    );
+
+
+  /*
+   * ==========================================================
+   * PONTUAÇÃO
+   * ==========================================================
+   *
+   * Processo = 35
+   * Dor      = 40
+   * Objetivo = 25
+   *
+   * A DOR recebe o maior peso porque é o problema
+   * que a solução precisa atacar.
+   */
+
+  let pontuacao = Math.round(
+    (
+      correspondenciaProcesso.pontos * 0.35
+    ) +
+    (
+      correspondenciaDor.pontos * 0.40
+    ) +
+    (
+      correspondenciaObjetivo.pontos * 0.25
+    )
+  );
+
+
+  /*
+   * ==========================================================
+   * BÔNUS DE COERÊNCIA
+   * ==========================================================
+   *
+   * Quando processo + dor possuem correspondência,
+   * existe evidência de que a solução atua diretamente
+   * no problema diagnosticado.
+   */
+
+  if (
+    correspondenciaProcesso.pontos >= 40 &&
+    correspondenciaDor.pontos >= 40
+  ) {
+    pontuacao += 15;
+  }
+
+  /*
+   * Quando os três eixos possuem correspondência,
+   * tratamos como forte alinhamento diagnóstico.
+   */
+
+  if (
+    correspondenciaProcesso.pontos >= 30 &&
+    correspondenciaDor.pontos >= 30 &&
+    correspondenciaObjetivo.pontos >= 30
+  ) {
+    pontuacao += 10;
+  }
+
+  pontuacao =
+    Math.min(
+      100,
+      Math.max(
+        0,
+        pontuacao
+      )
+    );
+
+
+  /*
+   * ==========================================================
+   * CLASSIFICAÇÃO
+   * ==========================================================
+   */
+
+  let compatibilidade =
+    'INCOMPATIVEL';
+
+  if (pontuacao >= 70) {
+
+    compatibilidade =
+      'ALTA';
+
+  } else if (pontuacao >= 45) {
+
+    compatibilidade =
+      'MEDIA';
+
+  } else if (pontuacao >= 20) {
+
+    compatibilidade =
+      'BAIXA';
+  }
+
+
+  /*
+   * ==========================================================
+   * VIABILIDADE
+   * ==========================================================
+   */
+
+  const status =
+    String(
+      dadosSolucao.status ||
+      ''
+    ).trim().toUpperCase();
+
+  const podeOferecer =
+    String(
+      dadosSolucao.pode_oferecer ||
+      ''
+    ).trim().toUpperCase();
+
+  let viabilidade =
+    'BAIXA';
+
+  if (status === 'ATIVA') {
+
+    viabilidade =
+      'MEDIA';
+
+    if (
+      !podeOferecer ||
+      podeOferecer === 'SIM' ||
+      podeOferecer === 'S' ||
+      podeOferecer === 'TRUE'
+    ) {
+      viabilidade =
+        'ALTA';
+    }
+  }
+
+
+  /*
+   * ==========================================================
+   * TERMOS RELACIONADOS
+   * ==========================================================
+   */
+
+  const termos =
+    []
+      .concat(
+        correspondenciaProcesso.termos
+      )
+      .concat(
+        correspondenciaDor.termos
+      )
+      .concat(
+        correspondenciaObjetivo.termos
+      )
+      .filter(function(
+        termo,
+        indice,
+        lista
+      ) {
+        return (
+          lista.indexOf(termo) === indice
+        );
+      });
+
+
+  /*
+   * ==========================================================
+   * MOTIVO EXPLICÁVEL
+   * ==========================================================
+   */
+
+  const motivoPartes = [];
+
+  if (
+    correspondenciaProcesso.pontos > 0
+  ) {
+    motivoPartes.push(
+      'há correspondência com o processo'
+    );
+  }
+
+  if (
+    correspondenciaDor.pontos > 0
+  ) {
+    motivoPartes.push(
+      'há correspondência com a dor principal'
+    );
+  }
+
+  if (
+    correspondenciaObjetivo.pontos > 0
+  ) {
+    motivoPartes.push(
+      'há correspondência com o objetivo'
+    );
+  }
+
+  let motivo =
+    motivoPartes.length
+      ? motivoPartes.join('; ') + '.'
+      : 'Não foram encontradas correspondências suficientes.';
+
+  if (termos.length) {
+    motivo +=
+      ' Termos relacionados: ' +
+      termos.join(', ') +
+      '.';
+  }
+
+
+  /*
+   * ==========================================================
+   * RESULTADO
+   * ==========================================================
+   */
+
+  return {
+
+    compatibilidade:
+      compatibilidade,
+
+    pontuacao:
+      pontuacao,
+
+    viabilidade:
+      viabilidade,
+
+    motivo:
+      motivo,
+
+    termos:
+      termos,
+
+    processo_pontos:
+      correspondenciaProcesso.pontos,
+
+    dor_pontos:
+      correspondenciaDor.pontos,
+
+    objetivo_pontos:
+      correspondenciaObjetivo.pontos
+  };
+}
+
+
+/**
+ * Constrói uma relação diagnóstico → solução.
+ *
+ * Não grava no banco.
+ */
+function construirRelacaoDiagnosticoSolucaoV59_(
+  diagnostico,
+  solucao
+) {
+
+  if (!diagnostico || !solucao) {
+    return null;
+  }
+
+  const solucaoId =
+    String(
+      solucao.solucao_id ||
+      ''
+    ).trim();
+
+  if (!solucaoId) {
+    return null;
+  }
+
+  const resultado =
+    calcularCompatibilidadeSolucaoV59_(
+      diagnostico,
+      solucao
+    );
+
+  /*
+   * Soluções incompatíveis não entram na relação.
+   */
+  if (
+    resultado.compatibilidade ===
+    'INCOMPATIVEL'
+  ) {
+    return null;
+  }
+
+  return {
+    diagnostico_id:
+      String(
+        diagnostico.diagnostico_id ||
+        ''
+      ).trim(),
+
+    empresa_id:
+      String(
+        diagnostico.empresa_id ||
+        ''
+      ).trim(),
+
+    conversa_id:
+      String(
+        diagnostico.conversa_id ||
+        ''
+      ).trim(),
+
+    solucao_id:
+      solucaoId,
+
+    compatibilidade:
+      resultado.compatibilidade,
+
+    pontuacao:
+      resultado.pontuacao,
+
+    motivo:
+      resultado.motivo,
+
+    viabilidade:
+      resultado.viabilidade,
+
+    principal: false,
+
+    termos:
+      resultado.termos
+  };
+}
+
+
+/**
+ * Seleciona a solução principal entre as relações.
+ *
+ * Critério:
+ * 1. Maior compatibilidade
+ * 2. Maior pontuação
+ * 3. Primeira ocorrência em caso de empate
+ */
+function selecionarSolucaoPrincipalV59_(
+  relacoes
+) {
+
+  if (!Array.isArray(relacoes) || !relacoes.length) {
+    return [];
+  }
+
+  let maiorPontuacao = -1;
+  let indicePrincipal = 0;
+
+  relacoes.forEach(function(relacao, indice) {
+
+    const pontuacao =
+      Number(
+        relacao.pontuacao || 0
+      );
+
+    if (pontuacao > maiorPontuacao) {
+      maiorPontuacao = pontuacao;
+      indicePrincipal = indice;
+    }
+  });
+
+  return relacoes.map(function(relacao, indice) {
+
+    const copia =
+      Object.assign({}, relacao);
+
+    copia.principal =
+      indice === indicePrincipal;
+
+    return copia;
+  });
+}
+
+
+/**
+ * Analisa todas as soluções ativas para um diagnóstico.
+ *
+ * Não grava no banco.
+ */
+function analisarSolucoesDiagnosticoV59_(
+  diagnostico
+) {
+
+  if (!diagnostico) {
+    return [];
+  }
+
+  const solucoes =
+    buscarSolucoesAtivas_();
+
+  if (!Array.isArray(solucoes) || !solucoes.length) {
+    return [];
+  }
+
+  const relacoes = [];
+
+  solucoes.forEach(function(solucao) {
+
+    const relacao =
+      construirRelacaoDiagnosticoSolucaoV59_(
+        diagnostico,
+        solucao
+      );
+
+    if (relacao) {
+      relacoes.push(relacao);
+    }
+  });
+
+  return selecionarSolucaoPrincipalV59_(
+    relacoes
+  );
+}
+
+function TESTAR_MOTOR_COMPATIBILIDADE_V59() {
+
+  const diagnostico = {
+    diagnostico_id: 'DIAG-TESTE-V59',
+    empresa_id: 'EMP-TESTE-V59',
+    conversa_id: 'CONV-TESTE-V59',
+
+    processo_nome:
+      'conferir e lançar pedidos',
+
+    dor_principal:
+      'erros de digitação e retrabalho',
+
+    frequencia:
+      'diariamente',
+
+    objetivo:
+      'reduzir os erros e diminuir o retrabalho'
+  };
+
+  const solucoes = [
+
+    {
+      solucao_id: 'SOL-01',
+      familia: 'Automação',
+      nome: 'Automação de lançamento de pedidos',
+      descricao:
+        'Automatiza a conferência e o lançamento de pedidos, reduzindo erros de digitação e retrabalho.',
+      status: 'ATIVA',
+      nivel_complexidade: 'MEDIA',
+      repetibilidade: 'ALTA',
+      pode_oferecer: 'SIM',
+      versao: '1.0'
+    },
+
+    {
+      solucao_id: 'SOL-02',
+      familia: 'Treinamento',
+      nome: 'Treinamento administrativo',
+      descricao:
+        'Capacitação geral para equipes administrativas.',
+      status: 'ATIVA',
+      nivel_complexidade: 'BAIXA',
+      repetibilidade: 'ALTA',
+      pode_oferecer: 'SIM',
+      versao: '1.0'
+    },
+
+    {
+      solucao_id: 'SOL-03',
+      familia: 'Marketing',
+      nome: 'Gestão de redes sociais',
+      descricao:
+        'Planejamento e publicação de conteúdo para redes sociais.',
+      status: 'ATIVA',
+      nivel_complexidade: 'MEDIA',
+      repetibilidade: 'ALTA',
+      pode_oferecer: 'SIM',
+      versao: '1.0'
+    }
+  ];
+
+  const relacoes = [];
+
+  solucoes.forEach(function(solucao) {
+
+    const relacao =
+      construirRelacaoDiagnosticoSolucaoV59_(
+        diagnostico,
+        solucao
+      );
+
+    if (relacao) {
+      relacoes.push(relacao);
+    }
+  });
+
+  const resultado =
+    selecionarSolucaoPrincipalV59_(
+      relacoes
+    );
+
+  console.log(
+    JSON.stringify(
+      resultado,
+      null,
+      2
+    )
+  );
+
+  if (!Array.isArray(resultado)) {
+    throw new Error(
+      'FALHA: resultado não é array.'
+    );
+  }
+
+  if (!resultado.length) {
+    throw new Error(
+      'FALHA: nenhuma solução compatível foi encontrada.'
+    );
+  }
+
+  const principal =
+    resultado.filter(function(relacao) {
+      return relacao.principal === true;
+    });
+
+  if (principal.length !== 1) {
+    throw new Error(
+      'FALHA: deve existir exatamente uma solução principal.'
+    );
+  }
+
+  if (
+    principal[0].solucao_id !== 'SOL-01'
+  ) {
+    throw new Error(
+      'FALHA: a solução principal esperada não foi selecionada.'
+    );
+  }
+
+  resultado.forEach(function(relacao) {
+
+    if (
+      !relacao.diagnostico_id ||
+      !relacao.solucao_id ||
+      !relacao.compatibilidade ||
+      !relacao.viabilidade ||
+      !relacao.motivo
+    ) {
+      throw new Error(
+        'FALHA: relação incompleta.'
+      );
+    }
+  });
+
+  const incompatibilidade =
+    calcularCompatibilidadeSolucaoV59_(
+      diagnostico,
+      solucoes[2]
+    );
+
+  if (
+    incompatibilidade.compatibilidade !==
+    'INCOMPATIVEL'
+  ) {
+    throw new Error(
+      'FALHA: solução de marketing deveria ser incompatível.'
+    );
+  }
+
+  console.log(
+    'TESTAR_MOTOR_COMPATIBILIDADE_V59: PASSOU'
+  );
+
+  return {
+    sucesso: true,
+    total_solucoes_analisadas:
+      solucoes.length,
+    total_compativeis:
+      resultado.length,
+    principal:
+      principal[0].solucao_id,
+    resultado:
+      resultado
+  };
+}
+
+/* ============================================================
+ * V5.9.2 — AUDITORIA DO CATÁLOGO DE SOLUÇÕES
+ * ============================================================ */
+
+
+/**
+ * Retorna os cabeçalhos esperados da aba SOLUCOES.
+ */
+function obterCabecalhosSolucoesV592_() {
+
+  return [
+    'solucao_id',
+    'familia',
+    'nome',
+    'descricao',
+    'status',
+    'nivel_complexidade',
+    'repetibilidade',
+    'pode_oferecer',
+    'versao'
+  ];
+}
+
+
+/**
+ * Audita a estrutura real da aba SOLUCOES.
+ *
+ * Não altera dados.
+ */
+function auditarCatalogoSolucoesV592_() {
+
+  const sheet =
+    obterAba_(SHEETS.SOLUCOES);
+
+  if (!sheet) {
+    throw new Error(
+      'FALHA: aba SOLUCOES não encontrada.'
+    );
+  }
+
+  const dados =
+    sheet.getDataRange().getValues();
+
+  if (!dados.length) {
+    throw new Error(
+      'FALHA: aba SOLUCOES não possui cabeçalho.'
+    );
+  }
+
+  const cabecalhos =
+    dados[0].map(function(cabecalho) {
+      return String(
+        cabecalho || ''
+      ).trim();
+    });
+
+  const esperados =
+    obterCabecalhosSolucoesV592_();
+
+  const ausentes =
+    esperados.filter(function(cabecalho) {
+      return cabecalhos.indexOf(cabecalho) === -1;
+    });
+
+  if (ausentes.length) {
+    throw new Error(
+      'FALHA: cabeçalhos ausentes em SOLUCOES: ' +
+      ausentes.join(', ')
+    );
+  }
+
+  const linhasFisicas =
+    Math.max(
+      0,
+      dados.length - 1
+    );
+
+  const solucoesAtivas =
+    buscarSolucoesAtivas_();
+
+  if (!Array.isArray(solucoesAtivas)) {
+    throw new Error(
+      'FALHA: buscarSolucoesAtivas_ não retornou array.'
+    );
+  }
+
+  return {
+    sucesso: true,
+
+    aba:
+      sheet.getName(),
+
+    cabecalhos:
+      cabecalhos,
+
+    cabecalhos_esperados:
+      esperados,
+
+    linhas_fisicas:
+      linhasFisicas,
+
+    solucoes_ativas:
+      solucoesAtivas.length,
+
+    dados_ativos:
+      solucoesAtivas
+  };
+}
+
+
+/**
+ * Teste oficial V5.9.2.
+ *
+ * O catálogo está vazio neste momento.
+ * Portanto, o resultado máximo esperado é:
+ *
+ * estrutura correta
+ * + zero soluções ativas
+ * + nenhum dado inventado
+ */
+function TESTAR_AUDITORIA_CATALOGO_V592() {
+
+  const resultado =
+    auditarCatalogoSolucoesV592_();
+
+  console.log(
+    JSON.stringify(
+      resultado,
+      null,
+      2
+    )
+  );
+
+  if (resultado.sucesso !== true) {
+    throw new Error(
+      'FALHA: auditoria não retornou sucesso.'
+    );
+  }
+
+  if (
+    resultado.aba !== 'SOLUCOES'
+  ) {
+    throw new Error(
+      'FALHA: aba incorreta.'
+    );
+  }
+
+  const esperados =
+    obterCabecalhosSolucoesV592_();
+
+  esperados.forEach(function(cabecalho) {
+
+    if (
+      resultado.cabecalhos.indexOf(cabecalho) === -1
+    ) {
+      throw new Error(
+        'FALHA: cabeçalho ausente: ' +
+        cabecalho
+      );
+    }
+  });
+
+  /*
+   * Como o catálogo real está vazio,
+   * o resultado máximo correto agora
+   * é zero soluções ativas.
+   */
+  if (
+    resultado.solucoes_ativas !== 0
+  ) {
+    throw new Error(
+      'FALHA: o catálogo deveria estar vazio neste estágio.'
+    );
+  }
+
+  if (
+    !Array.isArray(
+      resultado.dados_ativos
+    )
+  ) {
+    throw new Error(
+      'FALHA: dados ativos não são array.'
+    );
+  }
+
+  if (
+    resultado.dados_ativos.length !== 0
+  ) {
+    throw new Error(
+      'FALHA: foram encontradas soluções ativas inesperadas.'
+    );
+  }
+
+  console.log(
+    'TESTAR_AUDITORIA_CATALOGO_V592: PASSOU'
+  );
+
+  return resultado;
+}
+
+/* ============================================================
+ * V5.9.3 — TESTE DE QUALIDADE DO MOTOR DE COMPATIBILIDADE
+ * ============================================================ */
+
+
+/**
+ * Cria uma solução temporária de teste.
+ */
+function criarSolucaoTesteV593_(
+  sheet,
+  dados
+) {
+
+  sheet.appendRow([
+    dados.solucao_id,
+    dados.familia,
+    dados.nome,
+    dados.descricao,
+    dados.status,
+    dados.nivel_complexidade,
+    dados.repetibilidade,
+    dados.pode_oferecer,
+    dados.versao
+  ]);
+}
+
+
+/**
+ * Remove todas as soluções temporárias V5.9.3.
+ */
+function limparSolucoesTesteV593_(
+  sheet
+) {
+
+  const dados =
+    sheet.getDataRange().getValues();
+
+  if (dados.length <= 1) {
+    return;
+  }
+
+  const linhasParaExcluir = [];
+
+  for (
+    let i = 1;
+    i < dados.length;
+    i++
+  ) {
+
+    const solucaoId =
+      String(
+        dados[i][0] || ''
+      ).trim();
+
+    if (
+      solucaoId.indexOf(
+        'V593-'
+      ) === 0
+    ) {
+      linhasParaExcluir.push(
+        i + 1
+      );
+    }
+  }
+
+  /*
+   * Exclui de baixo para cima.
+   */
+  for (
+    let i = linhasParaExcluir.length - 1;
+    i >= 0;
+    i--
+  ) {
+
+    sheet.deleteRow(
+      linhasParaExcluir[i]
+    );
+  }
+}
+
+
+/**
+ * Teste oficial V5.9.3.
+ *
+ * Valida:
+ *
+ * 1. Correspondência perfeita = 100 / ALTA
+ * 2. Correspondência parcial = MEDIA
+ * 3. Sem correspondência = INCOMPATIVEL
+ * 4. Solução inativa = não viável
+ * 5. Apenas uma solução principal
+ * 6. Relações possuem rastreabilidade
+ * 7. Nenhuma solução incompatível entra na relação
+ * 8. Limpeza física ao final
+ */
+function TESTAR_QUALIDADE_COMPATIBILIDADE_V593() {
+
+  const sheet =
+    obterAba_(SHEETS.SOLUCOES);
+
+  if (!sheet) {
+    throw new Error(
+      'FALHA: aba SOLUCOES não encontrada.'
+    );
+  }
+
+  const diagnostico = {
+
+    diagnostico_id:
+      'DIAG-V593',
+
+    empresa_id:
+      'EMP-V593',
+
+    conversa_id:
+      'CONV-V593',
+
+    processo_nome:
+      'conferir e lançar pedidos',
+
+    dor_principal:
+      'erros de digitação e retrabalho',
+
+    frequencia:
+      'diariamente',
+
+    objetivo:
+      'reduzir os erros e diminuir o retrabalho'
+  };
+
+
+  /*
+   * ==========================================================
+   * SOLUÇÃO 1 — PERFEITA
+   * ==========================================================
+   *
+   * Este cenário DEVE atingir 100 pontos.
+   */
+
+  const solucaoPerfeita = {
+
+    solucao_id:
+      'V593-PERFEITA',
+
+    familia:
+      'Automação de pedidos',
+
+    nome:
+      'Conferir e lançar pedidos',
+
+    descricao:
+      'Reduzir erros de digitação e retrabalho no processo de conferir e lançar pedidos.',
+
+    status:
+      'ATIVA',
+
+    nivel_complexidade:
+      'MEDIA',
+
+    repetibilidade:
+      'ALTA',
+
+    pode_oferecer:
+      'SIM',
+
+    versao:
+      'V5.9.3'
+  };
+
+
+  /*
+   * ==========================================================
+   * SOLUÇÃO 2 — PARCIAL
+   * ==========================================================
+   *
+   * Possui relação real com o processo,
+   * mas não atende diretamente a dor e o objetivo.
+   *
+   * Portanto:
+   * > 0
+   * < 100
+   * não pode ser INCOMPATIVEL
+   */
+
+  const solucaoParcial = {
+
+    solucao_id:
+      'V593-PARCIAL',
+
+    familia:
+      'Processos administrativos',
+
+    nome:
+      'Apoio para conferir pedidos',
+
+    descricao:
+      'Apoio na conferência de pedidos e identificação de informações administrativas.',
+
+    status:
+      'ATIVA',
+
+    nivel_complexidade:
+      'MEDIA',
+
+    repetibilidade:
+      'ALTA',
+
+    pode_oferecer:
+      'SIM',
+
+    versao:
+      'V5.9.3'
+  };
+
+
+  /*
+   * ==========================================================
+   * SOLUÇÃO 3 — INCOMPATÍVEL
+   * ==========================================================
+   */
+
+  const solucaoIncompativel = {
+
+    solucao_id:
+      'V593-INCOMPATIVEL',
+
+    familia:
+      'Marketing',
+
+    nome:
+      'Gestão de redes sociais',
+
+    descricao:
+      'Planejamento e publicação de conteúdo para redes sociais.',
+
+    status:
+      'ATIVA',
+
+    nivel_complexidade:
+      'MEDIA',
+
+    repetibilidade:
+      'ALTA',
+
+    pode_oferecer:
+      'SIM',
+
+    versao:
+      'V5.9.3'
+  };
+
+
+  /*
+   * ==========================================================
+   * SOLUÇÃO 4 — PERFEITA, MAS INATIVA
+   * ==========================================================
+   *
+   * A compatibilidade deve continuar sendo 100.
+   * Porém a viabilidade NÃO pode ser ALTA.
+   */
+
+  const solucaoInativa = {
+
+    solucao_id:
+      'V593-INATIVA',
+
+    familia:
+      'Automação de pedidos',
+
+    nome:
+      'Conferir e lançar pedidos',
+
+    descricao:
+      'Reduzir erros de digitação e retrabalho no processo de conferir e lançar pedidos.',
+
+    status:
+      'INATIVA',
+
+    nivel_complexidade:
+      'MEDIA',
+
+    repetibilidade:
+      'ALTA',
+
+    pode_oferecer:
+      'SIM',
+
+    versao:
+      'V5.9.3'
+  };
+
+
+  const solucoes = [
+    solucaoPerfeita,
+    solucaoParcial,
+    solucaoIncompativel,
+    solucaoInativa
+  ];
+
+
+  let resultado = null;
+
+
+  try {
+
+    /*
+     * ========================================================
+     * INSERÇÃO TEMPORÁRIA
+     * ========================================================
+     */
+
+    solucoes.forEach(function(solucao) {
+
+      criarSolucaoTesteV593_(
+        sheet,
+        solucao
+      );
+
+    });
+
+
+    /*
+     * ========================================================
+     * TESTE 1 — SOLUÇÃO PERFEITA
+     * ========================================================
+     */
+
+    const perfeita =
+      calcularCompatibilidadeSolucaoV59_(
+        diagnostico,
+        solucaoPerfeita
+      );
+
+    console.log(
+      'TESTE 1 — SOLUÇÃO PERFEITA:'
+    );
+
+    console.log(
+      JSON.stringify(
+        perfeita,
+        null,
+        2
+      )
+    );
+
+
+    /*
+     * Pontuação máxima obrigatória.
+     */
+
+    if (
+      perfeita.pontuacao !== 100
+    ) {
+      throw new Error(
+        'FALHA TESTE 1: solução perfeita deve atingir 100 pontos. Resultado: ' +
+        perfeita.pontuacao
+      );
+    }
+
+
+    if (
+      perfeita.compatibilidade !==
+      'ALTA'
+    ) {
+      throw new Error(
+        'FALHA TESTE 1: solução perfeita deve ser ALTA.'
+      );
+    }
+
+
+    if (
+      perfeita.viabilidade !==
+      'ALTA'
+    ) {
+      throw new Error(
+        'FALHA TESTE 1: solução perfeita deve ter viabilidade ALTA.'
+      );
+    }
+
+
+    /*
+     * ========================================================
+     * TESTE 2 — SOLUÇÃO PARCIAL
+     * ========================================================
+     */
+
+    const parcial =
+      calcularCompatibilidadeSolucaoV59_(
+        diagnostico,
+        solucaoParcial
+      );
+
+    console.log(
+      'TESTE 2 — SOLUÇÃO PARCIAL:'
+    );
+
+    console.log(
+      JSON.stringify(
+        parcial,
+        null,
+        2
+      )
+    );
+
+
+    /*
+     * A solução parcial precisa possuir
+     * alguma correspondência real.
+     */
+
+    if (
+      parcial.pontuacao <= 0
+    ) {
+      throw new Error(
+        'FALHA TESTE 2: solução parcial deveria apresentar alguma correspondência. Resultado: ' +
+        parcial.pontuacao
+      );
+    }
+
+
+    /*
+     * Não pode atingir a pontuação máxima.
+     */
+
+    if (
+      parcial.pontuacao >= 100
+    ) {
+      throw new Error(
+        'FALHA TESTE 2: solução parcial não pode atingir 100 pontos.'
+      );
+    }
+
+
+    /*
+     * Não pode ser incompatível.
+     */
+
+    if (
+      parcial.compatibilidade ===
+      'INCOMPATIVEL'
+    ) {
+      throw new Error(
+        'FALHA TESTE 2: solução parcialmente relacionada não pode ser INCOMPATIVEL. Resultado: ' +
+        parcial.compatibilidade +
+        ' / ' +
+        parcial.pontuacao
+      );
+    }
+
+
+    /*
+     * ========================================================
+     * TESTE 3 — INCOMPATÍVEL
+     * ========================================================
+     */
+
+    const incompativel =
+      calcularCompatibilidadeSolucaoV59_(
+        diagnostico,
+        solucaoIncompativel
+      );
+
+    console.log(
+      'TESTE 3 — INCOMPATÍVEL:'
+    );
+
+    console.log(
+      JSON.stringify(
+        incompativel,
+        null,
+        2
+      )
+    );
+
+
+    if (
+      incompativel.compatibilidade !==
+      'INCOMPATIVEL'
+    ) {
+      throw new Error(
+        'FALHA TESTE 3: solução sem relação deve ser INCOMPATIVEL. Resultado: ' +
+        incompativel.compatibilidade +
+        ' / ' +
+        incompativel.pontuacao
+      );
+    }
+
+
+    if (
+      incompativel.pontuacao !== 0
+    ) {
+      throw new Error(
+        'FALHA TESTE 3: solução incompatível deve ter 0 pontos. Resultado: ' +
+        incompativel.pontuacao
+      );
+    }
+
+
+    /*
+     * ========================================================
+     * TESTE 4 — SOLUÇÃO INATIVA
+     * ========================================================
+     */
+
+    const inativa =
+      calcularCompatibilidadeSolucaoV59_(
+        diagnostico,
+        solucaoInativa
+      );
+
+    console.log(
+      'TESTE 4 — SOLUÇÃO INATIVA:'
+    );
+
+    console.log(
+      JSON.stringify(
+        inativa,
+        null,
+        2
+      )
+    );
+
+
+    /*
+     * A solução continua sendo perfeitamente
+     * compatível com o diagnóstico.
+     */
+
+    if (
+      inativa.pontuacao !== 100
+    ) {
+      throw new Error(
+        'FALHA TESTE 4: solução inativa deve preservar 100 pontos. Resultado: ' +
+        inativa.pontuacao
+      );
+    }
+
+
+    if (
+      inativa.compatibilidade !==
+      'ALTA'
+    ) {
+      throw new Error(
+        'FALHA TESTE 4: solução inativa deve continuar ALTA em compatibilidade.'
+      );
+    }
+
+
+    /*
+     * Mas não pode ser viável para oferta.
+     */
+
+    if (
+      inativa.viabilidade ===
+      'ALTA'
+    ) {
+      throw new Error(
+        'FALHA TESTE 4: solução INATIVA não pode possuir viabilidade ALTA.'
+      );
+    }
+
+
+    /*
+     * ========================================================
+     * TESTE 5 — LEITURA REAL DO CATÁLOGO
+     * ========================================================
+     */
+
+    const solucoesAtivas =
+      buscarSolucoesAtivas_();
+
+    console.log(
+      'TESTE 5 — SOLUÇÕES ATIVAS:'
+    );
+
+    console.log(
+      JSON.stringify(
+        solucoesAtivas,
+        null,
+        2
+      )
+    );
+
+
+    if (
+      !Array.isArray(
+        solucoesAtivas
+      )
+    ) {
+      throw new Error(
+        'FALHA TESTE 5: buscarSolucoesAtivas_ não retornou array.'
+      );
+    }
+
+
+    const idsAtivos =
+      solucoesAtivas.map(function(solucao) {
+
+        return String(
+          solucao.solucao_id || ''
+        ).trim();
+
+      });
+
+
+    /*
+     * Ativas precisam aparecer.
+     */
+
+    if (
+      idsAtivos.indexOf(
+        'V593-PERFEITA'
+      ) === -1
+    ) {
+      throw new Error(
+        'FALHA TESTE 5: solução perfeita não foi encontrada entre as ativas.'
+      );
+    }
+
+
+    if (
+      idsAtivos.indexOf(
+        'V593-PARCIAL'
+      ) === -1
+    ) {
+      throw new Error(
+        'FALHA TESTE 5: solução parcial não foi encontrada entre as ativas.'
+      );
+    }
+
+
+    if (
+      idsAtivos.indexOf(
+        'V593-INCOMPATIVEL'
+      ) === -1
+    ) {
+      throw new Error(
+        'FALHA TESTE 5: solução incompatível ativa não foi encontrada no catálogo.'
+      );
+    }
+
+
+    /*
+     * Inativa não pode aparecer.
+     */
+
+    if (
+      idsAtivos.indexOf(
+        'V593-INATIVA'
+      ) !== -1
+    ) {
+      throw new Error(
+        'FALHA TESTE 5: solução INATIVA apareceu entre as soluções ativas.'
+      );
+    }
+
+
+    /*
+     * ========================================================
+     * TESTE 6 — MOTOR COMPLETO
+     * ========================================================
+     */
+
+    const relacoes =
+      analisarSolucoesDiagnosticoV59_(
+        diagnostico
+      );
+
+    console.log(
+      'TESTE 6 — MOTOR COMPLETO:'
+    );
+
+    console.log(
+      JSON.stringify(
+        relacoes,
+        null,
+        2
+      )
+    );
+
+
+    if (
+      !Array.isArray(
+        relacoes
+      )
+    ) {
+      throw new Error(
+        'FALHA TESTE 6: resultado do motor não é array.'
+      );
+    }
+
+
+    /*
+     * A solução incompatível não pode
+     * entrar nas relações.
+     */
+
+    const encontrouIncompativel =
+      relacoes.some(function(relacao) {
+
+        return (
+          relacao.solucao_id ===
+          'V593-INCOMPATIVEL'
+        );
+
+      });
+
+
+    if (
+      encontrouIncompativel
+    ) {
+      throw new Error(
+        'FALHA TESTE 6: solução incompatível entrou nas relações.'
+      );
+    }
+
+
+    /*
+     * A solução inativa também não pode
+     * entrar, pois o motor trabalha apenas
+     * com soluções ativas.
+     */
+
+    const encontrouInativa =
+      relacoes.some(function(relacao) {
+
+        return (
+          relacao.solucao_id ===
+          'V593-INATIVA'
+        );
+
+      });
+
+
+    if (
+      encontrouInativa
+    ) {
+      throw new Error(
+        'FALHA TESTE 6: solução inativa entrou nas relações.'
+      );
+    }
+
+
+    /*
+     * A solução perfeita precisa existir.
+     */
+
+    const relacaoPerfeita =
+      relacoes.find(function(relacao) {
+
+        return (
+          relacao.solucao_id ===
+          'V593-PERFEITA'
+        );
+
+      });
+
+
+    if (
+      !relacaoPerfeita
+    ) {
+      throw new Error(
+        'FALHA TESTE 6: solução perfeita não entrou nas relações.'
+      );
+    }
+
+
+    /*
+     * A solução perfeita precisa
+     * preservar 100 pontos.
+     */
+
+    if (
+      relacaoPerfeita.pontuacao !== 100
+    ) {
+      throw new Error(
+        'FALHA TESTE 6: solução perfeita não preservou 100 pontos. Resultado: ' +
+        relacaoPerfeita.pontuacao
+      );
+    }
+
+
+    /*
+     * ========================================================
+     * TESTE 7 — SOLUÇÃO PRINCIPAL
+     * ========================================================
+     */
+
+    const principais =
+      relacoes.filter(function(relacao) {
+
+        return (
+          relacao.principal === true
+        );
+
+      });
+
+
+    if (
+      principais.length !== 1
+    ) {
+      throw new Error(
+        'FALHA TESTE 7: deve existir exatamente uma solução principal. Encontradas: ' +
+        principais.length
+      );
+    }
+
+
+    if (
+      principais[0].solucao_id !==
+      'V593-PERFEITA'
+    ) {
+      throw new Error(
+        'FALHA TESTE 7: solução principal incorreta. Resultado: ' +
+        principais[0].solucao_id
+      );
+    }
+
+
+    /*
+     * ========================================================
+     * TESTE 8 — RASTREABILIDADE
+     * ========================================================
+     */
+
+    relacoes.forEach(function(relacao) {
+
+      if (
+        relacao.diagnostico_id !==
+        diagnostico.diagnostico_id
+      ) {
+        throw new Error(
+          'FALHA TESTE 8: diagnostico_id incorreto.'
+        );
+      }
+
+
+      if (
+        relacao.empresa_id !==
+        diagnostico.empresa_id
+      ) {
+        throw new Error(
+          'FALHA TESTE 8: empresa_id incorreto.'
+        );
+      }
+
+
+      if (
+        relacao.conversa_id !==
+        diagnostico.conversa_id
+      ) {
+        throw new Error(
+          'FALHA TESTE 8: conversa_id incorreto.'
+        );
+      }
+
+
+      if (
+        !relacao.solucao_id
+      ) {
+        throw new Error(
+          'FALHA TESTE 8: solucao_id ausente.'
+        );
+      }
+
+
+      if (
+        !relacao.compatibilidade
+      ) {
+        throw new Error(
+          'FALHA TESTE 8: compatibilidade ausente.'
+        );
+      }
+
+
+      if (
+        typeof relacao.pontuacao !==
+        'number'
+      ) {
+        throw new Error(
+          'FALHA TESTE 8: pontuação ausente ou inválida.'
+        );
+      }
+
+
+      if (
+        !relacao.motivo
+      ) {
+        throw new Error(
+          'FALHA TESTE 8: motivo ausente.'
+        );
+      }
+
+
+      if (
+        !relacao.viabilidade
+      ) {
+        throw new Error(
+          'FALHA TESTE 8: viabilidade ausente.'
+        );
+      }
+
+    });
+
+
+    /*
+     * ========================================================
+     * RESULTADO FINAL
+     * ========================================================
+     */
+
+    resultado = {
+
+      sucesso:
+        true,
+
+      testes:
+        8,
+
+      pontuacao_maxima_obtida:
+        perfeita.pontuacao,
+
+      solucao_perfeita:
+        perfeita,
+
+      solucao_parcial:
+        parcial,
+
+      solucao_incompativel:
+        incompativel,
+
+      solucao_inativa:
+        inativa,
+
+      relacoes:
+        relacoes,
+
+      principal:
+        principais[0].solucao_id
+    };
+
+
+    console.log(
+      'TESTAR_QUALIDADE_COMPATIBILIDADE_V593: PASSOU'
+    );
+
+
+    return resultado;
+
+
+  } finally {
+
+    /*
+     * ========================================================
+     * LIMPEZA OBRIGATÓRIA
+     * ========================================================
+     */
+
+    limparSolucoesTesteV593_(
+      sheet
+    );
+
+    console.log(
+      'LIMPEZA V5.9.3 CONCLUÍDA'
+    );
+  }
+}
+
+/* ============================================================
+ * V5.9.4 — PERSISTÊNCIA DE RELAÇÕES DIAGNÓSTICO → SOLUÇÃO
+ * ============================================================
+ */
+
+
+/**
+ * Obtém a aba DIAGNOSTICO_SOLUCOES.
+ */
+function obterAbaDiagnosticoSolucoesV594_() {
+
+  const sheet =
+    obterAba_(
+      SHEETS.DIAGNOSTICO_SOLUCOES
+    );
+
+  if (!sheet) {
+    throw new Error(
+      'Aba DIAGNOSTICO_SOLUCOES não encontrada.'
+    );
+  }
+
+  return sheet;
+}
+
+
+/**
+ * Obtém os cabeçalhos esperados.
+ */
+function obterCabecalhosDiagnosticoSolucoesV594_() {
+
+  return [
+    'relacao_id',
+    'diagnostico_id',
+    'solucao_id',
+    'compatibilidade',
+    'motivo',
+    'viabilidade',
+    'principal',
+    'criado_em'
+  ];
+}
+
+
+/**
+ * Localiza uma relação específica por:
+ *
+ * diagnostico_id + solucao_id
+ *
+ * Retorna:
+ * {
+ *   linha,
+ *   dados
+ * }
+ *
+ * ou null.
+ */
+function buscarRelacaoDiagnosticoSolucaoV594_(
+  diagnosticoId,
+  solucaoId
+) {
+
+  const sheet =
+    obterAbaDiagnosticoSolucoesV594_();
+
+  const dados =
+    sheet.getDataRange().getValues();
+
+  if (
+    dados.length <= 1
+  ) {
+    return null;
+  }
+
+  const cabecalhos =
+    dados[0];
+
+  const colunaDiagnostico =
+    cabecalhos.indexOf(
+      'diagnostico_id'
+    );
+
+  const colunaSolucao =
+    cabecalhos.indexOf(
+      'solucao_id'
+    );
+
+  if (
+    colunaDiagnostico === -1 ||
+    colunaSolucao === -1
+  ) {
+    throw new Error(
+      'Estrutura de DIAGNOSTICO_SOLUCOES inválida.'
+    );
+  }
+
+  const diagnosticoNormalizado =
+    String(
+      diagnosticoId || ''
+    ).trim();
+
+  const solucaoNormalizada =
+    String(
+      solucaoId || ''
+    ).trim();
+
+  for (
+    let i = 1;
+    i < dados.length;
+    i++
+  ) {
+
+    const linha =
+      dados[i];
+
+    if (
+      String(
+        linha[colunaDiagnostico] || ''
+      ).trim() ===
+      diagnosticoNormalizado &&
+      String(
+        linha[colunaSolucao] || ''
+      ).trim() ===
+      solucaoNormalizada
+    ) {
+
+      return {
+        linha: i + 1,
+        dados:
+          objetoDaLinha_(
+            cabecalhos,
+            linha
+          )
+      };
+    }
+  }
+
+  return null;
+}
+
+
+/**
+ * Conta fisicamente as relações de um diagnóstico
+ * com uma solução.
+ */
+function contarRelacoesDiagnosticoSolucaoV594_(
+  diagnosticoId,
+  solucaoId
+) {
+
+  const sheet =
+    obterAbaDiagnosticoSolucoesV594_();
+
+  const dados =
+    sheet.getDataRange().getValues();
+
+  if (
+    dados.length <= 1
+  ) {
+    return 0;
+  }
+
+  const cabecalhos =
+    dados[0];
+
+  const colunaDiagnostico =
+    cabecalhos.indexOf(
+      'diagnostico_id'
+    );
+
+  const colunaSolucao =
+    cabecalhos.indexOf(
+      'solucao_id'
+    );
+
+  let total = 0;
+
+  for (
+    let i = 1;
+    i < dados.length;
+    i++
+  ) {
+
+    if (
+      String(
+        dados[i][colunaDiagnostico] || ''
+      ).trim() ===
+      String(
+        diagnosticoId || ''
+      ).trim() &&
+      String(
+        dados[i][colunaSolucao] || ''
+      ).trim() ===
+      String(
+        solucaoId || ''
+      ).trim()
+    ) {
+
+      total++;
+    }
+  }
+
+  return total;
+}
+
+
+/**
+ * Monta a linha física da relação.
+ */
+function montarRegistroDiagnosticoSolucaoV594_(
+  relacao,
+  relacaoId,
+  dataCriacao
+) {
+
+  return [
+
+    relacaoId,
+
+    String(
+      relacao.diagnostico_id || ''
+    ).trim(),
+
+    String(
+      relacao.solucao_id || ''
+    ).trim(),
+
+    String(
+      relacao.compatibilidade || ''
+    ).trim(),
+
+    String(
+      relacao.motivo || ''
+    ).trim(),
+
+    String(
+      relacao.viabilidade || ''
+    ).trim(),
+
+    relacao.principal === true
+      ? true
+      : false,
+
+    dataCriacao || new Date()
+  ];
+}
+
+
+/**
+ * Persiste uma relação diagnóstico → solução.
+ *
+ * Comportamento:
+ *
+ * inexistente → CRIAR
+ * existente   → ATUALIZAR
+ *
+ * Nunca cria duas relações para o mesmo
+ * diagnóstico + solução.
+ */
+function persistirRelacaoDiagnosticoSolucaoV594_(
+  relacao
+) {
+
+  if (!relacao) {
+    return null;
+  }
+
+  const diagnosticoId =
+    String(
+      relacao.diagnostico_id || ''
+    ).trim();
+
+  const solucaoId =
+    String(
+      relacao.solucao_id || ''
+    ).trim();
+
+  if (
+    !diagnosticoId ||
+    !solucaoId
+  ) {
+    throw new Error(
+      'Não é possível persistir relação sem diagnostico_id e solucao_id.'
+    );
+  }
+
+  const sheet =
+    obterAbaDiagnosticoSolucoesV594_();
+
+  const existente =
+    buscarRelacaoDiagnosticoSolucaoV594_(
+      diagnosticoId,
+      solucaoId
+    );
+
+
+  /*
+   * ==========================================================
+   * ATUALIZAÇÃO
+   * ==========================================================
+   */
+
+  if (existente) {
+
+    const relacaoId =
+      String(
+        existente.dados.relacao_id || ''
+      ).trim();
+
+    const dataCriacao =
+      existente.dados.criado_em ||
+      new Date();
+
+    const registro =
+      montarRegistroDiagnosticoSolucaoV594_(
+        relacao,
+        relacaoId,
+        dataCriacao
+      );
+
+    sheet
+      .getRange(
+        existente.linha,
+        1,
+        1,
+        registro.length
+      )
+      .setValues([
+        registro
+      ]);
+
+    return {
+
+      acao:
+        'ATUALIZAR',
+
+      relacao_id:
+        relacaoId,
+
+      diagnostico_id:
+        diagnosticoId,
+
+      solucao_id:
+        solucaoId,
+
+      linha:
+        existente.linha,
+
+      relacao:
+        relacao
+
+    };
+  }
+
+
+  /*
+   * ==========================================================
+   * CRIAÇÃO
+   * ==========================================================
+   */
+
+  const relacaoId =
+    gerarId_(
+      ID_PREFIXOS.RELACAO
+    );
+
+  const dataCriacao =
+    new Date();
+
+  const registro =
+    montarRegistroDiagnosticoSolucaoV594_(
+      relacao,
+      relacaoId,
+      dataCriacao
+    );
+
+  sheet.appendRow(
+    registro
+  );
+
+  const linha =
+    sheet.getLastRow();
+
+  return {
+
+    acao:
+      'CRIAR',
+
+    relacao_id:
+      relacaoId,
+
+    diagnostico_id:
+      diagnosticoId,
+
+    solucao_id:
+      solucaoId,
+
+    linha:
+      linha,
+
+    relacao:
+      relacao
+  };
+}
+
+
+/**
+ * Persiste todas as relações compatíveis
+ * de um diagnóstico.
+ *
+ * Soluções incompatíveis não são persistidas.
+ */
+function persistirRelacoesDiagnosticoSolucoesV594_(
+  diagnostico
+) {
+
+  if (!diagnostico) {
+    return [];
+  }
+
+  const relacoes =
+    analisarSolucoesDiagnosticoV59_(
+      diagnostico
+    );
+
+  if (
+    !Array.isArray(relacoes) ||
+    !relacoes.length
+  ) {
+    return [];
+  }
+
+  return relacoes.map(function(relacao) {
+
+    return persistirRelacaoDiagnosticoSolucaoV594_(
+      relacao
+    );
+
+  });
+}
+
+function TESTAR_PERSISTENCIA_RELACOES_V594() {
+
+  const sheetSolucoes =
+    obterAba_(
+      SHEETS.SOLUCOES
+    );
+
+  const sheetRelacoes =
+    obterAbaDiagnosticoSolucoesV594_();
+
+  if (!sheetSolucoes) {
+    throw new Error(
+      'FALHA: aba SOLUCOES não encontrada.'
+    );
+  }
+
+  if (!sheetRelacoes) {
+    throw new Error(
+      'FALHA: aba DIAGNOSTICO_SOLUCOES não encontrada.'
+    );
+  }
+
+
+  const diagnostico = {
+
+    diagnostico_id:
+      'DIAG-V594',
+
+    empresa_id:
+      'EMP-V594',
+
+    conversa_id:
+      'CONV-V594',
+
+    processo_nome:
+      'conferir e lançar pedidos',
+
+    dor_principal:
+      'erros de digitação e retrabalho',
+
+    frequencia:
+      'diariamente',
+
+    objetivo:
+      'reduzir os erros e diminuir o retrabalho'
+  };
+
+
+  /*
+   * ==========================================================
+   * SOLUÇÃO PERFEITA
+   * ==========================================================
+   */
+
+  const solucaoPerfeita = {
+
+    solucao_id:
+      'V594-PERFEITA',
+
+    familia:
+      'Automação de pedidos',
+
+    nome:
+      'Conferir e lançar pedidos',
+
+    descricao:
+      'Reduzir erros de digitação e retrabalho no processo de conferir e lançar pedidos.',
+
+    status:
+      'ATIVA',
+
+    nivel_complexidade:
+      'MEDIA',
+
+    repetibilidade:
+      'ALTA',
+
+    pode_oferecer:
+      'SIM',
+
+    versao:
+      'V5.9.4'
+  };
+
+
+  /*
+   * ==========================================================
+   * SOLUÇÃO PARCIAL
+   * ==========================================================
+   */
+
+  const solucaoParcial = {
+
+    solucao_id:
+      'V594-PARCIAL',
+
+    familia:
+      'Processos administrativos',
+
+    nome:
+      'Apoio para conferir pedidos',
+
+    descricao:
+      'Apoio na conferência de pedidos e identificação de informações administrativas.',
+
+    status:
+      'ATIVA',
+
+    nivel_complexidade:
+      'MEDIA',
+
+    repetibilidade:
+      'ALTA',
+
+    pode_oferecer:
+      'SIM',
+
+    versao:
+      'V5.9.4'
+  };
+
+
+  /*
+   * ==========================================================
+   * SOLUÇÃO INCOMPATÍVEL
+   * ==========================================================
+   */
+
+  const solucaoIncompativel = {
+
+    solucao_id:
+      'V594-INCOMPATIVEL',
+
+    familia:
+      'Marketing',
+
+    nome:
+      'Gestão de redes sociais',
+
+    descricao:
+      'Planejamento e publicação de conteúdo para redes sociais.',
+
+    status:
+      'ATIVA',
+
+    nivel_complexidade:
+      'MEDIA',
+
+    repetibilidade:
+      'ALTA',
+
+    pode_oferecer:
+      'SIM',
+
+    versao:
+      'V5.9.4'
+  };
+
+
+  /*
+   * ==========================================================
+   * SOLUÇÃO INATIVA
+   * ==========================================================
+   */
+
+  const solucaoInativa = {
+
+    solucao_id:
+      'V594-INATIVA',
+
+    familia:
+      'Automação de pedidos',
+
+    nome:
+      'Conferir e lançar pedidos',
+
+    descricao:
+      'Reduzir erros de digitação e retrabalho no processo de conferir e lançar pedidos.',
+
+    status:
+      'INATIVA',
+
+    nivel_complexidade:
+      'MEDIA',
+
+    repetibilidade:
+      'ALTA',
+
+    pode_oferecer:
+      'SIM',
+
+    versao:
+      'V5.9.4'
+  };
+
+
+  const solucoes = [
+    solucaoPerfeita,
+    solucaoParcial,
+    solucaoIncompativel,
+    solucaoInativa
+  ];
+
+let resultado = null;
+
+  try {
+
+    /*
+     * ========================================================
+     * INSERE CATÁLOGO TEMPORÁRIO
+     * ========================================================
+     */
+
+    solucoes.forEach(function(solucao) {
+
+      criarSolucaoTesteV593_(
+        sheetSolucoes,
+        solucao
+      );
+
+    });
+
+
+    /*
+     * ========================================================
+     * TESTE 1
+     * MOTOR
+     * ========================================================
+     */
+
+    const relacoes =
+      analisarSolucoesDiagnosticoV59_(
+        diagnostico
+      );
+
+    console.log(
+      'TESTE 1 — RELAÇÕES GERADAS:'
+    );
+
+    console.log(
+      JSON.stringify(
+        relacoes,
+        null,
+        2
+      )
+    );
+
+
+    /*
+     * Deve haver exatamente duas:
+     *
+     * perfeita
+     * parcial
+     */
+
+    if (
+      relacoes.length !== 2
+    ) {
+      throw new Error(
+        'FALHA TESTE 1: esperado 2 relações compatíveis. Encontradas: ' +
+        relacoes.length
+      );
+    }
+
+
+    /*
+     * ========================================================
+     * TESTE 2
+     * PERFEITA = 100
+     * ========================================================
+     */
+
+    const perfeita =
+      relacoes.find(function(relacao) {
+
+        return (
+          relacao.solucao_id ===
+          'V594-PERFEITA'
+        );
+
+      });
+
+
+    if (!perfeita) {
+      throw new Error(
+        'FALHA TESTE 2: solução perfeita não encontrada.'
+      );
+    }
+
+
+    if (
+      perfeita.pontuacao !== 100
+    ) {
+      throw new Error(
+        'FALHA TESTE 2: solução perfeita deve ter 100 pontos.'
+      );
+    }
+
+
+    if (
+      perfeita.compatibilidade !==
+      'ALTA'
+    ) {
+      throw new Error(
+        'FALHA TESTE 2: solução perfeita deve ser ALTA.'
+      );
+    }
+
+
+    if (
+      perfeita.principal !== true
+    ) {
+      throw new Error(
+        'FALHA TESTE 2: solução perfeita deve ser principal.'
+      );
+    }
+
+
+    /*
+     * ========================================================
+     * TESTE 3
+     * INCOMPATÍVEL NÃO ENTRA
+     * ========================================================
+     */
+
+    const encontrouIncompativel =
+      relacoes.some(function(relacao) {
+
+        return (
+          relacao.solucao_id ===
+          'V594-INCOMPATIVEL'
+        );
+
+      });
+
+
+    if (
+      encontrouIncompativel
+    ) {
+      throw new Error(
+        'FALHA TESTE 3: solução incompatível entrou nas relações.'
+      );
+    }
+
+
+    /*
+     * ========================================================
+     * TESTE 4
+     * INATIVA NÃO ENTRA
+     * ========================================================
+     */
+
+    const encontrouInativa =
+      relacoes.some(function(relacao) {
+
+        return (
+          relacao.solucao_id ===
+          'V594-INATIVA'
+        );
+
+      });
+
+
+    if (
+      encontrouInativa
+    ) {
+      throw new Error(
+        'FALHA TESTE 4: solução inativa entrou nas relações.'
+      );
+    }
+
+
+    /*
+     * ========================================================
+     * TESTE 5
+     * PRIMEIRA PERSISTÊNCIA
+     * ========================================================
+     */
+
+    const primeiraPersistencia =
+      persistirRelacoesDiagnosticoSolucoesV594_(
+        diagnostico
+      );
+
+
+    console.log(
+      'TESTE 5 — PRIMEIRA PERSISTÊNCIA:'
+    );
+
+    console.log(
+      JSON.stringify(
+        primeiraPersistencia,
+        null,
+        2
+      )
+    );
+
+
+    if (
+      primeiraPersistencia.length !== 2
+    ) {
+      throw new Error(
+        'FALHA TESTE 5: deveriam ser criadas 2 relações.'
+      );
+    }
+
+
+    const criadas =
+      primeiraPersistencia.filter(function(item) {
+
+        return (
+          item.acao ===
+          'CRIAR'
+        );
+
+      });
+
+
+    if (
+      criadas.length !== 2
+    ) {
+      throw new Error(
+        'FALHA TESTE 5: as duas relações deveriam ser CRIAR.'
+      );
+    }
+
+
+    /*
+     * ========================================================
+     * TESTE 6
+     * PERSISTÊNCIA FÍSICA
+     * ========================================================
+     */
+
+    const relacaoFisicaPerfeita =
+      buscarRelacaoDiagnosticoSolucaoV594_(
+        diagnostico.diagnostico_id,
+        'V594-PERFEITA'
+      );
+
+
+    if (
+      !relacaoFisicaPerfeita
+    ) {
+      throw new Error(
+        'FALHA TESTE 6: relação perfeita não foi encontrada fisicamente.'
+      );
+    }
+
+
+    if (
+      relacaoFisicaPerfeita.dados.relacao_id !==
+      criadas.find(function(item) {
+
+        return (
+          item.solucao_id ===
+          'V594-PERFEITA'
+        );
+
+      }).relacao_id
+    ) {
+      throw new Error(
+        'FALHA TESTE 6: relacao_id físico diferente do retornado.'
+      );
+    }
+
+
+    if (
+      relacaoFisicaPerfeita.dados.compatibilidade !==
+      'ALTA'
+    ) {
+      throw new Error(
+        'FALHA TESTE 6: compatibilidade física incorreta.'
+      );
+    }
+
+
+    if (
+      relacaoFisicaPerfeita.dados.principal !==
+      true
+    ) {
+      throw new Error(
+        'FALHA TESTE 6: principal físico incorreto.'
+      );
+    }
+
+
+    /*
+     * ========================================================
+     * TESTE 7
+     * RASTREABILIDADE
+     * ========================================================
+     */
+
+    primeiraPersistencia.forEach(function(item) {
+
+      if (
+        item.diagnostico_id !==
+        diagnostico.diagnostico_id
+      ) {
+        throw new Error(
+          'FALHA TESTE 7: diagnostico_id incorreto.'
+        );
+      }
+
+
+      if (
+        !item.relacao_id
+      ) {
+        throw new Error(
+          'FALHA TESTE 7: relacao_id ausente.'
+        );
+      }
+
+
+      if (
+        !item.solucao_id
+      ) {
+        throw new Error(
+          'FALHA TESTE 7: solucao_id ausente.'
+        );
+      }
+
+    });
+
+
+    /*
+     * ========================================================
+     * TESTE 8
+     * IDEMPOTÊNCIA
+     * ========================================================
+     */
+
+    const segundaPersistencia =
+      persistirRelacoesDiagnosticoSolucoesV594_(
+        diagnostico
+      );
+
+
+    console.log(
+      'TESTE 8 — SEGUNDA PERSISTÊNCIA:'
+    );
+
+    console.log(
+      JSON.stringify(
+        segundaPersistencia,
+        null,
+        2
+      )
+    );
+
+
+    if (
+      segundaPersistencia.length !== 2
+    ) {
+      throw new Error(
+        'FALHA TESTE 8: segunda persistência deveria retornar 2 relações.'
+      );
+    }
+
+
+    const atualizadas =
+      segundaPersistencia.filter(function(item) {
+
+        return (
+          item.acao ===
+          'ATUALIZAR'
+        );
+
+      });
+
+
+    if (
+      atualizadas.length !== 2
+    ) {
+      throw new Error(
+        'FALHA TESTE 8: segunda execução deveria ser 100% ATUALIZAR.'
+      );
+    }
+
+
+    /*
+     * ========================================================
+     * TESTE 9
+     * MESMOS IDs
+     * ========================================================
+     */
+
+    segundaPersistencia.forEach(function(item) {
+
+      const primeira =
+        primeiraPersistencia.find(function(original) {
+
+          return (
+            original.solucao_id ===
+            item.solucao_id
+          );
+
+        });
+
+
+      if (
+        !primeira
+      ) {
+        throw new Error(
+          'FALHA TESTE 9: relação original não encontrada.'
+        );
+      }
+
+
+      if (
+        primeira.relacao_id !==
+        item.relacao_id
+      ) {
+        throw new Error(
+          'FALHA TESTE 9: relacao_id mudou no reprocessamento.'
+        );
+      }
+
+    });
+
+
+    /*
+     * ========================================================
+     * TESTE 10
+     * ZERO DUPLICAÇÃO FÍSICA
+     * ========================================================
+     */
+
+    const quantidadePerfeita =
+      contarRelacoesDiagnosticoSolucaoV594_(
+        diagnostico.diagnostico_id,
+        'V594-PERFEITA'
+      );
+
+
+    const quantidadeParcial =
+      contarRelacoesDiagnosticoSolucaoV594_(
+        diagnostico.diagnostico_id,
+        'V594-PARCIAL'
+      );
+
+
+    if (
+      quantidadePerfeita !== 1
+    ) {
+      throw new Error(
+        'FALHA TESTE 10: solução perfeita possui ' +
+        quantidadePerfeita +
+        ' registros físicos; esperado 1.'
+      );
+    }
+
+
+    if (
+      quantidadeParcial !== 1
+    ) {
+      throw new Error(
+        'FALHA TESTE 10: solução parcial possui ' +
+        quantidadeParcial +
+        ' registros físicos; esperado 1.'
+      );
+    }
+
+
+    /*
+     * ========================================================
+     * TESTE 11
+     * UMA ÚNICA PRINCIPAL
+     * ========================================================
+     */
+
+    const dadosRelacoes =
+      sheetRelacoes
+        .getDataRange()
+        .getValues();
+
+
+    const cabecalhos =
+      dadosRelacoes[0];
+
+
+    const colunaDiagnostico =
+      cabecalhos.indexOf(
+        'diagnostico_id'
+      );
+
+    const colunaPrincipal =
+      cabecalhos.indexOf(
+        'principal'
+      );
+
+
+    let totalPrincipais = 0;
+
+
+    for (
+      let i = 1;
+      i < dadosRelacoes.length;
+      i++
+    ) {
+
+      if (
+        String(
+          dadosRelacoes[i][colunaDiagnostico] || ''
+        ).trim() ===
+        diagnostico.diagnostico_id
+      ) {
+
+        const principal =
+          dadosRelacoes[i][colunaPrincipal];
+
+        if (
+          principal === true ||
+          String(
+            principal || ''
+          ).toUpperCase() === 'TRUE'
+        ) {
+          totalPrincipais++;
+        }
+      }
+    }
+
+
+    if (
+      totalPrincipais !== 1
+    ) {
+      throw new Error(
+        'FALHA TESTE 11: devem existir exatamente 1 principal. Encontradas: ' +
+        totalPrincipais
+      );
+    }
+
+
+    /*
+     * ========================================================
+     * RESULTADO
+     * ========================================================
+     */
+
+    resultado = {
+
+      sucesso:
+        true,
+
+      testes:
+        11,
+
+      relacoes_criadas:
+        criadas.length,
+
+      relacoes_atualizadas:
+        atualizadas.length,
+
+      relacao_perfeita:
+        relacaoFisicaPerfeita.dados,
+
+      quantidade_fisica_perfeita:
+        quantidadePerfeita,
+
+      quantidade_fisica_parcial:
+        quantidadeParcial,
+
+      total_principais:
+        totalPrincipais
+
+    };
+
+
+    console.log(
+      'TESTAR_PERSISTENCIA_RELACOES_V594: PASSOU'
+    );
+
+
+    return resultado;
+
+
+  } finally {
+
+    /*
+     * ========================================================
+     * LIMPEZA
+     * ========================================================
+     */
+
+    limparSolucoesTesteV593_(
+      sheetSolucoes
+    );
+
+
+    /*
+     * Remove as relações V5.9.4.
+     */
+    const dados =
+      sheetRelacoes
+        .getDataRange()
+        .getValues();
+
+
+    if (
+      dados.length > 1
+    ) {
+
+      for (
+        let i = dados.length - 1;
+        i >= 1;
+        i--
+      ) {
+
+        const diagnosticoId =
+          String(
+            dados[i][1] || ''
+          ).trim();
+
+        if (
+          diagnosticoId ===
+          'DIAG-V594'
+        ) {
+
+          sheetRelacoes.deleteRow(
+            i + 1
+          );
+        }
+      }
+    }
+
+
+    console.log(
+      'LIMPEZA V5.9.4 CONCLUÍDA'
+    );
+  }
+}
+
+/**
+ * ============================================================
+ * V5.9.5 — INTEGRAÇÃO DO MOTOR DE SOLUÇÕES
+ * ============================================================
+ *
+ * Integra:
+ * DIAGNÓSTICO → ANÁLISE → SOLUÇÕES → RELAÇÕES
+ *
+ * Regras:
+ * - Só executa com diagnóstico PRONTO_PARA_ANALISE
+ * - Usa somente soluções ATIVAS
+ * - Não cria soluções
+ * - Não altera diagnóstico
+ * - Não persiste incompatíveis
+ * - Mantém idempotência através da V5.9.4
+ */
+
+/**
+ * Executa o Motor de Soluções para um diagnóstico pronto.
+ *
+ * @param {Object} diagnostico
+ * @return {Object|null}
+ */
+function processarSolucoesDiagnosticoV595_(diagnostico) {
+
+  if (!diagnostico) {
+    return null;
+  }
+
+  const estado =
+    String(diagnostico.estado || '').trim();
+
+  if (
+    estado !==
+    DIAGNOSTICO_ESTADOS.PRONTO_PARA_ANALISE
+  ) {
+    return null;
+  }
+
+  const resultado =
+    persistirRelacoesDiagnosticoSolucoesV594_(
+      diagnostico
+    );
+
+  if (!resultado) {
+    return null;
+  }
+
+  return {
+    acao: resultado.acao || '',
+    diagnostico_id:
+      diagnostico.diagnostico_id || '',
+    total:
+      Number(resultado.total || 0),
+    relacoes:
+      resultado.relacoes || []
+  };
+}
+
+
+/**
+ * Executa a integração somente quando o diagnóstico
+ * estiver pronto para análise.
+ *
+ * Função intermediária para o fluxo principal.
+ *
+ * @param {Object} diagnostico
+ * @return {Object|null}
+ */
+function integrarSolucoesDiagnosticoV595_(diagnostico) {
+
+  if (!diagnostico) {
+    return null;
+  }
+
+  return processarSolucoesDiagnosticoV595_(
+    diagnostico
+  );
+}
+
+/**
+ * ============================================================
+ * TESTE V5.9.5 — INTEGRAÇÃO REAL
+ * ============================================================
+ */
+function const resultadoFluxo =() {
+
+  const resultados = [];
+
+  function teste(nome, condicao, detalhe) {
+    resultados.push({
+      teste: nome,
+      passou: !!condicao,
+      detalhe: detalhe || ''
+    });
+  }
+
+  let empresa = null;
+  let diagnostico = null;
+
+  try {
+
+    Logger.log(
+      '===================================================='
+    );
+    Logger.log(
+      'V5.9.5 — INTEGRAÇÃO REAL DO MOTOR DE SOLUÇÕES'
+    );
+    Logger.log(
+      '===================================================='
+    );
+
+    /**
+     * --------------------------------------------------------
+     * 1. CRIAR SOLUÇÕES TEMPORÁRIAS
+     * --------------------------------------------------------
+     */
+
+    const abaSolucoes =
+      obterAba_(SHEETS.SOLUCOES);
+
+    const cabecalhos =
+      abaSolucoes
+        .getRange(
+          1,
+          1,
+          1,
+          abaSolucoes.getLastColumn()
+        )
+        .getValues()[0];
+
+    const mapa = {};
+
+    cabecalhos.forEach(function(cabecalho, indice) {
+      mapa[cabecalho] = indice;
+    });
+
+    const solucoesTeste = [
+      {
+        solucao_id: 'V595-PERFEITA',
+        familia: 'PROCESSOS',
+        nome: 'Padronização de conferência e lançamento',
+        descricao:
+          'Padronizar a conferência e o lançamento de pedidos para reduzir erros de digitação e retrabalho.',
+        status: 'ATIVA',
+        nivel_complexidade: 'MÉDIA',
+        repetibilidade: 'ALTA',
+        pode_oferecer: 'SIM',
+        versao: 'V595'
+      },
+      {
+        solucao_id: 'V595-INCOMPATIVEL',
+        familia: 'OUTRO',
+        nome: 'Gestão de frota',
+        descricao:
+          'Controle de veículos e manutenção de frota.',
+        status: 'ATIVA',
+        nivel_complexidade: 'MÉDIA',
+        repetibilidade: 'ALTA',
+        pode_oferecer: 'SIM',
+        versao: 'V595'
+      },
+      {
+        solucao_id: 'V595-INATIVA',
+        familia: 'PROCESSOS',
+        nome: 'Padronização de conferência',
+        descricao:
+          'Padronização de conferência e lançamento.',
+        status: 'INATIVA',
+        nivel_complexidade: 'MÉDIA',
+        repetibilidade: 'ALTA',
+        pode_oferecer: 'SIM',
+        versao: 'V595'
+      }
+    ];
+
+    solucoesTeste.forEach(function(solucao) {
+
+      const linha =
+        new Array(cabecalhos.length)
+          .fill('');
+
+      Object.keys(solucao).forEach(function(campo) {
+
+        if (
+          Object.prototype.hasOwnProperty.call(
+            mapa,
+            campo
+          )
+        ) {
+          linha[mapa[campo]] =
+            solucao[campo];
+        }
+      });
+
+      abaSolucoes.appendRow(linha);
+    });
+
+    teste(
+      '1 — Soluções temporárias criadas',
+      solucoesTeste.length === 3,
+      '3 soluções V595'
+    );
+
+
+    /**
+     * --------------------------------------------------------
+     * 2. EXECUTAR FLUXO REAL
+     * --------------------------------------------------------
+     */
+
+    const empresaTeste =
+      'Empresa Teste V595';
+
+    const resultadoFluxo =
+      processarMensagemDiagnostico({
+        empresa_id: '',
+        conversa_id: '',
+        mensagem:
+          'Nosso processo principal é conferir e lançar pedidos. Temos erros de digitação e retrabalho nesse processo. Isso acontece diariamente. Processamos 120 pedidos por dia. Perdemos aproximadamente 3 horas por dia com esse problema. Nosso objetivo é reduzir os erros e diminuir o retrabalho.'
+      });
+
+    teste(
+      '2 — Fluxo principal executado',
+      !!resultadoFluxo,
+      resultadoFluxo
+        ? 'Retorno recebido'
+        : 'Sem retorno'
+    );
+
+
+    /**
+     * --------------------------------------------------------
+     * 3. DIAGNÓSTICO
+     * --------------------------------------------------------
+     */
+
+    diagnostico =
+      resultadoFluxo &&
+      resultadoFluxo.diagnostico
+        ? resultadoFluxo.diagnostico
+        : null;
+
+    if (!diagnostico) {
+
+      /**
+       * Alguns fluxos retornam os dados diretamente
+       * sem encapsular o diagnóstico.
+       */
+      if (
+        resultadoFluxo &&
+        resultadoFluxo.diagnostico_id
+      ) {
+
+        diagnostico =
+          buscarDiagnostico_(
+            resultadoFluxo.diagnostico_id
+          );
+      }
+    }
+
+    teste(
+      '3 — Diagnóstico encontrado',
+      !!diagnostico,
+      diagnostico
+        ? diagnostico.diagnostico_id
+        : 'Diagnóstico não encontrado'
+    );
+
+
+    if (!diagnostico) {
+      throw new Error(
+        'O teste não conseguiu recuperar o diagnóstico real.'
+      );
+    }
+
+
+    /**
+     * --------------------------------------------------------
+     * 4. ESTADO
+     * --------------------------------------------------------
+     */
+
+    teste(
+      '4 — Diagnóstico PRONTO_PARA_ANALISE',
+      diagnostico.estado ===
+        DIAGNOSTICO_ESTADOS.PRONTO_PARA_ANALISE,
+      diagnostico.estado || ''
+    );
+
+
+    /**
+     * --------------------------------------------------------
+     * 5. SOLUÇÕES NO RETORNO DO FLUXO
+     * --------------------------------------------------------
+     */
+
+    const solucoesRetorno =
+      resultadoFluxo
+        ? resultadoFluxo.solucoes
+        : null;
+
+    teste(
+      '5 — Motor V5.9.5 retornou resultado',
+      !!solucoesRetorno,
+      solucoesRetorno
+        ? JSON.stringify(solucoesRetorno)
+        : 'Nenhum resultado'
+    );
+
+
+    /**
+     * --------------------------------------------------------
+     * 6. UMA SOLUÇÃO PRINCIPAL
+     * --------------------------------------------------------
+     */
+
+    const relacoes =
+      solucoesRetorno &&
+      Array.isArray(solucoesRetorno.relacoes)
+        ? solucoesRetorno.relacoes
+        : [];
+
+    const principais =
+      relacoes.filter(function(relacao) {
+        return (
+          String(
+            relacao.principal || ''
+          ).toUpperCase() === 'SIM' ||
+          relacao.principal === true
+        );
+      });
+
+    teste(
+      '6 — Exatamente uma solução principal',
+      principais.length === 1,
+      'Principais: ' + principais.length
+    );
+
+
+    /**
+     * --------------------------------------------------------
+     * 7. SOLUÇÃO PERFEITA
+     * --------------------------------------------------------
+     */
+
+    const perfeita =
+      relacoes.find(function(relacao) {
+        return (
+          relacao.solucao_id ===
+          'V595-PERFEITA'
+        );
+      });
+
+    teste(
+      '7 — Solução perfeita encontrada',
+      !!perfeita,
+      perfeita
+        ? JSON.stringify(perfeita)
+        : 'Não encontrada'
+    );
+
+    teste(
+      '8 — Solução perfeita com pontuação máxima',
+      perfeita &&
+        Number(perfeita.pontuacao) === 100,
+      perfeita
+        ? String(perfeita.pontuacao)
+        : 'N/A'
+    );
+
+    teste(
+      '9 — Solução perfeita com compatibilidade ALTA',
+      perfeita &&
+        String(
+          perfeita.compatibilidade || ''
+        ).toUpperCase() === 'ALTA',
+      perfeita
+        ? perfeita.compatibilidade
+        : 'N/A'
+    );
+
+
+    /**
+     * --------------------------------------------------------
+     * 8. INCOMPATÍVEL NÃO PERSISTE
+     * --------------------------------------------------------
+     */
+
+    const incompatibilidade =
+      relacoes.find(function(relacao) {
+        return (
+          relacao.solucao_id ===
+          'V595-INCOMPATIVEL'
+        );
+      });
+
+    teste(
+      '10 — Solução incompatível não persistida',
+      !incompatibilidade,
+      incompatibilidade
+        ? 'ERRO: incompatível persistida'
+        : 'Correto'
+    );
+
+
+    /**
+     * --------------------------------------------------------
+     * 9. INATIVA NÃO PERSISTE
+     * --------------------------------------------------------
+     */
+
+    const inativa =
+      relacoes.find(function(relacao) {
+        return (
+          relacao.solucao_id ===
+          'V595-INATIVA'
+        );
+      });
+
+    teste(
+      '11 — Solução inativa não persistida',
+      !inativa,
+      inativa
+        ? 'ERRO: inativa persistida'
+        : 'Correto'
+    );
+
+
+    /**
+     * --------------------------------------------------------
+     * 10. PERSISTÊNCIA FÍSICA
+     * --------------------------------------------------------
+     */
+
+    const abaRelacoes =
+      obterAba_(
+        SHEETS.DIAGNOSTICO_SOLUCOES
+      );
+
+    const dadosRelacoes =
+      abaRelacoes
+        .getDataRange()
+        .getValues();
+
+    const cabRelacoes =
+      dadosRelacoes[0];
+
+    const idxDiag =
+      cabRelacoes.indexOf(
+        'diagnostico_id'
+      );
+
+    const idxSolucao =
+      cabRelacoes.indexOf(
+        'solucao_id'
+      );
+
+    const fisicas =
+      dadosRelacoes
+        .slice(1)
+        .filter(function(linha) {
+
+          return (
+            String(
+              linha[idxDiag] || ''
+            ) ===
+            String(
+              diagnostico.diagnostico_id
+            )
+          );
+        });
+
+    teste(
+      '12 — Relação física criada',
+      fisicas.length >= 1,
+      'Registros: ' + fisicas.length
+    );
+
+
+    /**
+     * --------------------------------------------------------
+     * 11. RASTREABILIDADE
+     * --------------------------------------------------------
+     */
+
+    const rastreavel =
+      fisicas.every(function(linha) {
+
+        return (
+          String(
+            linha[idxDiag] || ''
+          ) ===
+          String(
+            diagnostico.diagnostico_id
+          ) &&
+          String(
+            linha[idxSolucao] || ''
+          ).trim() !== ''
+        );
+      });
+
+    teste(
+      '13 — Relações fisicamente rastreáveis',
+      rastreavel,
+      rastreavel
+        ? 'Diagnóstico + solução presentes'
+        : 'Falha de rastreabilidade'
+    );
+
+
+    /**
+     * --------------------------------------------------------
+     * 12. IDEMPOTÊNCIA
+     * --------------------------------------------------------
+     */
+
+    const antes =
+      fisicas.length;
+
+    const segundaExecucao =
+      integrarSolucoesDiagnosticoV595_(
+        diagnostico
+      );
+
+    const depoisDados =
+      abaRelacoes
+        .getDataRange()
+        .getValues();
+
+    const depois =
+      depoisDados
+        .slice(1)
+        .filter(function(linha) {
+
+          return (
+            String(
+              linha[idxDiag] || ''
+            ) ===
+            String(
+              diagnostico.diagnostico_id
+            )
+          );
+        })
+        .length;
+
+    teste(
+      '14 — Segunda execução realizada',
+      !!segundaExecucao,
+      segundaExecucao
+        ? JSON.stringify(
+            segundaExecucao
+          )
+        : 'Sem retorno'
+    );
+
+    teste(
+      '15 — Idempotência física',
+      antes === depois,
+      'Antes: ' +
+        antes +
+        ' | Depois: ' +
+        depois
+    );
+
+
+    /**
+     * --------------------------------------------------------
+     * RESULTADO
+     * --------------------------------------------------------
+     */
+
+    const aprovados =
+      resultados.filter(function(item) {
+        return item.passou;
+      }).length;
+
+    const total =
+      resultados.length;
+
+    Logger.log(
+      '===================================================='
+    );
+
+    resultados.forEach(function(item, indice) {
+
+      Logger.log(
+        (item.passou ? 'PASSOU' : 'FALHOU') +
+        ' — TESTE ' +
+        (indice + 1) +
+        ': ' +
+        item.teste +
+        ' — ' +
+        item.detalhe
+      );
+    });
+
+    Logger.log(
+      '===================================================='
+    );
+
+    Logger.log(
+      'RESULTADO V5.9.5: ' +
+      aprovados +
+      '/' +
+      total
+    );
+
+    if (aprovados !== total) {
+      throw new Error(
+        'V5.9.5 FALHOU: ' +
+        aprovados +
+        '/' +
+        total
+      );
+    }
+
+    Logger.log(
+      'TESTAR_INTEGRACAO_REAL_V595: PASSOU'
+    );
+
+  } finally {
+
+    /**
+     * --------------------------------------------------------
+     * LIMPEZA
+     * --------------------------------------------------------
+     */
+
+    try {
+
+      const abaSolucoes =
+        obterAba_(SHEETS.SOLUCOES);
+
+      const dados =
+        abaSolucoes
+          .getDataRange()
+          .getValues();
+
+      const cabecalhos =
+        dados[0];
+
+      const idxId =
+        cabecalhos.indexOf(
+          'solucao_id'
+        );
+
+      for (
+        let i = dados.length - 1;
+        i >= 1;
+        i--
+      ) {
+
+        const id =
+          String(
+            dados[i][idxId] || ''
+          );
+
+        if (
+          id.indexOf('V595-') === 0
+        ) {
+          abaSolucoes.deleteRow(i + 1);
+        }
+      }
+
+    } catch (erro) {
+
+      Logger.log(
+        'Erro na limpeza de SOLUCOES: ' +
+        erro.message
+      );
+    }
+
+    try {
+
+      if (diagnostico) {
+
+        const abaRelacoes =
+          obterAba_(
+            SHEETS.DIAGNOSTICO_SOLUCOES
+          );
+
+        const dados =
+          abaRelacoes
+            .getDataRange()
+            .getValues();
+
+        const cabecalhos =
+          dados[0];
+
+        const idxDiag =
+          cabecalhos.indexOf(
+            'diagnostico_id'
+          );
+
+        for (
+          let i = dados.length - 1;
+          i >= 1;
+          i--
+        ) {
+
+          if (
+            String(
+              dados[i][idxDiag] || ''
+            ) ===
+            String(
+              diagnostico.diagnostico_id
+            )
+          ) {
+            abaRelacoes.deleteRow(
+              i + 1
+            );
+          }
+        }
+      }
+
+    } catch (erro) {
+
+      Logger.log(
+        'Erro na limpeza de relações: ' +
+        erro.message
+      );
+    }
+
+    Logger.log(
+      'LIMPEZA V5.9.5 CONCLUÍDA'
+    );
+  }
 }
