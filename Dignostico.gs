@@ -534,7 +534,25 @@ function processarMensagemDiagnostico(dados) {
     analiseContinuidade,
     mensagem
   );
+  /**
+   * ----------------------------------------------------------
+   * V5.7 — GERAR / ATUALIZAR OPORTUNIDADE
+   * ----------------------------------------------------------
+   *
+   * Só acontece depois que:
+   *
+   * 1. o diagnóstico foi atualizado;
+   * 2. novas dores/medidas foram persistidas;
+   * 3. o estado foi determinado.
+   *
+   * O próprio motor bloqueia qualquer diagnóstico
+   * que ainda não esteja pronto para análise.
+   */
 
+  const oportunidadeV57 =
+    persistirOportunidadeDiagnosticoV57_(
+      novoDiagnostico
+    );
 
   /**
    * ----------------------------------------------------------
@@ -663,7 +681,21 @@ function processarMensagemDiagnostico(dados) {
       novoDiagnostico,
 
     analise_ia:
-      analiseContinuidade
+      analiseContinuidade,
+
+  oportunidade:
+    oportunidadeV57
+      ? {
+          acao:
+            oportunidadeV57.acao,
+
+          oportunidade_id:
+            oportunidadeV57.oportunidade_id,
+
+          linha:
+            oportunidadeV57.linha
+        }
+      : null
 
   };
 
@@ -23165,4 +23197,1326 @@ function TESTAR_PERSISTENCIA_IDEMPOTENCIA_OPORTUNIDADE_V57() {
   Logger.log(
     '=============================================='
   );
+}
+/**
+ * ============================================================
+ * V5.7 — PERSISTÊNCIA REAL DE OPORTUNIDADES
+ * ============================================================
+ *
+ * Regras:
+ *
+ * 1. Só persiste diagnóstico PRONTO_PARA_ANALISE.
+ * 2. Uma oportunidade por diagnostico_id.
+ * 3. Se não existir, cria.
+ * 4. Se existir, atualiza.
+ * 5. Nunca cria duplicata.
+ * 6. Não altera o diagnóstico.
+ * 7. Não utiliza IA.
+ *
+ * ============================================================
+ */
+
+
+/**
+ * Retorna a aba OPORTUNIDADES.
+ */
+function obterAbaOportunidadesV57_() {
+
+  const ss =
+    SpreadsheetApp.getActiveSpreadsheet();
+
+  const nomeAba =
+    (
+      typeof SHEETS !== 'undefined' &&
+      SHEETS.OPORTUNIDADES
+    )
+      ? SHEETS.OPORTUNIDADES
+      : 'OPORTUNIDADES';
+
+  const sheet =
+    ss.getSheetByName(nomeAba);
+
+  if (!sheet) {
+
+    throw new Error(
+      'Aba OPORTUNIDADES não encontrada. ' +
+      'Execute criarEstruturaMVP() antes.'
+    );
+
+  }
+
+  return sheet;
+}
+
+
+/**
+ * Lê os cabeçalhos da aba.
+ */
+function obterCabecalhosOportunidadesV57_() {
+
+  const sheet =
+    obterAbaOportunidadesV57_();
+
+  return sheet
+    .getRange(
+      1,
+      1,
+      1,
+      sheet.getLastColumn()
+    )
+    .getValues()[0];
+}
+
+
+/**
+ * Localiza uma oportunidade pelo diagnostico_id.
+ *
+ * Esse é o mecanismo central de idempotência.
+ */
+function buscarOportunidadePorDiagnosticoV57_(
+  diagnosticoId
+) {
+
+  const id =
+    String(
+      diagnosticoId || ''
+    ).trim();
+
+  if (!id) {
+    return null;
+  }
+
+  const sheet =
+    obterAbaOportunidadesV57_();
+
+  const ultimaLinha =
+    sheet.getLastRow();
+
+  if (ultimaLinha <= 1) {
+    return null;
+  }
+
+  const cabecalhos =
+    obterCabecalhosOportunidadesV57_();
+
+  const colunaDiagnostico =
+    cabecalhos.indexOf(
+      'diagnostico_id'
+    ) + 1;
+
+  const colunaOportunidade =
+    cabecalhos.indexOf(
+      'oportunidade_id'
+    ) + 1;
+
+  if (
+    colunaDiagnostico <= 0 ||
+    colunaOportunidade <= 0
+  ) {
+
+    throw new Error(
+      'Estrutura da aba OPORTUNIDADES inválida.'
+    );
+
+  }
+
+  const valores =
+    sheet
+      .getRange(
+        2,
+        1,
+        ultimaLinha - 1,
+        sheet.getLastColumn()
+      )
+      .getValues();
+
+  for (
+    let i = 0;
+    i < valores.length;
+    i++
+  ) {
+
+    const valorDiagnostico =
+      String(
+        valores[i][colunaDiagnostico - 1] || ''
+      ).trim();
+
+    if (
+      valorDiagnostico === id
+    ) {
+
+      const numeroLinha =
+        i + 2;
+
+      const objeto = {};
+
+      cabecalhos.forEach(
+        function(cabecalho, indice) {
+
+          objeto[cabecalho] =
+            valores[i][indice];
+
+        }
+      );
+
+      objeto._linha =
+        numeroLinha;
+
+      objeto._oportunidade_id =
+        String(
+          valores[i][colunaOportunidade - 1] || ''
+        ).trim();
+
+      return objeto;
+
+    }
+  }
+
+  return null;
+}
+
+
+/**
+ * Gera ID de oportunidade.
+ */
+function gerarIdOportunidadeDiagnosticoV57_() {
+
+  const prefixo =
+    (
+      typeof ID_PREFIXOS !== 'undefined' &&
+      ID_PREFIXOS.OPORTUNIDADE
+    )
+      ? ID_PREFIXOS.OPORTUNIDADE
+      : 'OPP';
+
+  return (
+    prefixo +
+    '_' +
+    Utilities.getUuid()
+      .replace(/-/g, '')
+      .substring(0, 16)
+      .toUpperCase()
+  );
+}
+
+
+/**
+ * Converte o objeto da oportunidade
+ * para os dados da planilha.
+ */
+function montarRegistroOportunidadeV57_(
+  oportunidade,
+  diagnostico,
+  oportunidadeId,
+  dataCriacao
+) {
+
+  const agora =
+    new Date();
+
+  return {
+
+    oportunidade_id:
+      oportunidadeId,
+
+    diagnostico_id:
+      String(
+        diagnostico.diagnostico_id || ''
+      ).trim(),
+
+    empresa_id:
+      String(
+        diagnostico.empresa_id || ''
+      ).trim(),
+
+    conversa_id:
+      String(
+        diagnostico.conversa_id || ''
+      ).trim(),
+
+    processo:
+      String(
+        oportunidade.processo || ''
+      ).trim(),
+
+    dor:
+      String(
+        oportunidade.dor || ''
+      ).trim(),
+
+    frequencia:
+      String(
+        oportunidade.frequencia || ''
+      ).trim(),
+
+    volume:
+      String(
+        oportunidade.volume || ''
+      ).trim(),
+
+    impacto:
+      String(
+        oportunidade.impacto || ''
+      ).trim(),
+
+    objetivo:
+      String(
+        oportunidade.objetivo || ''
+      ).trim(),
+
+    descricao:
+      String(
+        oportunidade.descricao || ''
+      ).trim(),
+
+    prioridade:
+      String(
+        oportunidade.prioridade || ''
+      ).trim(),
+
+    justificativa:
+      String(
+        oportunidade.justificativa || ''
+      ).trim(),
+
+    status:
+      'ABERTA',
+
+    criado_em:
+      dataCriacao || agora,
+
+    atualizado_em:
+      agora
+  };
+}
+
+
+/**
+ * Persiste uma oportunidade.
+ *
+ * Retorno:
+ *
+ * {
+ *   acao: 'CRIAR' | 'ATUALIZAR',
+ *   oportunidade_id: 'OPP_...',
+ *   linha: number,
+ *   oportunidade: object
+ * }
+ */
+function persistirOportunidadeDiagnosticoV57_(
+  diagnostico
+) {
+
+  if (!diagnostico) {
+
+  return null;
+
+}
+
+
+/*
+ * ============================================================
+ * V5.7 — VOLUME CONSOLIDADO
+ * ============================================================
+ *
+ * O volume não pertence à aba DIAGNOSTICOS.
+ * Ele é uma medida persistida em METRICAS.
+ *
+ * Portanto, antes de construir a oportunidade,
+ * recuperamos o último VOLUME confirmado.
+ */
+const diagnosticoParaOportunidade =
+  Object.assign(
+    {},
+    diagnostico
+  );
+
+
+if (
+  !String(
+    diagnosticoParaOportunidade.volume || ''
+  ).trim()
+) {
+
+  const medidas =
+    obterMedidasDiagnostico_(
+      diagnostico.empresa_id,
+      diagnostico.conversa_id
+    );
+
+
+  const volumeConsolidado =
+    obterUltimoVolumeDiagnostico_(
+      medidas
+    );
+
+
+  diagnosticoParaOportunidade.volume =
+    volumeConsolidado || '';
+
+}
+
+
+const oportunidade =
+  construirOportunidadeSeProntoDiagnosticoV57_(
+    diagnosticoParaOportunidade
+  );
+
+
+  // Diagnóstico ainda não está pronto.
+  if (!oportunidade) {
+
+    return null;
+
+  }
+
+
+  const diagnosticoId =
+    String(
+      diagnostico.diagnostico_id || ''
+    ).trim();
+
+
+  if (!diagnosticoId) {
+
+    throw new Error(
+      'Não é possível persistir oportunidade sem diagnostico_id.'
+    );
+
+  }
+
+
+  const sheet =
+    obterAbaOportunidadesV57_();
+
+
+  const existente =
+    buscarOportunidadePorDiagnosticoV57_(
+      diagnosticoId
+    );
+
+
+  // ============================================================
+  // ATUALIZAÇÃO
+  // ============================================================
+
+  if (existente) {
+
+    const oportunidadeId =
+      existente.oportunidade_id ||
+      existente._oportunidade_id;
+
+
+    const registro =
+      montarRegistroOportunidadeV57_(
+        oportunidade,
+        diagnostico,
+        oportunidadeId,
+        existente.criado_em || new Date()
+      );
+
+
+    const cabecalhos =
+      obterCabecalhosOportunidadesV57_();
+
+
+    const valores =
+      cabecalhos.map(
+        function(cabecalho) {
+
+          return registro[cabecalho] !== undefined
+            ? registro[cabecalho]
+            : '';
+
+        }
+      );
+
+
+    sheet
+      .getRange(
+        existente._linha,
+        1,
+        1,
+        cabecalhos.length
+      )
+      .setValues([
+        valores
+      ]);
+
+
+    return {
+
+      acao:
+        'ATUALIZAR',
+
+      oportunidade_id:
+        oportunidadeId,
+
+      linha:
+        existente._linha,
+
+      oportunidade:
+        oportunidade
+
+    };
+
+  }
+
+
+  // ============================================================
+  // CRIAÇÃO
+  // ============================================================
+
+  const oportunidadeId =
+    gerarIdOportunidadeDiagnosticoV57_();
+
+
+  const registro =
+    montarRegistroOportunidadeV57_(
+      oportunidade,
+      diagnostico,
+      oportunidadeId,
+      new Date()
+    );
+
+
+  const cabecalhos =
+    obterCabecalhosOportunidadesV57_();
+
+
+  const valores =
+    cabecalhos.map(
+      function(cabecalho) {
+
+        return registro[cabecalho] !== undefined
+          ? registro[cabecalho]
+          : '';
+
+      }
+    );
+
+
+  sheet.appendRow(
+    valores
+  );
+
+
+  const linha =
+    sheet.getLastRow();
+
+
+  return {
+
+    acao:
+      'CRIAR',
+
+    oportunidade_id:
+      oportunidadeId,
+
+    linha:
+      linha,
+
+    oportunidade:
+      oportunidade
+
+  };
+
+}
+
+function TESTAR_PERSISTENCIA_REAL_OPORTUNIDADE_V57() {
+
+  Logger.log('');
+  Logger.log('==============================================');
+  Logger.log(' FEEDS SOLUTIONS — PERSISTÊNCIA REAL');
+  Logger.log(' OPORTUNIDADE V5.7');
+  Logger.log('==============================================');
+  Logger.log('');
+
+  const ss =
+    SpreadsheetApp.getActiveSpreadsheet();
+
+  const sheet =
+    ss.getSheetByName('OPORTUNIDADES');
+
+  if (!sheet) {
+    throw new Error(
+      'Aba OPORTUNIDADES não existe.'
+    );
+  }
+
+  const diagnosticoId =
+    'DIAG_TEST_V57_PERSISTENCIA_' +
+    Date.now();
+
+  const diagnostico = {
+
+    diagnostico_id:
+      diagnosticoId,
+
+    empresa_id:
+      'EMP_TEST_V57',
+
+    conversa_id:
+      'CONV_TEST_V57',
+
+    processo_nome:
+      'Conferir e lançar pedidos',
+
+    dor_principal:
+      'Erros de digitação e retrabalho',
+
+    frequencia:
+      'Diária',
+
+    volume:
+      '120 pedidos por dia',
+
+    impacto_nivel:
+      '3 horas por dia',
+
+    objetivo:
+      'Reduzir erros e retrabalho'
+  };
+
+
+  // ============================================================
+  // 01 — CRIAR
+  // ============================================================
+
+  Logger.log(
+    '01 — Criar primeira oportunidade'
+  );
+
+  const primeira =
+    persistirOportunidadeDiagnosticoV57_(
+      diagnostico
+    );
+
+  if (!primeira) {
+    throw new Error(
+      'Nenhuma oportunidade foi retornada.'
+    );
+  }
+
+  if (
+    primeira.acao !== 'CRIAR'
+  ) {
+    throw new Error(
+      'Ação esperada: CRIAR. Recebida: ' +
+      primeira.acao
+    );
+  }
+
+  Logger.log(
+    'Oportunidade criada: ' +
+    primeira.oportunidade_id
+  );
+
+
+  // ============================================================
+  // 02 — CONFIRMAR PERSISTÊNCIA
+  // ============================================================
+
+  Logger.log(
+    '02 — Confirmar persistência na planilha'
+  );
+
+  const encontrada =
+    buscarOportunidadePorDiagnosticoV57_(
+      diagnosticoId
+    );
+
+  if (!encontrada) {
+    throw new Error(
+      'Oportunidade não foi encontrada na planilha.'
+    );
+  }
+
+  if (
+    encontrada.oportunidade_id !==
+    primeira.oportunidade_id
+  ) {
+    throw new Error(
+      'ID persistido diverge do ID retornado.'
+    );
+  }
+
+  Logger.log(
+    'Linha persistida: ' +
+    encontrada._linha
+  );
+
+
+  // ============================================================
+  // 03 — REPROCESSAR
+  // ============================================================
+
+  Logger.log(
+    '03 — Reprocessar o mesmo diagnóstico'
+  );
+
+  const segunda =
+    persistirOportunidadeDiagnosticoV57_(
+      diagnostico
+    );
+
+  if (
+    segunda.acao !== 'ATUALIZAR'
+  ) {
+    throw new Error(
+      'Reprocessamento criou uma segunda oportunidade.'
+    );
+  }
+
+  if (
+    segunda.oportunidade_id !==
+    primeira.oportunidade_id
+  ) {
+    throw new Error(
+      'Reprocessamento gerou outro ID.'
+    );
+  }
+
+  if (
+    segunda.linha !==
+    primeira.linha
+  ) {
+    throw new Error(
+      'Reprocessamento gravou em outra linha.'
+    );
+  }
+
+
+  // ============================================================
+  // 04 — ATUALIZAR DADOS
+  // ============================================================
+
+  Logger.log(
+    '04 — Atualizar dados do diagnóstico'
+  );
+
+  const diagnosticoAtualizado =
+    Object.assign(
+      {},
+      diagnostico,
+      {
+
+        volume:
+          '150 pedidos por dia',
+
+        impacto_nivel:
+          '4 horas por dia',
+
+        dor_principal:
+          'Erros de digitação, retrabalho e atrasos',
+
+        objetivo:
+          'Reduzir erros, retrabalho e atrasos'
+      }
+    );
+
+  const terceira =
+    persistirOportunidadeDiagnosticoV57_(
+      diagnosticoAtualizado
+    );
+
+  if (
+    terceira.acao !== 'ATUALIZAR'
+  ) {
+    throw new Error(
+      'Atualização não foi identificada.'
+    );
+  }
+
+  if (
+    terceira.oportunidade_id !==
+    primeira.oportunidade_id
+  ) {
+    throw new Error(
+      'Atualização criou outro ID.'
+    );
+  }
+
+
+  // ============================================================
+  // 05 — VALIDAR DADOS PERSISTIDOS
+  // ============================================================
+
+  Logger.log(
+    '05 — Validar dados finais'
+  );
+
+  const final =
+    buscarOportunidadePorDiagnosticoV57_(
+      diagnosticoId
+    );
+
+  if (
+    final.volume !==
+    '150 pedidos por dia'
+  ) {
+    throw new Error(
+      'Volume atualizado não foi persistido.'
+    );
+  }
+
+  if (
+    final.impacto !==
+    '4 horas por dia'
+  ) {
+    throw new Error(
+      'Impacto atualizado não foi persistido.'
+    );
+  }
+
+  if (
+    final.dor !==
+    'Erros de digitação, retrabalho e atrasos'
+  ) {
+    throw new Error(
+      'Nova dor não foi persistida.'
+    );
+  }
+
+  if (
+    final.objetivo !==
+    'Reduzir erros, retrabalho e atrasos'
+  ) {
+    throw new Error(
+      'Novo objetivo não foi persistido.'
+    );
+  }
+
+
+  // ============================================================
+  // 06 — CONFIRMAR UMA ÚNICA LINHA
+  // ============================================================
+
+  Logger.log(
+    '06 — Confirmar idempotência física'
+  );
+
+  const ultimaLinha =
+    sheet.getLastRow();
+
+  const quantidadeDados =
+    Math.max(
+      ultimaLinha - 1,
+      0
+    );
+
+  let quantidade = 0;
+
+  if (
+    quantidadeDados > 0
+  ) {
+
+    const cabecalhos =
+      sheet
+        .getRange(
+          1,
+          1,
+          1,
+          sheet.getLastColumn()
+        )
+        .getValues()[0];
+
+    const dados =
+      sheet
+        .getRange(
+          2,
+          1,
+          quantidadeDados,
+          sheet.getLastColumn()
+        )
+        .getValues();
+
+    const colunaDiagnostico =
+      cabecalhos.indexOf(
+        'diagnostico_id'
+      );
+
+    dados.forEach(
+      function(linha) {
+
+        if (
+          String(
+            linha[colunaDiagnostico] || ''
+          ).trim() ===
+          diagnosticoId
+        ) {
+
+          quantidade++;
+
+        }
+
+      }
+    );
+  }
+
+  if (
+    quantidade !== 1
+  ) {
+    throw new Error(
+      'Foram encontradas ' +
+      quantidade +
+      ' oportunidades para o mesmo diagnóstico.'
+    );
+  }
+
+  Logger.log(
+    'Quantidade de oportunidades: ' +
+    quantidade
+  );
+
+
+  // ============================================================
+  // LIMPEZA
+  // ============================================================
+
+  Logger.log(
+    'Limpando registro de teste...'
+  );
+
+  sheet.deleteRow(
+    final._linha
+  );
+
+
+  Logger.log('');
+  Logger.log(
+    '=============================================='
+  );
+
+  Logger.log(
+    '🟢 PERSISTÊNCIA REAL V5.7 PASSOU'
+  );
+
+  Logger.log(
+    '=============================================='
+  );
+}
+
+function TESTAR_FLUXO_COMPLETO_PRONTO_V57() {
+
+  Logger.log('==============================================');
+  Logger.log('     FEEDS SOLUTIONS — V5.7');
+  Logger.log('     TESTE INTEGRADO — OPORTUNIDADE');
+  Logger.log('==============================================');
+
+  let empresa = null;
+  let conversa = null;
+  let diagnostico = null;
+
+  try {
+
+    // ==================================================
+    // 01. CRIAR DIAGNÓSTICO DE TESTE
+    // ==================================================
+
+    Logger.log('01 — Criando diagnóstico de teste...');
+
+    const inicio = iniciarDiagnostico();
+
+    if (!inicio || !inicio.sucesso) {
+      throw new Error(
+        'Falha ao iniciar diagnóstico: ' +
+        JSON.stringify(inicio)
+      );
+    }
+
+    empresa = inicio.empresa_id;
+    conversa = inicio.conversa_id;
+    diagnostico = inicio.diagnostico_id;
+
+    Logger.log(
+      'Diagnóstico criado: ' + diagnostico
+    );
+
+    // ==================================================
+    // 02. PROCESSAR MENSAGEM COMPLETA
+    // ==================================================
+
+    Logger.log('02 — Processando mensagem completa...');
+
+    const mensagem =
+      'Nosso processo principal é conferir e lançar pedidos. ' +
+      'Temos erros de digitação e retrabalho nesse processo. ' +
+      'Isso acontece diariamente. ' +
+      'Processamos 120 pedidos por dia. ' +
+      'Perdemos aproximadamente 3 horas por dia com esse problema. ' +
+      'Nosso objetivo é reduzir os erros e diminuir o retrabalho.';
+
+    const resultado =
+      processarMensagemDiagnostico(
+        empresa,
+        conversa,
+        mensagem
+      );
+
+    if (!resultado || !resultado.sucesso) {
+      throw new Error(
+        'Falha ao processar mensagem: ' +
+        JSON.stringify(resultado)
+      );
+    }
+
+    Logger.log(
+      'Estado retornado: ' +
+      resultado.estado
+    );
+
+    // ==================================================
+    // 03. VERIFICAR DIAGNÓSTICO PRONTO
+    // ==================================================
+
+    Logger.log('03 — Verificando PRONTO_PARA_ANALISE...');
+
+    const diagnosticoFinal =
+      resultado.diagnostico || {};
+
+    const estadoFinal =
+      String(
+        diagnosticoFinal.status_diagnostico ||
+        resultado.estado ||
+        ''
+      ).trim().toUpperCase();
+
+    if (
+      estadoFinal !==
+      String(
+        DIAGNOSTICO_ESTADOS.PRONTO_PARA_ANALISE
+      ).trim().toUpperCase()
+    ) {
+      throw new Error(
+        'Diagnóstico não chegou a PRONTO_PARA_ANALISE. ' +
+        'Estado atual: ' + estadoFinal +
+        ' | Diagnóstico: ' +
+        JSON.stringify(diagnosticoFinal)
+      );
+    }
+
+    Logger.log(
+      'Diagnóstico chegou a PRONTO_PARA_ANALISE.'
+    );
+
+    // ==================================================
+    // 04. VERIFICAR OPORTUNIDADE CRIADA
+    // ==================================================
+
+    Logger.log('04 — Verificando oportunidade persistida...');
+
+    const oportunidade =
+      buscarOportunidadePorDiagnosticoV57_(
+        diagnostico
+      );
+
+    if (!oportunidade) {
+      throw new Error(
+        'Nenhuma oportunidade foi persistida para o diagnóstico.'
+      );
+    }
+
+    Logger.log(
+      'Oportunidade encontrada: ' +
+      JSON.stringify(oportunidade)
+    );
+
+    // ==================================================
+    // 05. VERIFICAR ID
+    // ==================================================
+
+    Logger.log('05 — Verificando oportunidade_id...');
+
+    if (
+      !String(
+        oportunidade.oportunidade_id || ''
+      ).trim()
+    ) {
+      throw new Error(
+        'Oportunidade encontrada sem oportunidade_id.'
+      );
+    }
+
+    Logger.log(
+      'ID da oportunidade: ' +
+      oportunidade.oportunidade_id
+    );
+
+    // ==================================================
+    // 06. VERIFICAR DIAGNÓSTICO
+    // ==================================================
+
+    Logger.log('06 — Verificando diagnostico_id...');
+
+    if (
+      String(oportunidade.diagnostico_id || '').trim() !==
+      String(diagnostico || '').trim()
+    ) {
+      throw new Error(
+        'diagnostico_id da oportunidade não corresponde ao diagnóstico.'
+      );
+    }
+
+    Logger.log(
+      'diagnostico_id corretamente relacionado.'
+    );
+
+    // ==================================================
+    // 07. VERIFICAR CAMPOS PRINCIPAIS
+    // ==================================================
+
+    Logger.log('07 — Verificando dados da oportunidade...');
+
+    const camposObrigatorios = [
+      'processo',
+      'dor',
+      'frequencia',
+      'impacto',
+      'objetivo',
+      'descricao',
+      'prioridade',
+      'justificativa',
+      'status'
+    ];
+
+    camposObrigatorios.forEach(function(campo) {
+
+      if (
+        !String(
+          oportunidade[campo] || ''
+        ).trim()
+      ) {
+        throw new Error(
+          'Campo obrigatório vazio na oportunidade: ' +
+          campo
+        );
+      }
+
+    });
+
+    Logger.log(
+      'Todos os campos principais estão preenchidos.'
+    );
+
+    // ==================================================
+    // 08. VERIFICAR IDEMPOTÊNCIA
+    // ==================================================
+
+    Logger.log(
+      '08 — Reprocessando o mesmo diagnóstico...'
+    );
+
+    const resultadoPersistencia =
+      persistirOportunidadeDiagnosticoV57_(
+        diagnosticoFinal
+      );
+
+    if (!resultadoPersistencia) {
+      throw new Error(
+        'Reprocessamento não retornou resultado.'
+      );
+    }
+
+    Logger.log(
+      'Ação no reprocessamento: ' +
+      resultadoPersistencia.acao
+    );
+
+    // ==================================================
+    // 09. BUSCAR NOVAMENTE
+    // ==================================================
+
+    Logger.log(
+      '09 — Confirmando idempotência física...'
+    );
+
+    const oportunidadeDepois =
+      buscarOportunidadePorDiagnosticoV57_(
+        diagnostico
+      );
+
+    if (!oportunidadeDepois) {
+      throw new Error(
+        'Oportunidade desapareceu após reprocessamento.'
+      );
+    }
+
+    if (
+      String(
+        oportunidadeDepois.oportunidade_id
+      ).trim() !==
+      String(
+        oportunidade.oportunidade_id
+      ).trim()
+    ) {
+      throw new Error(
+        'O reprocessamento criou outro oportunidade_id.'
+      );
+    }
+
+    Logger.log(
+      'Mesmo oportunidade_id mantido: ' +
+      oportunidadeDepois.oportunidade_id
+    );
+
+    // ==================================================
+    // 10. CONTAGEM FÍSICA
+    // ==================================================
+
+    Logger.log(
+      '10 — Confirmando apenas uma oportunidade...'
+    );
+
+    const aba =
+      obterAbaOportunidadesV57_();
+
+    if (!aba) {
+      throw new Error(
+        'Aba OPORTUNIDADES não encontrada.'
+      );
+    }
+
+    const valores =
+      aba.getDataRange().getValues();
+
+    const colunaDiagnostico =
+      obterCabecalhosOportunidadesV57_()
+        .indexOf('diagnostico_id');
+
+    if (colunaDiagnostico < 0) {
+      throw new Error(
+        'Coluna diagnostico_id não encontrada.'
+      );
+    }
+
+    let quantidade = 0;
+
+    for (
+      let i = 1;
+      i < valores.length;
+      i++
+    ) {
+
+      if (
+        String(
+          valores[i][colunaDiagnostico] || ''
+        ).trim() ===
+        String(diagnostico || '').trim()
+      ) {
+        quantidade++;
+      }
+
+    }
+
+    Logger.log(
+      'Quantidade física de oportunidades: ' +
+      quantidade
+    );
+
+    if (quantidade !== 1) {
+      throw new Error(
+        'Falha de idempotência: esperado 1 registro, encontrado ' +
+        quantidade
+      );
+    }
+
+    Logger.log('');
+    Logger.log(
+      '🟢 V5.7 — TESTE INTEGRADO PASSOU'
+    );
+    Logger.log(
+      'Diagnóstico → PRONTO → OPORTUNIDADE → IDEMPOTÊNCIA'
+    );
+    Logger.log(
+      '=============================================='
+    );
+
+  } catch (erro) {
+
+    Logger.log('');
+    Logger.log(
+      '🔴 V5.7 — TESTE INTEGRADO FALHOU'
+    );
+    Logger.log(
+      'ERRO: ' + erro.message
+    );
+    Logger.log(
+      erro.stack || ''
+    );
+
+    throw erro;
+
+  } finally {
+
+    // ==================================================
+    // LIMPEZA
+    // ==================================================
+
+    Logger.log(
+      'Limpando dados do teste...'
+    );
+
+    try {
+
+      if (
+        typeof diagnostico !== 'undefined' &&
+        diagnostico
+      ) {
+        const abaOportunidades =
+          obterAbaOportunidadesV57_();
+
+        if (abaOportunidades) {
+
+          const dados =
+            abaOportunidades
+              .getDataRange()
+              .getValues();
+
+          const cabecalhos =
+            obterCabecalhosOportunidadesV57_();
+
+          const colDiagnostico =
+            cabecalhos.indexOf(
+              'diagnostico_id'
+            );
+
+          if (colDiagnostico >= 0) {
+
+            for (
+              let i = dados.length - 1;
+              i >= 1;
+              i--
+            ) {
+
+              if (
+                String(
+                  dados[i][colDiagnostico] || ''
+                ).trim() ===
+                String(diagnostico).trim()
+              ) {
+                abaOportunidades.deleteRow(
+                  i + 1
+                );
+              }
+
+            }
+
+          }
+        }
+      }
+
+      Logger.log(
+        'Limpeza da oportunidade concluída.'
+      );
+
+    } catch (limpezaErro) {
+
+      Logger.log(
+        '⚠️ Erro durante limpeza: ' +
+        limpezaErro.message
+      );
+
+    }
+  }
 }
