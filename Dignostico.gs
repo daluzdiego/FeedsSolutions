@@ -31842,7 +31842,9 @@ function processarSolucoesDiagnosticoV595_(diagnostico) {
   }
 
   const estado =
-    String(diagnostico.estado || '').trim();
+    String(
+      diagnostico.status_diagnostico || ''
+    ).trim();
 
   if (
     estado !==
@@ -31861,7 +31863,8 @@ function processarSolucoesDiagnosticoV595_(diagnostico) {
   }
 
   return {
-    acao: resultado.acao || '',
+    acao:
+      resultado.acao || '',
     diagnostico_id:
       diagnostico.diagnostico_id || '',
     total:
@@ -32540,4 +32543,924 @@ function const resultadoFluxo =() {
       'LIMPEZA V5.9.5 CONCLUÍDA'
     );
   }
+}
+
+function TESTAR_INTEGRACAO_REAL_V595() {
+
+  const resultados = [];
+
+  function teste(nome, condicao, detalhe) {
+
+    resultados.push({
+      teste: nome,
+      passou: !!condicao,
+      detalhe: detalhe || ''
+    });
+
+  }
+
+  let inicio = null;
+  let diagnostico = null;
+
+  try {
+
+    Logger.log(
+      '===================================================='
+    );
+
+    Logger.log(
+      'V5.9.5 — INTEGRAÇÃO REAL DO MOTOR DE SOLUÇÕES'
+    );
+
+    Logger.log(
+      '===================================================='
+    );
+
+
+    /*
+     * ==========================================================
+     * 1. CRIAR SOLUÇÕES TEMPORÁRIAS
+     * ==========================================================
+     */
+
+    const abaSolucoes =
+      obterAba_(SHEETS.SOLUCOES);
+
+    const dadosCabecalhos =
+      abaSolucoes
+        .getRange(
+          1,
+          1,
+          1,
+          abaSolucoes.getLastColumn()
+        )
+        .getValues();
+
+    const cabecalhos =
+      dadosCabecalhos[0];
+
+    const mapa = {};
+
+    cabecalhos.forEach(
+      function(cabecalho, indice) {
+
+        mapa[cabecalho] = indice;
+
+      }
+    );
+
+
+    const solucoesTeste = [
+
+      {
+        solucao_id:
+          'V595-PERFEITA',
+
+        familia:
+          'PROCESSOS',
+
+        nome:
+          'Padronização de conferência e lançamento',
+
+        descricao:
+          'Padronizar a conferência e o lançamento de pedidos para reduzir erros de digitação e retrabalho.',
+
+        status:
+          'ATIVA',
+
+        nivel_complexidade:
+          'MÉDIA',
+
+        repetibilidade:
+          'ALTA',
+
+        pode_oferecer:
+          'SIM',
+
+        versao:
+          'V595'
+      },
+
+      {
+        solucao_id:
+          'V595-INCOMPATIVEL',
+
+        familia:
+          'FROTA',
+
+        nome:
+          'Gestão de frota',
+
+        descricao:
+          'Controle de veículos e manutenção de frota.',
+
+        status:
+          'ATIVA',
+
+        nivel_complexidade:
+          'MÉDIA',
+
+        repetibilidade:
+          'ALTA',
+
+        pode_oferecer:
+          'SIM',
+
+        versao:
+          'V595'
+      },
+
+      {
+        solucao_id:
+          'V595-INATIVA',
+
+        familia:
+          'PROCESSOS',
+
+        nome:
+          'Padronização de conferência',
+
+        descricao:
+          'Padronização de conferência e lançamento.',
+
+        status:
+          'INATIVA',
+
+        nivel_complexidade:
+          'MÉDIA',
+
+        repetibilidade:
+          'ALTA',
+
+        pode_oferecer:
+          'SIM',
+
+        versao:
+          'V595'
+      }
+
+    ];
+
+
+    solucoesTeste.forEach(
+      function(solucao) {
+
+        const linha =
+          new Array(
+            cabecalhos.length
+          ).fill('');
+
+        Object.keys(solucao)
+          .forEach(
+            function(campo) {
+
+              if (
+                Object.prototype.hasOwnProperty.call(
+                  mapa,
+                  campo
+                )
+              ) {
+
+                linha[mapa[campo]] =
+                  solucao[campo];
+
+              }
+
+            }
+          );
+
+        abaSolucoes.appendRow(linha);
+
+      }
+    );
+
+
+    teste(
+      '1 — Soluções temporárias criadas',
+      solucoesTeste.length === 3,
+      '3 soluções V595'
+    );
+
+
+    /*
+     * ==========================================================
+     * 2. INICIAR DIAGNÓSTICO REAL
+     * ==========================================================
+     */
+
+    inicio =
+      iniciarDiagnostico({
+
+        nome:
+          'Empresa Teste V595',
+
+        nome_empresa:
+          'Empresa Teste V595',
+
+        segmento:
+          'Serviços',
+
+        porte:
+          'PEQUENA',
+
+        nome_contato:
+          'Teste V595',
+
+        email:
+          '',
+
+        whatsapp:
+          '',
+
+        cidade:
+          ''
+      });
+
+
+    teste(
+      '2 — Diagnóstico iniciado',
+      !!inicio &&
+      !!inicio.empresa_id &&
+      !!inicio.conversa_id &&
+      !!inicio.diagnostico_id,
+      inicio
+        ? JSON.stringify(inicio)
+        : 'Falha ao iniciar diagnóstico'
+    );
+
+
+    if (!inicio) {
+
+      throw new Error(
+        'Não foi possível iniciar o diagnóstico de teste.'
+      );
+
+    }
+
+
+    /*
+     * ==========================================================
+     * 3. EXECUTAR FLUXO PRINCIPAL
+     * ==========================================================
+     */
+
+    const resultadoFluxo =
+      processarMensagemDiagnostico({
+
+        empresa_id:
+          inicio.empresa_id,
+
+        conversa_id:
+          inicio.conversa_id,
+
+        mensagem:
+          'Nosso processo principal é conferir e lançar pedidos. Temos erros de digitação e retrabalho nesse processo. Isso acontece diariamente. Processamos 120 pedidos por dia. Perdemos aproximadamente 3 horas por dia com esse problema. Nosso objetivo é reduzir os erros e diminuir o retrabalho.'
+
+      });
+
+
+    teste(
+      '3 — Fluxo principal executado',
+      !!resultadoFluxo &&
+      resultadoFluxo.sucesso === true,
+      resultadoFluxo
+        ? 'Fluxo executado'
+        : 'Sem retorno'
+    );
+
+
+    /*
+     * ==========================================================
+     * 4. DIAGNÓSTICO
+     * ==========================================================
+     */
+
+    diagnostico =
+      resultadoFluxo &&
+      resultadoFluxo.diagnostico
+        ? resultadoFluxo.diagnostico
+        : null;
+
+
+    if (
+      !diagnostico &&
+      resultadoFluxo &&
+      resultadoFluxo.diagnostico_id
+    ) {
+
+      diagnostico =
+        buscarDiagnostico_(
+          resultadoFluxo.diagnostico_id
+        );
+
+    }
+
+
+    teste(
+      '4 — Diagnóstico encontrado',
+      !!diagnostico,
+      diagnostico
+        ? diagnostico.diagnostico_id
+        : 'Não encontrado'
+    );
+
+
+    if (!diagnostico) {
+
+      throw new Error(
+        'Diagnóstico real não encontrado.'
+      );
+
+    }
+
+
+    /*
+     * ==========================================================
+     * 5. ESTADO
+     * ==========================================================
+     */
+
+    teste(
+      '5 — Diagnóstico PRONTO_PARA_ANALISE',
+      String(
+        diagnostico.status_diagnostico || ''
+      ) ===
+      DIAGNOSTICO_ESTADOS.PRONTO_PARA_ANALISE,
+      diagnostico.status_diagnostico || ''
+    );
+
+
+    /*
+     * ==========================================================
+     * 6. MOTOR DE SOLUÇÕES
+     * ==========================================================
+     */
+
+    const solucoesRetorno =
+      resultadoFluxo
+        ? resultadoFluxo.solucoes
+        : null;
+
+
+    teste(
+      '6 — Motor V5.9.5 integrado ao fluxo',
+      !!solucoesRetorno,
+      solucoesRetorno
+        ? JSON.stringify(solucoesRetorno)
+        : 'Nenhum resultado'
+    );
+
+
+    /*
+     * ==========================================================
+     * 7. RELAÇÕES
+     * ==========================================================
+     */
+
+    const relacoes =
+      solucoesRetorno &&
+      Array.isArray(
+        solucoesRetorno.relacoes
+      )
+        ? solucoesRetorno.relacoes
+        : [];
+
+
+    teste(
+      '7 — Relações retornadas',
+      relacoes.length >= 1,
+      'Total: ' + relacoes.length
+    );
+
+
+    /*
+     * ==========================================================
+     * 8. SOLUÇÃO PRINCIPAL
+     * ==========================================================
+     */
+
+    const principais =
+      relacoes.filter(
+        function(relacao) {
+
+          return (
+            String(
+              relacao.principal || ''
+            ).toUpperCase() === 'SIM'
+            ||
+            relacao.principal === true
+          );
+
+        }
+      );
+
+
+    teste(
+      '8 — Exatamente uma solução principal',
+      principais.length === 1,
+      'Principais: ' +
+      principais.length
+    );
+
+
+    /*
+     * ==========================================================
+     * 9. SOLUÇÃO PERFEITA
+     * ==========================================================
+     */
+
+    const perfeita =
+      relacoes.find(
+        function(relacao) {
+
+          return (
+            relacao.solucao_id ===
+            'V595-PERFEITA'
+          );
+
+        }
+      );
+
+
+    teste(
+      '9 — Solução perfeita encontrada',
+      !!perfeita,
+      perfeita
+        ? JSON.stringify(perfeita)
+        : 'Não encontrada'
+    );
+
+
+    teste(
+      '10 — Solução perfeita = 100/100',
+      perfeita &&
+      Number(
+        perfeita.pontuacao
+      ) === 100,
+      perfeita
+        ? String(
+            perfeita.pontuacao
+          )
+        : 'N/A'
+    );
+
+
+    teste(
+      '11 — Solução perfeita = ALTA',
+      perfeita &&
+      String(
+        perfeita.compatibilidade || ''
+      ).toUpperCase() === 'ALTA',
+      perfeita
+        ? perfeita.compatibilidade
+        : 'N/A'
+    );
+
+
+    /*
+     * ==========================================================
+     * 10. INCOMPATÍVEL
+     * ==========================================================
+     */
+
+    const incompatibilidade =
+      relacoes.find(
+        function(relacao) {
+
+          return (
+            relacao.solucao_id ===
+            'V595-INCOMPATIVEL'
+          );
+
+        }
+      );
+
+
+    teste(
+      '12 — Incompatível não persistida',
+      !incompatibilidade,
+      incompatibilidade
+        ? 'ERRO'
+        : 'Correto'
+    );
+
+
+    /*
+     * ==========================================================
+     * 11. INATIVA
+     * ==========================================================
+     */
+
+    const inativa =
+      relacoes.find(
+        function(relacao) {
+
+          return (
+            relacao.solucao_id ===
+            'V595-INATIVA'
+          );
+
+        }
+      );
+
+
+    teste(
+      '13 — Solução inativa não persistida',
+      !inativa,
+      inativa
+        ? 'ERRO'
+        : 'Correto'
+    );
+
+
+    /*
+     * ==========================================================
+     * 12. PERSISTÊNCIA FÍSICA
+     * ==========================================================
+     */
+
+    const abaRelacoes =
+      obterAba_(
+        SHEETS.DIAGNOSTICO_SOLUCOES
+      );
+
+
+    const dadosRelacoes =
+      abaRelacoes
+        .getDataRange()
+        .getValues();
+
+
+    const cabRelacoes =
+      dadosRelacoes[0];
+
+
+    const idxDiag =
+      cabRelacoes.indexOf(
+        'diagnostico_id'
+      );
+
+
+    const idxSolucao =
+      cabRelacoes.indexOf(
+        'solucao_id'
+      );
+
+
+    const fisicas =
+      dadosRelacoes
+        .slice(1)
+        .filter(
+          function(linha) {
+
+            return (
+              String(
+                linha[idxDiag] || ''
+              ) ===
+              String(
+                diagnostico.diagnostico_id
+              )
+            );
+
+          }
+        );
+
+
+    teste(
+      '14 — Relação física criada',
+      fisicas.length >= 1,
+      'Registros: ' +
+      fisicas.length
+    );
+
+
+    /*
+     * ==========================================================
+     * 13. RASTREABILIDADE
+     * ==========================================================
+     */
+
+    const rastreavel =
+      fisicas.every(
+        function(linha) {
+
+          return (
+            String(
+              linha[idxDiag] || ''
+            ) ===
+            String(
+              diagnostico.diagnostico_id
+            )
+            &&
+            String(
+              linha[idxSolucao] || ''
+            ).trim() !== ''
+          );
+
+        }
+      );
+
+
+    teste(
+      '15 — Relações rastreáveis',
+      rastreavel,
+      rastreavel
+        ? 'Diagnóstico + solução'
+        : 'Falha'
+    );
+
+
+    /*
+     * ==========================================================
+     * 14. IDEMPOTÊNCIA
+     * ==========================================================
+     */
+
+    const antes =
+      fisicas.length;
+
+
+    const segundaExecucao =
+      integrarSolucoesDiagnosticoV595_(
+        diagnostico
+      );
+
+
+    const depoisDados =
+      abaRelacoes
+        .getDataRange()
+        .getValues();
+
+
+    const depois =
+      depoisDados
+        .slice(1)
+        .filter(
+          function(linha) {
+
+            return (
+              String(
+                linha[idxDiag] || ''
+              ) ===
+              String(
+                diagnostico.diagnostico_id
+              )
+            );
+
+          }
+        )
+        .length;
+
+
+    teste(
+      '16 — Segunda execução realizada',
+      !!segundaExecucao,
+      segundaExecucao
+        ? JSON.stringify(
+            segundaExecucao
+          )
+        : 'Sem retorno'
+    );
+
+
+    teste(
+      '17 — Idempotência física',
+      antes === depois,
+      'Antes: ' +
+      antes +
+      ' | Depois: ' +
+      depois
+    );
+
+
+    /*
+     * ==========================================================
+     * RESULTADO FINAL
+     * ==========================================================
+     */
+
+    const aprovados =
+      resultados.filter(
+        function(item) {
+
+          return item.passou;
+
+        }
+      ).length;
+
+
+    const total =
+      resultados.length;
+
+
+    Logger.log(
+      '===================================================='
+    );
+
+
+    resultados.forEach(
+      function(item, indice) {
+
+        Logger.log(
+          (
+            item.passou
+              ? 'PASSOU'
+              : 'FALHOU'
+          )
+          +
+          ' — TESTE '
+          +
+          (indice + 1)
+          +
+          ': '
+          +
+          item.teste
+          +
+          ' — '
+          +
+          item.detalhe
+        );
+
+      }
+    );
+
+
+    Logger.log(
+      '===================================================='
+    );
+
+
+    Logger.log(
+      'RESULTADO V5.9.5: ' +
+      aprovados +
+      '/' +
+      total
+    );
+
+
+    if (
+      aprovados !== total
+    ) {
+
+      throw new Error(
+        'V5.9.5 FALHOU: ' +
+        aprovados +
+        '/' +
+        total
+      );
+
+    }
+
+
+    Logger.log(
+      'TESTAR_INTEGRACAO_REAL_V595: PASSOU'
+    );
+
+
+  } finally {
+
+
+    /*
+     * ==========================================================
+     * LIMPAR SOLUÇÕES DE TESTE
+     * ==========================================================
+     */
+
+    try {
+
+      const abaSolucoes =
+        obterAba_(
+          SHEETS.SOLUCOES
+        );
+
+
+      const dados =
+        abaSolucoes
+          .getDataRange()
+          .getValues();
+
+
+      if (dados.length > 1) {
+
+        const cabecalhos =
+          dados[0];
+
+        const idxId =
+          cabecalhos.indexOf(
+            'solucao_id'
+          );
+
+
+        for (
+          let i = dados.length - 1;
+          i >= 1;
+          i--
+        ) {
+
+          const id =
+            String(
+              dados[i][idxId] || ''
+            );
+
+
+          if (
+            id.indexOf('V595-') === 0
+          ) {
+
+            abaSolucoes.deleteRow(
+              i + 1
+            );
+
+          }
+
+        }
+
+      }
+
+    } catch (erro) {
+
+      Logger.log(
+        'Erro limpeza SOLUCOES: ' +
+        erro.message
+      );
+
+    }
+
+
+    /*
+     * ==========================================================
+     * LIMPAR RELAÇÕES DE TESTE
+     * ==========================================================
+     */
+
+    try {
+
+      if (diagnostico) {
+
+        const abaRelacoes =
+          obterAba_(
+            SHEETS.DIAGNOSTICO_SOLUCOES
+          );
+
+
+        const dados =
+          abaRelacoes
+            .getDataRange()
+            .getValues();
+
+
+        if (dados.length > 1) {
+
+          const cabecalhos =
+            dados[0];
+
+          const idxDiag =
+            cabecalhos.indexOf(
+              'diagnostico_id'
+            );
+
+
+          for (
+            let i = dados.length - 1;
+            i >= 1;
+            i--
+          ) {
+
+            if (
+              String(
+                dados[i][idxDiag] || ''
+              ) ===
+              String(
+                diagnostico.diagnostico_id
+              )
+            ) {
+
+              abaRelacoes.deleteRow(
+                i + 1
+              );
+
+            }
+
+          }
+
+        }
+
+      }
+
+    } catch (erro) {
+
+      Logger.log(
+        'Erro limpeza RELACOES: ' +
+        erro.message
+      );
+
+    }
+
+
+    Logger.log(
+      'LIMPEZA V5.9.5 CONCLUÍDA'
+    );
+
+  }
+
 }
