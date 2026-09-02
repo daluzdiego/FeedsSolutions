@@ -458,16 +458,20 @@ function processarMensagemDiagnostico(dados) {
       contexto.diagnostico || {}
     );
 
-  // A IA pode retornar vazio em uma rodada posterior. O motor nunca
-  // perde uma medida confirmada já existente.
+
+  // A IA pode retornar vazio em uma rodada posterior.
+  // O motor nunca perde uma medida confirmada já existente.
   if (
     !analiseNormalizada.volume &&
     contexto.diagnostico &&
     contexto.diagnostico.volume
   ) {
+
     analiseNormalizada.volume =
       contexto.diagnostico.volume;
+
   }
+
 
   /**
    * ----------------------------------------------------------
@@ -485,7 +489,7 @@ function processarMensagemDiagnostico(dados) {
 
   /**
    * ----------------------------------------------------------
-   * 7. ATUALIZAR DIAGNÓSTICO
+   * 8. ATUALIZAR DIAGNÓSTICO
    * ----------------------------------------------------------
    */
 
@@ -498,7 +502,7 @@ function processarMensagemDiagnostico(dados) {
 
   /**
    * ----------------------------------------------------------
-   * 8. DETERMINAR ESTADO
+   * 9. DETERMINAR ESTADO
    * ----------------------------------------------------------
    */
 
@@ -519,13 +523,14 @@ function processarMensagemDiagnostico(dados) {
 
   /**
    * ----------------------------------------------------------
-   * 8. SALVAR DIAGNÓSTICO
+   * 10. SALVAR DIAGNÓSTICO
    * ----------------------------------------------------------
    */
 
   atualizarDiagnostico_(
     novoDiagnostico
   );
+
 
   // Persistência separada: novas dores e medidas não substituem
   // o diagnóstico consolidado.
@@ -534,6 +539,8 @@ function processarMensagemDiagnostico(dados) {
     analiseContinuidade,
     mensagem
   );
+
+
   /**
    * ----------------------------------------------------------
    * V5.7 — GERAR / ATUALIZAR OPORTUNIDADE
@@ -554,9 +561,35 @@ function processarMensagemDiagnostico(dados) {
       novoDiagnostico
     );
 
+
   /**
    * ----------------------------------------------------------
-   * 9. ATUALIZAR ÚLTIMA INTERAÇÃO DA EMPRESA
+   * V5.8 — GERAR / ATUALIZAR ANÁLISE DIAGNÓSTICA
+   * ----------------------------------------------------------
+   *
+   * A análise só é persistida quando o diagnóstico
+   * possui todos os elementos essenciais.
+   *
+   * A função persistirAnaliseDiagnosticaV58_()
+   * controla:
+   *
+   * - criação;
+   * - atualização;
+   * - idempotência;
+   * - rastreabilidade.
+   *
+   * Diagnóstico incompleto retorna null.
+   */
+
+  const analiseDiagnosticaV58 =
+    persistirAnaliseDiagnosticaV58_(
+      novoDiagnostico
+    );
+
+
+  /**
+   * ----------------------------------------------------------
+   * 11. ATUALIZAR ÚLTIMA INTERAÇÃO DA EMPRESA
    * ----------------------------------------------------------
    */
 
@@ -567,7 +600,7 @@ function processarMensagemDiagnostico(dados) {
 
   /**
    * ----------------------------------------------------------
-   * 10. DETERMINAR RESPOSTA
+   * 12. DETERMINAR RESPOSTA
    * ----------------------------------------------------------
    */
 
@@ -580,7 +613,7 @@ function processarMensagemDiagnostico(dados) {
 
   /**
    * ----------------------------------------------------------
-   * 11. SALVAR RESPOSTA DO SISTEMA
+   * 13. SALVAR RESPOSTA DO SISTEMA
    * ----------------------------------------------------------
    *
    * Só grava se realmente houver uma resposta.
@@ -622,7 +655,7 @@ function processarMensagemDiagnostico(dados) {
 
   /**
    * ----------------------------------------------------------
-   * 12. MÉTRICA
+   * 14. MÉTRICA
    * ----------------------------------------------------------
    */
 
@@ -653,7 +686,7 @@ function processarMensagemDiagnostico(dados) {
 
   /**
    * ----------------------------------------------------------
-   * 13. RETORNO PARA INTERFACE
+   * 15. RETORNO PARA INTERFACE
    * ----------------------------------------------------------
    */
 
@@ -683,19 +716,39 @@ function processarMensagemDiagnostico(dados) {
     analise_ia:
       analiseContinuidade,
 
-  oportunidade:
-    oportunidadeV57
-      ? {
-          acao:
-            oportunidadeV57.acao,
+    oportunidade:
+      oportunidadeV57
+        ? {
+            acao:
+              oportunidadeV57.acao,
 
-          oportunidade_id:
-            oportunidadeV57.oportunidade_id,
+            oportunidade_id:
+              oportunidadeV57.oportunidade_id,
 
-          linha:
-            oportunidadeV57.linha
-        }
-      : null
+            linha:
+              oportunidadeV57.linha
+          }
+        : null,
+
+    analise_diagnostica:
+      analiseDiagnosticaV58
+        ? {
+            acao:
+              analiseDiagnosticaV58.acao,
+
+            analise_id:
+              analiseDiagnosticaV58.analise_id,
+
+            diagnostico_id:
+              analiseDiagnosticaV58.diagnostico_id,
+
+            linha:
+              analiseDiagnosticaV58.linha,
+
+            analise:
+              analiseDiagnosticaV58.analise
+          }
+        : null
 
   };
 
@@ -23509,58 +23562,59 @@ function persistirOportunidadeDiagnosticoV57_(
 
   if (!diagnostico) {
 
-  return null;
+    return null;
 
-}
-
-
-/*
- * ============================================================
- * V5.7 — VOLUME CONSOLIDADO
- * ============================================================
- *
- * O volume não pertence à aba DIAGNOSTICOS.
- * Ele é uma medida persistida em METRICAS.
- *
- * Portanto, antes de construir a oportunidade,
- * recuperamos o último VOLUME confirmado.
- */
-const diagnosticoParaOportunidade =
-  Object.assign(
-    {},
-    diagnostico
-  );
+  }
 
 
-if (
-  !String(
-    diagnosticoParaOportunidade.volume || ''
-  ).trim()
-) {
+  /*
+   * ============================================================
+   * V5.7 — VOLUME CONSOLIDADO
+   * ============================================================
+   *
+   * O volume não pertence à aba DIAGNOSTICOS.
+   * Ele é uma medida persistida em METRICAS.
+   *
+   * Portanto, antes de construir a oportunidade,
+   * recuperamos o último VOLUME confirmado.
+   */
 
-  const medidas =
-    obterMedidasDiagnostico_(
-      diagnostico.empresa_id,
-      diagnostico.conversa_id
+  const diagnosticoParaOportunidade =
+    Object.assign(
+      {},
+      diagnostico
     );
 
 
-  const volumeConsolidado =
-    obterUltimoVolumeDiagnostico_(
-      medidas
+  if (
+    !String(
+      diagnosticoParaOportunidade.volume || ''
+    ).trim()
+  ) {
+
+    const medidas =
+      obterMedidasDiagnostico_(
+        diagnostico.empresa_id,
+        diagnostico.conversa_id
+      );
+
+
+    const volumeConsolidado =
+      obterUltimoVolumeDiagnostico_(
+        medidas
+      );
+
+
+    diagnosticoParaOportunidade.volume =
+      volumeConsolidado || '';
+
+  }
+
+
+  const oportunidade =
+    construirOportunidadeSeProntoDiagnosticoV57_(
+      diagnosticoParaOportunidade
     );
-
-
-  diagnosticoParaOportunidade.volume =
-    volumeConsolidado || '';
-
-}
-
-
-const oportunidade =
-  construirOportunidadeSeProntoDiagnosticoV57_(
-    diagnosticoParaOportunidade
-  );
 
 
   // Diagnóstico ainda não está pronto.
@@ -23610,7 +23664,7 @@ const oportunidade =
     const registro =
       montarRegistroOportunidadeV57_(
         oportunidade,
-        diagnostico,
+        diagnosticoParaOportunidade,
         oportunidadeId,
         existente.criado_em || new Date()
       );
@@ -23674,7 +23728,7 @@ const oportunidade =
   const registro =
     montarRegistroOportunidadeV57_(
       oportunidade,
-      diagnostico,
+      diagnosticoParaOportunidade,
       oportunidadeId,
       new Date()
     );
@@ -24099,14 +24153,27 @@ function TESTAR_PERSISTENCIA_REAL_OPORTUNIDADE_V57() {
 
 function TESTAR_FLUXO_COMPLETO_PRONTO_V57() {
 
-  Logger.log('==============================================');
-  Logger.log('     FEEDS SOLUTIONS — V5.7');
-  Logger.log('     TESTE INTEGRADO — OPORTUNIDADE');
-  Logger.log('==============================================');
+  Logger.log(
+    '=============================================='
+  );
+
+  Logger.log(
+    '     FEEDS SOLUTIONS — V5.7'
+  );
+
+  Logger.log(
+    '     TESTE INTEGRADO — OPORTUNIDADE'
+  );
+
+  Logger.log(
+    '=============================================='
+  );
+
 
   let empresa = null;
   let conversa = null;
   let diagnostico = null;
+
 
   try {
 
@@ -24114,30 +24181,54 @@ function TESTAR_FLUXO_COMPLETO_PRONTO_V57() {
     // 01. CRIAR DIAGNÓSTICO DE TESTE
     // ==================================================
 
-    Logger.log('01 — Criando diagnóstico de teste...');
+    Logger.log(
+      '01 — Criando diagnóstico de teste...'
+    );
 
-    const inicio = iniciarDiagnostico();
 
-    if (!inicio || !inicio.sucesso) {
+    const inicio =
+      iniciarDiagnostico();
+
+
+    if (
+      !inicio ||
+      !inicio.sucesso
+    ) {
+
       throw new Error(
         'Falha ao iniciar diagnóstico: ' +
         JSON.stringify(inicio)
       );
+
     }
 
-    empresa = inicio.empresa_id;
-    conversa = inicio.conversa_id;
-    diagnostico = inicio.diagnostico_id;
+
+    empresa =
+      inicio.empresa_id;
+
+
+    conversa =
+      inicio.conversa_id;
+
+
+    diagnostico =
+      inicio.diagnostico_id;
+
 
     Logger.log(
-      'Diagnóstico criado: ' + diagnostico
+      'Diagnóstico criado: ' +
+      diagnostico
     );
+
 
     // ==================================================
     // 02. PROCESSAR MENSAGEM COMPLETA
     // ==================================================
 
-    Logger.log('02 — Processando mensagem completa...');
+    Logger.log(
+      '02 — Processando mensagem completa...'
+    );
+
 
     const mensagem =
       'Nosso processo principal é conferir e lançar pedidos. ' +
@@ -24147,128 +24238,195 @@ function TESTAR_FLUXO_COMPLETO_PRONTO_V57() {
       'Perdemos aproximadamente 3 horas por dia com esse problema. ' +
       'Nosso objetivo é reduzir os erros e diminuir o retrabalho.';
 
-    const resultado =
-      processarMensagemDiagnostico(
-        empresa,
-        conversa,
-        mensagem
-      );
 
-    if (!resultado || !resultado.sucesso) {
+    /*
+     * IMPORTANTE:
+     *
+     * processarMensagemDiagnostico()
+     * recebe UM objeto "dados".
+     */
+
+    const resultado =
+      processarMensagemDiagnostico({
+
+        empresa_id:
+          empresa,
+
+        conversa_id:
+          conversa,
+
+        mensagem:
+          mensagem
+
+      });
+
+
+    if (
+      !resultado ||
+      !resultado.sucesso
+    ) {
+
       throw new Error(
         'Falha ao processar mensagem: ' +
         JSON.stringify(resultado)
       );
+
     }
+
 
     Logger.log(
       'Estado retornado: ' +
       resultado.estado
     );
 
+
     // ==================================================
     // 03. VERIFICAR DIAGNÓSTICO PRONTO
     // ==================================================
 
-    Logger.log('03 — Verificando PRONTO_PARA_ANALISE...');
+    Logger.log(
+      '03 — Verificando PRONTO_PARA_ANALISE...'
+    );
+
 
     const diagnosticoFinal =
       resultado.diagnostico || {};
+
 
     const estadoFinal =
       String(
         diagnosticoFinal.status_diagnostico ||
         resultado.estado ||
         ''
-      ).trim().toUpperCase();
+      )
+        .trim()
+        .toUpperCase();
+
 
     if (
       estadoFinal !==
       String(
         DIAGNOSTICO_ESTADOS.PRONTO_PARA_ANALISE
-      ).trim().toUpperCase()
+      )
+        .trim()
+        .toUpperCase()
     ) {
+
       throw new Error(
         'Diagnóstico não chegou a PRONTO_PARA_ANALISE. ' +
-        'Estado atual: ' + estadoFinal +
+        'Estado atual: ' +
+        estadoFinal +
         ' | Diagnóstico: ' +
         JSON.stringify(diagnosticoFinal)
       );
+
     }
+
 
     Logger.log(
       'Diagnóstico chegou a PRONTO_PARA_ANALISE.'
     );
 
+
     // ==================================================
     // 04. VERIFICAR OPORTUNIDADE CRIADA
     // ==================================================
 
-    Logger.log('04 — Verificando oportunidade persistida...');
+    Logger.log(
+      '04 — Verificando oportunidade persistida...'
+    );
+
 
     const oportunidade =
       buscarOportunidadePorDiagnosticoV57_(
         diagnostico
       );
 
+
     if (!oportunidade) {
+
       throw new Error(
         'Nenhuma oportunidade foi persistida para o diagnóstico.'
       );
+
     }
+
 
     Logger.log(
       'Oportunidade encontrada: ' +
       JSON.stringify(oportunidade)
     );
 
+
     // ==================================================
     // 05. VERIFICAR ID
     // ==================================================
 
-    Logger.log('05 — Verificando oportunidade_id...');
+    Logger.log(
+      '05 — Verificando oportunidade_id...'
+    );
+
 
     if (
       !String(
         oportunidade.oportunidade_id || ''
       ).trim()
     ) {
+
       throw new Error(
         'Oportunidade encontrada sem oportunidade_id.'
       );
+
     }
+
 
     Logger.log(
       'ID da oportunidade: ' +
       oportunidade.oportunidade_id
     );
 
+
     // ==================================================
     // 06. VERIFICAR DIAGNÓSTICO
     // ==================================================
 
-    Logger.log('06 — Verificando diagnostico_id...');
+    Logger.log(
+      '06 — Verificando diagnostico_id...'
+    );
+
 
     if (
-      String(oportunidade.diagnostico_id || '').trim() !==
-      String(diagnostico || '').trim()
+      String(
+        oportunidade.diagnostico_id || ''
+      ).trim() !==
+      String(
+        diagnostico || ''
+      ).trim()
     ) {
+
       throw new Error(
         'diagnostico_id da oportunidade não corresponde ao diagnóstico.'
       );
+
     }
+
 
     Logger.log(
       'diagnostico_id corretamente relacionado.'
     );
 
+
     // ==================================================
     // 07. VERIFICAR CAMPOS PRINCIPAIS
     // ==================================================
 
-    Logger.log('07 — Verificando dados da oportunidade...');
+    Logger.log(
+      '07 — Verificando dados da oportunidade...'
+    );
+
 
     const camposObrigatorios = [
+
       'processo',
       'dor',
       'frequencia',
@@ -24278,69 +24436,130 @@ function TESTAR_FLUXO_COMPLETO_PRONTO_V57() {
       'prioridade',
       'justificativa',
       'status'
+
     ];
 
-    camposObrigatorios.forEach(function(campo) {
 
-      if (
-        !String(
-          oportunidade[campo] || ''
-        ).trim()
-      ) {
-        throw new Error(
-          'Campo obrigatório vazio na oportunidade: ' +
-          campo
-        );
+    camposObrigatorios.forEach(
+      function(campo) {
+
+        if (
+          !String(
+            oportunidade[campo] || ''
+          ).trim()
+        ) {
+
+          throw new Error(
+            'Campo obrigatório vazio na oportunidade: ' +
+            campo
+          );
+
+        }
+
       }
+    );
 
-    });
 
     Logger.log(
       'Todos os campos principais estão preenchidos.'
     );
 
+
     // ==================================================
-    // 08. VERIFICAR IDEMPOTÊNCIA
+    // 08. VERIFICAR VOLUME
     // ==================================================
 
     Logger.log(
-      '08 — Reprocessando o mesmo diagnóstico...'
+      '08 — Verificando VOLUME consolidado...'
     );
+
+
+    if (
+      !String(
+        oportunidade.volume || ''
+      ).trim()
+    ) {
+
+      throw new Error(
+        'Volume não foi persistido na oportunidade.'
+      );
+
+    }
+
+
+    Logger.log(
+      'Volume persistido: ' +
+      oportunidade.volume
+    );
+
+
+    // ==================================================
+    // 09. VERIFICAR IDEMPOTÊNCIA
+    // ==================================================
+
+    Logger.log(
+      '09 — Reprocessando o mesmo diagnóstico...'
+    );
+
 
     const resultadoPersistencia =
       persistirOportunidadeDiagnosticoV57_(
         diagnosticoFinal
       );
 
+
     if (!resultadoPersistencia) {
+
       throw new Error(
         'Reprocessamento não retornou resultado.'
       );
+
     }
+
 
     Logger.log(
       'Ação no reprocessamento: ' +
       resultadoPersistencia.acao
     );
 
+
+    if (
+      resultadoPersistencia.acao !==
+      'ATUALIZAR'
+    ) {
+
+      throw new Error(
+        'O reprocessamento deveria ATUALIZAR a oportunidade, ' +
+        'mas retornou: ' +
+        resultadoPersistencia.acao
+      );
+
+    }
+
+
     // ==================================================
-    // 09. BUSCAR NOVAMENTE
+    // 10. BUSCAR NOVAMENTE
     // ==================================================
 
     Logger.log(
-      '09 — Confirmando idempotência física...'
+      '10 — Confirmando idempotência física...'
     );
+
 
     const oportunidadeDepois =
       buscarOportunidadePorDiagnosticoV57_(
         diagnostico
       );
 
+
     if (!oportunidadeDepois) {
+
       throw new Error(
         'Oportunidade desapareceu após reprocessamento.'
       );
+
     }
+
 
     if (
       String(
@@ -24350,47 +24569,66 @@ function TESTAR_FLUXO_COMPLETO_PRONTO_V57() {
         oportunidade.oportunidade_id
       ).trim()
     ) {
+
       throw new Error(
         'O reprocessamento criou outro oportunidade_id.'
       );
+
     }
+
 
     Logger.log(
       'Mesmo oportunidade_id mantido: ' +
       oportunidadeDepois.oportunidade_id
     );
 
+
     // ==================================================
-    // 10. CONTAGEM FÍSICA
+    // 11. CONTAGEM FÍSICA
     // ==================================================
 
     Logger.log(
-      '10 — Confirmando apenas uma oportunidade...'
+      '11 — Confirmando apenas uma oportunidade...'
     );
+
 
     const aba =
       obterAbaOportunidadesV57_();
 
+
     if (!aba) {
+
       throw new Error(
         'Aba OPORTUNIDADES não encontrada.'
       );
+
     }
+
 
     const valores =
       aba.getDataRange().getValues();
 
+
     const colunaDiagnostico =
       obterCabecalhosOportunidadesV57_()
-        .indexOf('diagnostico_id');
+        .indexOf(
+          'diagnostico_id'
+        );
 
-    if (colunaDiagnostico < 0) {
+
+    if (
+      colunaDiagnostico < 0
+    ) {
+
       throw new Error(
         'Coluna diagnostico_id não encontrada.'
       );
+
     }
 
+
     let quantidade = 0;
+
 
     for (
       let i = 1;
@@ -24402,60 +24640,90 @@ function TESTAR_FLUXO_COMPLETO_PRONTO_V57() {
         String(
           valores[i][colunaDiagnostico] || ''
         ).trim() ===
-        String(diagnostico || '').trim()
+        String(
+          diagnostico || ''
+        ).trim()
       ) {
+
         quantidade++;
+
       }
 
     }
+
 
     Logger.log(
       'Quantidade física de oportunidades: ' +
       quantidade
     );
 
-    if (quantidade !== 1) {
+
+    if (
+      quantidade !== 1
+    ) {
+
       throw new Error(
         'Falha de idempotência: esperado 1 registro, encontrado ' +
         quantidade
       );
+
     }
 
+
+    // ==================================================
+    // RESULTADO
+    // ==================================================
+
     Logger.log('');
-    Logger.log(
-      '🟢 V5.7 — TESTE INTEGRADO PASSOU'
-    );
-    Logger.log(
-      'Diagnóstico → PRONTO → OPORTUNIDADE → IDEMPOTÊNCIA'
-    );
+
     Logger.log(
       '=============================================='
     );
 
+    Logger.log(
+      '🟢 V5.7 — TESTE INTEGRADO PASSOU'
+    );
+
+    Logger.log(
+      'Diagnóstico → PRONTO → OPORTUNIDADE → VOLUME → IDEMPOTÊNCIA'
+    );
+
+    Logger.log(
+      '=============================================='
+    );
+
+
   } catch (erro) {
 
     Logger.log('');
+
     Logger.log(
       '🔴 V5.7 — TESTE INTEGRADO FALHOU'
     );
+
     Logger.log(
-      'ERRO: ' + erro.message
+      'ERRO: ' +
+      erro.message
     );
+
     Logger.log(
       erro.stack || ''
     );
 
+
     throw erro;
+
 
   } finally {
 
     // ==================================================
-    // LIMPEZA
+    // LIMPEZA DA OPORTUNIDADE DE TESTE
     // ==================================================
 
     Logger.log(
       'Limpando dados do teste...'
     );
+
 
     try {
 
@@ -24463,25 +24731,34 @@ function TESTAR_FLUXO_COMPLETO_PRONTO_V57() {
         typeof diagnostico !== 'undefined' &&
         diagnostico
       ) {
+
         const abaOportunidades =
           obterAbaOportunidadesV57_();
 
-        if (abaOportunidades) {
+
+        if (
+          abaOportunidades
+        ) {
 
           const dados =
             abaOportunidades
               .getDataRange()
               .getValues();
 
+
           const cabecalhos =
             obterCabecalhosOportunidadesV57_();
+
 
           const colDiagnostico =
             cabecalhos.indexOf(
               'diagnostico_id'
             );
 
-          if (colDiagnostico >= 0) {
+
+          if (
+            colDiagnostico >= 0
+          ) {
 
             for (
               let i = dados.length - 1;
@@ -24493,22 +24770,30 @@ function TESTAR_FLUXO_COMPLETO_PRONTO_V57() {
                 String(
                   dados[i][colDiagnostico] || ''
                 ).trim() ===
-                String(diagnostico).trim()
+                String(
+                  diagnostico
+                ).trim()
               ) {
+
                 abaOportunidades.deleteRow(
                   i + 1
                 );
+
               }
 
             }
 
           }
+
         }
+
       }
+
 
       Logger.log(
         'Limpeza da oportunidade concluída.'
       );
+
 
     } catch (limpezaErro) {
 
@@ -24518,5 +24803,3701 @@ function TESTAR_FLUXO_COMPLETO_PRONTO_V57() {
       );
 
     }
+
   }
+
+}
+
+/**
+ * ============================================================
+ * NEURO SOLUTIONS — V5.8
+ * MOTOR DE ANÁLISE DIAGNÓSTICA
+ * ============================================================
+ *
+ * RESPONSABILIDADE:
+ *
+ * Transformar um diagnóstico já confirmado em uma análise
+ * estruturada, determinística e rastreável.
+ *
+ * IMPORTANTE:
+ *
+ * - NÃO altera o diagnóstico.
+ * - NÃO cria novas dores.
+ * - NÃO cria novas métricas.
+ * - NÃO escolhe solução comercial.
+ * - NÃO define preço.
+ * - NÃO inventa causas.
+ * - NÃO utiliza IA nesta primeira camada.
+ *
+ * A análise utiliza somente informações já confirmadas.
+ *
+ * ============================================================
+ */
+
+
+/**
+ * ------------------------------------------------------------
+ * CONSTRUIR ANÁLISE DIAGNÓSTICA V5.8
+ * ------------------------------------------------------------
+ */
+function construirAnaliseDiagnosticaV58_(diagnostico) {
+
+  if (!diagnostico) {
+    return null;
+  }
+
+
+  const processo =
+    String(
+      diagnostico.processo_nome || ''
+    ).trim();
+
+
+  const problema =
+    String(
+      diagnostico.dor_principal || ''
+    ).trim();
+
+
+  const frequencia =
+    String(
+      diagnostico.frequencia || ''
+    ).trim();
+
+
+  const impacto =
+    String(
+      diagnostico.impacto_nivel || ''
+    ).trim();
+
+
+  const objetivo =
+    String(
+      diagnostico.objetivo || ''
+    ).trim();
+
+
+  /*
+   * O VOLUME não fica armazenado diretamente em
+   * DIAGNOSTICOS.
+   *
+   * Ele é recuperado das métricas quando necessário.
+   */
+
+  let volume = '';
+
+
+  try {
+
+    if (
+      typeof obterMedidasDiagnostico_ === 'function'
+    ) {
+
+      const medidas =
+        obterMedidasDiagnostico_(
+          diagnostico.empresa_id,
+          diagnostico.conversa_id
+        );
+
+
+      if (
+        typeof obterUltimoVolumeDiagnostico_ === 'function'
+      ) {
+
+        volume =
+          obterUltimoVolumeDiagnostico_(
+            medidas
+          ) || '';
+
+      }
+
+    }
+
+  } catch (erroVolume) {
+
+    Logger.log(
+      'V5.8 — Não foi possível recuperar VOLUME: ' +
+      erroVolume.message
+    );
+
+  }
+
+
+  /*
+   * ----------------------------------------------------------
+   * VALIDAÇÃO MÍNIMA
+   * ----------------------------------------------------------
+   *
+   * A análise só pode existir quando o diagnóstico estiver
+   * efetivamente pronto.
+   */
+
+  const possuiProcesso =
+    !!processo;
+
+
+  const possuiProblema =
+    !!problema;
+
+
+  const possuiFrequencia =
+    !!frequencia;
+
+
+  const possuiImpacto =
+    !!impacto;
+
+
+  const possuiObjetivo =
+    !!objetivo;
+
+
+  if (
+    !possuiProcesso ||
+    !possuiProblema ||
+    !possuiFrequencia ||
+    !possuiImpacto ||
+    !possuiObjetivo
+  ) {
+
+    return null;
+
+  }
+
+
+  /*
+   * ----------------------------------------------------------
+   * PRIORIDADE
+   * ----------------------------------------------------------
+   *
+   * A prioridade aqui é uma classificação analítica simples.
+   *
+   * Ela NÃO representa decisão comercial.
+   */
+
+  let prioridade =
+    'MÉDIA';
+
+
+  const impactoNormalizado =
+    String(
+      impacto
+    )
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(
+        /[\u0300-\u036f]/g,
+        ''
+      );
+
+
+  const volumeNormalizado =
+    String(
+      volume
+    )
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(
+        /[\u0300-\u036f]/g,
+        '' 
+      );
+
+
+  if (
+    impactoNormalizado.indexOf('alto') >= 0 ||
+    impactoNormalizado.indexOf('alta') >= 0 ||
+    impactoNormalizado.indexOf('grave') >= 0 ||
+    impactoNormalizado.indexOf('grande') >= 0
+  ) {
+
+    prioridade =
+      'ALTA';
+
+  }
+
+
+  if (
+    /\d/.test(volumeNormalizado) &&
+    (
+      volumeNormalizado.indexOf('por dia') >= 0 ||
+      volumeNormalizado.indexOf('diario') >= 0 ||
+      volumeNormalizado.indexOf('diariamente') >= 0
+    )
+  ) {
+
+    prioridade =
+      'ALTA';
+
+  }
+
+
+  /*
+   * ----------------------------------------------------------
+   * EVIDÊNCIAS
+   * ----------------------------------------------------------
+   *
+   * A análise não inventa evidências.
+   *
+   * Cada item abaixo corresponde diretamente a uma informação
+   * existente no diagnóstico.
+   */
+
+  const evidencias = [];
+
+
+  if (processo) {
+
+    evidencias.push(
+      'Processo informado: ' +
+      processo
+    );
+
+  }
+
+
+  if (problema) {
+
+    evidencias.push(
+      'Problema informado: ' +
+      problema
+    );
+
+  }
+
+
+  if (frequencia) {
+
+    evidencias.push(
+      'Frequência informada: ' +
+      frequencia
+    );
+
+  }
+
+
+  if (volume) {
+
+    evidencias.push(
+      'Volume registrado: ' +
+      volume
+    );
+
+  }
+
+
+  if (impacto) {
+
+    evidencias.push(
+      'Impacto informado: ' +
+      impacto
+    );
+
+  }
+
+
+  if (objetivo) {
+
+    evidencias.push(
+      'Objetivo informado: ' +
+      objetivo
+    );
+
+  }
+
+
+  /*
+   * ----------------------------------------------------------
+   * LACUNAS
+   * ----------------------------------------------------------
+   *
+   * Nesta primeira versão, somente registramos lacunas.
+   *
+   * Não transformamos lacuna em fato.
+   */
+
+  const lacunas = [];
+
+
+  if (!volume) {
+
+    lacunas.push(
+      'volume'
+    );
+
+  }
+
+
+  /*
+   * ----------------------------------------------------------
+   * CONFIANÇA
+   * ----------------------------------------------------------
+   *
+   * A confiança é determinada pela completude dos campos
+   * estruturais do diagnóstico.
+   */
+
+  let confianca =
+    'ALTA';
+
+
+  if (
+    evidencias.length < 5
+  ) {
+
+    confianca =
+      'MÉDIA';
+
+  }
+
+
+  /*
+   * ----------------------------------------------------------
+   * RESUMO ANALÍTICO
+   * ----------------------------------------------------------
+   */
+
+  const resumo =
+    'O processo de ' +
+    processo +
+    ' apresenta o problema de ' +
+    problema +
+    ', com frequência ' +
+    frequencia +
+    '. O impacto informado é ' +
+    impacto +
+    '. O objetivo declarado é ' +
+    objetivo +
+    '.';
+
+
+  /*
+   * ----------------------------------------------------------
+   * OPORTUNIDADE
+   * ----------------------------------------------------------
+   *
+   * Aqui NÃO estamos criando uma nova oportunidade comercial.
+   *
+   * Estamos apenas descrevendo a oportunidade analítica
+   * derivada diretamente do diagnóstico.
+   */
+
+  const oportunidadeAnalitica =
+    'Reduzir ' +
+    problema +
+    ' no processo de ' +
+    processo +
+    '.';
+
+
+  /*
+   * ----------------------------------------------------------
+   * RESULTADO
+   * ----------------------------------------------------------
+   */
+
+  return {
+
+    versao:
+      'V5.8',
+
+    diagnostico_id:
+      diagnostico.diagnostico_id || '',
+
+    empresa_id:
+      diagnostico.empresa_id || '',
+
+    conversa_id:
+      diagnostico.conversa_id || '',
+
+    processo:
+      processo,
+
+    problema:
+      problema,
+
+    frequencia:
+      frequencia,
+
+    volume:
+      volume,
+
+    impacto:
+      impacto,
+
+    objetivo:
+      objetivo,
+
+    resumo:
+      resumo,
+
+    oportunidade:
+      oportunidadeAnalitica,
+
+    prioridade:
+      prioridade,
+
+    evidencias:
+      evidencias,
+
+    lacunas:
+      lacunas,
+
+    confianca:
+      confianca,
+
+    criado_em:
+      new Date()
+
+  };
+
+}
+
+/**
+ * ------------------------------------------------------------
+ * ANALISAR SOMENTE SE DIAGNÓSTICO ESTIVER PRONTO
+ * ------------------------------------------------------------
+ */
+function analisarDiagnosticoV58_(diagnostico) {
+
+  if (!diagnostico) {
+
+    return null;
+
+  }
+
+
+  const estado =
+    String(
+      diagnostico.status_diagnostico || ''
+    )
+      .trim()
+      .toUpperCase();
+
+
+  const estadoPronto =
+    String(
+      DIAGNOSTICO_ESTADOS.PRONTO_PARA_ANALISE
+    )
+      .trim()
+      .toUpperCase();
+
+
+  if (
+    estado !== estadoPronto
+  ) {
+
+    return null;
+
+  }
+
+
+  return construirAnaliseDiagnosticaV58_(
+    diagnostico
+  );
+
+}
+
+/**
+ * ============================================================
+ * V5.8 — TESTE DO MOTOR DE ANÁLISE DIAGNÓSTICA
+ * ============================================================
+ */
+function TESTAR_ANALISE_DIAGNOSTICA_V58() {
+
+  Logger.log(
+    '=============================================='
+  );
+
+  Logger.log(
+    '     FEEDS SOLUTIONS — V5.8'
+  );
+
+  Logger.log(
+    '     TESTE DO MOTOR DE ANÁLISE'
+  );
+
+  Logger.log(
+    '=============================================='
+  );
+
+
+  // ==========================================================
+  // DIAGNÓSTICO FICTÍCIO
+  // ==========================================================
+
+  const diagnostico = {
+
+    diagnostico_id:
+      'DIA-TESTE-V58',
+
+    empresa_id:
+      'EMP-TESTE-V58',
+
+    conversa_id:
+      'CONV-TESTE-V58',
+
+    processo_nome:
+      'conferir e lançar pedidos',
+
+    dor_principal:
+      'erros de digitação e retrabalho',
+
+    frequencia:
+      'diariamente',
+
+    impacto_nivel:
+      '3 horas por dia',
+
+    objetivo:
+      'reduzir os erros e diminuir o retrabalho',
+
+    status_diagnostico:
+      DIAGNOSTICO_ESTADOS.PRONTO_PARA_ANALISE
+
+  };
+
+
+  Logger.log(
+    '01 — Diagnóstico de teste criado.'
+  );
+
+
+  // ==========================================================
+  // EXECUTAR MOTOR
+  // ==========================================================
+
+  const analise =
+    analisarDiagnosticoV58_(
+      diagnostico
+    );
+
+
+  if (!analise) {
+
+    throw new Error(
+      'O motor não produziu uma análise.'
+    );
+
+  }
+
+
+  Logger.log(
+    '02 — Análise criada.'
+  );
+
+
+  // ==========================================================
+  // CAMPOS OBRIGATÓRIOS
+  // ==========================================================
+
+  const camposObrigatorios = [
+
+    'versao',
+    'diagnostico_id',
+    'empresa_id',
+    'conversa_id',
+    'processo',
+    'problema',
+    'frequencia',
+    'impacto',
+    'objetivo',
+    'resumo',
+    'oportunidade',
+    'prioridade',
+    'confianca'
+
+  ];
+
+
+  camposObrigatorios.forEach(
+    function(campo) {
+
+      if (
+        !String(
+          analise[campo] || ''
+        ).trim()
+      ) {
+
+        throw new Error(
+          'Campo obrigatório ausente na análise: ' +
+          campo
+        );
+
+      }
+
+    }
+  );
+
+
+  Logger.log(
+    '03 — Campos obrigatórios preenchidos.'
+  );
+
+
+  // ==========================================================
+  // EVIDÊNCIAS
+  // ==========================================================
+
+  if (
+    !Array.isArray(
+      analise.evidencias
+    )
+  ) {
+
+    throw new Error(
+      'Evidências não foram retornadas como array.'
+    );
+
+  }
+
+
+  Logger.log(
+    '04 — Evidências válidas: ' +
+    analise.evidencias.length
+  );
+
+
+  // ==========================================================
+  // LACUNAS
+  // ==========================================================
+
+  if (
+    !Array.isArray(
+      analise.lacunas
+    )
+  ) {
+
+    throw new Error(
+      'Lacunas não foram retornadas como array.'
+    );
+
+  }
+
+
+  Logger.log(
+    '05 — Lacunas válidas: ' +
+    analise.lacunas.length
+  );
+
+
+  // ==========================================================
+  // PROTEÇÃO DO DIAGNÓSTICO ORIGINAL
+  // ==========================================================
+
+  if (
+    diagnostico.processo_nome !==
+    'conferir e lançar pedidos'
+  ) {
+
+    throw new Error(
+      'O diagnóstico original foi alterado.'
+    );
+
+  }
+
+
+  if (
+    diagnostico.dor_principal !==
+    'erros de digitação e retrabalho'
+  ) {
+
+    throw new Error(
+      'A dor original foi alterada.'
+    );
+
+  }
+
+
+  if (
+    diagnostico.frequencia !==
+    'diariamente'
+  ) {
+
+    throw new Error(
+      'A frequência original foi alterada.'
+    );
+
+  }
+
+
+  if (
+    diagnostico.impacto_nivel !==
+    '3 horas por dia'
+  ) {
+
+    throw new Error(
+      'O impacto original foi alterado.'
+    );
+
+  }
+
+
+  if (
+    diagnostico.objetivo !==
+    'reduzir os erros e diminuir o retrabalho'
+  ) {
+
+    throw new Error(
+      'O objetivo original foi alterado.'
+    );
+
+  }
+
+
+  Logger.log(
+    '06 — Diagnóstico original preservado.'
+  );
+
+
+  // ==========================================================
+  // TESTAR BLOQUEIO DE DIAGNÓSTICO INCOMPLETO
+  // ==========================================================
+
+  const diagnosticoIncompleto =
+    Object.assign(
+      {},
+      diagnostico,
+      {
+        objetivo: ''
+      }
+    );
+
+
+  const resultadoIncompleto =
+    analisarDiagnosticoV58_(
+      diagnosticoIncompleto
+    );
+
+
+  if (
+    resultadoIncompleto !== null
+  ) {
+
+    throw new Error(
+      'Diagnóstico incompleto foi analisado indevidamente.'
+    );
+
+  }
+
+
+  Logger.log(
+    '07 — Diagnóstico incompleto corretamente bloqueado.'
+  );
+
+
+  // ==========================================================
+  // RESULTADO
+  // ==========================================================
+
+  Logger.log('');
+
+  Logger.log(
+    'ANÁLISE GERADA:'
+  );
+
+  Logger.log(
+    JSON.stringify(
+      analise,
+      null,
+      2
+    )
+  );
+
+  Logger.log('');
+
+  Logger.log(
+    '=============================================='
+  );
+
+  Logger.log(
+    '🟢 V5.8 — TESTE DO MOTOR DE ANÁLISE PASSOU'
+  );
+
+  Logger.log(
+    '=============================================='
+  );
+
+}
+
+/**
+ * ============================================================
+ * V5.8 — TESTE INTEGRADO COM DIAGNÓSTICO REAL
+ * ============================================================
+ */
+function TESTAR_ANALISE_REAL_V58() {
+
+  Logger.log(
+    '=============================================='
+  );
+
+  Logger.log(
+    '     FEEDS SOLUTIONS — V5.8'
+  );
+
+  Logger.log(
+    '     TESTE INTEGRADO — ANÁLISE REAL'
+  );
+
+  Logger.log(
+    '=============================================='
+  );
+
+
+  let empresaId = '';
+  let conversaId = '';
+  let diagnosticoId = '';
+
+
+  try {
+
+    // ==========================================================
+    // 01 — CRIAR DIAGNÓSTICO REAL
+    // ==========================================================
+
+    Logger.log(
+      '01 — Criando diagnóstico real...'
+    );
+
+
+    const inicio =
+      iniciarDiagnostico({});
+
+
+    if (
+      !inicio ||
+      !inicio.sucesso
+    ) {
+
+      throw new Error(
+        'Falha ao iniciar diagnóstico: ' +
+        JSON.stringify(inicio)
+      );
+
+    }
+
+
+    empresaId =
+      inicio.empresa_id;
+
+
+    conversaId =
+      inicio.conversa_id;
+
+
+    diagnosticoId =
+      inicio.diagnostico_id;
+
+
+    Logger.log(
+      'Diagnóstico: ' +
+      diagnosticoId
+    );
+
+
+    // ==========================================================
+    // 02 — PROCESSAR MENSAGEM REAL
+    // ==========================================================
+
+    Logger.log(
+      '02 — Processando mensagem real...'
+    );
+
+
+    const mensagem =
+      'Nosso processo principal é conferir e lançar pedidos. ' +
+      'Temos erros de digitação e retrabalho nesse processo. ' +
+      'Isso acontece diariamente. ' +
+      'Processamos 120 pedidos por dia. ' +
+      'Perdemos aproximadamente 3 horas por dia com esse problema. ' +
+      'Nosso objetivo é reduzir os erros e diminuir o retrabalho.';
+
+
+    const resultado =
+      processarMensagemDiagnostico({
+
+        empresa_id:
+          empresaId,
+
+        conversa_id:
+          conversaId,
+
+        mensagem:
+          mensagem
+
+      });
+
+
+    if (
+      !resultado ||
+      !resultado.sucesso
+    ) {
+
+      throw new Error(
+        'Falha ao processar mensagem: ' +
+        JSON.stringify(resultado)
+      );
+
+    }
+
+
+    Logger.log(
+      'Estado retornado: ' +
+      resultado.estado
+    );
+
+
+    // ==========================================================
+    // 03 — RECUPERAR DIAGNÓSTICO REAL
+    // ==========================================================
+
+    Logger.log(
+      '03 — Recuperando diagnóstico real...'
+    );
+
+
+    const diagnostico =
+      obterDiagnosticoAtual_(
+        empresaId,
+        conversaId
+      );
+
+
+    if (!diagnostico) {
+
+      throw new Error(
+        'Diagnóstico real não encontrado.'
+      );
+
+    }
+
+
+    Logger.log(
+      'Diagnóstico recuperado.'
+    );
+
+
+    // ==========================================================
+    // 04 — CONFIRMAR ESTADO
+    // ==========================================================
+
+    Logger.log(
+      '04 — Confirmando PRONTO_PARA_ANALISE...'
+    );
+
+
+    const estado =
+      String(
+        diagnostico.status_diagnostico || ''
+      )
+        .trim()
+        .toUpperCase();
+
+
+    if (
+      estado !==
+      String(
+        DIAGNOSTICO_ESTADOS.PRONTO_PARA_ANALISE
+      )
+        .trim()
+        .toUpperCase()
+    ) {
+
+      throw new Error(
+        'Diagnóstico não chegou a PRONTO_PARA_ANALISE. ' +
+        'Estado atual: ' +
+        estado
+      );
+
+    }
+
+
+    Logger.log(
+      'Diagnóstico está PRONTO_PARA_ANALISE.'
+    );
+
+
+    // ==========================================================
+    // 05 — EXECUTAR MOTOR V5.8
+    // ==========================================================
+
+    Logger.log(
+      '05 — Executando Motor de Análise V5.8...'
+    );
+
+
+    const analise =
+      analisarDiagnosticoV58_(
+        diagnostico
+      );
+
+
+    if (!analise) {
+
+      throw new Error(
+        'Motor V5.8 não produziu análise.'
+      );
+
+    }
+
+
+    Logger.log(
+      'Análise produzida.'
+    );
+
+
+    // ==========================================================
+    // 06 — VALIDAR VOLUME REAL
+    // ==========================================================
+
+    Logger.log(
+      '06 — Validando VOLUME real...'
+    );
+
+
+    if (
+      !String(
+        analise.volume || ''
+      ).trim()
+    ) {
+
+      throw new Error(
+        'Motor V5.8 não recuperou o VOLUME real das METRICAS.'
+      );
+
+    }
+
+
+    Logger.log(
+      'VOLUME recuperado: ' +
+      analise.volume
+    );
+
+
+    // ==========================================================
+    // 07 — VALIDAR PRIORIDADE
+    // ==========================================================
+
+    Logger.log(
+      '07 — Validando prioridade...'
+    );
+
+
+    if (
+      String(
+        analise.prioridade || ''
+      ).trim().toUpperCase() !==
+      'ALTA'
+    ) {
+
+      throw new Error(
+        'Prioridade esperada ALTA, encontrada: ' +
+        analise.prioridade
+      );
+
+    }
+
+
+    Logger.log(
+      'Prioridade: ' +
+      analise.prioridade
+    );
+
+
+    // ==========================================================
+    // 08 — VALIDAR DADOS PRINCIPAIS
+    // ==========================================================
+
+    Logger.log(
+      '08 — Validando dados principais...'
+    );
+
+
+    const campos =
+      [
+        'processo',
+        'problema',
+        'frequencia',
+        'impacto',
+        'objetivo',
+        'volume',
+        'resumo',
+        'oportunidade'
+      ];
+
+
+    campos.forEach(
+      function(campo) {
+
+        if (
+          !String(
+            analise[campo] || ''
+          ).trim()
+        ) {
+
+          throw new Error(
+            'Campo ausente na análise real: ' +
+            campo
+          );
+
+        }
+
+      }
+    );
+
+
+    Logger.log(
+      'Todos os dados principais foram confirmados.'
+    );
+
+
+    // ==========================================================
+    // 09 — VALIDAR RASTREABILIDADE
+    // ==========================================================
+
+    Logger.log(
+      '09 — Validando rastreabilidade...'
+    );
+
+
+    if (
+      String(
+        analise.diagnostico_id || ''
+      ).trim() !==
+      String(
+        diagnosticoId
+      ).trim()
+    ) {
+
+      throw new Error(
+        'diagnostico_id da análise não corresponde ao diagnóstico real.'
+      );
+
+    }
+
+
+    if (
+      String(
+        analise.empresa_id || ''
+      ).trim() !==
+      String(
+        empresaId
+      ).trim()
+    ) {
+
+      throw new Error(
+        'empresa_id da análise não corresponde ao diagnóstico real.'
+      );
+
+    }
+
+
+    if (
+      String(
+        analise.conversa_id || ''
+      ).trim() !==
+      String(
+        conversaId
+      ).trim()
+    ) {
+
+      throw new Error(
+        'conversa_id da análise não corresponde ao diagnóstico real.'
+      );
+
+    }
+
+
+    Logger.log(
+      'Rastreabilidade confirmada.'
+    );
+
+
+    // ==========================================================
+    // 10 — RESULTADO
+    // ==========================================================
+
+    Logger.log('');
+
+    Logger.log(
+      'ANÁLISE REAL GERADA:'
+    );
+
+
+    Logger.log(
+      JSON.stringify(
+        analise,
+        null,
+        2
+      )
+    );
+
+
+    Logger.log('');
+
+    Logger.log(
+      '=============================================='
+    );
+
+    Logger.log(
+      '🟢 V5.8 — TESTE INTEGRADO REAL PASSOU'
+    );
+
+    Logger.log(
+      'Diagnóstico real → METRICAS → Análise V5.8'
+    );
+
+    Logger.log(
+      '=============================================='
+    );
+
+
+  } catch (erro) {
+
+    Logger.log('');
+
+    Logger.log(
+      '🔴 V5.8 — TESTE INTEGRADO REAL FALHOU'
+    );
+
+    Logger.log(
+      'ERRO: ' +
+      erro.message
+    );
+
+    Logger.log(
+      erro.stack || ''
+    );
+
+
+    throw erro;
+
+  }
+
+}
+
+function TESTAR_INTEGRACAO_V58_FLUXO_PRINCIPAL() {
+
+  Logger.log('==============================================');
+  Logger.log('     FEEDS SOLUTIONS — V5.8');
+  Logger.log('     TESTE INTEGRAÇÃO NO FLUXO PRINCIPAL');
+  Logger.log('==============================================');
+
+  let empresaId = '';
+  let conversaId = '';
+
+  try {
+
+    Logger.log('01 — Criando diagnóstico real...');
+
+    const inicio =
+      iniciarDiagnostico({});
+
+    if (
+      !inicio ||
+      !inicio.sucesso
+    ) {
+      throw new Error(
+        'Falha ao iniciar diagnóstico: ' +
+        JSON.stringify(inicio)
+      );
+    }
+
+    empresaId =
+      inicio.empresa_id;
+
+    conversaId =
+      inicio.conversa_id;
+
+    Logger.log(
+      'Diagnóstico: ' +
+      inicio.diagnostico_id
+    );
+
+
+    Logger.log(
+      '02 — Executando fluxo principal...'
+    );
+
+    const mensagem =
+      'Nosso processo principal é conferir e lançar pedidos. ' +
+      'Temos erros de digitação e retrabalho nesse processo. ' +
+      'Isso acontece diariamente. ' +
+      'Processamos 120 pedidos por dia. ' +
+      'Perdemos aproximadamente 3 horas por dia com esse problema. ' +
+      'Nosso objetivo é reduzir os erros e diminuir o retrabalho.';
+
+
+    const resultado =
+      processarMensagemDiagnostico({
+
+        empresa_id:
+          empresaId,
+
+        conversa_id:
+          conversaId,
+
+        mensagem:
+          mensagem
+
+      });
+
+
+    if (
+      !resultado ||
+      !resultado.sucesso
+    ) {
+
+      throw new Error(
+        'Fluxo principal não retornou sucesso: ' +
+        JSON.stringify(resultado)
+      );
+
+    }
+
+
+    Logger.log(
+      'Fluxo principal executado.'
+    );
+
+
+    Logger.log(
+      '03 — Validando estado...'
+    );
+
+    const estado =
+      String(
+        resultado.estado || ''
+      )
+        .trim()
+        .toUpperCase();
+
+
+    if (
+      estado !==
+      String(
+        DIAGNOSTICO_ESTADOS.PRONTO_PARA_ANALISE
+      )
+        .trim()
+        .toUpperCase()
+    ) {
+
+      throw new Error(
+        'Estado inesperado: ' +
+        estado
+      );
+
+    }
+
+
+    Logger.log(
+      'Estado: ' +
+      estado
+    );
+
+
+    Logger.log(
+      '04 — Validando oportunidade V5.7...'
+    );
+
+    if (
+      !resultado.oportunidade
+    ) {
+
+      throw new Error(
+        'Oportunidade V5.7 não foi retornada.'
+      );
+
+    }
+
+
+    if (
+      !resultado.oportunidade.oportunidade_id
+    ) {
+
+      throw new Error(
+        'oportunidade_id não foi retornado.'
+      );
+
+    }
+
+
+    Logger.log(
+      'Oportunidade: ' +
+      resultado.oportunidade.oportunidade_id
+    );
+
+
+    Logger.log(
+      '05 — Validando análise V5.8...'
+    );
+
+    if (
+      !resultado.analise_diagnostica
+    ) {
+
+      throw new Error(
+        'ANÁLISE V5.8 NÃO FOI RETORNADA PELO FLUXO PRINCIPAL.'
+      );
+
+    }
+
+
+    const analise =
+      resultado.analise_diagnostica;
+
+
+    Logger.log(
+      'Análise V5.8 retornada.'
+    );
+
+
+    Logger.log(
+      '06 — Validando versão...'
+    );
+
+    if (
+      String(
+        analise.versao || ''
+      ).trim() !==
+      'V5.8'
+    ) {
+
+      throw new Error(
+        'Versão da análise inesperada: ' +
+        analise.versao
+      );
+
+    }
+
+
+    Logger.log(
+      'Versão: ' +
+      analise.versao
+    );
+
+
+    Logger.log(
+      '07 — Validando rastreabilidade...'
+    );
+
+    if (
+      String(
+        analise.diagnostico_id || ''
+      ).trim() !==
+      String(
+        resultado.diagnostico_id || ''
+      ).trim()
+    ) {
+
+      throw new Error(
+        'diagnostico_id da análise não corresponde ao resultado.'
+      );
+
+    }
+
+
+    if (
+      String(
+        analise.empresa_id || ''
+      ).trim() !==
+      String(
+        empresaId
+      ).trim()
+    ) {
+
+      throw new Error(
+        'empresa_id da análise não corresponde à empresa.'
+      );
+
+    }
+
+
+    if (
+      String(
+        analise.conversa_id || ''
+      ).trim() !==
+      String(
+        conversaId
+      ).trim()
+    ) {
+
+      throw new Error(
+        'conversa_id da análise não corresponde à conversa.'
+      );
+
+    }
+
+
+    Logger.log(
+      'Rastreabilidade confirmada.'
+    );
+
+
+    Logger.log(
+      '08 — Validando campos principais...'
+    );
+
+    const campos =
+      [
+        'processo',
+        'problema',
+        'frequencia',
+        'volume',
+        'impacto',
+        'objetivo',
+        'resumo',
+        'oportunidade',
+        'prioridade',
+        'confianca'
+      ];
+
+
+    campos.forEach(
+      function(campo) {
+
+        if (
+          !String(
+            analise[campo] || ''
+          ).trim()
+        ) {
+
+          throw new Error(
+            'Campo ausente na análise V5.8: ' +
+            campo
+          );
+
+        }
+
+      }
+    );
+
+
+    Logger.log(
+      'Todos os campos principais presentes.'
+    );
+
+
+    Logger.log(
+      '09 — Validando evidências...'
+    );
+
+    if (
+      !Array.isArray(
+        analise.evidencias
+      )
+    ) {
+
+      throw new Error(
+        'evidencias não é um array.'
+      );
+
+    }
+
+
+    if (
+      analise.evidencias.length <
+      5
+    ) {
+
+      throw new Error(
+        'Quantidade insuficiente de evidências: ' +
+        analise.evidencias.length
+      );
+
+    }
+
+
+    Logger.log(
+      'Evidências: ' +
+      analise.evidencias.length
+    );
+
+
+    Logger.log(
+      '10 — Validando lacunas...'
+    );
+
+    if (
+      !Array.isArray(
+        analise.lacunas
+      )
+    ) {
+
+      throw new Error(
+        'lacunas não é um array.'
+      );
+
+    }
+
+
+    Logger.log(
+      'Lacunas: ' +
+      analise.lacunas.length
+    );
+
+
+    Logger.log('');
+    Logger.log(
+      'ANÁLISE V5.8 RETORNADA PELO FLUXO PRINCIPAL:'
+    );
+
+    Logger.log(
+      JSON.stringify(
+        analise,
+        null,
+        2
+      )
+    );
+
+    Logger.log('');
+
+    Logger.log(
+      '=============================================='
+    );
+
+    Logger.log(
+      '🟢 V5.8 — INTEGRAÇÃO NO FLUXO PRINCIPAL PASSOU'
+    );
+
+    Logger.log(
+      'Mensagem → Diagnóstico → Oportunidade → Análise'
+    );
+
+    Logger.log(
+      '=============================================='
+    );
+
+
+  } catch (erro) {
+
+    Logger.log('');
+
+    Logger.log(
+      '🔴 V5.8 — INTEGRAÇÃO NO FLUXO PRINCIPAL FALHOU'
+    );
+
+    Logger.log(
+      'ERRO: ' +
+      erro.message
+    );
+
+    Logger.log(
+      erro.stack || ''
+    );
+
+    throw erro;
+
+  } finally {
+
+    /**
+     * --------------------------------------------------------
+     * LIMPEZA
+     * --------------------------------------------------------
+     *
+     * A própria função de teste deverá remover os dados
+     * temporários se você já possuir o padrão de limpeza
+     * utilizado nos testes V5.6/V5.7.
+     *
+     * Não apagamos dados aqui de forma arbitrária.
+     */
+
+    Logger.log(
+      'Teste finalizado.'
+    );
+
+  }
+
+}
+
+/**
+ * ============================================================
+ * V5.8 — PERSISTÊNCIA DA ANÁLISE DIAGNÓSTICA
+ * ============================================================
+ *
+ * Responsabilidades:
+ *
+ * - localizar a aba ANALISES_DIAGNOSTICAS;
+ * - localizar análise pelo diagnostico_id;
+ * - criar uma análise quando ainda não existe;
+ * - atualizar a mesma análise quando já existe;
+ * - impedir duplicação;
+ * - preservar rastreabilidade;
+ *
+ * NÃO:
+ * - altera DIAGNOSTICOS;
+ * - cria DORES;
+ * - cria METRICAS;
+ * - cria OPORTUNIDADES;
+ * - escolhe solução;
+ * - define preço.
+ * ============================================================
+ */
+
+
+/**
+ * ------------------------------------------------------------
+ * OBTER ABA DE ANÁLISES
+ * ------------------------------------------------------------
+ */
+
+function obterAbaAnalisesDiagnosticasV58_() {
+
+  const ss =
+    SpreadsheetApp.getActiveSpreadsheet();
+
+  const sheet =
+    ss.getSheetByName(
+      'ANALISES_DIAGNOSTICAS'
+    );
+
+  if (!sheet) {
+
+    throw new Error(
+      'Aba ANALISES_DIAGNOSTICAS não encontrada.'
+    );
+
+  }
+
+  return sheet;
+
+}
+
+
+/**
+ * ------------------------------------------------------------
+ * OBTER CABEÇALHOS
+ * ------------------------------------------------------------
+ */
+
+function obterCabecalhosAnalisesDiagnosticasV58_() {
+
+  const sheet =
+    obterAbaAnalisesDiagnosticasV58_();
+
+  const ultimaColuna =
+    sheet.getLastColumn();
+
+  if (
+    ultimaColuna < 1
+  ) {
+
+    throw new Error(
+      'Aba ANALISES_DIAGNOSTICAS sem cabeçalhos.'
+    );
+
+  }
+
+  return sheet
+    .getRange(
+      1,
+      1,
+      1,
+      ultimaColuna
+    )
+    .getValues()[0];
+
+}
+
+
+/**
+ * ------------------------------------------------------------
+ * BUSCAR ANÁLISE POR DIAGNÓSTICO
+ * ------------------------------------------------------------
+ */
+
+function buscarAnaliseDiagnosticaV58_(
+  diagnosticoId
+) {
+
+  const id =
+    String(
+      diagnosticoId || ''
+    ).trim();
+
+  if (!id) {
+    return null;
+  }
+
+  const sheet =
+    obterAbaAnalisesDiagnosticasV58_();
+
+  const ultimaLinha =
+    sheet.getLastRow();
+
+  if (
+    ultimaLinha < 2
+  ) {
+
+    return null;
+
+  }
+
+  const cabecalhos =
+    obterCabecalhosAnalisesDiagnosticasV58_();
+
+  const colunaDiagnostico =
+    cabecalhos.indexOf(
+      'diagnostico_id'
+    );
+
+  if (
+    colunaDiagnostico === -1
+  ) {
+
+    throw new Error(
+      'Cabeçalho diagnostico_id não encontrado em ANALISES_DIAGNOSTICAS.'
+    );
+
+  }
+
+  const dados =
+    sheet
+      .getRange(
+        2,
+        1,
+        ultimaLinha - 1,
+        cabecalhos.length
+      )
+      .getValues();
+
+  for (
+    let i = 0;
+    i < dados.length;
+    i++
+  ) {
+
+    const valor =
+      String(
+        dados[i][colunaDiagnostico] || ''
+      ).trim();
+
+    if (
+      valor === id
+    ) {
+
+      const registro = {};
+
+      cabecalhos.forEach(
+        function(
+          cabecalho,
+          indice
+        ) {
+
+          registro[cabecalho] =
+            dados[i][indice];
+
+        }
+      );
+
+      registro.linha =
+        i + 2;
+
+      return registro;
+
+    }
+
+  }
+
+  return null;
+
+}
+
+
+/**
+ * ------------------------------------------------------------
+ * GERAR ID DA ANÁLISE
+ * ------------------------------------------------------------
+ */
+
+function gerarIdAnaliseDiagnosticaV58_() {
+
+  return (
+    'ANA-' +
+    Utilities.getUuid()
+  );
+
+}
+
+
+/**
+ * ------------------------------------------------------------
+ * SERIALIZAR ARRAY
+ * ------------------------------------------------------------
+ */
+
+function serializarAnaliseDiagnosticaV58_(
+  valor
+) {
+
+  if (
+    Array.isArray(valor)
+  ) {
+
+    return JSON.stringify(
+      valor
+    );
+
+  }
+
+  if (
+    valor === null ||
+    valor === undefined
+  ) {
+
+    return '[]';
+
+  }
+
+  const texto =
+    String(
+      valor
+    ).trim();
+
+  if (!texto) {
+    return '[]';
+  }
+
+  return JSON.stringify([
+    texto
+  ]);
+
+}
+
+
+/**
+ * ------------------------------------------------------------
+ * MONTAR REGISTRO
+ * ------------------------------------------------------------
+ */
+
+function montarRegistroAnaliseDiagnosticaV58_(
+  analise,
+  analiseId,
+  dataCriacao
+) {
+
+  if (!analise) {
+
+    throw new Error(
+      'Análise V5.8 não informada.'
+    );
+
+  }
+
+  const agora =
+    new Date();
+
+  const criadoEm =
+    dataCriacao ||
+    analise.criado_em ||
+    agora;
+
+  const atualizadoEm =
+    agora;
+
+  return [
+
+    analiseId,
+
+    String(
+      analise.diagnostico_id || ''
+    ).trim(),
+
+    String(
+      analise.empresa_id || ''
+    ).trim(),
+
+    String(
+      analise.conversa_id || ''
+    ).trim(),
+
+    String(
+      analise.versao || 'V5.8'
+    ).trim(),
+
+    String(
+      analise.processo || ''
+    ).trim(),
+
+    String(
+      analise.problema || ''
+    ).trim(),
+
+    String(
+      analise.frequencia || ''
+    ).trim(),
+
+    String(
+      analise.volume || ''
+    ).trim(),
+
+    String(
+      analise.impacto || ''
+    ).trim(),
+
+    String(
+      analise.objetivo || ''
+    ).trim(),
+
+    String(
+      analise.resumo || ''
+    ).trim(),
+
+    String(
+      analise.oportunidade || ''
+    ).trim(),
+
+    String(
+      analise.prioridade || ''
+    ).trim(),
+
+    serializarAnaliseDiagnosticaV58_(
+      analise.evidencias
+    ),
+
+    serializarAnaliseDiagnosticaV58_(
+      analise.lacunas
+    ),
+
+    String(
+      analise.confianca || ''
+    ).trim(),
+
+    criadoEm,
+
+    atualizadoEm
+
+  ];
+
+}
+
+
+/**
+ * ------------------------------------------------------------
+ * PERSISTIR ANÁLISE V5.8
+ * ------------------------------------------------------------
+ */
+
+function persistirAnaliseDiagnosticaV58_(
+  diagnostico
+) {
+
+  if (!diagnostico) {
+
+    return null;
+
+  }
+
+
+  /**
+   * A análise é construída somente a partir
+   * do diagnóstico consolidado.
+   */
+
+  const analise =
+    analisarDiagnosticoV58_(
+      diagnostico
+    );
+
+
+  if (!analise) {
+
+    return null;
+
+  }
+
+
+  const diagnosticoId =
+    String(
+      analise.diagnostico_id || ''
+    ).trim();
+
+
+  if (!diagnosticoId) {
+
+    throw new Error(
+      'Análise V5.8 sem diagnostico_id.'
+    );
+
+  }
+
+
+  const sheet =
+    obterAbaAnalisesDiagnosticasV58_();
+
+
+  const existente =
+    buscarAnaliseDiagnosticaV58_(
+      diagnosticoId
+    );
+
+
+  /**
+   * ----------------------------------------------------------
+   * ATUALIZAÇÃO
+   * ----------------------------------------------------------
+   */
+
+  if (existente) {
+
+    const analiseId =
+      String(
+        existente.analise_id || ''
+      ).trim();
+
+
+    if (!analiseId) {
+
+      throw new Error(
+        'Registro de análise existente sem analise_id.'
+      );
+
+    }
+
+
+    const registro =
+      montarRegistroAnaliseDiagnosticaV58_(
+        analise,
+        analiseId,
+        existente.criado_em || new Date()
+      );
+
+
+    sheet
+      .getRange(
+        existente.linha,
+        1,
+        1,
+        registro.length
+      )
+      .setValues([
+        registro
+      ]);
+
+
+    return {
+
+      acao:
+        'ATUALIZAR',
+
+      analise_id:
+        analiseId,
+
+      diagnostico_id:
+        diagnosticoId,
+
+      linha:
+        existente.linha,
+
+      analise:
+        analise
+
+    };
+
+  }
+
+
+  /**
+   * ----------------------------------------------------------
+   * CRIAÇÃO
+   * ----------------------------------------------------------
+   */
+
+  const analiseId =
+    gerarIdAnaliseDiagnosticaV58_();
+
+
+  const registro =
+    montarRegistroAnaliseDiagnosticaV58_(
+      analise,
+      analiseId,
+      new Date()
+    );
+
+
+  const novaLinha =
+    sheet.getLastRow() + 1;
+
+
+  sheet
+    .getRange(
+      novaLinha,
+      1,
+      1,
+      registro.length
+    )
+    .setValues([
+      registro
+    ]);
+
+
+  return {
+
+    acao:
+      'CRIAR',
+
+    analise_id:
+      analiseId,
+
+    diagnostico_id:
+      diagnosticoId,
+
+    linha:
+      novaLinha,
+
+    analise:
+      analise
+
+  };
+
+}
+
+function TESTAR_PERSISTENCIA_ANALISE_V58() {
+
+  Logger.log(
+    '=============================================='
+  );
+
+  Logger.log(
+    '     FEEDS SOLUTIONS — V5.8'
+  );
+
+  Logger.log(
+    '     TESTE PERSISTÊNCIA + IDEMPOTÊNCIA'
+  );
+
+  Logger.log(
+    '=============================================='
+  );
+
+
+  let empresaId = '';
+  let conversaId = '';
+  let diagnosticoId = '';
+
+  try {
+
+    Logger.log(
+      '01 — Criando diagnóstico real...'
+    );
+
+
+    const inicio =
+      iniciarDiagnostico({});
+
+
+    if (
+      !inicio ||
+      !inicio.sucesso
+    ) {
+
+      throw new Error(
+        'Falha ao iniciar diagnóstico: ' +
+        JSON.stringify(inicio)
+      );
+
+    }
+
+
+    empresaId =
+      inicio.empresa_id;
+
+    conversaId =
+      inicio.conversa_id;
+
+    diagnosticoId =
+      inicio.diagnostico_id;
+
+
+    Logger.log(
+      'Diagnóstico: ' +
+      diagnosticoId
+    );
+
+
+    Logger.log(
+      '02 — Processando mensagem real...'
+    );
+
+
+    const mensagem =
+      'Nosso processo principal é conferir e lançar pedidos. ' +
+      'Temos erros de digitação e retrabalho nesse processo. ' +
+      'Isso acontece diariamente. ' +
+      'Processamos 120 pedidos por dia. ' +
+      'Perdemos aproximadamente 3 horas por dia com esse problema. ' +
+      'Nosso objetivo é reduzir os erros e diminuir o retrabalho.';
+
+
+    const resultado =
+      processarMensagemDiagnostico({
+
+        empresa_id:
+          empresaId,
+
+        conversa_id:
+          conversaId,
+
+        mensagem:
+          mensagem
+
+      });
+
+
+    if (
+      !resultado ||
+      !resultado.sucesso
+    ) {
+
+      throw new Error(
+        'Falha no processamento: ' +
+        JSON.stringify(resultado)
+      );
+
+    }
+
+
+    Logger.log(
+      'Fluxo processado.'
+    );
+
+
+    Logger.log(
+      '03 — Recuperando diagnóstico...'
+    );
+
+
+    const diagnostico =
+      obterDiagnosticoAtual_(
+        empresaId,
+        conversaId
+      );
+
+
+    if (!diagnostico) {
+
+      throw new Error(
+        'Diagnóstico não encontrado.'
+      );
+
+    }
+
+
+    Logger.log(
+      'Diagnóstico recuperado.'
+    );
+
+
+    Logger.log(
+      '04 — Confirmando PRONTO_PARA_ANALISE...'
+    );
+
+
+    const estado =
+      String(
+        diagnostico.status_diagnostico || ''
+      )
+        .trim()
+        .toUpperCase();
+
+
+    if (
+      estado !==
+      String(
+        DIAGNOSTICO_ESTADOS.PRONTO_PARA_ANALISE
+      )
+        .trim()
+        .toUpperCase()
+    ) {
+
+      throw new Error(
+        'Diagnóstico não está pronto. Estado: ' +
+        estado
+      );
+
+    }
+
+
+    Logger.log(
+      'Diagnóstico pronto.'
+    );
+
+
+    Logger.log(
+      '05 — Persistindo análise V5.8...'
+    );
+
+
+    const primeira =
+      persistirAnaliseDiagnosticaV58_(
+        diagnostico
+      );
+
+
+    if (
+      !primeira
+    ) {
+
+      throw new Error(
+        'Primeira persistência não produziu resultado.'
+      );
+
+    }
+
+
+    if (
+      primeira.acao !==
+      'CRIAR'
+    ) {
+
+      throw new Error(
+        'Primeira persistência deveria ser CRIAR. ' +
+        'Encontrado: ' +
+        primeira.acao
+      );
+
+    }
+
+
+    Logger.log(
+      'Análise criada: ' +
+      primeira.analise_id
+    );
+
+
+    Logger.log(
+      '06 — Recuperando análise física...'
+    );
+
+
+    const recuperada =
+      buscarAnaliseDiagnosticaV58_(
+        diagnosticoId
+      );
+
+
+    if (
+      !recuperada
+    ) {
+
+      throw new Error(
+        'Análise não foi encontrada fisicamente na planilha.'
+      );
+
+    }
+
+
+    Logger.log(
+      'Análise encontrada na linha ' +
+      recuperada.linha
+    );
+
+
+    Logger.log(
+      '07 — Validando rastreabilidade...'
+    );
+
+
+    if (
+      String(
+        recuperada.diagnostico_id || ''
+      ).trim() !==
+      String(
+        diagnosticoId
+      ).trim()
+    ) {
+
+      throw new Error(
+        'diagnostico_id não corresponde.'
+      );
+
+    }
+
+
+    if (
+      String(
+        recuperada.empresa_id || ''
+      ).trim() !==
+      String(
+        empresaId
+      ).trim()
+    ) {
+
+      throw new Error(
+        'empresa_id não corresponde.'
+      );
+
+    }
+
+
+    if (
+      String(
+        recuperada.conversa_id || ''
+      ).trim() !==
+      String(
+        conversaId
+      ).trim()
+    ) {
+
+      throw new Error(
+        'conversa_id não corresponde.'
+      );
+
+    }
+
+
+    Logger.log(
+      'Rastreabilidade confirmada.'
+    );
+
+
+    Logger.log(
+      '08 — Validando VOLUME persistido...'
+    );
+
+
+    if (
+      String(
+        recuperada.volume || ''
+      ).trim() !==
+      '120 pedidos por dia'
+    ) {
+
+      throw new Error(
+        'VOLUME incorreto: ' +
+        recuperada.volume
+      );
+
+    }
+
+
+    Logger.log(
+      'VOLUME: ' +
+      recuperada.volume
+    );
+
+
+    Logger.log(
+      '09 — Persistindo novamente...'
+    );
+
+
+    const segunda =
+      persistirAnaliseDiagnosticaV58_(
+        diagnostico
+      );
+
+
+    if (
+      !segunda
+    ) {
+
+      throw new Error(
+        'Segunda persistência não produziu resultado.'
+      );
+
+    }
+
+
+    if (
+      segunda.acao !==
+      'ATUALIZAR'
+    ) {
+
+      throw new Error(
+        'Segunda persistência deveria ser ATUALIZAR. ' +
+        'Encontrado: ' +
+        segunda.acao
+      );
+
+    }
+
+
+    Logger.log(
+      'Segunda operação: ATUALIZAR'
+    );
+
+
+    Logger.log(
+      '10 — Validando mesmo analise_id...'
+    );
+
+
+    if (
+      String(
+        segunda.analise_id
+      ).trim() !==
+      String(
+        primeira.analise_id
+      ).trim()
+    ) {
+
+      throw new Error(
+        'A segunda execução criou outro analise_id.'
+      );
+
+    }
+
+
+    Logger.log(
+      'Mesmo analise_id confirmado.'
+    );
+
+
+    Logger.log(
+      '11 — Contando registros físicos...'
+    );
+
+
+    const sheet =
+      obterAbaAnalisesDiagnosticasV58_();
+
+
+    const ultimaLinha =
+      sheet.getLastRow();
+
+
+    const cabecalhos =
+      obterCabecalhosAnalisesDiagnosticasV58_();
+
+
+    const colunaDiagnostico =
+      cabecalhos.indexOf(
+        'diagnostico_id'
+      );
+
+
+    if (
+      colunaDiagnostico === -1
+    ) {
+
+      throw new Error(
+        'Coluna diagnostico_id não encontrada.'
+      );
+
+    }
+
+
+    let quantidade = 0;
+
+
+    if (
+      ultimaLinha >= 2
+    ) {
+
+      const valores =
+        sheet
+          .getRange(
+            2,
+            colunaDiagnostico + 1,
+            ultimaLinha - 1,
+            1
+          )
+          .getValues();
+
+
+      valores.forEach(
+        function(linha) {
+
+          if (
+            String(
+              linha[0] || ''
+            ).trim() ===
+            String(
+              diagnosticoId
+            ).trim()
+          ) {
+
+            quantidade++;
+
+          }
+
+        }
+      );
+
+    }
+
+
+    Logger.log(
+      'Registros físicos para o diagnóstico: ' +
+      quantidade
+    );
+
+
+    if (
+      quantidade !== 1
+    ) {
+
+      throw new Error(
+        'IDEMPOTÊNCIA FALHOU. ' +
+        'Esperado 1 registro, encontrado: ' +
+        quantidade
+      );
+
+    }
+
+
+    Logger.log(
+      'Idempotência confirmada.'
+    );
+
+
+    Logger.log('');
+    Logger.log(
+      'ANÁLISE PERSISTIDA:'
+    );
+
+
+    Logger.log(
+      JSON.stringify(
+        recuperada,
+        null,
+        2
+      )
+    );
+
+
+    Logger.log('');
+    Logger.log(
+      '=============================================='
+    );
+
+
+    Logger.log(
+      '🟢 V5.8 — PERSISTÊNCIA + IDEMPOTÊNCIA PASSOU'
+    );
+
+
+    Logger.log(
+      'CRIAR → RECUPERAR → ATUALIZAR → 1 REGISTRO'
+    );
+
+
+    Logger.log(
+      '=============================================='
+    );
+
+
+  } catch (erro) {
+
+    Logger.log('');
+    Logger.log(
+      '🔴 V5.8 — PERSISTÊNCIA + IDEMPOTÊNCIA FALHOU'
+    );
+
+
+    Logger.log(
+      'ERRO: ' +
+      erro.message
+    );
+
+
+    Logger.log(
+      erro.stack || ''
+    );
+
+
+    throw erro;
+
+  }
+
+}
+
+function TESTAR_BLOQUEIO_ANALISE_INCOMPLETA_V58() {
+
+  Logger.log('==============================================');
+  Logger.log('     FEEDS SOLUTIONS — V5.8');
+  Logger.log('     TESTE BLOQUEIO DE ANÁLISE INCOMPLETA');
+  Logger.log('==============================================');
+
+  try {
+
+    Logger.log(
+      '01 — Criando diagnóstico artificial incompleto...'
+    );
+
+    const diagnosticoId =
+      'DIA-TESTE-BLOQUEIO-V58-' +
+      Utilities.getUuid();
+
+    const diagnostico = {
+
+      diagnostico_id:
+        diagnosticoId,
+
+      empresa_id:
+        'EMP-TESTE-BLOQUEIO-V58',
+
+      conversa_id:
+        'CONV-TESTE-BLOQUEIO-V58',
+
+      processo_nome:
+        'conferir e lançar pedidos',
+
+      dor_principal:
+        'erros de digitação',
+
+      frequencia:
+        '',
+
+      impacto_nivel:
+        '3 horas por dia',
+
+      objetivo:
+        '',
+
+      status_diagnostico:
+        DIAGNOSTICO_ESTADOS.INVESTIGACAO
+
+    };
+
+
+    Logger.log(
+      'Diagnóstico artificial criado.'
+    );
+
+
+    Logger.log(
+      '02 — Confirmando que o diagnóstico está incompleto...'
+    );
+
+
+    const estado =
+      determinarEstadoDiagnostico_(
+        diagnostico,
+        {
+          informacao_faltante:
+            'frequência e objetivo'
+        }
+      );
+
+
+    Logger.log(
+      'Estado calculado: ' +
+      estado
+    );
+
+
+    if (
+      String(
+        estado || ''
+      ).trim().toUpperCase() !==
+      String(
+        DIAGNOSTICO_ESTADOS.INVESTIGACAO
+      ).trim().toUpperCase()
+    ) {
+
+      throw new Error(
+        'Diagnóstico incompleto não foi classificado como INVESTIGACAO.'
+      );
+
+    }
+
+
+    Logger.log(
+      'Diagnóstico corretamente bloqueado.'
+    );
+
+
+    Logger.log(
+      '03 — Procurando análise antes da persistência...'
+    );
+
+
+    const antes =
+      buscarAnaliseDiagnosticaV58_(
+        diagnosticoId
+      );
+
+
+    if (
+      antes
+    ) {
+
+      throw new Error(
+        'Já existe uma análise para o diagnóstico artificial antes do teste.'
+      );
+
+    }
+
+
+    Logger.log(
+      'Nenhuma análise encontrada antes do teste.'
+    );
+
+
+    Logger.log(
+      '04 — Tentando persistir diagnóstico incompleto...'
+    );
+
+
+    const resultado =
+      persistirAnaliseDiagnosticaV58_(
+        diagnostico
+      );
+
+
+    Logger.log(
+      'Resultado da persistência: ' +
+      JSON.stringify(
+        resultado
+      )
+    );
+
+
+    if (
+      resultado !== null
+    ) {
+
+      throw new Error(
+        'A persistência deveria retornar null para diagnóstico incompleto.'
+      );
+
+    }
+
+
+    Logger.log(
+      'Persistência corretamente bloqueada.'
+    );
+
+
+    Logger.log(
+      '05 — Confirmando ausência física de registro...'
+    );
+
+
+    const depois =
+      buscarAnaliseDiagnosticaV58_(
+        diagnosticoId
+      );
+
+
+    if (
+      depois
+    ) {
+
+      throw new Error(
+        'Foi criado registro físico para diagnóstico incompleto.'
+      );
+
+    }
+
+
+    Logger.log(
+      'Nenhum registro físico foi criado.'
+    );
+
+
+    Logger.log(
+      '06 — Testando outro diagnóstico com lacuna diferente...'
+    );
+
+
+    const diagnosticoSemImpacto = {
+
+      diagnostico_id:
+        'DIA-TESTE-BLOQUEIO-V58-2-' +
+        Utilities.getUuid(),
+
+      empresa_id:
+        'EMP-TESTE-BLOQUEIO-V58-2',
+
+      conversa_id:
+        'CONV-TESTE-BLOQUEIO-V58-2',
+
+      processo_nome:
+        'conferir pedidos',
+
+      dor_principal:
+        'retrabalho',
+
+      frequencia:
+        'diariamente',
+
+      impacto_nivel:
+        '',
+
+      objetivo:
+        'reduzir retrabalho',
+
+      status_diagnostico:
+        DIAGNOSTICO_ESTADOS.INVESTIGACAO
+
+    };
+
+
+    const resultado2 =
+      persistirAnaliseDiagnosticaV58_(
+        diagnosticoSemImpacto
+      );
+
+
+    if (
+      resultado2 !== null
+    ) {
+
+      throw new Error(
+        'A persistência criou análise sem impacto confirmado.'
+      );
+
+    }
+
+
+    const depois2 =
+      buscarAnaliseDiagnosticaV58_(
+        diagnosticoSemImpacto.diagnostico_id
+      );
+
+
+    if (
+      depois2
+    ) {
+
+      throw new Error(
+        'Foi criado registro físico para diagnóstico sem impacto.'
+      );
+
+    }
+
+
+    Logger.log(
+      'Segundo bloqueio confirmado.'
+    );
+
+
+    Logger.log('');
+    Logger.log(
+      '=============================================='
+    );
+
+
+    Logger.log(
+      '🟢 V5.8 — BLOQUEIO DE ANÁLISE INCOMPLETA PASSOU'
+    );
+
+
+    Logger.log(
+      'Diagnóstico incompleto → NÃO PERSISTE'
+    );
+
+
+    Logger.log(
+      'Nenhum registro físico indevido foi criado.'
+    );
+
+
+    Logger.log(
+      '=============================================='
+    );
+
+
+  } catch (erro) {
+
+    Logger.log('');
+    Logger.log(
+      '🔴 V5.8 — BLOQUEIO DE ANÁLISE INCOMPLETA FALHOU'
+    );
+
+
+    Logger.log(
+      'ERRO: ' +
+      erro.message
+    );
+
+
+    Logger.log(
+      erro.stack || ''
+    );
+
+
+    throw erro;
+
+  }
+
+}
+
+function TESTAR_PERSISTENCIA_INTEGRADA_V58() {
+
+  Logger.log('==============================================');
+  Logger.log('     FEEDS SOLUTIONS — V5.8');
+  Logger.log('     TESTE FINAL — PERSISTÊNCIA INTEGRADA');
+  Logger.log('==============================================');
+
+
+  let empresaId = '';
+  let conversaId = '';
+  let diagnosticoId = '';
+
+  try {
+
+    Logger.log(
+      '01 — Criando diagnóstico real...'
+    );
+
+
+    const inicio =
+      iniciarDiagnostico({});
+
+
+    if (
+      !inicio ||
+      !inicio.sucesso
+    ) {
+
+      throw new Error(
+        'Falha ao iniciar diagnóstico: ' +
+        JSON.stringify(inicio)
+      );
+
+    }
+
+
+    empresaId =
+      inicio.empresa_id;
+
+    conversaId =
+      inicio.conversa_id;
+
+    diagnosticoId =
+      inicio.diagnostico_id;
+
+
+    Logger.log(
+      'Diagnóstico: ' +
+      diagnosticoId
+    );
+
+
+    const mensagem =
+      'Nosso processo principal é conferir e lançar pedidos. ' +
+      'Temos erros de digitação e retrabalho nesse processo. ' +
+      'Isso acontece diariamente. ' +
+      'Processamos 120 pedidos por dia. ' +
+      'Perdemos aproximadamente 3 horas por dia com esse problema. ' +
+      'Nosso objetivo é reduzir os erros e diminuir o retrabalho.';
+
+
+    /**
+     * --------------------------------------------------------
+     * PRIMEIRO PROCESSAMENTO
+     * --------------------------------------------------------
+     */
+
+    Logger.log(
+      '02 — Primeiro processamento do fluxo principal...'
+    );
+
+
+    const primeira =
+      processarMensagemDiagnostico({
+
+        empresa_id:
+          empresaId,
+
+        conversa_id:
+          conversaId,
+
+        mensagem:
+          mensagem
+
+      });
+
+
+    if (
+      !primeira ||
+      !primeira.sucesso
+    ) {
+
+      throw new Error(
+        'Primeiro processamento falhou: ' +
+        JSON.stringify(primeira)
+      );
+
+    }
+
+
+    Logger.log(
+      'Primeiro processamento concluído.'
+    );
+
+
+    /**
+     * --------------------------------------------------------
+     * ESTADO
+     * --------------------------------------------------------
+     */
+
+    Logger.log(
+      '03 — Validando PRONTO_PARA_ANALISE...'
+    );
+
+
+    if (
+      String(
+        primeira.estado || ''
+      ).trim().toUpperCase() !==
+      String(
+        DIAGNOSTICO_ESTADOS.PRONTO_PARA_ANALISE
+      ).trim().toUpperCase()
+    ) {
+
+      throw new Error(
+        'Estado inesperado: ' +
+        primeira.estado
+      );
+
+    }
+
+
+    Logger.log(
+      'Estado: PRONTO_PARA_ANALISE'
+    );
+
+
+    /**
+     * --------------------------------------------------------
+     * ANÁLISE
+     * --------------------------------------------------------
+     */
+
+    Logger.log(
+      '04 — Validando persistência V5.8 no retorno...'
+    );
+
+
+    if (
+      !primeira.analise_diagnostica
+    ) {
+
+      throw new Error(
+        'O fluxo principal não retornou analise_diagnostica.'
+      );
+
+    }
+
+
+    if (
+      primeira.analise_diagnostica.acao !==
+      'CRIAR'
+    ) {
+
+      throw new Error(
+        'Primeiro processamento deveria retornar CRIAR. ' +
+        'Encontrado: ' +
+        primeira.analise_diagnostica.acao
+      );
+
+    }
+
+
+    const analiseId =
+      primeira
+        .analise_diagnostica
+        .analise_id;
+
+
+    if (
+      !analiseId
+    ) {
+
+      throw new Error(
+        'analise_id não retornado.'
+      );
+
+    }
+
+
+    Logger.log(
+      'Análise criada: ' +
+      analiseId
+    );
+
+
+    /**
+     * --------------------------------------------------------
+     * RECUPERAR DA PLANILHA
+     * --------------------------------------------------------
+     */
+
+    Logger.log(
+      '05 — Recuperando análise física...'
+    );
+
+
+    const fisica =
+      buscarAnaliseDiagnosticaV58_(
+        diagnosticoId
+      );
+
+
+    if (
+      !fisica
+    ) {
+
+      throw new Error(
+        'Análise não encontrada fisicamente.'
+      );
+
+    }
+
+
+    if (
+      String(
+        fisica.analise_id || ''
+      ).trim() !==
+      String(
+        analiseId
+      ).trim()
+    ) {
+
+      throw new Error(
+        'analise_id físico diferente do retorno.'
+      );
+
+    }
+
+
+    Logger.log(
+      'Análise encontrada na linha ' +
+      fisica.linha
+    );
+
+
+    /**
+     * --------------------------------------------------------
+     * VOLUME
+     * --------------------------------------------------------
+     */
+
+    Logger.log(
+      '06 — Validando VOLUME físico...'
+    );
+
+
+    if (
+      String(
+        fisica.volume || ''
+      ).trim() !==
+      '120 pedidos por dia'
+    ) {
+
+      throw new Error(
+        'VOLUME físico incorreto: ' +
+        fisica.volume
+      );
+
+    }
+
+
+    Logger.log(
+      'VOLUME confirmado: ' +
+      fisica.volume
+    );
+
+
+    /**
+     * --------------------------------------------------------
+     * SEGUNDO PROCESSAMENTO
+     * --------------------------------------------------------
+     */
+
+    Logger.log(
+      '07 — Segundo processamento do mesmo diagnóstico...'
+    );
+
+
+    const segunda =
+      processarMensagemDiagnostico({
+
+        empresa_id:
+          empresaId,
+
+        conversa_id:
+          conversaId,
+
+        mensagem:
+          mensagem
+
+      });
+
+
+    if (
+      !segunda ||
+      !segunda.sucesso
+    ) {
+
+      throw new Error(
+        'Segundo processamento falhou: ' +
+        JSON.stringify(segunda)
+      );
+
+    }
+
+
+    Logger.log(
+      'Segundo processamento concluído.'
+    );
+
+
+    /**
+     * --------------------------------------------------------
+     * IDEMPOTÊNCIA
+     * --------------------------------------------------------
+     */
+
+    Logger.log(
+      '08 — Validando ATUALIZAR...'
+    );
+
+
+    if (
+      !segunda.analise_diagnostica
+    ) {
+
+      throw new Error(
+        'Segundo processamento não retornou análise.'
+      );
+
+    }
+
+
+    if (
+      segunda.analise_diagnostica.acao !==
+      'ATUALIZAR'
+    ) {
+
+      throw new Error(
+        'Segundo processamento deveria retornar ATUALIZAR. ' +
+        'Encontrado: ' +
+        segunda.analise_diagnostica.acao
+      );
+
+    }
+
+
+    Logger.log(
+      'Operação: ATUALIZAR'
+    );
+
+
+    /**
+     * --------------------------------------------------------
+     * MESMO ID
+     * --------------------------------------------------------
+     */
+
+    Logger.log(
+      '09 — Validando mesmo analise_id...'
+    );
+
+
+    if (
+      String(
+        segunda
+          .analise_diagnostica
+          .analise_id
+      ).trim() !==
+      String(
+        analiseId
+      ).trim()
+    ) {
+
+      throw new Error(
+        'Segundo processamento criou outro analise_id.'
+      );
+
+    }
+
+
+    Logger.log(
+      'Mesmo analise_id confirmado.'
+    );
+
+
+    /**
+     * --------------------------------------------------------
+     * CONTAGEM FÍSICA
+     * --------------------------------------------------------
+     */
+
+    Logger.log(
+      '10 — Contando registros físicos...'
+    );
+
+
+    const sheet =
+      obterAbaAnalisesDiagnosticasV58_();
+
+
+    const cabecalhos =
+      obterCabecalhosAnalisesDiagnosticasV58_();
+
+
+    const colunaDiagnostico =
+      cabecalhos.indexOf(
+        'diagnostico_id'
+      );
+
+
+    if (
+      colunaDiagnostico === -1
+    ) {
+
+      throw new Error(
+        'Coluna diagnostico_id não encontrada.'
+      );
+
+    }
+
+
+    const ultimaLinha =
+      sheet.getLastRow();
+
+
+    let quantidade =
+      0;
+
+
+    if (
+      ultimaLinha >= 2
+    ) {
+
+      const valores =
+        sheet
+          .getRange(
+            2,
+            colunaDiagnostico + 1,
+            ultimaLinha - 1,
+            1
+          )
+          .getValues();
+
+
+      valores.forEach(
+        function(linha) {
+
+          if (
+            String(
+              linha[0] || ''
+            ).trim() ===
+            String(
+              diagnosticoId
+            ).trim()
+          ) {
+
+            quantidade++;
+
+          }
+
+        }
+      );
+
+    }
+
+
+    Logger.log(
+      'Registros físicos: ' +
+      quantidade
+    );
+
+
+    if (
+      quantidade !== 1
+    ) {
+
+      throw new Error(
+        'IDEMPOTÊNCIA FALHOU. ' +
+        'Esperado 1 registro, encontrado: ' +
+        quantidade
+      );
+
+    }
+
+
+    Logger.log(
+      'Idempotência confirmada.'
+    );
+
+
+    /**
+     * --------------------------------------------------------
+     * RECUPERAÇÃO FINAL
+     * --------------------------------------------------------
+     */
+
+    Logger.log(
+      '11 — Recuperando estado final da análise...'
+    );
+
+
+    const final =
+      buscarAnaliseDiagnosticaV58_(
+        diagnosticoId
+      );
+
+
+    if (
+      !final
+    ) {
+
+      throw new Error(
+        'Análise final não encontrada.'
+      );
+
+    }
+
+
+    Logger.log(
+      JSON.stringify(
+        final,
+        null,
+        2
+      )
+    );
+
+
+    Logger.log('');
+    Logger.log(
+      '=============================================='
+    );
+
+
+    Logger.log(
+      '🟢 V5.8 — PERSISTÊNCIA INTEGRADA PASSOU'
+    );
+
+
+    Logger.log(
+      'FLUXO PRINCIPAL → CRIAR → ATUALIZAR → 1 REGISTRO'
+    );
+
+
+    Logger.log(
+      '=============================================='
+    );
+
+
+  } catch (erro) {
+
+    Logger.log('');
+    Logger.log(
+      '🔴 V5.8 — PERSISTÊNCIA INTEGRADA FALHOU'
+    );
+
+
+    Logger.log(
+      'ERRO: ' +
+      erro.message
+    );
+
+
+    Logger.log(
+      erro.stack || ''
+    );
+
+
+    throw erro;
+
+  }
+
 }
