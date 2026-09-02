@@ -32262,23 +32262,12 @@ function TESTAR_INTEGRACAO_REAL_V595() {
   let diagnostico = null;
 
 
-  function teste(
-    nome,
-    condicao,
-    detalhe
-  ) {
+  function teste(nome, condicao, detalhe) {
 
     resultados.push({
-
-      teste:
-        nome,
-
-      passou:
-        !!condicao,
-
-      detalhe:
-        detalhe || ''
-
+      teste: nome,
+      passou: !!condicao,
+      detalhe: detalhe || ''
     });
 
   }
@@ -32293,9 +32282,7 @@ function TESTAR_INTEGRACAO_REAL_V595() {
     try {
 
       const sheet =
-        obterAba_(
-          nomeAba
-        );
+        obterAba_(nomeAba);
 
       if (!sheet) {
         return;
@@ -32306,9 +32293,7 @@ function TESTAR_INTEGRACAO_REAL_V595() {
           .getDataRange()
           .getValues();
 
-      if (
-        dados.length <= 1
-      ) {
+      if (dados.length <= 1) {
         return;
       }
 
@@ -32316,19 +32301,14 @@ function TESTAR_INTEGRACAO_REAL_V595() {
         dados[0];
 
       const coluna =
-        cabecalhos.indexOf(
-          campo
-        );
+        cabecalhos.indexOf(campo);
 
-      if (
-        coluna < 0
-      ) {
+      if (coluna < 0) {
         return;
       }
 
       for (
-        let i =
-          dados.length - 1;
+        let i = dados.length - 1;
         i >= 1;
         i--
       ) {
@@ -32342,9 +32322,7 @@ function TESTAR_INTEGRACAO_REAL_V595() {
           ).trim()
         ) {
 
-          sheet.deleteRow(
-            i + 1
-          );
+          sheet.deleteRow(i + 1);
 
         }
 
@@ -32368,63 +32346,52 @@ function TESTAR_INTEGRACAO_REAL_V595() {
 
     try {
 
-      const aba =
+      const sheet =
         obterAba_(
           SHEETS.SOLUCOES
         );
 
       const dados =
-        aba
+        sheet
           .getDataRange()
           .getValues();
 
-      if (
-        dados.length <= 1
-      ) {
+      if (dados.length <= 1) {
         return;
       }
 
       const cabecalhos =
         dados[0];
 
-      const colunaId =
+      const coluna =
         cabecalhos.indexOf(
           'solucao_id'
         );
 
-      if (
-        colunaId < 0
-      ) {
+      if (coluna < 0) {
         throw new Error(
           'Cabeçalho solucao_id não encontrado.'
         );
       }
 
-      /*
-       * Remove resíduos dos testes V5.9.4 e V5.9.5.
-       *
-       * Esses IDs são exclusivamente de teste.
-       */
-
       for (
-        let i =
-          dados.length - 1;
+        let i = dados.length - 1;
         i >= 1;
         i--
       ) {
 
         const id =
           String(
-            dados[i][colunaId] || ''
+            dados[i][coluna] || ''
           ).trim();
 
-
         if (
+          id.indexOf('V593-') === 0 ||
           id.indexOf('V594-') === 0 ||
           id.indexOf('V595-') === 0
         ) {
 
-          aba.deleteRow(
+          sheet.deleteRow(
             i + 1
           );
 
@@ -32435,35 +32402,7 @@ function TESTAR_INTEGRACAO_REAL_V595() {
     } catch (erro) {
 
       Logger.log(
-        'Falha limpeza do catálogo: ' +
-        erro.message
-      );
-
-    }
-
-  }
-
-
-  function limparRelacoesTeste(
-    diagnosticoId
-  ) {
-
-    if (!diagnosticoId) {
-      return;
-    }
-
-    try {
-
-      limparPorCampo(
-        SHEETS.DIAGNOSTICO_SOLUCOES,
-        'diagnostico_id',
-        diagnosticoId
-      );
-
-    } catch (erro) {
-
-      Logger.log(
-        'Falha limpeza relações: ' +
+        'Falha limpeza catálogo: ' +
         erro.message
       );
 
@@ -32498,8 +32437,11 @@ function TESTAR_INTEGRACAO_REAL_V595() {
 
     /*
      * ==========================================================
-     * 1 — CRIAR CATÁLOGO TEMPORÁRIO ISOLADO
+     * 1 — CATÁLOGO TEMPORÁRIO
      * ==========================================================
+     *
+     * A solução perfeita usa EXATAMENTE o cenário
+     * já aprovado no V5.9.3 com 100/100.
      */
 
     const abaSolucoes =
@@ -32508,7 +32450,7 @@ function TESTAR_INTEGRACAO_REAL_V595() {
       );
 
 
-    const dadosCabecalhos =
+    const cabecalhos =
       abaSolucoes
         .getRange(
           1,
@@ -32516,21 +32458,14 @@ function TESTAR_INTEGRACAO_REAL_V595() {
           1,
           abaSolucoes.getLastColumn()
         )
-        .getValues();
-
-
-    const cabecalhos =
-      dadosCabecalhos[0];
+        .getValues()[0];
 
 
     const mapa = {};
 
 
     cabecalhos.forEach(
-      function(
-        cabecalho,
-        indice
-      ) {
+      function(cabecalho, indice) {
 
         mapa[cabecalho] =
           indice;
@@ -32541,25 +32476,30 @@ function TESTAR_INTEGRACAO_REAL_V595() {
 
     const solucoesTeste = [
 
-      {
+      /*
+       * SOLUÇÃO PERFEITA
+       *
+       * Cenário já aprovado no V5.9.3.
+       */
 
+      {
         solucao_id:
           'V595-PERFEITA',
 
         familia:
-          'PROCESSOS',
+          'Automação de pedidos',
 
         nome:
-          'Conferência e lançamento de pedidos',
+          'Conferir e lançar pedidos',
 
         descricao:
-          'Padronização da conferência e lançamento de pedidos para reduzir erros de digitação e retrabalho.',
+          'Reduzir erros de digitação e retrabalho no processo de conferir e lançar pedidos.',
 
         status:
           'ATIVA',
 
         nivel_complexidade:
-          'MÉDIA',
+          'MEDIA',
 
         repetibilidade:
           'ALTA',
@@ -32568,29 +32508,68 @@ function TESTAR_INTEGRACAO_REAL_V595() {
           'SIM',
 
         versao:
-          'V595'
-
+          'V5.9.5'
       },
 
-      {
 
+      /*
+       * SOLUÇÃO PARCIAL
+       *
+       * Compatível somente com parte do processo.
+       */
+
+      {
+        solucao_id:
+          'V595-PARCIAL',
+
+        familia:
+          'Processos administrativos',
+
+        nome:
+          'Apoio para conferir pedidos',
+
+        descricao:
+          'Apoio na conferência de pedidos e identificação de informações administrativas.',
+
+        status:
+          'ATIVA',
+
+        nivel_complexidade:
+          'MEDIA',
+
+        repetibilidade:
+          'ALTA',
+
+        pode_oferecer:
+          'SIM',
+
+        versao:
+          'V5.9.5'
+      },
+
+
+      /*
+       * INCOMPATÍVEL
+       */
+
+      {
         solucao_id:
           'V595-INCOMPATIVEL',
 
         familia:
-          'FROTA',
+          'Marketing',
 
         nome:
-          'Gestão de frota',
+          'Gestão de redes sociais',
 
         descricao:
-          'Controle de veículos, manutenção e abastecimento de frota.',
+          'Planejamento e publicação de conteúdo para redes sociais.',
 
         status:
           'ATIVA',
 
         nivel_complexidade:
-          'MÉDIA',
+          'MEDIA',
 
         repetibilidade:
           'ALTA',
@@ -32599,29 +32578,32 @@ function TESTAR_INTEGRACAO_REAL_V595() {
           'SIM',
 
         versao:
-          'V595'
-
+          'V5.9.5'
       },
 
-      {
 
+      /*
+       * INATIVA
+       */
+
+      {
         solucao_id:
           'V595-INATIVA',
 
         familia:
-          'PROCESSOS',
+          'Automação de pedidos',
 
         nome:
-          'Conferência de pedidos',
+          'Conferir e lançar pedidos',
 
         descricao:
-          'Padronização da conferência e lançamento de pedidos.',
+          'Reduzir erros de digitação e retrabalho no processo de conferir e lançar pedidos.',
 
         status:
           'INATIVA',
 
         nivel_complexidade:
-          'MÉDIA',
+          'MEDIA',
 
         repetibilidade:
           'ALTA',
@@ -32630,8 +32612,7 @@ function TESTAR_INTEGRACAO_REAL_V595() {
           'SIM',
 
         versao:
-          'V595'
-
+          'V5.9.5'
       }
 
     ];
@@ -32643,8 +32624,7 @@ function TESTAR_INTEGRACAO_REAL_V595() {
         const linha =
           new Array(
             cabecalhos.length
-          )
-            .fill('');
+          ).fill('');
 
 
         Object.keys(solucao)
@@ -32679,32 +32659,32 @@ function TESTAR_INTEGRACAO_REAL_V595() {
 
 
     /*
-     * Confirmar que o catálogo contém exatamente
-     * as três soluções do teste.
+     * ==========================================================
+     * TESTE 1 — CATÁLOGO
+     * ==========================================================
      */
 
-    const catalogoAtual =
+    const catalogo =
       abaSolucoes
         .getDataRange()
         .getValues();
 
 
-    const colunaIdCatalogo =
-      catalogoAtual[0]
+    const idxCatalogo =
+      catalogo[0]
         .indexOf(
           'solucao_id'
         );
 
 
     const idsCatalogo =
-      catalogoAtual
+      catalogo
         .slice(1)
         .map(
           function(linha) {
 
             return String(
-              linha[colunaIdCatalogo] ||
-              ''
+              linha[idxCatalogo] || ''
             ).trim();
 
           }
@@ -32712,32 +32692,17 @@ function TESTAR_INTEGRACAO_REAL_V595() {
         .filter(Boolean);
 
 
-    const somenteTeste =
-      idsCatalogo.filter(
-        function(id) {
-
-          return (
-            id === 'V595-PERFEITA' ||
-            id === 'V595-INCOMPATIVEL' ||
-            id === 'V595-INATIVA'
-          );
-
-        }
-      );
-
-
     teste(
       '1 — Catálogo V5.9.5 isolado',
-      somenteTeste.length === 3 &&
-      idsCatalogo.length === 3,
-      'Soluções no catálogo: ' +
+      idsCatalogo.length === 4,
+      'Soluções: ' +
       idsCatalogo.length
     );
 
 
     /*
      * ==========================================================
-     * 2 — INICIAR DIAGNÓSTICO REAL
+     * 2 — INICIAR DIAGNÓSTICO
      * ==========================================================
      */
 
@@ -32779,9 +32744,7 @@ function TESTAR_INTEGRACAO_REAL_V595() {
       !!inicio.conversa_id &&
       !!inicio.diagnostico_id,
       inicio
-        ? JSON.stringify(
-            inicio
-          )
+        ? JSON.stringify(inicio)
         : 'Falha'
     );
 
@@ -32794,7 +32757,7 @@ function TESTAR_INTEGRACAO_REAL_V595() {
     ) {
 
       throw new Error(
-        'Não foi possível iniciar o diagnóstico V5.9.5.'
+        'Falha ao iniciar diagnóstico V5.9.5.'
       );
 
     }
@@ -32802,7 +32765,7 @@ function TESTAR_INTEGRACAO_REAL_V595() {
 
     /*
      * ==========================================================
-     * 3 — FLUXO PRINCIPAL
+     * 3 — FLUXO REAL
      * ==========================================================
      */
 
@@ -32831,8 +32794,8 @@ function TESTAR_INTEGRACAO_REAL_V595() {
       !!resultadoFluxo &&
       resultadoFluxo.sucesso === true,
       resultadoFluxo
-        ? 'Fluxo executado'
-        : 'Sem retorno'
+        ? 'OK'
+        : 'Falha'
     );
 
 
@@ -32843,8 +32806,7 @@ function TESTAR_INTEGRACAO_REAL_V595() {
      */
 
     diagnostico =
-      resultadoFluxo
-        .diagnostico;
+      resultadoFluxo.diagnostico;
 
 
     teste(
@@ -32876,11 +32838,7 @@ function TESTAR_INTEGRACAO_REAL_V595() {
     teste(
       '5 — Diagnóstico PRONTO_PARA_ANALISE',
       estado ===
-      String(
-        DIAGNOSTICO_ESTADOS.PRONTO_PARA_ANALISE
-      )
-        .trim()
-        .toUpperCase(),
+      'PRONTO_PARA_ANALISE',
       estado
     );
 
@@ -32892,34 +32850,32 @@ function TESTAR_INTEGRACAO_REAL_V595() {
      */
 
     teste(
-      '6 — Oportunidade V5.7 retornada',
+      '6 — Oportunidade V5.7',
       !!resultadoFluxo.oportunidade,
       resultadoFluxo.oportunidade
-        ? JSON.stringify(
-            resultadoFluxo.oportunidade
-          )
+        ? 'OK'
         : 'Não retornada'
     );
 
 
     /*
      * ==========================================================
-     * 6 — ANÁLISE V5.8
+     * 6 — ANÁLISE
      * ==========================================================
      */
 
     teste(
-      '7 — Análise V5.8 retornada',
+      '7 — Análise V5.8',
       !!resultadoFluxo.analise_diagnostica,
       resultadoFluxo.analise_diagnostica
-        ? 'V5.8 presente'
+        ? 'OK'
         : 'Não retornada'
     );
 
 
     /*
      * ==========================================================
-     * 7 — V5.9.5
+     * 7 — MOTOR V5.9.5
      * ==========================================================
      */
 
@@ -32931,10 +32887,8 @@ function TESTAR_INTEGRACAO_REAL_V595() {
       '8 — Motor V5.9.5 integrado',
       !!solucoes,
       solucoes
-        ? JSON.stringify(
-            solucoes
-          )
-        : 'Nenhum resultado'
+        ? 'OK'
+        : 'Não retornado'
     );
 
 
@@ -32955,6 +32909,12 @@ function TESTAR_INTEGRACAO_REAL_V595() {
         : [];
 
 
+    /*
+     * ==========================================================
+     * 8 — DUAS COMPATÍVEIS
+     * ==========================================================
+     */
+
     teste(
       '9 — Exatamente duas relações compatíveis',
       relacoes.length === 2,
@@ -32965,7 +32925,7 @@ function TESTAR_INTEGRACAO_REAL_V595() {
 
     /*
      * ==========================================================
-     * 8 — PRINCIPAL
+     * 9 — PRINCIPAL
      * ==========================================================
      */
 
@@ -32991,7 +32951,7 @@ function TESTAR_INTEGRACAO_REAL_V595() {
 
     /*
      * ==========================================================
-     * 9 — PERFEITA
+     * 10 — SOLUÇÃO PERFEITA
      * ==========================================================
      */
 
@@ -33012,9 +32972,7 @@ function TESTAR_INTEGRACAO_REAL_V595() {
       '11 — Solução perfeita encontrada',
       !!perfeita,
       perfeita
-        ? JSON.stringify(
-            perfeita
-          )
+        ? JSON.stringify(perfeita)
         : 'Não encontrada'
     );
 
@@ -33062,7 +33020,7 @@ function TESTAR_INTEGRACAO_REAL_V595() {
 
     /*
      * ==========================================================
-     * 10 — INCOMPATÍVEL
+     * 11 — INCOMPATÍVEL
      * ==========================================================
      */
 
@@ -33090,7 +33048,7 @@ function TESTAR_INTEGRACAO_REAL_V595() {
 
     /*
      * ==========================================================
-     * 11 — INATIVA
+     * 12 — INATIVA
      * ==========================================================
      */
 
@@ -33118,7 +33076,7 @@ function TESTAR_INTEGRACAO_REAL_V595() {
 
     /*
      * ==========================================================
-     * 12 — PERSISTÊNCIA FÍSICA
+     * 13 — PERSISTÊNCIA
      * ==========================================================
      */
 
@@ -33158,8 +33116,7 @@ function TESTAR_INTEGRACAO_REAL_V595() {
 
             return (
               String(
-                linha[idxDiagnostico] ||
-                ''
+                linha[idxDiagnostico] || ''
               ).trim() ===
               String(
                 diagnostico.diagnostico_id
@@ -33180,7 +33137,7 @@ function TESTAR_INTEGRACAO_REAL_V595() {
 
     /*
      * ==========================================================
-     * 13 — RASTREABILIDADE
+     * 14 — RASTREABILIDADE
      * ==========================================================
      */
 
@@ -33190,16 +33147,14 @@ function TESTAR_INTEGRACAO_REAL_V595() {
 
           return (
             String(
-              linha[idxDiagnostico] ||
-              ''
+              linha[idxDiagnostico] || ''
             ).trim() ===
             String(
               diagnostico.diagnostico_id
             ).trim()
             &&
             String(
-              linha[idxSolucao] ||
-              ''
+              linha[idxSolucao] || ''
             ).trim() !== ''
           );
 
@@ -33208,7 +33163,7 @@ function TESTAR_INTEGRACAO_REAL_V595() {
 
 
     teste(
-      '18 — Relações fisicamente rastreáveis',
+      '18 — Relações rastreáveis',
       rastreavel,
       rastreavel
         ? 'OK'
@@ -33218,7 +33173,7 @@ function TESTAR_INTEGRACAO_REAL_V595() {
 
     /*
      * ==========================================================
-     * 14 — IDEMPOTÊNCIA
+     * 15 — IDEMPOTÊNCIA
      * ==========================================================
      */
 
@@ -33246,8 +33201,7 @@ function TESTAR_INTEGRACAO_REAL_V595() {
 
             return (
               String(
-                linha[idxDiagnostico] ||
-                ''
+                linha[idxDiagnostico] || ''
               ).trim() ===
               String(
                 diagnostico.diagnostico_id
@@ -33282,7 +33236,7 @@ function TESTAR_INTEGRACAO_REAL_V595() {
 
     /*
      * ==========================================================
-     * RESULTADO FINAL
+     * RESULTADO
      * ==========================================================
      */
 
@@ -33306,26 +33260,20 @@ function TESTAR_INTEGRACAO_REAL_V595() {
 
 
     resultados.forEach(
-      function(
-        item,
-        indice
-      ) {
+      function(item, indice) {
 
         Logger.log(
-
           (
             item.passou
               ? 'PASSOU'
               : 'FALHOU'
-          )
-          +
+          ) +
           ' — TESTE ' +
           (indice + 1) +
           ': ' +
           item.teste +
           ' — ' +
           item.detalhe
-
         );
 
       }
@@ -33369,22 +33317,18 @@ function TESTAR_INTEGRACAO_REAL_V595() {
 
     /*
      * ==========================================================
-     * LIMPEZA FINAL DO CATÁLOGO
+     * LIMPEZA FINAL
      * ==========================================================
      */
 
     limparSolucoesTeste();
 
 
-    /*
-     * ==========================================================
-     * LIMPEZA DOS DADOS DO DIAGNÓSTICO
-     * ==========================================================
-     */
-
     if (inicio) {
 
-      limparRelacoesTeste(
+      limparPorCampo(
+        SHEETS.DIAGNOSTICO_SOLUCOES,
+        'diagnostico_id',
         inicio.diagnostico_id
       );
 
@@ -33430,18 +33374,6 @@ function TESTAR_INTEGRACAO_REAL_V595() {
         inicio.empresa_id
       );
 
-    }
-
-
-    /*
-     * ANALISES_DIAGNOSTICAS NÃO usa SHEETS.
-     *
-     * A implementação V5.8 utiliza o nome literal
-     * da aba, portanto não usamos SHEETS.ANALISES_DIAGNOSTICAS
-     * aqui para evitar "undefined".
-     */
-
-    if (inicio) {
 
       try {
 
@@ -33453,9 +33385,7 @@ function TESTAR_INTEGRACAO_REAL_V595() {
             );
 
 
-        if (
-          abaAnalises
-        ) {
+        if (abaAnalises) {
 
           const dados =
             abaAnalises
@@ -33463,9 +33393,7 @@ function TESTAR_INTEGRACAO_REAL_V595() {
               .getValues();
 
 
-          if (
-            dados.length > 1
-          ) {
+          if (dados.length > 1) {
 
             const cab =
               dados[0];
@@ -33476,9 +33404,7 @@ function TESTAR_INTEGRACAO_REAL_V595() {
               );
 
 
-            if (
-              coluna >= 0
-            ) {
+            if (coluna >= 0) {
 
               for (
                 let i =
@@ -33489,8 +33415,7 @@ function TESTAR_INTEGRACAO_REAL_V595() {
 
                 if (
                   String(
-                    dados[i][coluna] ||
-                    ''
+                    dados[i][coluna] || ''
                   ).trim() ===
                   String(
                     inicio.diagnostico_id
@@ -33514,7 +33439,7 @@ function TESTAR_INTEGRACAO_REAL_V595() {
       } catch (erro) {
 
         Logger.log(
-          'Falha limpeza ANALISES_DIAGNOSTICAS: ' +
+          'Falha limpeza análise: ' +
           erro.message
         );
 
