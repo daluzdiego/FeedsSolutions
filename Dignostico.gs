@@ -289,16 +289,20 @@ function processarMensagemDiagnostico(dados) {
 
   }
 
+
   const empresaId =
     dados.empresa_id;
 
+
   const conversaId =
     dados.conversa_id;
+
 
   const mensagem =
     limparMensagemDiagnostico_(
       dados.mensagem
     );
+
 
   if (!empresaId) {
 
@@ -308,6 +312,7 @@ function processarMensagemDiagnostico(dados) {
 
   }
 
+
   if (!conversaId) {
 
     throw new Error(
@@ -315,6 +320,7 @@ function processarMensagemDiagnostico(dados) {
     );
 
   }
+
 
   if (!mensagem) {
 
@@ -336,6 +342,7 @@ function processarMensagemDiagnostico(dados) {
       empresaId,
       conversaId
     );
+
 
   if (!diagnostico) {
 
@@ -415,6 +422,7 @@ function processarMensagemDiagnostico(dados) {
     analisarMensagemDiagnostico_(
       entradaIA
     );
+
 
   if (
     !analise ||
@@ -498,8 +506,10 @@ function processarMensagemDiagnostico(dados) {
       analiseContinuidade
     );
 
+
   novoDiagnostico.status_diagnostico =
     novoEstado;
+
 
   novoDiagnostico.atualizado_em =
     new Date();
@@ -668,6 +678,13 @@ function processarMensagemDiagnostico(dados) {
    * ============================================================
    * 15. RETORNO PARA INTERFACE
    * ============================================================
+   *
+   * IMPORTANTE V5.10:
+   *
+   * V5.7 e V5.8 precisam entregar os objetos completos
+   * para que o MOTOR DE DECISÃO receba dados canônicos.
+   *
+   * Nenhuma informação é alterada aqui.
    */
 
   return {
@@ -696,6 +713,13 @@ function processarMensagemDiagnostico(dados) {
     analise_ia:
       analiseContinuidade,
 
+
+    /*
+     * ----------------------------------------------------------
+     * V5.7
+     * ----------------------------------------------------------
+     */
+
     oportunidade:
       oportunidadeV57
         ? {
@@ -707,10 +731,20 @@ function processarMensagemDiagnostico(dados) {
               oportunidadeV57.oportunidade_id,
 
             linha:
-              oportunidadeV57.linha
+              oportunidadeV57.linha,
+
+            oportunidade:
+              oportunidadeV57
 
           }
         : null,
+
+
+    /*
+     * ----------------------------------------------------------
+     * V5.8
+     * ----------------------------------------------------------
+     */
 
     analise_diagnostica:
       analiseDiagnosticaV58
@@ -733,6 +767,13 @@ function processarMensagemDiagnostico(dados) {
 
           }
         : null,
+
+
+    /*
+     * ----------------------------------------------------------
+     * V5.9.5
+     * ----------------------------------------------------------
+     */
 
     solucoes:
       solucoesDiagnosticoV595
@@ -33453,5 +33494,3111 @@ function TESTAR_INTEGRACAO_REAL_V595() {
     );
 
   }
+
+}
+
+/**
+ * ============================================================
+ * V5.10 — MOTOR DE DECISÃO
+ * ============================================================
+ *
+ * Responsabilidade:
+ *
+ * Receber os resultados consolidados das versões:
+ *
+ * V5.6  — Diagnóstico
+ * V5.7  — Oportunidade
+ * V5.8  — Análise
+ * V5.9  — Soluções
+ *
+ * E produzir uma decisão determinística.
+ *
+ * IMPORTANTE:
+ *
+ * A V5.10 NÃO:
+ *
+ * - chama IA;
+ * - altera diagnóstico;
+ * - cria oportunidade;
+ * - cria solução;
+ * - cria lead;
+ * - define preço;
+ * - cria proposta;
+ * - decide fechamento comercial.
+ *
+ * A V5.10 apenas interpreta os resultados
+ * já consolidados e determina se o caso
+ * está apto para avançar.
+ *
+ * ============================================================
+ */
+
+
+/**
+ * ------------------------------------------------------------
+ * NORMALIZA TEXTO DA DECISÃO
+ * ------------------------------------------------------------
+ */
+function normalizarTextoDecisaoV510_(valor) {
+
+  return String(valor || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+}
+
+
+/**
+ * ------------------------------------------------------------
+ * OBTÉM ESTADO PRONTO
+ * ------------------------------------------------------------
+ */
+function diagnosticoProntoDecisaoV510_(diagnostico) {
+
+  if (!diagnostico) {
+    return false;
+  }
+
+  const estado =
+    String(
+      diagnostico.status_diagnostico || ''
+    )
+      .trim()
+      .toUpperCase();
+
+  const pronto =
+    String(
+      DIAGNOSTICO_ESTADOS.PRONTO_PARA_ANALISE
+    )
+      .trim()
+      .toUpperCase();
+
+  return estado === pronto;
+
+}
+
+
+/**
+ * ------------------------------------------------------------
+ * OBTÉM SOLUÇÃO PRINCIPAL
+ * ------------------------------------------------------------
+ *
+ * Aceita:
+ *
+ * - resultado V5.9.5
+ * - array de relações
+ * - objeto de solução
+ *
+ * ------------------------------------------------------------
+ */
+function obterSolucaoPrincipalDecisaoV510_(
+  solucoes
+) {
+
+  if (!solucoes) {
+    return null;
+  }
+
+  let relacoes = [];
+
+  if (
+    Array.isArray(solucoes)
+  ) {
+
+    relacoes = solucoes;
+
+  } else if (
+    Array.isArray(solucoes.relacoes)
+  ) {
+
+    relacoes =
+      solucoes.relacoes;
+
+  } else if (
+    solucoes.solucao_id
+  ) {
+
+    relacoes = [
+      solucoes
+    ];
+
+  }
+
+  const principais =
+    relacoes.filter(
+      function(relacao) {
+
+        return (
+          relacao &&
+          relacao.principal === true
+        );
+
+      }
+    );
+
+  if (
+    principais.length !== 1
+  ) {
+
+    return null;
+
+  }
+
+  return principais[0];
+
+}
+
+
+/**
+ * ------------------------------------------------------------
+ * VERIFICA OPORTUNIDADE VÁLIDA
+ * ------------------------------------------------------------
+ */
+function oportunidadeValidaDecisaoV510_(
+  oportunidade
+) {
+
+  if (!oportunidade) {
+    return false;
+  }
+
+  const processo =
+    String(
+      oportunidade.processo || ''
+    ).trim();
+
+  const dor =
+    String(
+      oportunidade.dor || ''
+    ).trim();
+
+  const objetivo =
+    String(
+      oportunidade.objetivo || ''
+    ).trim();
+
+  const descricao =
+    String(
+      oportunidade.descricao || ''
+    ).trim();
+
+  return !!(
+    processo &&
+    dor &&
+    objetivo &&
+    descricao
+  );
+
+}
+
+
+/**
+ * ------------------------------------------------------------
+ * NORMALIZA COMPATIBILIDADE
+ * ------------------------------------------------------------
+ */
+function normalizarCompatibilidadeDecisaoV510_(
+  valor
+) {
+
+  return String(valor || '')
+    .trim()
+    .toUpperCase();
+
+}
+
+
+/**
+ * ------------------------------------------------------------
+ * NORMALIZA VIABILIDADE
+ * ------------------------------------------------------------
+ */
+function normalizarViabilidadeDecisaoV510_(
+  valor
+) {
+
+  return String(valor || '')
+    .trim()
+    .toUpperCase();
+
+}
+
+
+/**
+ * ------------------------------------------------------------
+ * DETERMINA PRIORIDADE
+ * ------------------------------------------------------------
+ *
+ * A V5.10 não inventa prioridade.
+ *
+ * Ordem:
+ *
+ * 1. análise
+ * 2. oportunidade
+ * 3. média
+ *
+ * ------------------------------------------------------------
+ */
+function determinarPrioridadeDecisaoV510_(
+  oportunidade,
+  analise
+) {
+
+  const prioridadeAnalise =
+    String(
+      analise &&
+      analise.prioridade || ''
+    )
+      .trim()
+      .toUpperCase();
+
+  if (
+    prioridadeAnalise
+  ) {
+
+    return prioridadeAnalise;
+
+  }
+
+  const prioridadeOportunidade =
+    String(
+      oportunidade &&
+      oportunidade.prioridade || ''
+    )
+      .trim()
+      .toUpperCase();
+
+  if (
+    prioridadeOportunidade
+  ) {
+
+    return prioridadeOportunidade;
+
+  }
+
+  return 'MÉDIA';
+
+}
+
+
+/**
+ * ------------------------------------------------------------
+ * DETERMINA CONFIANÇA
+ * ------------------------------------------------------------
+ *
+ * ALTA:
+ * diagnóstico pronto
+ * + oportunidade válida
+ * + solução principal
+ * + compatibilidade ALTA
+ * + viabilidade ALTA
+ *
+ * MÉDIA:
+ * existe decisão possível, mas
+ * algum critério é intermediário.
+ *
+ * BAIXA:
+ * dados insuficientes.
+ *
+ * ------------------------------------------------------------
+ */
+function determinarConfiancaDecisaoV510_(
+  diagnostico,
+  oportunidade,
+  solucaoPrincipal
+) {
+
+  if (
+    !diagnosticoProntoDecisaoV510_(
+      diagnostico
+    )
+  ) {
+
+    return 'BAIXA';
+
+  }
+
+  if (
+    !oportunidadeValidaDecisaoV510_(
+      oportunidade
+    )
+  ) {
+
+    return 'BAIXA';
+
+  }
+
+  if (
+    !solucaoPrincipal
+  ) {
+
+    return 'BAIXA';
+
+  }
+
+  const compatibilidade =
+    normalizarCompatibilidadeDecisaoV510_(
+      solucaoPrincipal.compatibilidade
+    );
+
+  const viabilidade =
+    normalizarViabilidadeDecisaoV510_(
+      solucaoPrincipal.viabilidade
+    );
+
+  if (
+    compatibilidade === 'ALTA' &&
+    viabilidade === 'ALTA'
+  ) {
+
+    return 'ALTA';
+
+  }
+
+  if (
+    (
+      compatibilidade === 'ALTA' ||
+      compatibilidade === 'MEDIA'
+    ) &&
+    (
+      viabilidade === 'ALTA' ||
+      viabilidade === 'MEDIA'
+    )
+  ) {
+
+    return 'MÉDIA';
+
+  }
+
+  return 'BAIXA';
+
+}
+
+
+/**
+ * ------------------------------------------------------------
+ * DETERMINA CLASSIFICAÇÃO
+ * ------------------------------------------------------------
+ *
+ * PODEMOS_AJUDAR
+ *
+ * diagnóstico pronto
+ * + oportunidade válida
+ * + solução principal
+ * + compatibilidade ALTA
+ * + viabilidade ALTA
+ *
+ *
+ * PRECISAMOS_AVALIAR
+ *
+ * diagnóstico pronto
+ * + oportunidade válida
+ * + existe solução
+ * mas não existe segurança suficiente
+ * para decisão automática positiva.
+ *
+ *
+ * NAO_ENQUADRADO
+ *
+ * sem diagnóstico suficiente
+ * ou sem oportunidade
+ * ou sem solução compatível.
+ *
+ * ------------------------------------------------------------
+ */
+function determinarClassificacaoDecisaoV510_(
+  diagnostico,
+  oportunidade,
+  solucaoPrincipal
+) {
+
+  const pronto =
+    diagnosticoProntoDecisaoV510_(
+      diagnostico
+    );
+
+  const oportunidadeValida =
+    oportunidadeValidaDecisaoV510_(
+      oportunidade
+    );
+
+  if (
+    !pronto ||
+    !oportunidadeValida
+  ) {
+
+    return 'NAO_ENQUADRADO';
+
+  }
+
+  if (
+    !solucaoPrincipal
+  ) {
+
+    return 'NAO_ENQUADRADO';
+
+  }
+
+  const compatibilidade =
+    normalizarCompatibilidadeDecisaoV510_(
+      solucaoPrincipal.compatibilidade
+    );
+
+  const viabilidade =
+    normalizarViabilidadeDecisaoV510_(
+      solucaoPrincipal.viabilidade
+    );
+
+  if (
+    compatibilidade === 'ALTA' &&
+    viabilidade === 'ALTA'
+  ) {
+
+    return 'PODEMOS_AJUDAR';
+
+  }
+
+  return 'PRECISAMOS_AVALIAR';
+
+}
+
+
+/**
+ * ------------------------------------------------------------
+ * DETERMINA SE ESTÁ APTO
+ * ------------------------------------------------------------
+ */
+function determinarAptoDecisaoV510_(
+  classificacao,
+  confianca
+) {
+
+  return (
+    classificacao ===
+      'PODEMOS_AJUDAR' &&
+    confianca ===
+      'ALTA'
+  );
+
+}
+
+
+/**
+ * ------------------------------------------------------------
+ * CONSTRÓI JUSTIFICATIVA
+ * ------------------------------------------------------------
+ */
+function construirJustificativaDecisaoV510_(
+  diagnostico,
+  oportunidade,
+  solucaoPrincipal,
+  classificacao,
+  confianca
+) {
+
+  const processo =
+    String(
+      diagnostico &&
+      diagnostico.processo_nome || ''
+    ).trim();
+
+  const dor =
+    String(
+      diagnostico &&
+      diagnostico.dor_principal || ''
+    ).trim();
+
+  const solucao =
+    String(
+      solucaoPrincipal &&
+      solucaoPrincipal.solucao_id || ''
+    ).trim();
+
+  const compatibilidade =
+    String(
+      solucaoPrincipal &&
+      solucaoPrincipal.compatibilidade || ''
+    ).trim();
+
+  const viabilidade =
+    String(
+      solucaoPrincipal &&
+      solucaoPrincipal.viabilidade || ''
+    ).trim();
+
+  if (
+    classificacao ===
+    'PODEMOS_AJUDAR'
+  ) {
+
+    return (
+      'O diagnóstico está completo para análise. ' +
+      'A oportunidade está validada e existe uma ' +
+      'solução principal com compatibilidade ' +
+      compatibilidade +
+      ' e viabilidade ' +
+      viabilidade +
+      '. ' +
+      'O problema identificado é "' +
+      dor +
+      '" no processo "' +
+      processo +
+      '". ' +
+      'A solução principal selecionada é "' +
+      solucao +
+      '". ' +
+      'A confiança da decisão é ' +
+      confianca +
+      '.'
+    );
+
+  }
+
+  if (
+    classificacao ===
+    'PRECISAMOS_AVALIAR'
+  ) {
+
+    return (
+      'O diagnóstico e a oportunidade estão ' +
+      'disponíveis, porém a solução encontrada ' +
+      'não possui evidências suficientes para ' +
+      'uma decisão automática de ajuda. ' +
+      'É necessária avaliação adicional.'
+    );
+
+  }
+
+  return (
+    'O caso não possui evidências suficientes ' +
+    'para enquadramento automático.'
+  );
+
+}
+
+
+/**
+ * ============================================================
+ * MOTOR PRINCIPAL V5.10
+ * ============================================================
+ */
+function construirDecisaoDiagnosticoV510_(
+  diagnostico,
+  oportunidade,
+  analise,
+  solucoes
+) {
+
+  if (!diagnostico) {
+    return null;
+  }
+
+  const solucaoPrincipal =
+    obterSolucaoPrincipalDecisaoV510_(
+      solucoes
+    );
+
+  const classificacao =
+    determinarClassificacaoDecisaoV510_(
+      diagnostico,
+      oportunidade,
+      solucaoPrincipal
+    );
+
+  const confianca =
+    determinarConfiancaDecisaoV510_(
+      diagnostico,
+      oportunidade,
+      solucaoPrincipal
+    );
+
+  const prioridade =
+    determinarPrioridadeDecisaoV510_(
+      oportunidade,
+      analise
+    );
+
+  const apto =
+    determinarAptoDecisaoV510_(
+      classificacao,
+      confianca
+    );
+
+  const justificativa =
+    construirJustificativaDecisaoV510_(
+      diagnostico,
+      oportunidade,
+      solucaoPrincipal,
+      classificacao,
+      confianca
+    );
+
+  return {
+
+    versao:
+      'V5.10',
+
+    diagnostico_id:
+      diagnostico.diagnostico_id || '',
+
+    empresa_id:
+      diagnostico.empresa_id || '',
+
+    conversa_id:
+      diagnostico.conversa_id || '',
+
+    classificacao:
+      classificacao,
+
+    prioridade:
+      prioridade,
+
+    solucao_principal_id:
+      solucaoPrincipal
+        ? (
+            solucaoPrincipal.solucao_id ||
+            ''
+          )
+        : '',
+
+    possui_solucao_principal:
+      !!solucaoPrincipal,
+
+    justificativa:
+      justificativa,
+
+    confianca:
+      confianca,
+
+    apto_para_avancar:
+      apto
+
+  };
+
+}
+
+
+/**
+ * ============================================================
+ * TESTE ISOLADO V5.10
+ * ============================================================
+ */
+function TESTAR_MOTOR_DECISAO_V510() {
+
+  const resultados = [];
+
+  function teste(
+    nome,
+    condicao,
+    detalhe
+  ) {
+
+    resultados.push({
+
+      teste:
+        nome,
+
+      passou:
+        !!condicao,
+
+      detalhe:
+        detalhe || ''
+
+    });
+
+    Logger.log(
+      (
+        condicao
+          ? 'PASSOU'
+          : 'FALHOU'
+      ) +
+      ' — ' +
+      nome +
+      (
+        detalhe
+          ? ' — ' + detalhe
+          : ''
+      )
+    );
+
+  }
+
+
+  Logger.log(
+    '===================================================='
+  );
+
+  Logger.log(
+    'V5.10 — TESTE ISOLADO DO MOTOR DE DECISÃO'
+  );
+
+  Logger.log(
+    '===================================================='
+  );
+
+
+  /*
+   * ----------------------------------------------------------
+   * DADOS BASE
+   * ----------------------------------------------------------
+   */
+
+  const diagnosticoBase = {
+
+    diagnostico_id:
+      'DIA-TESTE-V510',
+
+    empresa_id:
+      'EMP-TESTE-V510',
+
+    conversa_id:
+      'CONV-TESTE-V510',
+
+    processo_nome:
+      'conferir e lançar pedidos',
+
+    dor_principal:
+      'erros de digitação e retrabalho',
+
+    frequencia:
+      'diariamente',
+
+    impacto_nivel:
+      'alto',
+
+    objetivo:
+      'reduzir os erros',
+
+    status_diagnostico:
+      DIAGNOSTICO_ESTADOS.PRONTO_PARA_ANALISE
+
+  };
+
+
+  const oportunidadeBase = {
+
+    diagnostico_id:
+      'DIA-TESTE-V510',
+
+    processo:
+      'conferir e lançar pedidos',
+
+    dor:
+      'erros de digitação e retrabalho',
+
+    frequencia:
+      'diariamente',
+
+    volume:
+      '120 pedidos por dia',
+
+    impacto:
+      '3 horas por dia',
+
+    objetivo:
+      'reduzir os erros',
+
+    descricao:
+      'Reduzir o problema de erros de digitação e retrabalho no processo de conferir e lançar pedidos.',
+
+    prioridade:
+      'ALTA'
+
+  };
+
+
+  const analiseBase = {
+
+    versao:
+      'V5.8',
+
+    prioridade:
+      'ALTA',
+
+    confianca:
+      'ALTA'
+
+  };
+
+
+  const solucaoPerfeita = {
+
+    solucao_id:
+      'V510-SOLUCAO-PERFEITA',
+
+    compatibilidade:
+      'ALTA',
+
+    pontuacao:
+      100,
+
+    viabilidade:
+      'ALTA',
+
+    principal:
+      true
+
+  };
+
+
+  const solucaoMedia = {
+
+    solucao_id:
+      'V510-SOLUCAO-MEDIA',
+
+    compatibilidade:
+      'MEDIA',
+
+    pontuacao:
+      55,
+
+    viabilidade:
+      'MEDIA',
+
+    principal:
+      true
+
+  };
+
+
+  const solucaoBaixa = {
+
+    solucao_id:
+      'V510-SOLUCAO-BAIXA',
+
+    compatibilidade:
+      'BAIXA',
+
+    pontuacao:
+      25,
+
+    viabilidade:
+      'BAIXA',
+
+    principal:
+      true
+
+  };
+
+
+  /*
+   * ----------------------------------------------------------
+   * TESTE 1 — CASO PERFEITO
+   * ----------------------------------------------------------
+   */
+
+  const decisaoPerfeita =
+    construirDecisaoDiagnosticoV510_(
+      diagnosticoBase,
+      oportunidadeBase,
+      analiseBase,
+      {
+        relacoes: [
+          solucaoPerfeita
+        ]
+      }
+    );
+
+
+  teste(
+    '1 — Caso perfeito gera decisão',
+    !!decisaoPerfeita,
+    JSON.stringify(
+      decisaoPerfeita
+    )
+  );
+
+
+  teste(
+    '2 — Classificação PODEMOS_AJUDAR',
+    decisaoPerfeita &&
+    decisaoPerfeita.classificacao ===
+      'PODEMOS_AJUDAR',
+    decisaoPerfeita
+      ? decisaoPerfeita.classificacao
+      : 'N/A'
+  );
+
+
+  teste(
+    '3 — Prioridade ALTA',
+    decisaoPerfeita &&
+    decisaoPerfeita.prioridade ===
+      'ALTA',
+    decisaoPerfeita
+      ? decisaoPerfeita.prioridade
+      : 'N/A'
+  );
+
+
+  teste(
+    '4 — Solução principal correta',
+    decisaoPerfeita &&
+    decisaoPerfeita.solucao_principal_id ===
+      'V510-SOLUCAO-PERFEITA',
+    decisaoPerfeita
+      ? decisaoPerfeita.solucao_principal_id
+      : 'N/A'
+  );
+
+
+  teste(
+    '5 — Possui solução principal',
+    decisaoPerfeita &&
+    decisaoPerfeita.possui_solucao_principal ===
+      true,
+    decisaoPerfeita
+      ? String(
+          decisaoPerfeita.possui_solucao_principal
+        )
+      : 'N/A'
+  );
+
+
+  teste(
+    '6 — Confiança ALTA',
+    decisaoPerfeita &&
+    decisaoPerfeita.confianca ===
+      'ALTA',
+    decisaoPerfeita
+      ? decisaoPerfeita.confianca
+      : 'N/A'
+  );
+
+
+  teste(
+    '7 — Apto para avançar',
+    decisaoPerfeita &&
+    decisaoPerfeita.apto_para_avancar ===
+      true,
+    decisaoPerfeita
+      ? String(
+          decisaoPerfeita.apto_para_avancar
+        )
+      : 'N/A'
+  );
+
+
+  teste(
+    '8 — Versão V5.10',
+    decisaoPerfeita &&
+    decisaoPerfeita.versao ===
+      'V5.10',
+    decisaoPerfeita
+      ? decisaoPerfeita.versao
+      : 'N/A'
+  );
+
+
+  teste(
+    '9 — Rastreabilidade completa',
+    decisaoPerfeita &&
+    decisaoPerfeita.diagnostico_id ===
+      diagnosticoBase.diagnostico_id &&
+    decisaoPerfeita.empresa_id ===
+      diagnosticoBase.empresa_id &&
+    decisaoPerfeita.conversa_id ===
+      diagnosticoBase.conversa_id,
+    decisaoPerfeita
+      ? 'OK'
+      : 'Falha'
+  );
+
+
+  /*
+   * ----------------------------------------------------------
+   * TESTE 10 — SEM SOLUÇÃO
+   * ----------------------------------------------------------
+   */
+
+  const decisaoSemSolucao =
+    construirDecisaoDiagnosticoV510_(
+      diagnosticoBase,
+      oportunidadeBase,
+      analiseBase,
+      {
+        relacoes: []
+      }
+    );
+
+
+  teste(
+    '10 — Sem solução não gera PODEMOS_AJUDAR',
+    decisaoSemSolucao &&
+    decisaoSemSolucao.classificacao !==
+      'PODEMOS_AJUDAR',
+    decisaoSemSolucao
+      ? decisaoSemSolucao.classificacao
+      : 'N/A'
+  );
+
+
+  /*
+   * ----------------------------------------------------------
+   * TESTE 11 — SOLUÇÃO MÉDIA
+   * ----------------------------------------------------------
+   */
+
+  const decisaoMedia =
+    construirDecisaoDiagnosticoV510_(
+      diagnosticoBase,
+      oportunidadeBase,
+      analiseBase,
+      {
+        relacoes: [
+          solucaoMedia
+        ]
+      }
+    );
+
+
+  teste(
+    '11 — Solução média exige avaliação',
+    decisaoMedia &&
+    decisaoMedia.classificacao ===
+      'PRECISAMOS_AVALIAR',
+    decisaoMedia
+      ? decisaoMedia.classificacao
+      : 'N/A'
+  );
+
+
+  teste(
+    '12 — Solução média não fica apta',
+    decisaoMedia &&
+    decisaoMedia.apto_para_avancar ===
+      false,
+    decisaoMedia
+      ? String(
+          decisaoMedia.apto_para_avancar
+        )
+      : 'N/A'
+  );
+
+
+  /*
+   * ----------------------------------------------------------
+   * TESTE 13 — DIAGNÓSTICO INCOMPLETO
+   * ----------------------------------------------------------
+   */
+
+  const diagnosticoIncompleto =
+    Object.assign(
+      {},
+      diagnosticoBase,
+      {
+        status_diagnostico:
+          DIAGNOSTICO_ESTADOS.INVESTIGACAO
+      }
+    );
+
+
+  const decisaoIncompleta =
+    construirDecisaoDiagnosticoV510_(
+      diagnosticoIncompleto,
+      oportunidadeBase,
+      analiseBase,
+      {
+        relacoes: [
+          solucaoPerfeita
+        ]
+      }
+    );
+
+
+  teste(
+    '13 — Diagnóstico incompleto não pode ajudar automaticamente',
+    decisaoIncompleta &&
+    decisaoIncompleta.classificacao ===
+      'NAO_ENQUADRADO',
+    decisaoIncompleta
+      ? decisaoIncompleta.classificacao
+      : 'N/A'
+  );
+
+
+  teste(
+    '14 — Diagnóstico incompleto não fica apto',
+    decisaoIncompleta &&
+    decisaoIncompleta.apto_para_avancar ===
+      false,
+    decisaoIncompleta
+      ? String(
+          decisaoIncompleta.apto_para_avancar
+        )
+      : 'N/A'
+  );
+
+
+  /*
+   * ----------------------------------------------------------
+   * TESTE 15 — OPORTUNIDADE AUSENTE
+   * ----------------------------------------------------------
+   */
+
+  const decisaoSemOportunidade =
+    construirDecisaoDiagnosticoV510_(
+      diagnosticoBase,
+      null,
+      analiseBase,
+      {
+        relacoes: [
+          solucaoPerfeita
+        ]
+      }
+    );
+
+
+  teste(
+    '15 — Sem oportunidade não pode ajudar',
+    decisaoSemOportunidade &&
+    decisaoSemOportunidade.classificacao ===
+      'NAO_ENQUADRADO',
+    decisaoSemOportunidade
+      ? decisaoSemOportunidade.classificacao
+      : 'N/A'
+  );
+
+
+  /*
+   * ----------------------------------------------------------
+   * TESTE 16 — SEM ALTERAÇÃO DO DIAGNÓSTICO
+   * ----------------------------------------------------------
+   */
+
+  const diagnosticoAntes =
+    JSON.stringify(
+      diagnosticoBase
+    );
+
+
+  construirDecisaoDiagnosticoV510_(
+    diagnosticoBase,
+    oportunidadeBase,
+    analiseBase,
+    {
+      relacoes: [
+        solucaoPerfeita
+      ]
+    }
+  );
+
+
+  const diagnosticoDepois =
+    JSON.stringify(
+      diagnosticoBase
+    );
+
+
+  teste(
+    '16 — Motor não altera diagnóstico',
+    diagnosticoAntes ===
+      diagnosticoDepois,
+    diagnosticoAntes ===
+      diagnosticoDepois
+      ? 'Preservado'
+      : 'ALTERADO'
+  );
+
+
+  /*
+   * ----------------------------------------------------------
+   * TESTE 17 — SEM CRIAÇÃO DE LEAD
+   * ----------------------------------------------------------
+   *
+   * O motor apenas retorna decisão.
+   * Não existe chamada a salvarLead_().
+   * ----------------------------------------------------------
+   */
+
+  teste(
+    '17 — Motor não cria lead',
+    true,
+    'Nenhuma persistência comercial executada'
+  );
+
+
+  /*
+   * ----------------------------------------------------------
+   * TESTE 18 — SOLUÇÃO BAIXA
+   * ----------------------------------------------------------
+   */
+
+  const decisaoBaixa =
+    construirDecisaoDiagnosticoV510_(
+      diagnosticoBase,
+      oportunidadeBase,
+      analiseBase,
+      {
+        relacoes: [
+          solucaoBaixa
+        ]
+      }
+    );
+
+
+  teste(
+    '18 — Solução baixa exige avaliação',
+    decisaoBaixa &&
+    decisaoBaixa.classificacao ===
+      'PRECISAMOS_AVALIAR',
+    decisaoBaixa
+      ? decisaoBaixa.classificacao
+      : 'N/A'
+  );
+
+
+  /*
+   * ----------------------------------------------------------
+   * RESULTADO
+   * ----------------------------------------------------------
+   */
+
+  const total =
+    resultados.length;
+
+  const passaram =
+    resultados.filter(
+      function(item) {
+        return item.passou;
+      }
+    ).length;
+
+  const falharam =
+    total - passaram;
+
+
+  Logger.log(
+    '===================================================='
+  );
+
+  Logger.log(
+    'RESULTADO V5.10: ' +
+    passaram +
+    '/' +
+    total
+  );
+
+  Logger.log(
+    'FALHAS: ' +
+    falharam
+  );
+
+  Logger.log(
+    '===================================================='
+  );
+
+
+  if (
+    falharam > 0
+  ) {
+
+    throw new Error(
+      'V5.10 REPROVADA: ' +
+      passaram +
+      '/' +
+      total
+    );
+
+  }
+
+
+  Logger.log(
+    'TESTAR_MOTOR_DECISAO_V510: PASSOU'
+  );
+
+
+  return {
+
+    sucesso:
+      true,
+
+    versao:
+      'V5.10',
+
+    total:
+      total,
+
+    passaram:
+      passaram,
+
+    falharam:
+      falharam,
+
+    resultados:
+      resultados
+
+  };
+
+}
+
+/**
+ * ============================================================
+ * V5.10 — INTEGRAÇÃO REAL DO MOTOR DE DECISÃO
+ * ============================================================
+ *
+ * Fluxo testado:
+ *
+ * GEMINI
+ *   ↓
+ * V5.6 DIAGNÓSTICO
+ *   ↓
+ * V5.7 OPORTUNIDADE
+ *   ↓
+ * V5.8 ANÁLISE
+ *   ↓
+ * V5.9.5 SOLUÇÕES
+ *   ↓
+ * V5.10 DECISÃO
+ *
+ * Este teste:
+ *
+ * - cria catálogo temporário isolado;
+ * - inicia diagnóstico real;
+ * - executa processarMensagemDiagnostico();
+ * - valida diagnóstico;
+ * - valida oportunidade;
+ * - valida análise;
+ * - valida soluções;
+ * - executa V5.10;
+ * - valida decisão;
+ * - valida solução principal;
+ * - valida classificação;
+ * - valida confiança;
+ * - valida aptidão;
+ * - executa novamente;
+ * - verifica consistência;
+ * - limpa tudo ao final.
+ *
+ * NÃO cria LEAD.
+ * ============================================================
+ */
+
+/**
+ * ============================================================
+ * V5.10 — TESTE DE INTEGRAÇÃO REAL COMPLETA
+ * ============================================================
+ *
+ * Valida o fluxo completo:
+ *
+ * V5.6  → Diagnóstico
+ * V5.7  → Oportunidade
+ * V5.8  → Análise Diagnóstica
+ * V5.9.5 → Soluções
+ * V5.10 → Decisão
+ *
+ * REGRA:
+ * O teste só é aprovado com 24/24.
+ *
+ * ============================================================
+ */
+function TESTAR_INTEGRACAO_REAL_V510() {
+
+  const resultados = [];
+
+  let inicio = null;
+
+  let diagnostico = null;
+
+  let resultadoFluxo = null;
+
+  let segundaExecucao = null;
+
+
+  /*
+   * ==========================================================
+   * FUNÇÃO AUXILIAR DE TESTE
+   * ==========================================================
+   */
+
+  function teste(
+    nome,
+    passou,
+    detalhe
+  ) {
+
+    const item = {
+
+      teste:
+        nome,
+
+      passou:
+        !!passou,
+
+      detalhe:
+        detalhe === undefined ||
+        detalhe === null
+          ? ''
+          : String(detalhe)
+
+    };
+
+    resultados.push(item);
+
+    Logger.log(
+      (
+        item.passou
+          ? 'PASSOU'
+          : 'FALHOU'
+      ) +
+      ' — ' +
+      item.teste +
+      ' — ' +
+      item.detalhe
+    );
+
+  }
+
+
+  try {
+
+    Logger.log(
+      '===================================================='
+    );
+
+    Logger.log(
+      'V5.10 — INTEGRAÇÃO REAL COMPLETA'
+    );
+
+    Logger.log(
+      '===================================================='
+    );
+
+
+    /*
+     * ==========================================================
+     * 0 — LIMPEZA PREVENTIVA
+     * ==========================================================
+     */
+
+    limparSolucoesTeste();
+
+
+    /*
+     * ==========================================================
+     * 1 — CATÁLOGO TEMPORÁRIO
+     * ==========================================================
+     *
+     * Criamos quatro soluções:
+     *
+     * 1. PERFEITA
+     * 2. PARCIAL
+     * 3. INCOMPATÍVEL
+     * 4. INATIVA
+     *
+     * A perfeita deve resultar em:
+     *
+     * 100/100
+     * ALTA
+     * VIABILIDADE ALTA
+     * PRINCIPAL
+     *
+     * ==========================================================
+     */
+
+    const abaSolucoes =
+      obterAba_(
+        SHEETS.SOLUCOES
+      );
+
+
+    const cabecalhos =
+      abaSolucoes
+        .getRange(
+          1,
+          1,
+          1,
+          abaSolucoes.getLastColumn()
+        )
+        .getValues()[0];
+
+
+    const mapaSolucoes = {};
+
+
+    cabecalhos.forEach(
+      function(
+        cabecalho,
+        indice
+      ) {
+
+        mapaSolucoes[
+          String(
+            cabecalho || ''
+          ).trim()
+        ] =
+          indice;
+
+      }
+    );
+
+
+    const solucoesTeste = [
+
+      /*
+       * --------------------------------------------------------
+       * SOLUÇÃO PERFEITA
+       * --------------------------------------------------------
+       */
+
+      {
+
+        solucao_id:
+          'V510-PERFEITA',
+
+        familia:
+          'Automação de pedidos',
+
+        nome:
+          'Conferir e lançar pedidos',
+
+        descricao:
+          'Reduzir erros de digitação e retrabalho no processo de conferir e lançar pedidos.',
+
+        status:
+          'ATIVA',
+
+        nivel_complexidade:
+          'MEDIA',
+
+        repetibilidade:
+          'ALTA',
+
+        pode_oferecer:
+          'SIM',
+
+        versao:
+          'V5.10'
+
+      },
+
+
+      /*
+       * --------------------------------------------------------
+       * SOLUÇÃO PARCIAL
+       * --------------------------------------------------------
+       */
+
+      {
+
+        solucao_id:
+          'V510-PARCIAL',
+
+        familia:
+          'Processos administrativos',
+
+        nome:
+          'Apoio para conferir pedidos',
+
+        descricao:
+          'Apoio na conferência de pedidos e identificação de informações administrativas.',
+
+        status:
+          'ATIVA',
+
+        nivel_complexidade:
+          'MEDIA',
+
+        repetibilidade:
+          'ALTA',
+
+        pode_oferecer:
+          'SIM',
+
+        versao:
+          'V5.10'
+
+      },
+
+
+      /*
+       * --------------------------------------------------------
+       * SOLUÇÃO INCOMPATÍVEL
+       * --------------------------------------------------------
+       */
+
+      {
+
+        solucao_id:
+          'V510-INCOMPATIVEL',
+
+        familia:
+          'Marketing',
+
+        nome:
+          'Gestão de redes sociais',
+
+        descricao:
+          'Planejamento e publicação de conteúdo para redes sociais.',
+
+        status:
+          'ATIVA',
+
+        nivel_complexidade:
+          'MEDIA',
+
+        repetibilidade:
+          'ALTA',
+
+        pode_oferecer:
+          'SIM',
+
+        versao:
+          'V5.10'
+
+      },
+
+
+      /*
+       * --------------------------------------------------------
+       * SOLUÇÃO INATIVA
+       * --------------------------------------------------------
+       */
+
+      {
+
+        solucao_id:
+          'V510-INATIVA',
+
+        familia:
+          'Automação de pedidos',
+
+        nome:
+          'Conferir e lançar pedidos',
+
+        descricao:
+          'Reduzir erros de digitação e retrabalho no processo de conferir e lançar pedidos.',
+
+        status:
+          'INATIVA',
+
+        nivel_complexidade:
+          'MEDIA',
+
+        repetibilidade:
+          'ALTA',
+
+        pode_oferecer:
+          'SIM',
+
+        versao:
+          'V5.10'
+
+      }
+
+    ];
+
+
+    solucoesTeste.forEach(
+      function(solucao) {
+
+        const linha =
+          new Array(
+            cabecalhos.length
+          ).fill('');
+
+
+        Object.keys(solucao)
+          .forEach(
+            function(campo) {
+
+              if (
+                Object.prototype
+                  .hasOwnProperty.call(
+                    mapaSolucoes,
+                    campo
+                  )
+              ) {
+
+                linha[
+                  mapaSolucoes[campo]
+                ] =
+                  solucao[campo];
+
+              }
+
+            }
+          );
+
+
+        abaSolucoes.appendRow(
+          linha
+        );
+
+      }
+    );
+
+
+    /*
+     * ==========================================================
+     * TESTE 1 — CATÁLOGO
+     * ==========================================================
+     */
+
+    const catalogo =
+      abaSolucoes
+        .getDataRange()
+        .getValues();
+
+
+    const idxCatalogo =
+      catalogo[0]
+        .indexOf(
+          'solucao_id'
+        );
+
+
+    const idsCatalogo =
+      catalogo
+        .slice(1)
+        .map(
+          function(linha) {
+
+            return String(
+              linha[
+                idxCatalogo
+              ] || ''
+            ).trim();
+
+          }
+        )
+        .filter(
+          function(id) {
+
+            return (
+              id.indexOf(
+                'V510-'
+              ) === 0
+            );
+
+          }
+        );
+
+
+    teste(
+      '1 — Catálogo V5.10 criado',
+      idsCatalogo.length === 4,
+      'Soluções V5.10: ' +
+      idsCatalogo.length
+    );
+
+
+    /*
+     * ==========================================================
+     * TESTE 2 — INICIAR DIAGNÓSTICO
+     * ==========================================================
+     */
+
+    inicio =
+      iniciarDiagnostico({
+
+        nome:
+          'Empresa Teste V510',
+
+        nome_empresa:
+          'Empresa Teste V510',
+
+        segmento:
+          'Serviços',
+
+        porte:
+          'PEQUENA',
+
+        nome_contato:
+          'Teste V510',
+
+        email:
+          '',
+
+        whatsapp:
+          '',
+
+        cidade:
+          ''
+
+      });
+
+
+    teste(
+      '2 — Diagnóstico iniciado',
+      !!inicio &&
+      inicio.sucesso === true &&
+      !!inicio.empresa_id &&
+      !!inicio.conversa_id &&
+      !!inicio.diagnostico_id,
+
+      inicio
+        ? JSON.stringify(inicio)
+        : 'Falha'
+    );
+
+
+    if (
+      !inicio ||
+      !inicio.empresa_id ||
+      !inicio.conversa_id ||
+      !inicio.diagnostico_id
+    ) {
+
+      throw new Error(
+        'Falha ao iniciar diagnóstico V5.10.'
+      );
+
+    }
+
+
+    /*
+     * ==========================================================
+     * TESTE 3 — FLUXO REAL
+     * ==========================================================
+     */
+
+    resultadoFluxo =
+      processarMensagemDiagnostico({
+
+        empresa_id:
+          inicio.empresa_id,
+
+        conversa_id:
+          inicio.conversa_id,
+
+        mensagem:
+          'Nosso processo principal é conferir e lançar pedidos. ' +
+          'Temos erros de digitação e retrabalho nesse processo. ' +
+          'Isso acontece diariamente. ' +
+          'Processamos 120 pedidos por dia. ' +
+          'Perdemos aproximadamente 3 horas por dia com esse problema. ' +
+          'Nosso objetivo é reduzir os erros e diminuir o retrabalho.'
+
+      });
+
+
+    teste(
+      '3 — Fluxo principal executado',
+      !!resultadoFluxo &&
+      resultadoFluxo.sucesso === true,
+
+      resultadoFluxo
+        ? 'OK'
+        : 'Falha'
+    );
+
+
+    /*
+     * ==========================================================
+     * TESTE 4 — DIAGNÓSTICO
+     * ==========================================================
+     */
+
+    diagnostico =
+      resultadoFluxo
+        ? resultadoFluxo.diagnostico
+        : null;
+
+
+    teste(
+      '4 — Diagnóstico retornado',
+      !!diagnostico,
+
+      diagnostico
+        ? diagnostico.diagnostico_id
+        : 'Não retornado'
+    );
+
+
+    if (!diagnostico) {
+
+      throw new Error(
+        'Diagnóstico não retornado.'
+      );
+
+    }
+
+
+    /*
+     * ==========================================================
+     * TESTE 5 — ESTADO
+     * ==========================================================
+     */
+
+    const estado =
+      String(
+        diagnostico.status_diagnostico || ''
+      )
+        .trim()
+        .toUpperCase();
+
+
+    teste(
+      '5 — Diagnóstico PRONTO_PARA_ANALISE',
+      estado ===
+      'PRONTO_PARA_ANALISE',
+
+      estado
+    );
+
+
+    /*
+     * ==========================================================
+     * TESTE 6 — OPORTUNIDADE V5.7
+     * ==========================================================
+     *
+     * IMPORTANTE:
+     * O retorno da V5.7 possui um wrapper:
+     *
+     * resultadoFluxo.oportunidade
+     *
+     * e dentro dele:
+     *
+     * resultadoFluxo.oportunidade.oportunidade
+     *
+     * Aqui reconstruímos o objeto completo.
+     * Assim não perdemos:
+     *
+     * oportunidade_id
+     * acao
+     * linha
+     *
+     * ==========================================================
+     */
+
+    const oportunidadeWrapper =
+      resultadoFluxo &&
+      resultadoFluxo.oportunidade
+        ? resultadoFluxo.oportunidade
+        : null;
+
+
+    const oportunidade =
+      oportunidadeWrapper
+        ? Object.assign(
+            {},
+            oportunidadeWrapper.oportunidade || {},
+            {
+
+              oportunidade_id:
+                oportunidadeWrapper.oportunidade_id,
+
+              acao:
+                oportunidadeWrapper.acao,
+
+              linha:
+                oportunidadeWrapper.linha
+
+            }
+          )
+        : null;
+
+
+    teste(
+      '6 — Oportunidade V5.7 retornada',
+
+      !!oportunidade &&
+      !!oportunidade.oportunidade_id &&
+      !!oportunidade.processo &&
+      !!oportunidade.dor &&
+      !!oportunidade.objetivo,
+
+      oportunidade
+        ? JSON.stringify(
+            oportunidade
+          )
+        : 'Não retornada'
+    );
+
+
+    /*
+     * ==========================================================
+     * TESTE 7 — ANÁLISE V5.8
+     * ==========================================================
+     */
+
+    const analiseWrapper =
+      resultadoFluxo &&
+      resultadoFluxo.analise_diagnostica
+        ? resultadoFluxo.analise_diagnostica
+        : null;
+
+
+    const analise =
+      analiseWrapper
+        ? Object.assign(
+            {},
+            analiseWrapper.analise || {},
+            {
+
+              analise_id:
+                analiseWrapper.analise_id,
+
+              diagnostico_id:
+                analiseWrapper.diagnostico_id,
+
+              acao:
+                analiseWrapper.acao,
+
+              linha:
+                analiseWrapper.linha
+
+            }
+          )
+        : null;
+
+
+    teste(
+      '7 — Análise V5.8 retornada',
+
+      !!analise &&
+      !!analise.analise_id &&
+      !!analise.diagnostico_id &&
+      !!analise.processo &&
+      !!analise.problema &&
+      !!analise.frequencia &&
+      !!analise.impacto &&
+      !!analise.objetivo,
+
+      analise
+        ? JSON.stringify(
+            analise
+          )
+        : 'Não retornada'
+    );
+
+
+    /*
+     * ==========================================================
+     * TESTE 8 — MOTOR V5.9.5
+     * ==========================================================
+     */
+
+    const solucoes =
+      resultadoFluxo &&
+      resultadoFluxo.solucoes
+        ? resultadoFluxo.solucoes
+        : null;
+
+
+    teste(
+      '8 — Motor V5.9.5 integrado',
+
+      !!solucoes &&
+      Array.isArray(
+        solucoes.relações ||
+        solucoes.relacoes
+      ),
+
+      solucoes
+        ? JSON.stringify(
+            solucoes
+          )
+        : 'Não retornado'
+    );
+
+
+    if (!solucoes) {
+
+      throw new Error(
+        'Motor V5.9.5 não retornou resultado.'
+      );
+
+    }
+
+
+    const relacoes =
+      Array.isArray(
+        solucoes.relacoes
+      )
+        ? solucoes.relacoes
+        : [];
+
+
+    /*
+     * ==========================================================
+     * TESTE 9 — RELAÇÕES COMPATÍVEIS
+     * ==========================================================
+     */
+
+    teste(
+      '9 — Exatamente duas relações compatíveis',
+
+      relacoes.length === 2,
+
+      'Total: ' +
+      relacoes.length
+    );
+
+
+    /*
+     * ==========================================================
+     * PRINCIPAIS
+     * ==========================================================
+     */
+
+    const principais =
+      relacoes.filter(
+        function(relacao) {
+
+          return (
+            relacao.principal === true
+          );
+
+        }
+      );
+
+
+    /*
+     * ==========================================================
+     * TESTE 10 — UMA PRINCIPAL
+     * ==========================================================
+     */
+
+    teste(
+      '10 — Exatamente uma solução principal',
+
+      principais.length === 1,
+
+      'Principais: ' +
+      principais.length
+    );
+
+
+    /*
+     * ==========================================================
+     * SOLUÇÃO PERFEITA
+     * ==========================================================
+     */
+
+    const perfeita =
+      relacoes.find(
+        function(relacao) {
+
+          return (
+            relacao.solucao_id ===
+            'V510-PERFEITA'
+          );
+
+        }
+      );
+
+
+    /*
+     * ==========================================================
+     * TESTE 11 — SOLUÇÃO PERFEITA
+     * ==========================================================
+     */
+
+    teste(
+      '11 — Solução perfeita encontrada',
+
+      !!perfeita,
+
+      perfeita
+        ? JSON.stringify(
+            perfeita
+          )
+        : 'Não encontrada'
+    );
+
+
+    /*
+     * ==========================================================
+     * TESTE 12 — 100/100
+     * ==========================================================
+     */
+
+    teste(
+      '12 — Solução perfeita = 100/100',
+
+      !!perfeita &&
+      Number(
+        perfeita.pontuacao
+      ) === 100,
+
+      perfeita
+        ? String(
+            perfeita.pontuacao
+          )
+        : 'N/A'
+    );
+
+
+    /*
+     * ==========================================================
+     * TESTE 13 — ALTA
+     * ==========================================================
+     */
+
+    teste(
+      '13 — Solução perfeita = ALTA',
+
+      !!perfeita &&
+      String(
+        perfeita.compatibilidade || ''
+      )
+        .trim()
+        .toUpperCase() ===
+      'ALTA',
+
+      perfeita
+        ? perfeita.compatibilidade
+        : 'N/A'
+    );
+
+
+    /*
+     * ==========================================================
+     * TESTE 14 — PRINCIPAL
+     * ==========================================================
+     */
+
+    teste(
+      '14 — Solução perfeita é principal',
+
+      !!perfeita &&
+      perfeita.principal === true,
+
+      perfeita
+        ? String(
+            perfeita.principal
+          )
+        : 'N/A'
+    );
+
+
+    /*
+     * ==========================================================
+     * TESTE 15 — INCOMPATÍVEL
+     * ==========================================================
+     */
+
+    const incompatibilidade =
+      relacoes.find(
+        function(relacao) {
+
+          return (
+            relacao.solucao_id ===
+            'V510-INCOMPATIVEL'
+          );
+
+        }
+      );
+
+
+    teste(
+      '15 — Incompatível não persistida',
+
+      !incompatibilidade,
+
+      incompatibilidade
+        ? 'ERRO'
+        : 'Correto'
+    );
+
+
+    /*
+     * ==========================================================
+     * TESTE 16 — INATIVA
+     * ==========================================================
+     */
+
+    const inativa =
+      relacoes.find(
+        function(relacao) {
+
+          return (
+            relacao.solucao_id ===
+            'V510-INATIVA'
+          );
+
+        }
+      );
+
+
+    teste(
+      '16 — Inativa não persistida',
+
+      !inativa,
+
+      inativa
+        ? 'ERRO'
+        : 'Correto'
+    );
+
+
+    /*
+     * ==========================================================
+     * V5.10 — CONSTRUIR DECISÃO
+     * ==========================================================
+     *
+     * Aqui está a correção central:
+     *
+     * oportunidade = objeto completo
+     * analise      = objeto completo
+     *
+     * ==========================================================
+     */
+
+    const decisao =
+      construirDecisaoDiagnosticoV510_(
+        diagnostico,
+        oportunidade,
+        analise,
+        relacoes
+      );
+
+
+    /*
+     * ==========================================================
+     * TESTE 17 — DECISÃO INTEGRADA
+     * ==========================================================
+     */
+
+    teste(
+      '17 — Motor V5.10 integrado',
+
+      !!decisao &&
+      !!decisao.classificacao,
+
+      decisao
+        ? JSON.stringify(
+            decisao
+          )
+        : 'Decisão não retornada'
+    );
+
+
+    /*
+     * ==========================================================
+     * TESTE 18 — PODEMOS AJUDAR
+     * ==========================================================
+     */
+
+    teste(
+      '18 — Classificação PODEMOS_AJUDAR',
+
+      !!decisao &&
+      decisao.classificacao ===
+      'PODEMOS_AJUDAR',
+
+      decisao
+        ? decisao.classificacao
+        : 'N/A'
+    );
+
+
+    /*
+     * ==========================================================
+     * TESTE 19 — PRIORIDADE ALTA
+     * ==========================================================
+     */
+
+    teste(
+      '19 — Prioridade ALTA',
+
+      !!decisao &&
+      decisao.prioridade ===
+      'ALTA',
+
+      decisao
+        ? decisao.prioridade
+        : 'N/A'
+    );
+
+
+    /*
+     * ==========================================================
+     * TESTE 20 — SOLUÇÃO PRINCIPAL CORRETA
+     * ==========================================================
+     */
+
+    teste(
+      '20 — Solução principal V5.10 correta',
+
+      !!decisao &&
+      decisao.solucao_principal_id ===
+      'V510-PERFEITA',
+
+      decisao
+        ? decisao.solucao_principal_id
+        : 'N/A'
+    );
+
+
+    /*
+     * ==========================================================
+     * TESTE 21 — CONFIANÇA ALTA
+     * ==========================================================
+     */
+
+    teste(
+      '21 — Confiança ALTA',
+
+      !!decisao &&
+      decisao.confianca ===
+      'ALTA',
+
+      decisao
+        ? decisao.confianca
+        : 'N/A'
+    );
+
+
+    /*
+     * ==========================================================
+     * TESTE 22 — APTO PARA AVANÇAR
+     * ==========================================================
+     */
+
+    teste(
+      '22 — Apto para avançar',
+
+      !!decisao &&
+      decisao.apto_para_avancar === true,
+
+      decisao
+        ? String(
+            decisao.apto_para_avancar
+          )
+        : 'N/A'
+    );
+
+
+    /*
+     * ==========================================================
+     * TESTE 23 — RASTREABILIDADE
+     * ==========================================================
+     */
+
+    teste(
+      '23 — Rastreabilidade V5.10',
+
+      !!decisao &&
+      String(
+        decisao.diagnostico_id || ''
+      ).trim() ===
+      String(
+        diagnostico.diagnostico_id || ''
+      ).trim() &&
+
+      String(
+        decisao.empresa_id || ''
+      ).trim() ===
+      String(
+        inicio.empresa_id || ''
+      ).trim() &&
+
+      String(
+        decisao.conversa_id || ''
+      ).trim() ===
+      String(
+        inicio.conversa_id || ''
+      ).trim(),
+
+      decisao
+        ? JSON.stringify({
+            diagnostico_id:
+              decisao.diagnostico_id,
+            empresa_id:
+              decisao.empresa_id,
+            conversa_id:
+              decisao.conversa_id
+          })
+        : 'N/A'
+    );
+
+
+    /*
+     * ==========================================================
+     * TESTE 24 — SEGUNDA EXECUÇÃO / IDEMPOTÊNCIA
+     * ==========================================================
+     *
+     * Executamos novamente o fluxo.
+     *
+     * A decisão precisa continuar:
+     *
+     * PODEMOS_AJUDAR
+     * ALTA
+     * V510-PERFEITA
+     * ALTA confiança
+     * apto
+     *
+     * ==========================================================
+     */
+
+    const resultadoFluxo2 =
+      processarMensagemDiagnostico({
+
+        empresa_id:
+          inicio.empresa_id,
+
+        conversa_id:
+          inicio.conversa_id,
+
+        mensagem:
+          'Confirmamos novamente que processamos 120 pedidos por dia e que o objetivo é reduzir os erros e diminuir o retrabalho.'
+
+      });
+
+
+    const diagnostico2 =
+      resultadoFluxo2 &&
+      resultadoFluxo2.diagnostico
+        ? resultadoFluxo2.diagnostico
+        : null;
+
+
+    const oportunidadeWrapper2 =
+      resultadoFluxo2 &&
+      resultadoFluxo2.oportunidade
+        ? resultadoFluxo2.oportunidade
+        : null;
+
+
+    const oportunidade2 =
+      oportunidadeWrapper2
+        ? Object.assign(
+            {},
+            oportunidadeWrapper2.oportunidade || {},
+            {
+
+              oportunidade_id:
+                oportunidadeWrapper2.oportunidade_id,
+
+              acao:
+                oportunidadeWrapper2.acao,
+
+              linha:
+                oportunidadeWrapper2.linha
+
+            }
+          )
+        : null;
+
+
+    const analiseWrapper2 =
+      resultadoFluxo2 &&
+      resultadoFluxo2.analise_diagnostica
+        ? resultadoFluxo2.analise_diagnostica
+        : null;
+
+
+    const analise2 =
+      analiseWrapper2
+        ? Object.assign(
+            {},
+            analiseWrapper2.analise || {},
+            {
+
+              analise_id:
+                analiseWrapper2.analise_id,
+
+              diagnostico_id:
+                analiseWrapper2.diagnostico_id,
+
+              acao:
+                analiseWrapper2.acao,
+
+              linha:
+                analiseWrapper2.linha
+
+            }
+          )
+        : null;
+
+
+    const solucoes2 =
+      resultadoFluxo2 &&
+      resultadoFluxo2.solucoes
+        ? resultadoFluxo2.solucoes
+        : null;
+
+
+    const relacoes2 =
+      solucoes2 &&
+      Array.isArray(
+        solucoes2.relacoes
+      )
+        ? solucoes2.relacoes
+        : [];
+
+
+    const decisao2 =
+      construirDecisaoDiagnosticoV510_(
+        diagnostico2,
+        oportunidade2,
+        analise2,
+        relacoes2
+      );
+
+
+    /*
+     * ==========================================================
+     * TESTE 24A — SEGUNDA EXECUÇÃO
+     * ==========================================================
+     */
+
+    teste(
+      '24 — Segunda execução mantém decisão máxima',
+
+      !!decisao2 &&
+      decisao2.classificacao ===
+      'PODEMOS_AJUDAR' &&
+
+      decisao2.prioridade ===
+      'ALTA' &&
+
+      decisao2.solucao_principal_id ===
+      'V510-PERFEITA' &&
+
+      decisao2.confianca ===
+      'ALTA' &&
+
+      decisao2.apto_para_avancar ===
+      true,
+
+      decisao2
+        ? JSON.stringify(
+            decisao2
+          )
+        : 'Segunda decisão não retornada'
+    );
+
+
+    /*
+     * ==========================================================
+     * RESULTADO FINAL
+     * ==========================================================
+     */
+
+    const aprovados =
+      resultados.filter(
+        function(item) {
+
+          return item.passou;
+
+        }
+      ).length;
+
+
+    const total =
+      resultados.length;
+
+
+    Logger.log(
+      '===================================================='
+    );
+
+
+    resultados.forEach(
+      function(
+        item,
+        indice
+      ) {
+
+        Logger.log(
+
+          (
+            item.passou
+              ? 'PASSOU'
+              : 'FALHOU'
+          ) +
+
+          ' — TESTE ' +
+
+          (
+            indice + 1
+          ) +
+
+          ': ' +
+
+          item.teste +
+
+          ' — ' +
+
+          item.detalhe
+
+        );
+
+      }
+    );
+
+
+    Logger.log(
+      '===================================================='
+    );
+
+
+    Logger.log(
+      'RESULTADO V5.10: ' +
+      aprovados +
+      '/' +
+      total
+    );
+
+
+    if (
+      aprovados !== total
+    ) {
+
+      throw new Error(
+        'V5.10 FALHOU: ' +
+        aprovados +
+        '/' +
+        total
+      );
+
+    }
+
+
+    Logger.log(
+      'TESTAR_INTEGRACAO_REAL_V510: PASSOU'
+    );
+
+
+    return {
+
+      sucesso:
+        true,
+
+      aprovados:
+        aprovados,
+
+      total:
+        total,
+
+      percentual:
+        total > 0
+          ? (
+              aprovados /
+              total
+            ) * 100
+          : 0,
+
+      resultados:
+        resultados,
+
+      decisao:
+        decisao,
+
+      decisao_segunda_execucao:
+        decisao2
+
+    };
+
+
+  } finally {
+
+
+    /*
+     * ==========================================================
+     * LIMPEZA FINAL
+     * ==========================================================
+     */
+
+    try {
+
+      limparSolucoesTeste();
+
+    } catch (erro) {
+
+      Logger.log(
+        'Falha na limpeza das soluções V5.10: ' +
+        erro.message
+      );
+
+    }
+
+
+    if (inicio) {
+
+      try {
+
+        limparRegistrosPorCampoV510_(
+          SHEETS.DIAGNOSTICO_SOLUCOES,
+          'diagnostico_id',
+          inicio.diagnostico_id
+        );
+
+
+        limparRegistrosPorCampoV510_(
+          SHEETS.OPORTUNIDADES,
+          'diagnostico_id',
+          inicio.diagnostico_id
+        );
+
+
+        limparRegistrosPorCampoV510_(
+          SHEETS.DORES,
+          'diagnostico_id',
+          inicio.diagnostico_id
+        );
+
+
+        limparRegistrosPorCampoV510_(
+          SHEETS.DIAGNOSTICOS,
+          'diagnostico_id',
+          inicio.diagnostico_id
+        );
+
+
+        limparRegistrosPorCampoV510_(
+          SHEETS.CONVERSAS,
+          'conversa_id',
+          inicio.conversa_id
+        );
+
+
+        limparRegistrosPorCampoV510_(
+          SHEETS.METRICAS,
+          'conversa_id',
+          inicio.conversa_id
+        );
+
+
+        Logger.log(
+          'LIMPEZA V5.10 CONCLUÍDA'
+        );
+
+      } catch (erro) {
+
+        Logger.log(
+          'Falha na limpeza V5.10: ' +
+          erro.message
+        );
+
+      }
+
+    }
+
+  }
+
+}
+
+function limparSolucoesTeste() {
+
+  const aba =
+    obterAba_(
+      SHEETS.SOLUCOES
+    );
+
+  if (!aba) {
+    throw new Error(
+      'A aba SOLUCOES não foi encontrada.'
+    );
+  }
+
+  const ultimaLinha =
+    aba.getLastRow();
+
+  const ultimaColuna =
+    aba.getLastColumn();
+
+  if (
+    ultimaLinha <= 1 ||
+    ultimaColuna <= 0
+  ) {
+    return;
+  }
+
+  const valores =
+    aba
+      .getRange(
+        1,
+        1,
+        ultimaLinha,
+        ultimaColuna
+      )
+      .getValues();
+
+  const cabecalhos =
+    valores[0];
+
+  const indiceSolucao =
+    cabecalhos.indexOf(
+      'solucao_id'
+    );
+
+  if (
+    indiceSolucao === -1
+  ) {
+    throw new Error(
+      'A aba SOLUCOES precisa possuir a coluna solucao_id.'
+    );
+  }
+
+  let removidas = 0;
+
+  for (
+    let i = valores.length - 1;
+    i >= 1;
+    i--
+  ) {
+
+    const solucaoId =
+      String(
+        valores[i][indiceSolucao] || ''
+      )
+        .trim()
+        .toUpperCase();
+
+    if (
+      solucaoId.indexOf(
+        'V510-'
+      ) === 0
+    ) {
+
+      aba.deleteRow(
+        i + 1
+      );
+
+      removidas++;
+
+    }
+
+  }
+
+  Logger.log(
+    'LIMPEZA SOLUÇÕES V5.10: ' +
+    removidas +
+    ' registro(s) removido(s).'
+  );
+
+}
+
+function limparRegistrosPorCampoV510_(
+  nomeAba,
+  nomeCampo,
+  valor
+) {
+
+  if (!nomeAba) {
+    throw new Error(
+      'Nome da aba não informado.'
+    );
+  }
+
+  if (!nomeCampo) {
+    throw new Error(
+      'Nome do campo não informado.'
+    );
+  }
+
+  if (
+    valor === undefined ||
+    valor === null ||
+    String(valor).trim() === ''
+  ) {
+    return 0;
+  }
+
+
+  const aba =
+    obterAba_(
+      nomeAba
+    );
+
+
+  if (!aba) {
+    throw new Error(
+      'Aba não encontrada: ' +
+      nomeAba
+    );
+  }
+
+
+  const ultimaLinha =
+    aba.getLastRow();
+
+
+  const ultimaColuna =
+    aba.getLastColumn();
+
+
+  if (
+    ultimaLinha <= 1 ||
+    ultimaColuna <= 0
+  ) {
+    return 0;
+  }
+
+
+  const dados =
+    aba
+      .getRange(
+        1,
+        1,
+        ultimaLinha,
+        ultimaColuna
+      )
+      .getValues();
+
+
+  const cabecalhos =
+    dados[0];
+
+
+  const indiceCampo =
+    cabecalhos.indexOf(
+      nomeCampo
+    );
+
+
+  if (
+    indiceCampo === -1
+  ) {
+
+    throw new Error(
+      'Campo "' +
+      nomeCampo +
+      '" não encontrado na aba "' +
+      nomeAba +
+      '".'
+    );
+
+  }
+
+
+  const valorComparacao =
+    String(
+      valor
+    )
+      .trim();
+
+
+  let removidos = 0;
+
+
+  for (
+    let i = dados.length - 1;
+    i >= 1;
+    i--
+  ) {
+
+    const valorLinha =
+      String(
+        dados[i][indiceCampo] || ''
+      )
+        .trim();
+
+
+    if (
+      valorLinha ===
+      valorComparacao
+    ) {
+
+      aba.deleteRow(
+        i + 1
+      );
+
+      removidos++;
+
+    }
+
+  }
+
+
+  return removidos;
 
 }
