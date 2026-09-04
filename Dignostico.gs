@@ -332,9 +332,9 @@ function processarMensagemDiagnostico(dados) {
 
 
   /*
-   * ============================================================
+   * ==========================================================
    * 1. RECUPERAR DIAGNÓSTICO
-   * ============================================================
+   * ==========================================================
    */
 
   const diagnostico =
@@ -354,9 +354,9 @@ function processarMensagemDiagnostico(dados) {
 
 
   /*
-   * ============================================================
+   * ==========================================================
    * 2. SALVAR MENSAGEM DO EMPRESÁRIO
-   * ============================================================
+   * ==========================================================
    */
 
   salvarMensagemDiagnostico_({
@@ -388,9 +388,9 @@ function processarMensagemDiagnostico(dados) {
 
 
   /*
-   * ============================================================
+   * ==========================================================
    * 3. RECUPERAR CONTEXTO
-   * ============================================================
+   * ==========================================================
    */
 
   const contexto =
@@ -400,9 +400,9 @@ function processarMensagemDiagnostico(dados) {
 
 
   /*
-   * ============================================================
+   * ==========================================================
    * 4. CONSTRUIR ENTRADA PARA IA
-   * ============================================================
+   * ==========================================================
    */
 
   const entradaIA =
@@ -413,9 +413,9 @@ function processarMensagemDiagnostico(dados) {
 
 
   /*
-   * ============================================================
+   * ==========================================================
    * 5. ANALISAR COM GEMINI
-   * ============================================================
+   * ==========================================================
    */
 
   const analise =
@@ -437,9 +437,9 @@ function processarMensagemDiagnostico(dados) {
 
 
   /*
-   * ============================================================
+   * ==========================================================
    * 6. NORMALIZAR E VALIDAR ANÁLISE
-   * ============================================================
+   * ==========================================================
    */
 
   const analiseNormalizada =
@@ -452,7 +452,7 @@ function processarMensagemDiagnostico(dados) {
 
   /*
    * A IA pode retornar vazio em uma rodada posterior.
-   * O motor nunca perde uma medida confirmada.
+   * O motor nunca perde uma medida confirmada já existente.
    */
 
   if (
@@ -468,9 +468,9 @@ function processarMensagemDiagnostico(dados) {
 
 
   /*
-   * ============================================================
+   * ==========================================================
    * 7. CONTROLAR CONTINUIDADE
-   * ============================================================
+   * ==========================================================
    */
 
   const analiseContinuidade =
@@ -482,9 +482,9 @@ function processarMensagemDiagnostico(dados) {
 
 
   /*
-   * ============================================================
+   * ==========================================================
    * 8. ATUALIZAR DIAGNÓSTICO
-   * ============================================================
+   * ==========================================================
    */
 
   const novoDiagnostico =
@@ -495,9 +495,9 @@ function processarMensagemDiagnostico(dados) {
 
 
   /*
-   * ============================================================
+   * ==========================================================
    * 9. DETERMINAR ESTADO
-   * ============================================================
+   * ==========================================================
    */
 
   const novoEstado =
@@ -516,9 +516,9 @@ function processarMensagemDiagnostico(dados) {
 
 
   /*
-   * ============================================================
+   * ==========================================================
    * 10. SALVAR DIAGNÓSTICO
-   * ============================================================
+   * ==========================================================
    */
 
   atualizarDiagnostico_(
@@ -540,9 +540,9 @@ function processarMensagemDiagnostico(dados) {
 
 
   /*
-   * ============================================================
-   * V5.7 — OPORTUNIDADE
-   * ============================================================
+   * ==========================================================
+   * V5.7 — GERAR / ATUALIZAR OPORTUNIDADE
+   * ==========================================================
    */
 
   const oportunidadeV57 =
@@ -552,9 +552,9 @@ function processarMensagemDiagnostico(dados) {
 
 
   /*
-   * ============================================================
-   * V5.8 — ANÁLISE DIAGNÓSTICA
-   * ============================================================
+   * ==========================================================
+   * V5.8 — GERAR / ATUALIZAR ANÁLISE DIAGNÓSTICA
+   * ==========================================================
    */
 
   const analiseDiagnosticaV58 =
@@ -564,15 +564,9 @@ function processarMensagemDiagnostico(dados) {
 
 
   /*
-   * ============================================================
-   * V5.9.5 — MOTOR DE SOLUÇÕES
-   * ============================================================
-   *
-   * Só executa quando o diagnóstico estiver pronto.
-   *
-   * Não cria soluções.
-   * Apenas consulta soluções ativas,
-   * calcula compatibilidade e persiste relações.
+   * ==========================================================
+   * V5.9.5 — GERAR / ATUALIZAR SOLUÇÕES
+   * ==========================================================
    */
 
   const solucoesDiagnosticoV595 =
@@ -582,9 +576,9 @@ function processarMensagemDiagnostico(dados) {
 
 
   /*
-   * ============================================================
-   * 11. ATUALIZAR ÚLTIMA INTERAÇÃO DA EMPRESA
-   * ============================================================
+   * ==========================================================
+   * ATUALIZAR ÚLTIMA INTERAÇÃO DA EMPRESA
+   * ==========================================================
    */
 
   atualizarUltimaInteracaoEmpresa_(
@@ -593,9 +587,9 @@ function processarMensagemDiagnostico(dados) {
 
 
   /*
-   * ============================================================
-   * 12. DETERMINAR RESPOSTA
-   * ============================================================
+   * ==========================================================
+   * DETERMINAR RESPOSTA
+   * ==========================================================
    */
 
   const resposta =
@@ -606,12 +600,14 @@ function processarMensagemDiagnostico(dados) {
 
 
   /*
-   * ============================================================
-   * 13. SALVAR RESPOSTA DO SISTEMA
-   * ============================================================
+   * ==========================================================
+   * SALVAR RESPOSTA DO SISTEMA
+   * ==========================================================
    */
 
-  if (resposta) {
+  if (
+    resposta
+  ) {
 
     salvarMensagemDiagnostico_({
 
@@ -644,9 +640,9 @@ function processarMensagemDiagnostico(dados) {
 
 
   /*
-   * ============================================================
-   * 14. MÉTRICA
-   * ============================================================
+   * ==========================================================
+   * MÉTRICA
+   * ==========================================================
    */
 
   registrarEventoDiagnostico_(
@@ -675,16 +671,33 @@ function processarMensagemDiagnostico(dados) {
 
 
   /*
-   * ============================================================
-   * 15. RETORNO PARA INTERFACE
-   * ============================================================
+   * ==========================================================
+   * RETORNO PARA INTERFACE
+   * ==========================================================
    *
-   * IMPORTANTE V5.10:
+   * IMPORTANTE:
    *
-   * V5.7 e V5.8 precisam entregar os objetos completos
-   * para que o MOTOR DE DECISÃO receba dados canônicos.
+   * V5.7 retorna agora a oportunidade COMPLETA.
    *
-   * Nenhuma informação é alterada aqui.
+   * Não podemos devolver somente:
+   *
+   * acao
+   * oportunidade_id
+   * linha
+   *
+   * porque o V5.10 precisa validar:
+   *
+   * processo
+   * dor
+   * frequencia
+   * volume
+   * impacto
+   * objetivo
+   * descricao
+   * prioridade
+   * justificativa
+   *
+   * ==========================================================
    */
 
   return {
@@ -692,23 +705,30 @@ function processarMensagemDiagnostico(dados) {
     sucesso:
       true,
 
+
     empresa_id:
       empresaId,
+
 
     conversa_id:
       conversaId,
 
+
     diagnostico_id:
       novoDiagnostico.diagnostico_id,
+
 
     estado:
       novoEstado,
 
+
     resposta:
       resposta,
 
+
     diagnostico:
       novoDiagnostico,
+
 
     analise_ia:
       analiseContinuidade,
@@ -716,7 +736,7 @@ function processarMensagemDiagnostico(dados) {
 
     /*
      * ----------------------------------------------------------
-     * V5.7
+     * V5.7 — OPORTUNIDADE COMPLETA
      * ----------------------------------------------------------
      */
 
@@ -734,7 +754,7 @@ function processarMensagemDiagnostico(dados) {
               oportunidadeV57.linha,
 
             oportunidade:
-              oportunidadeV57
+              oportunidadeV57.oportunidade
 
           }
         : null,
@@ -742,7 +762,7 @@ function processarMensagemDiagnostico(dados) {
 
     /*
      * ----------------------------------------------------------
-     * V5.8
+     * V5.8 — ANÁLISE COMPLETA
      * ----------------------------------------------------------
      */
 
@@ -771,7 +791,7 @@ function processarMensagemDiagnostico(dados) {
 
     /*
      * ----------------------------------------------------------
-     * V5.9.5
+     * V5.9.5 — SOLUÇÕES
      * ----------------------------------------------------------
      */
 
@@ -36600,5 +36620,4882 @@ function limparRegistrosPorCampoV510_(
 
 
   return removidos;
+
+}
+
+/**
+ * ============================================================
+ * FEEDS SOLUTIONS — V5.11
+ * MOTOR DE ENCAMINHAMENTO
+ * ============================================================
+ *
+ * Objetivo:
+ * Transformar a decisão V5.10 em um próximo passo
+ * operacional/comercial determinístico.
+ *
+ * Regras:
+ * PODEMOS_AJUDAR      -> AVANCAR
+ * PRECISAMOS_AVALIAR  -> AVALIAR
+ * NAO_ENQUADRADO      -> NAO_AVANCAR
+ *
+ * IMPORTANTE:
+ * - Não chama IA.
+ * - Não altera diagnóstico.
+ * - Não altera oportunidade.
+ * - Não altera análise.
+ * - Não altera solução.
+ * - Não altera decisão V5.10.
+ * - Não cria Lead.
+ * - Não grava dados.
+ *
+ * V5.11 somente interpreta a decisão já aprovada pela V5.10.
+ * ============================================================
+ */
+
+
+/**
+ * Normaliza textos utilizados pelo motor V5.11.
+ */
+function normalizarEncaminhamentoV511_(valor) {
+  return String(valor == null ? '' : valor)
+    .trim()
+    .toUpperCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, ' ');
+}
+
+
+/**
+ * Determina a ação operacional a partir da decisão V5.10.
+ *
+ * PODEMOS_AJUDAR     -> AVANCAR
+ * PRECISAMOS_AVALIAR -> AVALIAR
+ * NAO_ENQUADRADO     -> NAO_AVANCAR
+ */
+function determinarAcaoEncaminhamentoV511_(classificacao) {
+
+  const classificacaoNormalizada =
+    normalizarEncaminhamentoV511_(classificacao);
+
+  if (classificacaoNormalizada === 'PODEMOS_AJUDAR') {
+    return 'AVANCAR';
+  }
+
+  if (classificacaoNormalizada === 'PRECISAMOS_AVALIAR') {
+    return 'AVALIAR';
+  }
+
+  if (classificacaoNormalizada === 'NAO_ENQUADRADO') {
+    return 'NAO_AVANCAR';
+  }
+
+  return 'NAO_AVANCAR';
+}
+
+
+/**
+ * Determina o próximo passo.
+ *
+ * Esta função não cria Lead.
+ * Ela apenas define o que deve acontecer depois da decisão.
+ */
+function determinarProximoPassoV511_(
+  classificacao,
+  possuiSolucaoPrincipal,
+  aptoParaAvancar
+) {
+
+  const classificacaoNormalizada =
+    normalizarEncaminhamentoV511_(classificacao);
+
+  const possuiSolucao =
+    possuiSolucaoPrincipal === true ||
+    normalizarEncaminhamentoV511_(possuiSolucaoPrincipal) === 'TRUE' ||
+    normalizarEncaminhamentoV511_(possuiSolucaoPrincipal) === 'SIM';
+
+  const apto =
+    aptoParaAvancar === true ||
+    normalizarEncaminhamentoV511_(aptoParaAvancar) === 'TRUE' ||
+    normalizarEncaminhamentoV511_(aptoParaAvancar) === 'SIM';
+
+  if (
+    classificacaoNormalizada === 'PODEMOS_AJUDAR' &&
+    possuiSolucao &&
+    apto
+  ) {
+    return 'AVANCAR_PARA_PROXIMA_ETAPA';
+  }
+
+  if (
+    classificacaoNormalizada === 'PRECISAMOS_AVALIAR'
+  ) {
+    return 'REALIZAR_AVALIACAO';
+  }
+
+  return 'NAO_AVANCAR';
+}
+
+
+/**
+ * Constrói a justificativa determinística do encaminhamento.
+ *
+ * Não inventa nenhuma informação.
+ * Utiliza exclusivamente os dados da decisão V5.10.
+ */
+function construirJustificativaEncaminhamentoV511_(decisao) {
+
+  const dados = decisao || {};
+
+  const classificacao =
+    String(dados.classificacao || '').trim();
+
+  const prioridade =
+    String(dados.prioridade || '').trim();
+
+  const solucaoPrincipalId =
+    String(dados.solucao_principal_id || '').trim();
+
+  const possuiSolucao =
+    dados.possui_solucao_principal === true;
+
+  const confianca =
+    String(dados.confianca || '').trim();
+
+  const apto =
+    dados.apto_para_avancar === true;
+
+  const partes = [];
+
+  if (classificacao) {
+    partes.push(
+      'A decisão V5.10 classificou o caso como "' +
+      classificacao +
+      '".'
+    );
+  }
+
+  if (prioridade) {
+    partes.push(
+      'A prioridade definida é "' +
+      prioridade +
+      '".'
+    );
+  }
+
+  if (possuiSolucao && solucaoPrincipalId) {
+    partes.push(
+      'Existe uma solução principal identificada como "' +
+      solucaoPrincipalId +
+      '".'
+    );
+  }
+
+  if (confianca) {
+    partes.push(
+      'A confiança da decisão é "' +
+      confianca +
+      '".'
+    );
+  }
+
+  if (apto) {
+    partes.push(
+      'O caso está apto para avançar para a próxima etapa.'
+    );
+  } else {
+    partes.push(
+      'O caso não está apto para avançar automaticamente.'
+    );
+  }
+
+  return partes.join(' ');
+}
+
+
+/**
+ * Constrói o objeto oficial de encaminhamento V5.11.
+ *
+ * IMPORTANTE:
+ * Esta função é PURAMENTE DETERMINÍSTICA.
+ *
+ * Não grava nada.
+ * Não altera nenhum objeto recebido.
+ */
+function construirEncaminhamentoDiagnosticoV511_(decisao) {
+
+  const dados = decisao || {};
+
+  const classificacao =
+    String(dados.classificacao || '').trim();
+
+  const acao =
+    determinarAcaoEncaminhamentoV511_(classificacao);
+
+  const proximoPasso =
+    determinarProximoPassoV511_(
+      classificacao,
+      dados.possui_solucao_principal,
+      dados.apto_para_avancar
+    );
+
+  const justificativa =
+    construirJustificativaEncaminhamentoV511_(dados);
+
+  const resultado = {
+    versao: 'V5.11',
+
+    diagnostico_id:
+      dados.diagnostico_id || null,
+
+    empresa_id:
+      dados.empresa_id || null,
+
+    conversa_id:
+      dados.conversa_id || null,
+
+    classificacao:
+      acao,
+
+    acao:
+      acao,
+
+    prioridade:
+      dados.prioridade || null,
+
+    solucao_principal_id:
+      dados.solucao_principal_id || null,
+
+    proximo_passo:
+      proximoPasso,
+
+    justificativa:
+      justificativa,
+
+    confianca:
+      dados.confianca || null,
+
+    apto_para_lead:
+      acao === 'AVANCAR' &&
+      proximoPasso === 'AVANCAR_PARA_PROXIMA_ETAPA' &&
+      dados.apto_para_avancar === true
+  };
+
+  return resultado;
+}
+
+
+/**
+ * ============================================================
+ * TESTE ISOLADO — V5.11
+ * ============================================================
+ *
+ * Objetivo:
+ * Validar todas as regras do motor antes da integração.
+ *
+ * Cenário perfeito:
+ * V5.10 = PODEMOS_AJUDAR
+ * solução principal = true
+ * apto = true
+ *
+ * Resultado esperado:
+ * AVANCAR
+ * AVANCAR_PARA_PROXIMA_ETAPA
+ * apto_para_lead = true
+ *
+ * Cenários intermediários:
+ * PRECISAMOS_AVALIAR
+ * NAO_ENQUADRADO
+ *
+ * Regra do projeto:
+ * 100% dos testes precisam passar.
+ */
+function TESTAR_MOTOR_ENCAMINHAMENTO_V511() {
+
+  Logger.log(
+    '===================================================='
+  );
+
+  Logger.log(
+    'INICIO — TESTE MOTOR ENCAMINHAMENTO V5.11'
+  );
+
+  let total = 0;
+  let passou = 0;
+  const falhas = [];
+
+  function testar(numero, descricao, condicao, detalhe) {
+
+    total++;
+
+    if (condicao) {
+
+      passou++;
+
+      Logger.log(
+        'PASSOU — TESTE ' +
+        numero +
+        ': ' +
+        numero +
+        ' — ' +
+        descricao +
+        ' — ' +
+        (detalhe == null ? '' : detalhe)
+      );
+
+    } else {
+
+      falhas.push(
+        numero + ' — ' + descricao
+      );
+
+      Logger.log(
+        'FALHOU — TESTE ' +
+        numero +
+        ': ' +
+        numero +
+        ' — ' +
+        descricao +
+        ' — ' +
+        (detalhe == null ? '' : detalhe)
+      );
+    }
+  }
+
+
+  // ==========================================================
+  // CENÁRIO 1 — PERFEITO
+  // ==========================================================
+
+  const decisaoPerfeita = {
+    versao: 'V5.10',
+    diagnostico_id: 'DIA-V511-TESTE',
+    empresa_id: 'EMP-V511-TESTE',
+    conversa_id: 'CONV-V511-TESTE',
+    classificacao: 'PODEMOS_AJUDAR',
+    prioridade: 'ALTA',
+    solucao_principal_id: 'V510-PERFEITA',
+    possui_solucao_principal: true,
+    justificativa:
+      'Diagnóstico completo e solução compatível.',
+    confianca: 'ALTA',
+    apto_para_avancar: true
+  };
+
+
+  const resultadoPerfeito =
+    construirEncaminhamentoDiagnosticoV511_(
+      decisaoPerfeita
+    );
+
+
+  testar(
+    1,
+    'Versão V5.11',
+    resultadoPerfeito.versao === 'V5.11',
+    resultadoPerfeito.versao
+  );
+
+
+  testar(
+    2,
+    'Classificação PODEMOS_AJUDAR gera AVANCAR',
+    resultadoPerfeito.classificacao === 'AVANCAR',
+    resultadoPerfeito.classificacao
+  );
+
+
+  testar(
+    3,
+    'Ação AVANCAR',
+    resultadoPerfeito.acao === 'AVANCAR',
+    resultadoPerfeito.acao
+  );
+
+
+  testar(
+    4,
+    'Próximo passo correto',
+    resultadoPerfeito.proximo_passo ===
+      'AVANCAR_PARA_PROXIMA_ETAPA',
+    resultadoPerfeito.proximo_passo
+  );
+
+
+  testar(
+    5,
+    'Apto para Lead',
+    resultadoPerfeito.apto_para_lead === true,
+    resultadoPerfeito.apto_para_lead
+  );
+
+
+  testar(
+    6,
+    'Prioridade preservada',
+    resultadoPerfeito.prioridade === 'ALTA',
+    resultadoPerfeito.prioridade
+  );
+
+
+  testar(
+    7,
+    'Solução principal preservada',
+    resultadoPerfeito.solucao_principal_id ===
+      'V510-PERFEITA',
+    resultadoPerfeito.solucao_principal_id
+  );
+
+
+  testar(
+    8,
+    'Confiança preservada',
+    resultadoPerfeito.confianca === 'ALTA',
+    resultadoPerfeito.confianca
+  );
+
+
+  testar(
+    9,
+    'Diagnóstico preservado',
+    resultadoPerfeito.diagnostico_id ===
+      'DIA-V511-TESTE',
+    resultadoPerfeito.diagnostico_id
+  );
+
+
+  testar(
+    10,
+    'Empresa preservada',
+    resultadoPerfeito.empresa_id ===
+      'EMP-V511-TESTE',
+    resultadoPerfeito.empresa_id
+  );
+
+
+  testar(
+    11,
+    'Conversa preservada',
+    resultadoPerfeito.conversa_id ===
+      'CONV-V511-TESTE',
+    resultadoPerfeito.conversa_id
+  );
+
+
+  // ==========================================================
+  // CENÁRIO 2 — PRECISAMOS_AVALIAR
+  // ==========================================================
+
+  const decisaoAvaliar = {
+    versao: 'V5.10',
+    diagnostico_id: 'DIA-V511-AVALIAR',
+    empresa_id: 'EMP-V511-AVALIAR',
+    conversa_id: 'CONV-V511-AVALIAR',
+    classificacao: 'PRECISAMOS_AVALIAR',
+    prioridade: 'MÉDIA',
+    solucao_principal_id: 'V511-AVALIACAO',
+    possui_solucao_principal: true,
+    confianca: 'MÉDIA',
+    apto_para_avancar: false
+  };
+
+
+  const resultadoAvaliar =
+    construirEncaminhamentoDiagnosticoV511_(
+      decisaoAvaliar
+    );
+
+
+  testar(
+    12,
+    'PRECISAMOS_AVALIAR gera AVALIAR',
+    resultadoAvaliar.classificacao === 'AVALIAR',
+    resultadoAvaliar.classificacao
+  );
+
+
+  testar(
+    13,
+    'Ação AVALIAR',
+    resultadoAvaliar.acao === 'AVALIAR',
+    resultadoAvaliar.acao
+  );
+
+
+  testar(
+    14,
+    'Próximo passo REALIZAR_AVALIACAO',
+    resultadoAvaliar.proximo_passo ===
+      'REALIZAR_AVALIACAO',
+    resultadoAvaliar.proximo_passo
+  );
+
+
+  testar(
+    15,
+    'Não fica apto para Lead',
+    resultadoAvaliar.apto_para_lead === false,
+    resultadoAvaliar.apto_para_lead
+  );
+
+
+  // ==========================================================
+  // CENÁRIO 3 — NÃO ENQUADRADO
+  // ==========================================================
+
+  const decisaoNaoEnquadrado = {
+    versao: 'V5.10',
+    diagnostico_id: 'DIA-V511-NAO',
+    empresa_id: 'EMP-V511-NAO',
+    conversa_id: 'CONV-V511-NAO',
+    classificacao: 'NAO_ENQUADRADO',
+    prioridade: 'BAIXA',
+    solucao_principal_id: null,
+    possui_solucao_principal: false,
+    confianca: 'BAIXA',
+    apto_para_avancar: false
+  };
+
+
+  const resultadoNaoEnquadrado =
+    construirEncaminhamentoDiagnosticoV511_(
+      decisaoNaoEnquadrado
+    );
+
+
+  testar(
+    16,
+    'NAO_ENQUADRADO gera NAO_AVANCAR',
+    resultadoNaoEnquadrado.classificacao ===
+      'NAO_AVANCAR',
+    resultadoNaoEnquadrado.classificacao
+  );
+
+
+  testar(
+    17,
+    'Ação NAO_AVANCAR',
+    resultadoNaoEnquadrado.acao ===
+      'NAO_AVANCAR',
+    resultadoNaoEnquadrado.acao
+  );
+
+
+  testar(
+    18,
+    'Próximo passo NAO_AVANCAR',
+    resultadoNaoEnquadrado.proximo_passo ===
+      'NAO_AVANCAR',
+    resultadoNaoEnquadrado.proximo_passo
+  );
+
+
+  testar(
+    19,
+    'Não fica apto para Lead',
+    resultadoNaoEnquadrado.apto_para_lead === false,
+    resultadoNaoEnquadrado.apto_para_lead
+  );
+
+
+  // ==========================================================
+  // CENÁRIO 4 — SEGURANÇA / CLASSIFICAÇÃO DESCONHECIDA
+  // ==========================================================
+
+  const decisaoDesconhecida = {
+    versao: 'V5.10',
+    diagnostico_id: 'DIA-V511-DESCONHECIDA',
+    empresa_id: 'EMP-V511-DESCONHECIDA',
+    conversa_id: 'CONV-V511-DESCONHECIDA',
+    classificacao: 'CLASSIFICACAO_DESCONHECIDA',
+    prioridade: 'ALTA',
+    solucao_principal_id: 'SOL-TESTE',
+    possui_solucao_principal: true,
+    confianca: 'ALTA',
+    apto_para_avancar: true
+  };
+
+
+  const resultadoDesconhecido =
+    construirEncaminhamentoDiagnosticoV511_(
+      decisaoDesconhecida
+    );
+
+
+  testar(
+    20,
+    'Classificação desconhecida não avança',
+    resultadoDesconhecido.classificacao ===
+      'NAO_AVANCAR',
+    resultadoDesconhecido.classificacao
+  );
+
+
+  testar(
+    21,
+    'Classificação desconhecida não gera Lead',
+    resultadoDesconhecido.apto_para_lead === false,
+    resultadoDesconhecido.apto_para_lead
+  );
+
+
+  // ==========================================================
+  // TESTE DE NÃO ALTERAÇÃO DA DECISÃO
+  // ==========================================================
+
+  testar(
+    22,
+    'V5.10 original permanece intacta',
+    decisaoPerfeita.classificacao ===
+      'PODEMOS_AJUDAR',
+    decisaoPerfeita.classificacao
+  );
+
+
+  testar(
+    23,
+    'V5.10 continua com apto_para_avancar true',
+    decisaoPerfeita.apto_para_avancar === true,
+    decisaoPerfeita.apto_para_avancar
+  );
+
+
+  // ==========================================================
+  // RESUMO
+  // ==========================================================
+
+  Logger.log(
+    '===================================================='
+  );
+
+  Logger.log(
+    'RESULTADO V5.11: ' +
+    passou +
+    '/' +
+    total
+  );
+
+  Logger.log(
+    'APROVEITAMENTO V5.11: ' +
+    Math.round((passou / total) * 100) +
+    '%'
+  );
+
+
+  if (falhas.length > 0) {
+
+    Logger.log(
+      'FALHAS: ' +
+      JSON.stringify(falhas)
+    );
+
+    throw new Error(
+      'V5.11 FALHOU: ' +
+      passou +
+      '/' +
+      total
+    );
+  }
+
+
+  Logger.log(
+    'TESTAR_MOTOR_ENCAMINHAMENTO_V511: PASSOU'
+  );
+
+  Logger.log(
+    '===================================================='
+  );
+
+  return {
+    versao: 'V5.11',
+    total: total,
+    passou: passou,
+    percentual:
+      Math.round((passou / total) * 100),
+    status: 'PASSOU'
+  };
+}
+
+/**
+ * ============================================================
+ * TESTE DE INTEGRAÇÃO REAL — V5.11
+ * ============================================================
+ *
+ * Fluxo:
+ *
+ * mensagem real
+ *     ↓
+ * V5.6 Diagnóstico
+ *     ↓
+ * V5.7 Oportunidade
+ *     ↓
+ * V5.8 Análise
+ *     ↓
+ * V5.9.5 Soluções
+ *     ↓
+ * V5.10 Decisão
+ *     ↓
+ * V5.11 Encaminhamento
+ *
+ * IMPORTANTE:
+ * - Não cria Lead.
+ * - Não grava encaminhamento.
+ * - Não altera V5.10.
+ * - Usa o fluxo real existente.
+ * - O objetivo é validar a integração.
+ *
+ * Regra:
+ * 100% dos testes precisam passar.
+ */
+
+/**
+ * ============================================================
+ * V5.11 — INTEGRAÇÃO REAL COMPLETA
+ * ============================================================
+ *
+ * Fluxo:
+ *
+ * V5.6
+ *   ↓
+ * V5.7
+ *   ↓
+ * V5.8
+ *   ↓
+ * V5.9.5
+ *   ↓
+ * V5.10
+ *   ↓
+ * V5.11
+ *
+ * IMPORTANTE:
+ * - Cria diagnóstico REAL antes de processar mensagem.
+ * - Cria catálogo temporário.
+ * - Não cria Lead.
+ * - Não persiste encaminhamento.
+ * - Executa segunda vez para verificar consistência.
+ * - Limpa dados temporários ao final.
+ *
+ * Regra:
+ * 100% dos testes.
+ */
+function TESTAR_INTEGRACAO_REAL_V511() {
+
+  const resultados = [];
+
+  let inicio = null;
+  let resultadoFluxo = null;
+  let segundaExecucao = null;
+
+  const idsTeste = {
+    empresa_id: null,
+    conversa_id: null,
+    diagnostico_id: null
+  };
+
+
+  function teste(
+    nome,
+    passou,
+    detalhe
+  ) {
+
+    const item = {
+
+      teste:
+        nome,
+
+      passou:
+        !!passou,
+
+      detalhe:
+        detalhe === undefined ||
+        detalhe === null
+          ? ''
+          : String(detalhe)
+
+    };
+
+    resultados.push(item);
+
+    Logger.log(
+      (
+        item.passou
+          ? 'PASSOU'
+          : 'FALHOU'
+      ) +
+      ' — ' +
+      item.teste +
+      ' — ' +
+      item.detalhe
+    );
+
+  }
+
+
+  try {
+
+    Logger.log(
+      '===================================================='
+    );
+
+    Logger.log(
+      'V5.11 — INTEGRAÇÃO REAL COMPLETA'
+    );
+
+    Logger.log(
+      '===================================================='
+    );
+
+
+    /*
+     * ==========================================================
+     * 0 — LIMPEZA PREVENTIVA DO CATÁLOGO DE TESTE
+     * ==========================================================
+     */
+
+    try {
+
+      limparSolucoesTeste();
+
+    } catch (erroLimpezaInicial) {
+
+      Logger.log(
+        'Aviso limpeza inicial: ' +
+        erroLimpezaInicial.message
+      );
+
+    }
+
+
+    /*
+     * ==========================================================
+     * 1 — PREPARAR CATÁLOGO TEMPORÁRIO
+     * ==========================================================
+     */
+
+    const abaSolucoes =
+      obterAba_(
+        SHEETS.SOLUCOES
+      );
+
+
+    const ultimaColuna =
+      abaSolucoes.getLastColumn();
+
+
+    const cabecalhos =
+      abaSolucoes
+        .getRange(
+          1,
+          1,
+          1,
+          ultimaColuna
+        )
+        .getValues()[0];
+
+
+    const mapaSolucoes = {};
+
+
+    cabecalhos.forEach(
+      function(
+        cabecalho,
+        indice
+      ) {
+
+        mapaSolucoes[
+          String(
+            cabecalho || ''
+          ).trim()
+        ] = indice;
+
+      }
+    );
+
+
+    const solucaoPerfeita = {
+
+      solucao_id:
+        'V510-PERFEITA',
+
+      familia:
+        'Automação de pedidos',
+
+      nome:
+        'Conferir e lançar pedidos',
+
+      descricao:
+        'Reduzir erros de digitação e retrabalho no processo de conferir e lançar pedidos.',
+
+      status:
+        'ATIVA',
+
+      nivel_complexidade:
+        'MEDIA',
+
+      repetibilidade:
+        'ALTA',
+
+      pode_oferecer:
+        'SIM',
+
+      versao:
+        'V5.10'
+
+    };
+
+
+    const linhaSolucao =
+      new Array(
+        cabecalhos.length
+      ).fill('');
+
+
+    Object.keys(
+      solucaoPerfeita
+    ).forEach(
+      function(campo) {
+
+        if (
+          Object.prototype
+            .hasOwnProperty.call(
+              mapaSolucoes,
+              campo
+            )
+        ) {
+
+          linhaSolucao[
+            mapaSolucoes[campo]
+          ] =
+            solucaoPerfeita[campo];
+
+        }
+
+      }
+    );
+
+
+    abaSolucoes.appendRow(
+      linhaSolucao
+    );
+
+
+    teste(
+      '1 — Solução perfeita temporária criada',
+      true,
+      'V510-PERFEITA'
+    );
+
+
+    /*
+     * ==========================================================
+     * 2 — CRIAR DIAGNÓSTICO REAL
+     * ==========================================================
+     *
+     * NÃO inventamos empresa_id/conversa_id.
+     *
+     * O sistema cria os três registros relacionados.
+     * ==========================================================
+     */
+
+    inicio =
+      iniciarDiagnostico({
+
+        nome:
+          'Empresa Teste V511',
+
+        nome_empresa:
+          'Empresa Teste V511',
+
+        segmento:
+          'Serviços',
+
+        porte:
+          'PEQUENA',
+
+        nome_contato:
+          'Teste V511',
+
+        email:
+          '',
+
+        whatsapp:
+          '',
+
+        cidade:
+          ''
+
+      });
+
+
+    teste(
+      '2 — Diagnóstico real iniciado',
+      !!inicio &&
+      inicio.sucesso === true &&
+      !!inicio.empresa_id &&
+      !!inicio.conversa_id &&
+      !!inicio.diagnostico_id,
+      inicio
+        ? JSON.stringify(inicio)
+        : 'Falha'
+    );
+
+
+    if (
+      !inicio ||
+      !inicio.empresa_id ||
+      !inicio.conversa_id ||
+      !inicio.diagnostico_id
+    ) {
+
+      throw new Error(
+        'Não foi possível iniciar o diagnóstico real V5.11.'
+      );
+
+    }
+
+
+    idsTeste.empresa_id =
+      inicio.empresa_id;
+
+    idsTeste.conversa_id =
+      inicio.conversa_id;
+
+    idsTeste.diagnostico_id =
+      inicio.diagnostico_id;
+
+
+    /*
+     * ==========================================================
+     * 3 — EXECUTAR FLUXO REAL
+     * ==========================================================
+     */
+
+    const mensagem =
+      'Nosso processo principal é conferir e lançar pedidos. ' +
+      'Temos erros de digitação e retrabalho nesse processo. ' +
+      'Isso acontece diariamente. ' +
+      'Processamos 120 pedidos por dia. ' +
+      'Perdemos aproximadamente 3 horas por dia com esse problema. ' +
+      'Nosso objetivo é reduzir os erros e diminuir o retrabalho.';
+
+
+    resultadoFluxo =
+      processarMensagemDiagnostico({
+
+        empresa_id:
+          inicio.empresa_id,
+
+        conversa_id:
+          inicio.conversa_id,
+
+        mensagem:
+          mensagem
+
+      });
+
+
+    teste(
+      '3 — Fluxo principal executado',
+      !!resultadoFluxo &&
+      resultadoFluxo.sucesso === true,
+      resultadoFluxo
+        ? 'OK'
+        : 'Falha'
+    );
+
+
+    /*
+     * ==========================================================
+     * 4 — DIAGNÓSTICO
+     * ==========================================================
+     */
+
+    const diagnostico =
+      resultadoFluxo
+        ? resultadoFluxo.diagnostico
+        : null;
+
+
+    teste(
+      '4 — Diagnóstico V5.6 retornado',
+      !!diagnostico &&
+      diagnostico.diagnostico_id ===
+        inicio.diagnostico_id,
+      diagnostico
+        ? diagnostico.diagnostico_id
+        : 'Ausente'
+    );
+
+
+    if (!diagnostico) {
+
+      throw new Error(
+        'Diagnóstico não retornado pelo fluxo real.'
+      );
+
+    }
+
+
+    const estado =
+      String(
+        diagnostico.status_diagnostico || ''
+      )
+        .trim()
+        .toUpperCase();
+
+
+    teste(
+      '5 — Diagnóstico PRONTO_PARA_ANALISE',
+      estado ===
+        'PRONTO_PARA_ANALISE',
+      estado
+    );
+
+
+    /*
+     * ==========================================================
+     * 6 — OPORTUNIDADE V5.7
+     * ==========================================================
+     */
+
+    const oportunidadeWrapper =
+      resultadoFluxo &&
+      resultadoFluxo.oportunidade
+        ? resultadoFluxo.oportunidade
+        : null;
+
+
+    const oportunidade =
+      oportunidadeWrapper
+        ? Object.assign(
+            {},
+            oportunidadeWrapper.oportunidade || {},
+            {
+
+              oportunidade_id:
+                oportunidadeWrapper.oportunidade_id,
+
+              acao:
+                oportunidadeWrapper.acao,
+
+              linha:
+                oportunidadeWrapper.linha
+
+            }
+          )
+        : null;
+
+
+    teste(
+      '6 — Oportunidade V5.7 completa',
+      !!oportunidade &&
+      !!oportunidade.oportunidade_id &&
+      !!oportunidade.processo &&
+      !!oportunidade.dor &&
+      !!oportunidade.objetivo,
+      oportunidade
+        ? JSON.stringify(oportunidade)
+        : 'Ausente'
+    );
+
+
+    /*
+     * ==========================================================
+     * 7 — ANÁLISE V5.8
+     * ==========================================================
+     */
+
+    const analiseWrapper =
+      resultadoFluxo &&
+      resultadoFluxo.analise_diagnostica
+        ? resultadoFluxo.analise_diagnostica
+        : null;
+
+
+    const analise =
+      analiseWrapper
+        ? Object.assign(
+            {},
+            analiseWrapper.analise || {},
+            {
+
+              analise_id:
+                analiseWrapper.analise_id,
+
+              diagnostico_id:
+                analiseWrapper.diagnostico_id,
+
+              acao:
+                analiseWrapper.acao,
+
+              linha:
+                analiseWrapper.linha
+
+            }
+          )
+        : null;
+
+
+    teste(
+      '7 — Análise V5.8 completa',
+      !!analise &&
+      !!analise.analise_id &&
+      !!analise.diagnostico_id,
+      analise
+        ? JSON.stringify(analise)
+        : 'Ausente'
+    );
+
+
+    /*
+     * ==========================================================
+     * 8 — SOLUÇÕES V5.9.5
+     * ==========================================================
+     */
+
+    const solucoes =
+      resultadoFluxo &&
+      resultadoFluxo.solucoes
+        ? resultadoFluxo.solucoes
+        : null;
+
+
+    const relacoes =
+      solucoes &&
+      Array.isArray(
+        solucoes.relacoes
+      )
+        ? solucoes.relacoes
+        : [];
+
+
+    teste(
+      '8 — Soluções V5.9.5 retornadas',
+      !!solucoes,
+      solucoes
+        ? 'OK'
+        : 'Ausente'
+    );
+
+
+    const principais =
+      relacoes.filter(
+        function(relacao) {
+
+          return (
+            relacao &&
+            relacao.principal === true
+          );
+
+        }
+      );
+
+
+    teste(
+      '9 — Exatamente uma solução principal',
+      principais.length === 1,
+      'Principais: ' +
+      principais.length
+    );
+
+
+    const principal =
+      principais.length === 1
+        ? principais[0]
+        : null;
+
+
+    teste(
+      '10 — Solução principal = V510-PERFEITA',
+      !!principal &&
+      principal.solucao_id ===
+        'V510-PERFEITA',
+      principal
+        ? principal.solucao_id
+        : 'Ausente'
+    );
+
+
+    teste(
+      '11 — Solução principal = 100/100',
+      !!principal &&
+      Number(
+        principal.pontuacao
+      ) === 100,
+      principal
+        ? String(
+            principal.pontuacao
+          )
+        : 'Ausente'
+    );
+
+
+    teste(
+      '12 — Solução principal = ALTA',
+      !!principal &&
+      String(
+        principal.compatibilidade || ''
+      ).toUpperCase() ===
+        'ALTA',
+      principal
+        ? principal.compatibilidade
+        : 'Ausente'
+    );
+
+
+    teste(
+      '13 — Solução principal = viabilidade ALTA',
+      !!principal &&
+      String(
+        principal.viabilidade || ''
+      ).toUpperCase() ===
+        'ALTA',
+      principal
+        ? principal.viabilidade
+        : 'Ausente'
+    );
+
+
+    /*
+     * ==========================================================
+     * 14 — DECISÃO V5.10
+     * ==========================================================
+     */
+
+    const decisao =
+      construirDecisaoDiagnosticoV510_(
+        diagnostico,
+        oportunidade,
+        analise,
+        relacoes
+      );
+
+
+    teste(
+      '14 — Decisão V5.10 retornada',
+      !!decisao,
+      decisao
+        ? JSON.stringify(decisao)
+        : 'Ausente'
+    );
+
+
+    teste(
+      '15 — V5.10 = PODEMOS_AJUDAR',
+      !!decisao &&
+      decisao.classificacao ===
+        'PODEMOS_AJUDAR',
+      decisao
+        ? decisao.classificacao
+        : 'Ausente'
+    );
+
+
+    teste(
+      '16 — V5.10 prioridade = ALTA',
+      !!decisao &&
+      decisao.prioridade ===
+        'ALTA',
+      decisao
+        ? decisao.prioridade
+        : 'Ausente'
+    );
+
+
+    teste(
+      '17 — V5.10 confiança = ALTA',
+      !!decisao &&
+      decisao.confianca ===
+        'ALTA',
+      decisao
+        ? decisao.confianca
+        : 'Ausente'
+    );
+
+
+    teste(
+      '18 — V5.10 apto_para_avancar = true',
+      !!decisao &&
+      decisao.apto_para_avancar ===
+        true,
+      decisao
+        ? decisao.apto_para_avancar
+        : 'Ausente'
+    );
+
+
+    /*
+     * ==========================================================
+     * 19 — V5.11
+     * ==========================================================
+     */
+
+    const encaminhamento =
+      construirEncaminhamentoDiagnosticoV511_(
+        decisao
+      );
+
+
+    Logger.log(
+      'ENCAMINHAMENTO V5.11: ' +
+      JSON.stringify(
+        encaminhamento
+      )
+    );
+
+
+    teste(
+      '19 — Encaminhamento V5.11 retornado',
+      !!encaminhamento,
+      encaminhamento
+        ? JSON.stringify(
+            encaminhamento
+          )
+        : 'Ausente'
+    );
+
+
+    teste(
+      '20 — Versão V5.11',
+      !!encaminhamento &&
+      encaminhamento.versao ===
+        'V5.11',
+      encaminhamento
+        ? encaminhamento.versao
+        : 'Ausente'
+    );
+
+
+    teste(
+      '21 — Classificação = AVANCAR',
+      !!encaminhamento &&
+      encaminhamento.classificacao ===
+        'AVANCAR',
+      encaminhamento
+        ? encaminhamento.classificacao
+        : 'Ausente'
+    );
+
+
+    teste(
+      '22 — Ação = AVANCAR',
+      !!encaminhamento &&
+      encaminhamento.acao ===
+        'AVANCAR',
+      encaminhamento
+        ? encaminhamento.acao
+        : 'Ausente'
+    );
+
+
+    teste(
+      '23 — Próximo passo correto',
+      !!encaminhamento &&
+      encaminhamento.proximo_passo ===
+        'AVANCAR_PARA_PROXIMA_ETAPA',
+      encaminhamento
+        ? encaminhamento.proximo_passo
+        : 'Ausente'
+    );
+
+
+    teste(
+      '24 — apto_para_lead = true',
+      !!encaminhamento &&
+      encaminhamento.apto_para_lead ===
+        true,
+      encaminhamento
+        ? encaminhamento.apto_para_lead
+        : 'Ausente'
+    );
+
+
+    /*
+     * ==========================================================
+     * 25 — RASTREABILIDADE
+     * ==========================================================
+     */
+
+    teste(
+      '25 — Rastreabilidade diagnóstico',
+      !!encaminhamento &&
+      encaminhamento.diagnostico_id ===
+        inicio.diagnostico_id,
+      encaminhamento
+        ? encaminhamento.diagnostico_id
+        : 'Ausente'
+    );
+
+
+    teste(
+      '26 — Rastreabilidade empresa',
+      !!encaminhamento &&
+      encaminhamento.empresa_id ===
+        inicio.empresa_id,
+      encaminhamento
+        ? encaminhamento.empresa_id
+        : 'Ausente'
+    );
+
+
+    teste(
+      '27 — Rastreabilidade conversa',
+      !!encaminhamento &&
+      encaminhamento.conversa_id ===
+        inicio.conversa_id,
+      encaminhamento
+        ? encaminhamento.conversa_id
+        : 'Ausente'
+    );
+
+
+    teste(
+      '28 — Solução principal preservada',
+      !!encaminhamento &&
+      encaminhamento.solucao_principal_id ===
+        'V510-PERFEITA',
+      encaminhamento
+        ? encaminhamento.solucao_principal_id
+        : 'Ausente'
+    );
+
+
+    /*
+     * ==========================================================
+     * 29 — PROTEÇÃO DA V5.10
+     * ==========================================================
+     */
+
+    teste(
+      '29 — V5.10 permanece PODEMOS_AJUDAR',
+      decisao.classificacao ===
+        'PODEMOS_AJUDAR',
+      decisao.classificacao
+    );
+
+
+    teste(
+      '30 — V5.10 permanece apto',
+      decisao.apto_para_avancar ===
+        true,
+      decisao.apto_para_avancar
+    );
+
+
+    /*
+     * ==========================================================
+     * 31 — SEGUNDA EXECUÇÃO
+     * ==========================================================
+     *
+     * O objetivo aqui é verificar se o encaminhamento
+     * continua máximo após reprocessamento.
+     * ==========================================================
+     */
+
+    Logger.log(
+      'Executando segunda passagem do mesmo diagnóstico...'
+    );
+
+
+    segundaExecucao =
+      processarMensagemDiagnostico({
+
+        empresa_id:
+          inicio.empresa_id,
+
+        conversa_id:
+          inicio.conversa_id,
+
+        mensagem:
+          mensagem
+
+      });
+
+
+    teste(
+      '31 — Segunda execução concluída',
+      !!segundaExecucao &&
+      segundaExecucao.sucesso === true,
+      segundaExecucao
+        ? 'OK'
+        : 'Falha'
+    );
+
+
+    const diagnosticoSegundo =
+      segundaExecucao
+        ? segundaExecucao.diagnostico
+        : null;
+
+
+    const oportunidadeSegundoWrapper =
+      segundaExecucao &&
+      segundaExecucao.oportunidade
+        ? segundaExecucao.oportunidade
+        : null;
+
+
+    const oportunidadeSegundo =
+      oportunidadeSegundoWrapper
+        ? Object.assign(
+            {},
+            oportunidadeSegundoWrapper.oportunidade || {},
+            {
+
+              oportunidade_id:
+                oportunidadeSegundoWrapper.oportunidade_id,
+
+              acao:
+                oportunidadeSegundoWrapper.acao,
+
+              linha:
+                oportunidadeSegundoWrapper.linha
+
+            }
+          )
+        : null;
+
+
+    const analiseSegundoWrapper =
+      segundaExecucao &&
+      segundaExecucao.analise_diagnostica
+        ? segundaExecucao.analise_diagnostica
+        : null;
+
+
+    const analiseSegundo =
+      analiseSegundoWrapper
+        ? Object.assign(
+            {},
+            analiseSegundoWrapper.analise || {},
+            {
+
+              analise_id:
+                analiseSegundoWrapper.analise_id,
+
+              diagnostico_id:
+                analiseSegundoWrapper.diagnostico_id,
+
+              acao:
+                analiseSegundoWrapper.acao,
+
+              linha:
+                analiseSegundoWrapper.linha
+
+            }
+          )
+        : null;
+
+
+    const solucoesSegundo =
+      segundaExecucao &&
+      segundaExecucao.solucoes
+        ? segundaExecucao.solucoes
+        : null;
+
+
+    const relacoesSegundo =
+      solucoesSegundo &&
+      Array.isArray(
+        solucoesSegundo.relacoes
+      )
+        ? solucoesSegundo.relacoes
+        : [];
+
+
+    const decisaoSegundo =
+      construirDecisaoDiagnosticoV510_(
+        diagnosticoSegundo,
+        oportunidadeSegundo,
+        analiseSegundo,
+        relacoesSegundo
+      );
+
+
+    const encaminhamentoSegundo =
+      construirEncaminhamentoDiagnosticoV511_(
+        decisaoSegundo
+      );
+
+
+    Logger.log(
+      'SEGUNDA DECISÃO V5.10: ' +
+      JSON.stringify(
+        decisaoSegundo
+      )
+    );
+
+
+    Logger.log(
+      'SEGUNDO ENCAMINHAMENTO V5.11: ' +
+      JSON.stringify(
+        encaminhamentoSegundo
+      )
+    );
+
+
+    teste(
+      '32 — Segunda execução mantém PODEMOS_AJUDAR',
+      !!decisaoSegundo &&
+      decisaoSegundo.classificacao ===
+        'PODEMOS_AJUDAR',
+      decisaoSegundo
+        ? decisaoSegundo.classificacao
+        : 'Ausente'
+    );
+
+
+    teste(
+      '33 — Segunda execução mantém confiança ALTA',
+      !!decisaoSegundo &&
+      decisaoSegundo.confianca ===
+        'ALTA',
+      decisaoSegundo
+        ? decisaoSegundo.confianca
+        : 'Ausente'
+    );
+
+
+    teste(
+      '34 — Segunda execução mantém apto',
+      !!decisaoSegundo &&
+      decisaoSegundo.apto_para_avancar ===
+        true,
+      decisaoSegundo
+        ? decisaoSegundo.apto_para_avancar
+        : 'Ausente'
+    );
+
+
+    teste(
+      '35 — Segunda execução mantém AVANCAR',
+      !!encaminhamentoSegundo &&
+      encaminhamentoSegundo.acao ===
+        'AVANCAR',
+      encaminhamentoSegundo
+        ? encaminhamentoSegundo.acao
+        : 'Ausente'
+    );
+
+
+    teste(
+      '36 — Segunda execução mantém apto_para_lead',
+      !!encaminhamentoSegundo &&
+      encaminhamentoSegundo.apto_para_lead ===
+        true,
+      encaminhamentoSegundo
+        ? encaminhamentoSegundo.apto_para_lead
+        : 'Ausente'
+    );
+
+
+    /*
+     * ==========================================================
+     * 37 — NÃO CRIA LEAD
+     * ==========================================================
+     */
+
+    teste(
+      '37 — V5.11 não cria Lead',
+      !(
+        resultadoFluxo &&
+        resultadoFluxo.lead
+      ) &&
+      !(
+        segundaExecucao &&
+        segundaExecucao.lead
+      ),
+      'Lead não criado'
+    );
+
+
+    /*
+     * ==========================================================
+     * RESULTADO
+     * ==========================================================
+     */
+
+    const total =
+      resultados.length;
+
+
+    const passaram =
+      resultados.filter(
+        function(item) {
+          return item.passou;
+        }
+      ).length;
+
+
+    const falharam =
+      total -
+      passaram;
+
+
+    Logger.log(
+      '===================================================='
+    );
+
+
+    Logger.log(
+      'RESULTADO V5.11 INTEGRADA: ' +
+      passaram +
+      '/' +
+      total
+    );
+
+
+    Logger.log(
+      'FALHAS V5.11: ' +
+      falharam
+    );
+
+
+    Logger.log(
+      'APROVEITAMENTO V5.11: ' +
+      Math.round(
+        (passaram / total) * 100
+      ) +
+      '%'
+    );
+
+
+    if (
+      falharam > 0
+    ) {
+
+      throw new Error(
+        'V5.11 INTEGRADA FALHOU: ' +
+        passaram +
+        '/' +
+        total
+      );
+
+    }
+
+
+    Logger.log(
+      'TESTAR_INTEGRACAO_REAL_V511: PASSOU'
+    );
+
+
+    Logger.log(
+      '===================================================='
+    );
+
+
+    return {
+
+      sucesso:
+        true,
+
+      versao:
+        'V5.11',
+
+      total:
+        total,
+
+      passaram:
+        passaram,
+
+      falharam:
+        falharam,
+
+      percentual:
+        Math.round(
+          (passaram / total) * 100
+        ),
+
+      encaminhamento:
+        encaminhamento,
+
+      encaminhamento_segunda_execucao:
+        encaminhamentoSegundo
+
+    };
+
+
+  } finally {
+
+    /*
+     * ==========================================================
+     * LIMPEZA FINAL
+     * ==========================================================
+     *
+     * A função existente de limpeza das soluções V5.10
+     * remove o catálogo temporário.
+     * ==========================================================
+     */
+
+    try {
+
+      const removidos =
+        limparSolucoesTeste();
+
+      Logger.log(
+        'LIMPEZA V5.11 — ' +
+        String(
+          removidos == null
+            ? ''
+            : removidos
+        )
+      );
+
+    } catch (erroLimpezaFinal) {
+
+      Logger.log(
+        'ERRO NA LIMPEZA FINAL V5.11: ' +
+        erroLimpezaFinal.message
+      );
+
+    }
+
+  }
+
+}
+
+/**
+ * ============================================================
+ * V6.1 — MOTOR DE CRIAÇÃO DE LEAD
+ * ============================================================
+ *
+ * Responsabilidades:
+ *
+ * - validar autorização V5.11
+ * - validar rastreabilidade mínima
+ * - impedir criação indevida
+ * - localizar Lead existente
+ * - impedir duplicidade por empresa + diagnóstico
+ * - criar Lead com status NOVO
+ * - preservar dados reais
+ * - retornar resultado auditável
+ *
+ * NÃO faz:
+ *
+ * - negociação
+ * - follow-up
+ * - contato
+ * - conversão
+ * - atribuição de responsável
+ * - envio de mensagens
+ *
+ * ============================================================
+ */
+
+
+/**
+ * ------------------------------------------------------------
+ * NORMALIZAR TEXTO V6.1
+ * ------------------------------------------------------------
+ */
+function normalizarLeadV61_(valor) {
+
+  return String(valor || '')
+    .trim()
+    .toLowerCase();
+
+}
+
+
+/**
+ * ------------------------------------------------------------
+ * VALIDAR AUTORIZAÇÃO V6.1
+ * ------------------------------------------------------------
+ *
+ * A criação somente é autorizada quando a cadeia V5.11
+ * estiver coerente.
+ *
+ * ------------------------------------------------------------
+ */
+function validarAutorizacaoLeadV61_(encaminhamento) {
+
+  const dados =
+    encaminhamento || {};
+
+  const classificacao =
+    String(
+      dados.classificacao || ''
+    )
+      .trim()
+      .toUpperCase();
+
+  const acao =
+    String(
+      dados.acao || ''
+    )
+      .trim()
+      .toUpperCase();
+
+  const confianca =
+    String(
+      dados.confianca || ''
+    )
+      .trim()
+      .toUpperCase();
+
+  const solucaoPrincipal =
+    String(
+      dados.solucao_principal_id || ''
+    )
+      .trim();
+
+  const diagnosticoId =
+    String(
+      dados.diagnostico_id || ''
+    )
+      .trim();
+
+  const empresaId =
+    String(
+      dados.empresa_id || ''
+    )
+      .trim();
+
+  const apto =
+    dados.apto_para_lead === true;
+
+  if (!apto) {
+
+    return {
+      autorizado: false,
+      motivo:
+        'V5.11 não autorizou criação de Lead.'
+    };
+
+  }
+
+  if (
+    classificacao !==
+    'AVANCAR'
+  ) {
+
+    return {
+      autorizado: false,
+      motivo:
+        'Classificação diferente de AVANCAR.'
+    };
+
+  }
+
+  if (
+    acao !==
+    'AVANCAR'
+  ) {
+
+    return {
+      autorizado: false,
+      motivo:
+        'Ação diferente de AVANCAR.'
+    };
+
+  }
+
+  if (
+    confianca !==
+    'ALTA'
+  ) {
+
+    return {
+      autorizado: false,
+      motivo:
+        'Confiança V5.11 não é ALTA.'
+    };
+
+  }
+
+  if (!solucaoPrincipal) {
+
+    return {
+      autorizado: false,
+      motivo:
+        'Solução principal não informada.'
+    };
+
+  }
+
+  if (!diagnosticoId) {
+
+    return {
+      autorizado: false,
+      motivo:
+        'diagnostico_id não informado.'
+    };
+
+  }
+
+  if (!empresaId) {
+
+    return {
+      autorizado: false,
+      motivo:
+        'empresa_id não informado.'
+    };
+
+  }
+
+  return {
+    autorizado: true,
+    motivo:
+      'Cadeia V5.11 autorizada para criação de Lead.'
+  };
+
+}
+
+
+/**
+ * ------------------------------------------------------------
+ * BUSCAR LEAD POR EMPRESA + DIAGNÓSTICO
+ * ------------------------------------------------------------
+ *
+ * Regra de identidade V6.1:
+ *
+ * empresa_id + diagnostico_id
+ *
+ * ------------------------------------------------------------
+ */
+function buscarLeadPorDiagnosticoV61_(
+  empresaId,
+  diagnosticoId
+) {
+
+  if (!empresaId) {
+    return null;
+  }
+
+  if (!diagnosticoId) {
+    return null;
+  }
+
+  const aba =
+    obterAba_(
+      SHEETS.LEADS
+    );
+
+  const valores =
+    aba
+      .getDataRange()
+      .getValues();
+
+  if (
+    valores.length <= 1
+  ) {
+    return null;
+  }
+
+  const cabecalhos =
+    valores[0];
+
+  const indiceEmpresa =
+    cabecalhos.indexOf(
+      'empresa_id'
+    );
+
+  const indiceDiagnostico =
+    cabecalhos.indexOf(
+      'diagnostico_id'
+    );
+
+  if (
+    indiceEmpresa === -1
+  ) {
+
+    throw new Error(
+      'A aba LEADS precisa possuir a coluna empresa_id.'
+    );
+
+  }
+
+  if (
+    indiceDiagnostico === -1
+  ) {
+
+    throw new Error(
+      'A aba LEADS precisa possuir a coluna diagnostico_id.'
+    );
+
+  }
+
+  for (
+    let i = 1;
+    i < valores.length;
+    i++
+  ) {
+
+    const empresaLinha =
+      String(
+        valores[i][indiceEmpresa] || ''
+      )
+        .trim();
+
+    const diagnosticoLinha =
+      String(
+        valores[i][indiceDiagnostico] || ''
+      )
+        .trim();
+
+    if (
+      empresaLinha ===
+      String(empresaId).trim() &&
+      diagnosticoLinha ===
+      String(diagnosticoId).trim()
+    ) {
+
+      return {
+        linha:
+          i + 1,
+
+        dados:
+          objetoDaLinha_(
+            cabecalhos,
+            valores[i]
+          )
+      };
+
+    }
+
+  }
+
+  return null;
+
+}
+
+
+/**
+ * ------------------------------------------------------------
+ * BUSCAR SOLUÇÃO PELO ID
+ * ------------------------------------------------------------
+ */
+function buscarSolucaoV61_(
+  solucaoId
+) {
+
+  if (!solucaoId) {
+    return null;
+  }
+
+  const aba =
+    obterAba_(
+      SHEETS.SOLUCOES
+    );
+
+  const valores =
+    aba
+      .getDataRange()
+      .getValues();
+
+  if (
+    valores.length <= 1
+  ) {
+    return null;
+  }
+
+  const cabecalhos =
+    valores[0];
+
+  const indiceId =
+    cabecalhos.indexOf(
+      'solucao_id'
+    );
+
+  if (
+    indiceId === -1
+  ) {
+
+    throw new Error(
+      'A aba SOLUCOES precisa possuir a coluna solucao_id.'
+    );
+
+  }
+
+  for (
+    let i = 1;
+    i < valores.length;
+    i++
+  ) {
+
+    if (
+      String(
+        valores[i][indiceId] || ''
+      )
+        .trim() ===
+      String(solucaoId).trim()
+    ) {
+
+      return objetoDaLinha_(
+        cabecalhos,
+        valores[i]
+      );
+
+    }
+
+  }
+
+  return null;
+
+}
+
+
+/**
+ * ------------------------------------------------------------
+ * CONSTRUIR LEAD V6.1
+ * ------------------------------------------------------------
+ */
+function construirLeadDiagnosticoV61_(
+  encaminhamento,
+  diagnostico,
+  oportunidade
+) {
+
+  const enc =
+    encaminhamento || {};
+
+  const diag =
+    diagnostico || {};
+
+  const opp =
+    oportunidade || {};
+
+  const empresaId =
+    String(
+      enc.empresa_id ||
+      diag.empresa_id ||
+      ''
+    ).trim();
+
+  const diagnosticoId =
+    String(
+      enc.diagnostico_id ||
+      diag.diagnostico_id ||
+      ''
+    ).trim();
+
+  const solucaoPrincipalId =
+    String(
+      enc.solucao_principal_id ||
+      ''
+    ).trim();
+
+  let interesse =
+    String(
+      opp.oportunidade ||
+      ''
+    ).trim();
+
+  /*
+   * Se a oportunidade não trouxer descrição,
+   * tentamos localizar a solução principal.
+   */
+  if (!interesse && solucaoPrincipalId) {
+
+    const solucao =
+      buscarSolucaoV61_(
+        solucaoPrincipalId
+      );
+
+    if (solucao) {
+
+      interesse =
+        String(
+          solucao.nome ||
+          solucao.descricao ||
+          ''
+        ).trim();
+
+    }
+
+  }
+
+  /*
+   * Último fallback:
+   * processo real do diagnóstico.
+   */
+  if (!interesse) {
+
+    interesse =
+      String(
+        diag.processo_nome ||
+        diag.processo_resumo ||
+        ''
+      ).trim();
+
+  }
+
+  return {
+
+    empresa_id:
+      empresaId,
+
+    diagnostico_id:
+      diagnosticoId,
+
+    nome:
+      String(
+        diag.nome_contato ||
+        diag.nome ||
+        ''
+      ).trim(),
+
+    whatsapp:
+      String(
+        diag.whatsapp ||
+        ''
+      ).trim(),
+
+    interesse:
+      interesse,
+
+    prioridade:
+      String(
+        enc.prioridade ||
+        'MÉDIA'
+      ).trim(),
+
+    status:
+      STATUS_LEAD.NOVO,
+
+    responsavel:
+      '',
+
+    criado_em:
+      new Date(),
+
+    atualizado_em:
+      new Date()
+
+  };
+
+}
+
+
+/**
+ * ------------------------------------------------------------
+ * MOTOR V6.1
+ * ------------------------------------------------------------
+ */
+function criarLeadDiagnosticoV61_(
+  encaminhamento,
+  diagnostico,
+  oportunidade
+) {
+
+  const enc =
+    encaminhamento || {};
+
+  const diag =
+    diagnostico || {};
+
+  /*
+   * ----------------------------------------------------------
+   * 1. VALIDAR AUTORIZAÇÃO
+   * ----------------------------------------------------------
+   */
+  const autorizacao =
+    validarAutorizacaoLeadV61_(
+      enc
+    );
+
+  if (
+    !autorizacao.autorizado
+  ) {
+
+    return {
+
+      versao:
+        'V6.1',
+
+      acao:
+        'BLOQUEADO',
+
+      lead_id:
+        '',
+
+      empresa_id:
+        enc.empresa_id || '',
+
+      diagnostico_id:
+        enc.diagnostico_id || '',
+
+      status:
+        '',
+
+      justificativa:
+        autorizacao.motivo,
+
+      criado:
+        false
+
+    };
+
+  }
+
+
+  /*
+   * ----------------------------------------------------------
+   * 2. VALIDAR DIAGNÓSTICO
+   * ----------------------------------------------------------
+   */
+  if (
+    !diag ||
+    String(
+      diag.diagnostico_id || ''
+    ).trim() === ''
+  ) {
+
+    return {
+
+      versao:
+        'V6.1',
+
+      acao:
+        'BLOQUEADO',
+
+      lead_id:
+        '',
+
+      empresa_id:
+        enc.empresa_id || '',
+
+      diagnostico_id:
+        enc.diagnostico_id || '',
+
+      status:
+        '',
+
+      justificativa:
+        'Diagnóstico não encontrado ou inválido.',
+
+      criado:
+        false
+
+    };
+
+  }
+
+
+  /*
+   * ----------------------------------------------------------
+   * 3. LOCALIZAR LEAD EXISTENTE
+   * ----------------------------------------------------------
+   */
+  const leadExistente =
+    buscarLeadPorDiagnosticoV61_(
+      enc.empresa_id,
+      enc.diagnostico_id
+    );
+
+  if (leadExistente) {
+
+    const dados =
+      leadExistente.dados || {};
+
+    return {
+
+      versao:
+        'V6.1',
+
+      acao:
+        'JA_EXISTE',
+
+      lead_id:
+        dados.lead_id || '',
+
+      empresa_id:
+        dados.empresa_id || enc.empresa_id,
+
+      diagnostico_id:
+        dados.diagnostico_id || enc.diagnostico_id,
+
+      status:
+        dados.status ||
+        STATUS_LEAD.NOVO,
+
+      justificativa:
+        'Já existe um Lead para esta empresa e diagnóstico.',
+
+      criado:
+        false
+
+    };
+
+  }
+
+
+  /*
+   * ----------------------------------------------------------
+   * 4. CONSTRUIR LEAD
+   * ----------------------------------------------------------
+   */
+  const novoLead =
+    construirLeadDiagnosticoV61_(
+      enc,
+      diag,
+      oportunidade
+    );
+
+
+  /*
+   * ----------------------------------------------------------
+   * 5. VALIDAÇÃO FINAL ANTES DA PERSISTÊNCIA
+   * ----------------------------------------------------------
+   */
+  if (
+    !novoLead.empresa_id
+  ) {
+
+    return {
+
+      versao:
+        'V6.1',
+
+      acao:
+        'BLOQUEADO',
+
+      lead_id:
+        '',
+
+      empresa_id:
+        '',
+
+      diagnostico_id:
+        novoLead.diagnostico_id,
+
+      status:
+        '',
+
+      justificativa:
+        'empresa_id ausente no Lead.',
+
+      criado:
+        false
+
+    };
+
+  }
+
+  if (
+    !novoLead.diagnostico_id
+  ) {
+
+    return {
+
+      versao:
+        'V6.1',
+
+      acao:
+        'BLOQUEADO',
+
+      lead_id:
+        '',
+
+      empresa_id:
+        novoLead.empresa_id,
+
+      diagnostico_id:
+        '',
+
+      status:
+        '',
+
+      justificativa:
+        'diagnostico_id ausente no Lead.',
+
+      criado:
+        false
+
+    };
+
+  }
+
+
+  /*
+   * ----------------------------------------------------------
+   * 6. PERSISTIR
+   * ----------------------------------------------------------
+   */
+  const persistencia =
+    salvarLead_(
+      novoLead
+    );
+
+
+  /*
+   * ----------------------------------------------------------
+   * 7. RECUPERAR REGISTRO CRIADO
+   * ----------------------------------------------------------
+   */
+  const leadCriado =
+    buscarLeadPorDiagnosticoV61_(
+      novoLead.empresa_id,
+      novoLead.diagnostico_id
+    );
+
+  if (!leadCriado) {
+
+    throw new Error(
+      'V6.1: Lead foi gravado, mas não pôde ser localizado após a persistência.'
+    );
+
+  }
+
+
+  return {
+
+    versao:
+      'V6.1',
+
+    acao:
+      'CRIAR',
+
+    lead_id:
+      persistencia.lead_id,
+
+    empresa_id:
+      novoLead.empresa_id,
+
+    diagnostico_id:
+      novoLead.diagnostico_id,
+
+    status:
+      STATUS_LEAD.NOVO,
+
+    justificativa:
+      'Lead criado porque o encaminhamento V5.11 autorizou avanço comercial.',
+
+    criado:
+      true
+
+  };
+
+}
+
+
+/**
+ * ============================================================
+ * TESTE ISOLADO — V6.1
+ * ============================================================
+ */
+function TESTAR_MOTOR_LEAD_V61() {
+
+  const resultados =
+    [];
+
+  function teste(
+    nome,
+    passou,
+    detalhe
+  ) {
+
+    resultados.push({
+
+      teste:
+        nome,
+
+      passou:
+        passou === true,
+
+      detalhe:
+        String(
+          detalhe || ''
+        )
+
+    });
+
+  }
+
+
+  let inicio =
+    null;
+
+  let leadCriado =
+    null;
+
+  try {
+
+    Logger.log(
+      '===================================================='
+    );
+
+    Logger.log(
+      'INICIANDO TESTE ISOLADO V6.1'
+    );
+
+
+    /*
+     * --------------------------------------------------------
+     * LIMPAR RESÍDUOS DOS TESTES V6.1
+     * --------------------------------------------------------
+     */
+    limparRegistrosPorCampoV510_(
+      SHEETS.LEADS,
+      'diagnostico_id',
+      'TESTE-V61-A'
+    );
+
+    limparRegistrosPorCampoV510_(
+      SHEETS.LEADS,
+      'diagnostico_id',
+      'TESTE-V61-B'
+    );
+
+    limparRegistrosPorCampoV510_(
+      SHEETS.LEADS,
+      'diagnostico_id',
+      'TESTE-V61-C'
+    );
+
+
+    /*
+     * --------------------------------------------------------
+     * CRIAR DIAGNÓSTICO REAL DE TESTE
+     * --------------------------------------------------------
+     */
+    inicio =
+      iniciarDiagnostico({
+
+        nome:
+          'Empresa Teste V6.1',
+
+        nome_empresa:
+          'Empresa Teste V6.1',
+
+        segmento:
+          'Serviços',
+
+        porte:
+          'PEQUENA',
+
+        nome_contato:
+          'Contato Teste V6.1',
+
+        whatsapp:
+          '',
+
+        email:
+          '',
+
+        cidade:
+          ''
+
+      });
+
+
+    teste(
+      '1 — Diagnóstico de teste criado',
+      !!inicio &&
+      !!inicio.empresa_id &&
+      !!inicio.diagnostico_id,
+      inicio
+        ? JSON.stringify(inicio)
+        : 'Falha'
+    );
+
+
+    /*
+     * --------------------------------------------------------
+     * OBJETO V5.11 PERFEITO
+     * --------------------------------------------------------
+     */
+    const encaminhamentoPerfeito = {
+
+      versao:
+        'V5.11',
+
+      diagnostico_id:
+        'TESTE-V61-A',
+
+      empresa_id:
+        inicio
+          ? inicio.empresa_id
+          : '',
+
+      conversa_id:
+        inicio
+          ? inicio.conversa_id
+          : '',
+
+      classificacao:
+        'AVANCAR',
+
+      acao:
+        'AVANCAR',
+
+      prioridade:
+        'ALTA',
+
+      solucao_principal_id:
+        'SOL-V61-TESTE',
+
+      proximo_passo:
+        'AVANCAR_PARA_PROXIMA_ETAPA',
+
+      justificativa:
+        'Teste V6.1',
+
+      confianca:
+        'ALTA',
+
+      apto_para_lead:
+        true
+
+    };
+
+
+    const diagnosticoTeste = {
+
+      diagnostico_id:
+        'TESTE-V61-A',
+
+      empresa_id:
+        inicio
+          ? inicio.empresa_id
+          : '',
+
+      processo_nome:
+        'Conferir e lançar pedidos',
+
+      processo_resumo:
+        'Conferir e lançar pedidos',
+
+      nome_contato:
+        'Contato Teste V6.1',
+
+      whatsapp:
+        '',
+
+      dor_principal:
+        'Erros de digitação e retrabalho'
+
+    };
+
+
+    const oportunidadeTeste = {
+
+      oportunidade_id:
+        'OPP-V61-TESTE',
+
+      oportunidade:
+        'Conferir e lançar pedidos',
+
+      processo:
+        'Conferir e lançar pedidos',
+
+      dor:
+        'Erros de digitação e retrabalho',
+
+      prioridade:
+        'ALTA'
+
+    };
+
+
+    /*
+     * --------------------------------------------------------
+     * TESTE 2 — AUTORIZAÇÃO
+     * --------------------------------------------------------
+     */
+    const autorizacao =
+      validarAutorizacaoLeadV61_(
+        encaminhamentoPerfeito
+      );
+
+    teste(
+      '2 — Autorização V5.11',
+      autorizacao.autorizado === true,
+      JSON.stringify(autorizacao)
+    );
+
+
+    /*
+     * --------------------------------------------------------
+     * TESTE 3 — CONSTRUÇÃO
+     * --------------------------------------------------------
+     */
+    const estrutura =
+      construirLeadDiagnosticoV61_(
+        encaminhamentoPerfeito,
+        diagnosticoTeste,
+        oportunidadeTeste
+      );
+
+    teste(
+      '3 — Lead construído corretamente',
+      !!estrutura &&
+      estrutura.empresa_id ===
+        inicio.empresa_id &&
+      estrutura.diagnostico_id ===
+        'TESTE-V61-A' &&
+      estrutura.status ===
+        STATUS_LEAD.NOVO &&
+      estrutura.interesse ===
+        'Conferir e lançar pedidos',
+      JSON.stringify(estrutura)
+    );
+
+
+    /*
+     * --------------------------------------------------------
+     * TESTE 4 — CRIAÇÃO
+     * --------------------------------------------------------
+     */
+    const resultadoCriacao =
+      criarLeadDiagnosticoV61_(
+        encaminhamentoPerfeito,
+        diagnosticoTeste,
+        oportunidadeTeste
+      );
+
+    leadCriado =
+      resultadoCriacao;
+
+    teste(
+      '4 — Lead criado',
+      resultadoCriacao.acao ===
+        'CRIAR' &&
+      resultadoCriacao.criado ===
+        true &&
+      !!resultadoCriacao.lead_id,
+      JSON.stringify(resultadoCriacao)
+    );
+
+
+    /*
+     * --------------------------------------------------------
+     * TESTE 5 — STATUS NOVO
+     * --------------------------------------------------------
+     */
+    teste(
+      '5 — Status inicial NOVO',
+      resultadoCriacao.status ===
+        STATUS_LEAD.NOVO,
+      resultadoCriacao.status
+    );
+
+
+    /*
+     * --------------------------------------------------------
+     * TESTE 6 — PERSISTÊNCIA
+     * --------------------------------------------------------
+     */
+    const persistido =
+      buscarLeadPorDiagnosticoV61_(
+        inicio.empresa_id,
+        'TESTE-V61-A'
+      );
+
+    teste(
+      '6 — Lead persistido',
+      !!persistido &&
+      !!persistido.dados &&
+      String(
+        persistido.dados.lead_id || ''
+      ).trim() ===
+      String(
+        resultadoCriacao.lead_id
+      ).trim(),
+      persistido
+        ? JSON.stringify(
+            persistido.dados
+          )
+        : 'Não encontrado'
+    );
+
+
+    /*
+     * --------------------------------------------------------
+     * TESTE 7 — IDEMPOTÊNCIA
+     * --------------------------------------------------------
+     */
+    const segundaExecucao =
+      criarLeadDiagnosticoV61_(
+        encaminhamentoPerfeito,
+        diagnosticoTeste,
+        oportunidadeTeste
+      );
+
+    teste(
+      '7 — Segunda execução não cria duplicado',
+      segundaExecucao.acao ===
+        'JA_EXISTE' &&
+      segundaExecucao.criado ===
+        false &&
+      segundaExecucao.lead_id ===
+        resultadoCriacao.lead_id,
+      JSON.stringify(segundaExecucao)
+    );
+
+
+    /*
+     * --------------------------------------------------------
+     * TESTE 8 — PRECISAMOS_AVALIAR
+     * --------------------------------------------------------
+     */
+    const avaliar =
+      criarLeadDiagnosticoV61_({
+
+        diagnostico_id:
+          'TESTE-V61-B',
+
+        empresa_id:
+          inicio.empresa_id,
+
+        classificacao:
+          'AVALIAR',
+
+        acao:
+          'AVALIAR',
+
+        prioridade:
+          'ALTA',
+
+        solucao_principal_id:
+          'SOL-V61-TESTE',
+
+        confianca:
+          'MÉDIA',
+
+        apto_para_lead:
+          false
+
+      }, {
+
+        diagnostico_id:
+          'TESTE-V61-B',
+
+        empresa_id:
+          inicio.empresa_id,
+
+        processo_nome:
+          'Processo de teste'
+
+      }, {
+
+        oportunidade:
+          'Oportunidade teste'
+
+      });
+
+    teste(
+      '8 — PRECISAMOS_AVALIAR bloqueado',
+      avaliar.acao ===
+        'BLOQUEADO' &&
+      avaliar.criado ===
+        false,
+      JSON.stringify(avaliar)
+    );
+
+
+    /*
+     * --------------------------------------------------------
+     * TESTE 9 — NAO_ENQUADRADO
+     * --------------------------------------------------------
+     */
+    const naoEnquadrado =
+      criarLeadDiagnosticoV61_({
+
+        diagnostico_id:
+          'TESTE-V61-C',
+
+        empresa_id:
+          inicio.empresa_id,
+
+        classificacao:
+          'NAO_ENQUADRADO',
+
+        acao:
+          'NAO_AVANCAR',
+
+        prioridade:
+          'MÉDIA',
+
+        solucao_principal_id:
+          '',
+
+        confianca:
+          'BAIXA',
+
+        apto_para_lead:
+          false
+
+      }, {
+
+        diagnostico_id:
+          'TESTE-V61-C',
+
+        empresa_id:
+          inicio.empresa_id,
+
+        processo_nome:
+          'Processo teste'
+
+      }, {});
+
+    teste(
+      '9 — NAO_ENQUADRADO bloqueado',
+      naoEnquadrado.acao ===
+        'BLOQUEADO' &&
+      naoEnquadrado.criado ===
+        false,
+      JSON.stringify(naoEnquadrado)
+    );
+
+
+    /*
+     * --------------------------------------------------------
+     * TESTE 10 — APTO FALSE
+     * --------------------------------------------------------
+     */
+    const aptoFalse =
+      criarLeadDiagnosticoV61_({
+
+        diagnostico_id:
+          'TESTE-V61-B',
+
+        empresa_id:
+          inicio.empresa_id,
+
+        classificacao:
+          'AVANCAR',
+
+        acao:
+          'AVANCAR',
+
+        prioridade:
+          'ALTA',
+
+        solucao_principal_id:
+          'SOL-V61-TESTE',
+
+        confianca:
+          'ALTA',
+
+        apto_para_lead:
+          false
+
+      }, {
+
+        diagnostico_id:
+          'TESTE-V61-B',
+
+        empresa_id:
+          inicio.empresa_id,
+
+        processo_nome:
+          'Processo teste'
+
+      }, {
+
+        oportunidade:
+          'Oportunidade teste'
+
+      });
+
+    teste(
+      '10 — apto_para_lead false bloqueado',
+      aptoFalse.acao ===
+        'BLOQUEADO' &&
+      aptoFalse.criado ===
+        false,
+      JSON.stringify(aptoFalse)
+    );
+
+
+    /*
+     * --------------------------------------------------------
+     * TESTE 11 — SEM SOLUÇÃO
+     * --------------------------------------------------------
+     */
+    const semSolucao =
+      criarLeadDiagnosticoV61_({
+
+        diagnostico_id:
+          'TESTE-V61-B',
+
+        empresa_id:
+          inicio.empresa_id,
+
+        classificacao:
+          'AVANCAR',
+
+        acao:
+          'AVANCAR',
+
+        prioridade:
+          'ALTA',
+
+        solucao_principal_id:
+          '',
+
+        confianca:
+          'ALTA',
+
+        apto_para_lead:
+          true
+
+      }, {
+
+        diagnostico_id:
+          'TESTE-V61-B',
+
+        empresa_id:
+          inicio.empresa_id,
+
+        processo_nome:
+          'Processo teste'
+
+      }, {
+
+        oportunidade:
+          'Oportunidade teste'
+
+      });
+
+    teste(
+      '11 — Sem solução principal bloqueado',
+      semSolucao.acao ===
+        'BLOQUEADO' &&
+      semSolucao.criado ===
+        false,
+      JSON.stringify(semSolucao)
+    );
+
+
+    /*
+     * --------------------------------------------------------
+     * TESTE 12 — SEM EMPRESA
+     * --------------------------------------------------------
+     */
+    const semEmpresa =
+      criarLeadDiagnosticoV61_({
+
+        diagnostico_id:
+          'TESTE-V61-B',
+
+        empresa_id:
+          '',
+
+        classificacao:
+          'AVANCAR',
+
+        acao:
+          'AVANCAR',
+
+        prioridade:
+          'ALTA',
+
+        solucao_principal_id:
+          'SOL-V61-TESTE',
+
+        confianca:
+          'ALTA',
+
+        apto_para_lead:
+          true
+
+      }, {
+
+        diagnostico_id:
+          'TESTE-V61-B',
+
+        empresa_id:
+          '',
+
+        processo_nome:
+          'Processo teste'
+
+      }, {
+
+        oportunidade:
+          'Oportunidade teste'
+
+      });
+
+    teste(
+      '12 — Empresa ausente bloqueada',
+      semEmpresa.acao ===
+        'BLOQUEADO' &&
+      semEmpresa.criado ===
+        false,
+      JSON.stringify(semEmpresa)
+    );
+
+
+    /*
+     * --------------------------------------------------------
+     * TESTE 13 — SEM DIAGNÓSTICO
+     * --------------------------------------------------------
+     */
+    const semDiagnostico =
+      criarLeadDiagnosticoV61_({
+
+        diagnostico_id:
+          '',
+
+        empresa_id:
+          inicio.empresa_id,
+
+        classificacao:
+          'AVANCAR',
+
+        acao:
+          'AVANCAR',
+
+        prioridade:
+          'ALTA',
+
+        solucao_principal_id:
+          'SOL-V61-TESTE',
+
+        confianca:
+          'ALTA',
+
+        apto_para_lead:
+          true
+
+      }, {
+
+        diagnostico_id:
+          '',
+
+        empresa_id:
+          inicio.empresa_id,
+
+        processo_nome:
+          'Processo teste'
+
+      }, {
+
+        oportunidade:
+          'Oportunidade teste'
+
+      });
+
+    teste(
+      '13 — Diagnóstico ausente bloqueado',
+      semDiagnostico.acao ===
+        'BLOQUEADO' &&
+      semDiagnostico.criado ===
+        false,
+      JSON.stringify(semDiagnostico)
+    );
+
+
+    /*
+     * --------------------------------------------------------
+     * TESTE 14 — CONFIANÇA MÉDIA
+     * --------------------------------------------------------
+     */
+    const confiancaMedia =
+      criarLeadDiagnosticoV61_({
+
+        diagnostico_id:
+          'TESTE-V61-B',
+
+        empresa_id:
+          inicio.empresa_id,
+
+        classificacao:
+          'AVANCAR',
+
+        acao:
+          'AVANCAR',
+
+        prioridade:
+          'ALTA',
+
+        solucao_principal_id:
+          'SOL-V61-TESTE',
+
+        confianca:
+          'MÉDIA',
+
+        apto_para_lead:
+          true
+
+      }, {
+
+        diagnostico_id:
+          'TESTE-V61-B',
+
+        empresa_id:
+          inicio.empresa_id,
+
+        processo_nome:
+          'Processo teste'
+
+      }, {
+
+        oportunidade:
+          'Oportunidade teste'
+
+      });
+
+    teste(
+      '14 — Confiança diferente de ALTA bloqueada',
+      confiancaMedia.acao ===
+        'BLOQUEADO' &&
+      confiancaMedia.criado ===
+        false,
+      JSON.stringify(confiancaMedia)
+    );
+
+
+    /*
+     * --------------------------------------------------------
+     * TESTE 15 — CLASSIFICAÇÃO INVÁLIDA
+     * --------------------------------------------------------
+     */
+    const classificacaoInvalida =
+      criarLeadDiagnosticoV61_({
+
+        diagnostico_id:
+          'TESTE-V61-B',
+
+        empresa_id:
+          inicio.empresa_id,
+
+        classificacao:
+          'QUALQUER_COISA',
+
+        acao:
+          'AVANCAR',
+
+        prioridade:
+          'ALTA',
+
+        solucao_principal_id:
+          'SOL-V61-TESTE',
+
+        confianca:
+          'ALTA',
+
+        apto_para_lead:
+          true
+
+      }, {
+
+        diagnostico_id:
+          'TESTE-V61-B',
+
+        empresa_id:
+          inicio.empresa_id,
+
+        processo_nome:
+          'Processo teste'
+
+      }, {
+
+        oportunidade:
+          'Oportunidade teste'
+
+      });
+
+    teste(
+      '15 — Classificação inválida bloqueada',
+      classificacaoInvalida.acao ===
+        'BLOQUEADO' &&
+      classificacaoInvalida.criado ===
+        false,
+      JSON.stringify(
+        classificacaoInvalida
+      )
+    );
+
+
+    /*
+     * --------------------------------------------------------
+     * TESTE 16 — EMPRESA DIFERENTE
+     * --------------------------------------------------------
+     */
+    const empresaDiferente =
+      iniciarDiagnostico({
+
+        nome:
+          'Empresa Teste V6.1 B',
+
+        nome_empresa:
+          'Empresa Teste V6.1 B',
+
+        segmento:
+          'Serviços',
+
+        porte:
+          'PEQUENA',
+
+        nome_contato:
+          'Contato B',
+
+        whatsapp:
+          '',
+
+        email:
+          '',
+
+        cidade:
+          ''
+
+      });
+
+    const leadEmpresaDiferente =
+      criarLeadDiagnosticoV61_({
+
+        diagnostico_id:
+          'TESTE-V61-A',
+
+        empresa_id:
+          empresaDiferente.empresa_id,
+
+        classificacao:
+          'AVANCAR',
+
+        acao:
+          'AVANCAR',
+
+        prioridade:
+          'ALTA',
+
+        solucao_principal_id:
+          'SOL-V61-TESTE',
+
+        confianca:
+          'ALTA',
+
+        apto_para_lead:
+          true
+
+      }, {
+
+        diagnostico_id:
+          'TESTE-V61-A',
+
+        empresa_id:
+          empresaDiferente.empresa_id,
+
+        processo_nome:
+          'Processo diferente'
+
+      }, {
+
+        oportunidade:
+          'Oportunidade empresa diferente'
+
+      });
+
+    teste(
+      '16 — Empresa diferente pode criar novo Lead',
+      leadEmpresaDiferente.acao ===
+        'CRIAR' &&
+      leadEmpresaDiferente.criado ===
+        true,
+      JSON.stringify(
+        leadEmpresaDiferente
+      )
+    );
+
+
+    /*
+     * --------------------------------------------------------
+     * TESTE 17 — MESMA EMPRESA / NOVO DIAGNÓSTICO
+     * --------------------------------------------------------
+     */
+    const novoDiagnostico =
+      iniciarDiagnostico({
+
+        nome:
+          'Novo Diagnóstico V6.1',
+
+        nome_empresa:
+          'Novo Diagnóstico V6.1',
+
+        segmento:
+          'Serviços',
+
+        porte:
+          'PEQUENA',
+
+        nome_contato:
+          'Contato Novo',
+
+        whatsapp:
+          '',
+
+        email:
+          '',
+
+        cidade:
+          ''
+
+      });
+
+    const leadNovoDiagnostico =
+      criarLeadDiagnosticoV61_({
+
+        diagnostico_id:
+          novoDiagnostico.diagnostico_id,
+
+        empresa_id:
+          inicio.empresa_id,
+
+        classificacao:
+          'AVANCAR',
+
+        acao:
+          'AVANCAR',
+
+        prioridade:
+          'ALTA',
+
+        solucao_principal_id:
+          'SOL-V61-TESTE',
+
+        confianca:
+          'ALTA',
+
+        apto_para_lead:
+          true
+
+      }, {
+
+        diagnostico_id:
+          novoDiagnostico.diagnostico_id,
+
+        empresa_id:
+          inicio.empresa_id,
+
+        processo_nome:
+          'Novo processo'
+
+      }, {
+
+        oportunidade:
+          'Nova oportunidade'
+
+      });
+
+    teste(
+      '17 — Novo diagnóstico permite novo Lead',
+      leadNovoDiagnostico.acao ===
+        'CRIAR' &&
+      leadNovoDiagnostico.criado ===
+        true,
+      JSON.stringify(
+        leadNovoDiagnostico
+      )
+    );
+
+
+    /*
+     * --------------------------------------------------------
+     * TESTE 18 — RASTREABILIDADE
+     * --------------------------------------------------------
+     */
+    const leadRastreado =
+      buscarLeadPorDiagnosticoV61_(
+        inicio.empresa_id,
+        'TESTE-V61-A'
+      );
+
+    teste(
+      '18 — Rastreabilidade empresa + diagnóstico',
+      !!leadRastreado &&
+      String(
+        leadRastreado.dados.empresa_id || ''
+      ) ===
+      String(
+        inicio.empresa_id
+      ) &&
+      String(
+        leadRastreado.dados.diagnostico_id || ''
+      ) ===
+      'TESTE-V61-A',
+      leadRastreado
+        ? JSON.stringify(
+            leadRastreado.dados
+          )
+        : 'Não encontrado'
+    );
+
+
+    /*
+     * --------------------------------------------------------
+     * TESTE 19 — STATUS NÃO PULA ETAPA
+     * --------------------------------------------------------
+     */
+    teste(
+      '19 — Lead nasce somente como NOVO',
+      !!leadRastreado &&
+      String(
+        leadRastreado.dados.status || ''
+      ) ===
+      STATUS_LEAD.NOVO,
+      leadRastreado
+        ? String(
+            leadRastreado.dados.status
+          )
+        : 'Não encontrado'
+    );
+
+
+    /*
+     * --------------------------------------------------------
+     * TESTE 20 — NÃO CRIA LEAD SEM AUTORIZAÇÃO
+     * --------------------------------------------------------
+     */
+    const totalAntesBloqueio =
+      obterAba_(
+        SHEETS.LEADS
+      )
+        .getDataRange()
+        .getValues()
+        .length;
+
+    criarLeadDiagnosticoV61_({
+
+      diagnostico_id:
+        'TESTE-V61-B',
+
+      empresa_id:
+        inicio.empresa_id,
+
+      classificacao:
+        'NAO_ENQUADRADO',
+
+      acao:
+        'NAO_AVANCAR',
+
+      prioridade:
+        'MÉDIA',
+
+      solucao_principal_id:
+        '',
+
+      confianca:
+        'BAIXA',
+
+      apto_para_lead:
+        false
+
+    }, {
+
+      diagnostico_id:
+        'TESTE-V61-B',
+
+      empresa_id:
+        inicio.empresa_id,
+
+      processo_nome:
+        'Não deve gerar Lead'
+
+    }, {});
+
+    const totalDepoisBloqueio =
+      obterAba_(
+        SHEETS.LEADS
+      )
+        .getDataRange()
+        .getValues()
+        .length;
+
+    teste(
+      '20 — Bloqueio não altera quantidade de Leads',
+      totalAntesBloqueio ===
+        totalDepoisBloqueio,
+      'Antes: ' +
+      totalAntesBloqueio +
+      ' | Depois: ' +
+      totalDepoisBloqueio
+    );
+
+
+    /*
+     * --------------------------------------------------------
+     * RESULTADO
+     * --------------------------------------------------------
+     */
+    const aprovados =
+      resultados.filter(
+        function(item) {
+
+          return item.passou === true;
+
+        }
+      ).length;
+
+    const total =
+      resultados.length;
+
+    Logger.log(
+      '===================================================='
+    );
+
+    resultados.forEach(
+      function(
+        item,
+        indice
+      ) {
+
+        Logger.log(
+
+          (
+            item.passou
+              ? 'PASSOU'
+              : 'FALHOU'
+          ) +
+
+          ' — TESTE ' +
+
+          (
+            indice + 1
+          ) +
+
+          ': ' +
+
+          item.teste +
+
+          ' — ' +
+
+          item.detalhe
+
+        );
+
+      }
+    );
+
+    Logger.log(
+      '===================================================='
+    );
+
+    Logger.log(
+      'RESULTADO V6.1: ' +
+      aprovados +
+      '/' +
+      total
+    );
+
+    Logger.log(
+      'PERCENTUAL V6.1: ' +
+      (
+        total > 0
+          ? (
+              aprovados /
+              total
+            ) * 100
+          : 0
+      ) +
+      '%'
+    );
+
+
+    if (
+      aprovados !==
+      total
+    ) {
+
+      throw new Error(
+        'V6.1 FALHOU: ' +
+        aprovados +
+        '/' +
+        total
+      );
+
+    }
+
+
+    Logger.log(
+      'TESTAR_MOTOR_LEAD_V61: PASSOU'
+    );
+
+
+    return {
+
+      sucesso:
+        true,
+
+      aprovados:
+        aprovados,
+
+      total:
+        total,
+
+      percentual:
+        total > 0
+          ? (
+              aprovados /
+              total
+            ) * 100
+          : 0,
+
+      resultados:
+        resultados,
+
+      lead:
+        leadCriado
+
+    };
+
+
+  } finally {
+
+    /*
+     * --------------------------------------------------------
+     * LIMPEZA
+     * --------------------------------------------------------
+     *
+     * Remove somente os Leads criados pelo teste.
+     */
+    try {
+
+      limparRegistrosPorCampoV510_(
+        SHEETS.LEADS,
+        'diagnostico_id',
+        'TESTE-V61-A'
+      );
+
+      limparRegistrosPorCampoV510_(
+        SHEETS.LEADS,
+        'diagnostico_id',
+        'TESTE-V61-B'
+      );
+
+      limparRegistrosPorCampoV510_(
+        SHEETS.LEADS,
+        'diagnostico_id',
+        'TESTE-V61-C'
+      );
+
+      if (inicio) {
+
+        limparRegistrosPorCampoV510_(
+          SHEETS.LEADS,
+          'diagnostico_id',
+          inicio.diagnostico_id
+        );
+
+        limparRegistrosPorCampoV510_(
+          SHEETS.DIAGNOSTICOS,
+          'diagnostico_id',
+          inicio.diagnostico_id
+        );
+
+        limparRegistrosPorCampoV510_(
+          SHEETS.CONVERSAS,
+          'conversa_id',
+          inicio.conversa_id
+        );
+
+        limparRegistrosPorCampoV510_(
+          SHEETS.METRICAS,
+          'conversa_id',
+          inicio.conversa_id
+        );
+
+      }
+
+      Logger.log(
+        'LIMPEZA V6.1 PRINCIPAL CONCLUÍDA'
+      );
+
+    } catch (erro) {
+
+      Logger.log(
+        'Falha na limpeza V6.1: ' +
+        erro.message
+      );
+
+    }
+
+  }
+
+}
+
+function TESTAR_INTEGRACAO_REAL_V61() {
+
+  Logger.log('====================================================');
+  Logger.log('INICIANDO INTEGRAÇÃO REAL V6.1');
+  Logger.log('====================================================');
+
+  const resultados = [];
+
+  function teste(nome, passou, detalhe) {
+
+    resultados.push({
+      nome: nome,
+      passou: passou === true,
+      detalhe: String(detalhe || '')
+    });
+
+  }
+
+  let inicio = null;
+  let leadPrimeiro = null;
+  let leadSegundo = null;
+
+  try {
+
+    /*
+     * ========================================================
+     * 1. CRIAR DIAGNÓSTICO REAL
+     * ========================================================
+     */
+
+    inicio = iniciarDiagnostico({
+
+      nome:
+        'Teste Integração V6.1',
+
+      nome_empresa:
+        'Teste Integração V6.1',
+
+      segmento:
+        'Serviços',
+
+      porte:
+        'PEQUENA',
+
+      nome_contato:
+        'Contato Integração V6.1',
+
+      whatsapp:
+        '',
+
+      email:
+        '',
+
+      cidade:
+        ''
+
+    });
+
+    teste(
+      '1 — Diagnóstico real inicializado',
+      !!inicio &&
+      !!inicio.empresa_id &&
+      !!inicio.conversa_id &&
+      !!inicio.diagnostico_id,
+      JSON.stringify(inicio)
+    );
+
+
+    /*
+     * ========================================================
+     * 2. MENSAGEM REAL
+     * ========================================================
+     */
+
+    const mensagem =
+      'Nosso processo principal é conferir e lançar pedidos. ' +
+      'Temos erros de digitação e retrabalho nesse processo. ' +
+      'Isso acontece diariamente. ' +
+      'Processamos 120 pedidos por dia. ' +
+      'Perdemos aproximadamente 3 horas por dia com esse problema. ' +
+      'Nosso objetivo é reduzir os erros e diminuir o retrabalho.';
+
+
+    /*
+     * ========================================================
+     * 3. EXECUTAR FLUXO PRINCIPAL
+     * ========================================================
+     */
+
+    const resultadoFluxo =
+      processarMensagemDiagnostico({
+
+        empresa_id:
+          inicio.empresa_id,
+
+        conversa_id:
+          inicio.conversa_id,
+
+        mensagem:
+          mensagem
+
+      });
+
+
+    teste(
+      '2 — Fluxo principal executado',
+      !!resultadoFluxo,
+      JSON.stringify(resultadoFluxo)
+    );
+
+
+    /*
+     * ========================================================
+     * 4. RECUPERAR V5.11
+     * ========================================================
+     */
+
+    const encaminhamento =
+      resultadoFluxo &&
+      resultadoFluxo.encaminhamento
+        ? resultadoFluxo.encaminhamento
+        : null;
+
+    teste(
+      '3 — V5.11 presente',
+      !!encaminhamento,
+      JSON.stringify(encaminhamento)
+    );
+
+
+    /*
+     * ========================================================
+     * 5. VALIDAR AUTORIZAÇÃO V6.1
+     * ========================================================
+     */
+
+    const autorizacao =
+      validarAutorizacaoLeadV61_(
+        encaminhamento
+      );
+
+    teste(
+      '4 — V5.11 autoriza criação do Lead',
+      autorizacao.autorizado === true,
+      JSON.stringify(autorizacao)
+    );
+
+
+    /*
+     * ========================================================
+     * 6. RECUPERAR DIAGNÓSTICO
+     * ========================================================
+     */
+
+    const diagnostico =
+      obterDiagnosticoAtual_(
+        inicio.empresa_id,
+        inicio.conversa_id
+      );
+
+    teste(
+      '5 — Diagnóstico real recuperado',
+      !!diagnostico &&
+      String(
+        diagnostico.diagnostico_id || ''
+      ) ===
+      String(
+        inicio.diagnostico_id
+      ),
+      JSON.stringify(diagnostico)
+    );
+
+
+    /*
+     * ========================================================
+     * 7. RECUPERAR OPORTUNIDADE
+     * ========================================================
+     */
+
+    const oportunidadeWrapper =
+      resultadoFluxo &&
+      resultadoFluxo.oportunidade
+        ? resultadoFluxo.oportunidade
+        : null;
+
+    const oportunidade =
+      oportunidadeWrapper
+        ? Object.assign(
+            {},
+            oportunidadeWrapper.oportunidade || {},
+            {
+              oportunidade_id:
+                oportunidadeWrapper.oportunidade_id,
+
+              acao:
+                oportunidadeWrapper.acao,
+
+              linha:
+                oportunidadeWrapper.linha
+            }
+          )
+        : null;
+
+    teste(
+      '6 — Oportunidade V5.7 presente',
+      !!oportunidade,
+      JSON.stringify(oportunidade)
+    );
+
+
+    /*
+     * ========================================================
+     * 8. CRIAR LEAD V6.1
+     * ========================================================
+     */
+
+    leadPrimeiro =
+      criarLeadDiagnosticoV61_(
+        encaminhamento,
+        diagnostico,
+        oportunidade
+      );
+
+    teste(
+      '7 — V6.1 criou Lead',
+      leadPrimeiro.acao ===
+        'CRIAR' &&
+      leadPrimeiro.criado ===
+        true &&
+      !!leadPrimeiro.lead_id,
+      JSON.stringify(leadPrimeiro)
+    );
+
+
+    /*
+     * ========================================================
+     * 9. STATUS
+     * ========================================================
+     */
+
+    teste(
+      '8 — Lead integrado nasce NOVO',
+      leadPrimeiro.status ===
+        STATUS_LEAD.NOVO,
+      leadPrimeiro.status
+    );
+
+
+    /*
+     * ========================================================
+     * 10. RECUPERAR LEAD
+     * ========================================================
+     */
+
+    const leadPersistido =
+      buscarLeadPorDiagnosticoV61_(
+        inicio.empresa_id,
+        inicio.diagnostico_id
+      );
+
+    teste(
+      '9 — Lead encontrado após persistência',
+      !!leadPersistido &&
+      String(
+        leadPersistido.dados.lead_id || ''
+      ) ===
+      String(
+        leadPrimeiro.lead_id
+      ),
+      leadPersistido
+        ? JSON.stringify(
+            leadPersistido.dados
+          )
+        : 'Lead não encontrado'
+    );
+
+
+    /*
+     * ========================================================
+     * 11. RASTREABILIDADE
+     * ========================================================
+     */
+
+    teste(
+      '10 — Rastreabilidade empresa + diagnóstico',
+      !!leadPersistido &&
+      String(
+        leadPersistido.dados.empresa_id || ''
+      ) ===
+      String(
+        inicio.empresa_id
+      ) &&
+      String(
+        leadPersistido.dados.diagnostico_id || ''
+      ) ===
+      String(
+        inicio.diagnostico_id
+      ),
+      leadPersistido
+        ? JSON.stringify(
+            leadPersistido.dados
+          )
+        : 'Não encontrado'
+    );
+
+
+    /*
+     * ========================================================
+     * 12. INTERESSE
+     * ========================================================
+     */
+
+    teste(
+      '11 — Interesse preservado',
+      !!leadPersistido &&
+      String(
+        leadPersistido.dados.interesse || ''
+      ).trim() !== '',
+      leadPersistido
+        ? String(
+            leadPersistido.dados.interesse || ''
+          )
+        : 'Não encontrado'
+    );
+
+
+    /*
+     * ========================================================
+     * 13. SEGUNDA EXECUÇÃO REAL
+     * ========================================================
+     */
+
+    Logger.log(
+      '===================================================='
+    );
+
+    Logger.log(
+      'EXECUTANDO SEGUNDA VEZ PARA TESTAR IDEMPOTÊNCIA'
+    );
+
+    Logger.log(
+      '===================================================='
+    );
+
+
+    const resultadoFluxoSegundo =
+      processarMensagemDiagnostico({
+
+        empresa_id:
+          inicio.empresa_id,
+
+        conversa_id:
+          inicio.conversa_id,
+
+        mensagem:
+          mensagem
+
+      });
+
+
+    teste(
+      '12 — Segunda execução do fluxo concluída',
+      !!resultadoFluxoSegundo,
+      JSON.stringify(
+        resultadoFluxoSegundo
+      )
+    );
+
+
+    /*
+     * ========================================================
+     * 14. V5.11 SEGUNDA EXECUÇÃO
+     * ========================================================
+     */
+
+    const encaminhamentoSegundo =
+      resultadoFluxoSegundo &&
+      resultadoFluxoSegundo.encaminhamento
+        ? resultadoFluxoSegundo.encaminhamento
+        : null;
+
+    teste(
+      '13 — V5.11 permanece presente na segunda execução',
+      !!encaminhamentoSegundo,
+      JSON.stringify(
+        encaminhamentoSegundo
+      )
+    );
+
+
+    /*
+     * ========================================================
+     * 15. DIAGNÓSTICO SEGUNDO
+     * ========================================================
+     */
+
+    const diagnosticoSegundo =
+      obterDiagnosticoAtual_(
+        inicio.empresa_id,
+        inicio.conversa_id
+      );
+
+    teste(
+      '14 — Diagnóstico permanece o mesmo',
+      !!diagnosticoSegundo &&
+      String(
+        diagnosticoSegundo.diagnostico_id || ''
+      ) ===
+      String(
+        inicio.diagnostico_id
+      ),
+      JSON.stringify(
+        diagnosticoSegundo
+      )
+    );
+
+
+    /*
+     * ========================================================
+     * 16. OPORTUNIDADE SEGUNDA
+     * ========================================================
+     */
+
+    const oportunidadeWrapperSegundo =
+      resultadoFluxoSegundo &&
+      resultadoFluxoSegundo.oportunidade
+        ? resultadoFluxoSegundo.oportunidade
+        : null;
+
+    const oportunidadeSegundo =
+      oportunidadeWrapperSegundo
+        ? Object.assign(
+            {},
+            oportunidadeWrapperSegundo.oportunidade || {},
+            {
+              oportunidade_id:
+                oportunidadeWrapperSegundo.oportunidade_id,
+
+              acao:
+                oportunidadeWrapperSegundo.acao,
+
+              linha:
+                oportunidadeWrapperSegundo.linha
+            }
+          )
+        : null;
+
+
+    /*
+     * ========================================================
+     * 17. SEGUNDA TENTATIVA DE CRIAÇÃO
+     * ========================================================
+     */
+
+    leadSegundo =
+      criarLeadDiagnosticoV61_(
+        encaminhamentoSegundo,
+        diagnosticoSegundo,
+        oportunidadeSegundo
+      );
+
+    teste(
+      '15 — Segunda execução retorna JA_EXISTE',
+      leadSegundo.acao ===
+        'JA_EXISTE' &&
+      leadSegundo.criado ===
+        false,
+      JSON.stringify(
+        leadSegundo
+      )
+    );
+
+
+    /*
+     * ========================================================
+     * 18. MESMO LEAD_ID
+     * ========================================================
+     */
+
+    teste(
+      '16 — Segunda execução mantém mesmo lead_id',
+      leadSegundo.lead_id ===
+        leadPrimeiro.lead_id,
+      'Primeiro: ' +
+      leadPrimeiro.lead_id +
+      ' | Segundo: ' +
+      leadSegundo.lead_id
+    );
+
+
+    /*
+     * ========================================================
+     * 19. QUANTIDADE DE LEADS
+     * ========================================================
+     */
+
+    const leadsDepois =
+      buscarLeadPorDiagnosticoV61_(
+        inicio.empresa_id,
+        inicio.diagnostico_id
+      );
+
+    teste(
+      '17 — Existe exatamente um Lead para o diagnóstico',
+      !!leadsDepois &&
+      leadsDepois.dados.lead_id ===
+        leadPrimeiro.lead_id,
+      leadsDepois
+        ? JSON.stringify(
+            leadsDepois.dados
+          )
+        : 'Não encontrado'
+    );
+
+
+    /*
+     * ========================================================
+     * 20. STATUS NÃO ALTERADO
+     * ========================================================
+     */
+
+    teste(
+      '18 — Segunda execução mantém status NOVO',
+      !!leadsDepois &&
+      String(
+        leadsDepois.dados.status || ''
+      ) ===
+      STATUS_LEAD.NOVO,
+      leadsDepois
+        ? String(
+            leadsDepois.dados.status
+          )
+        : 'Não encontrado'
+    );
+
+
+    /*
+     * ========================================================
+     * 21. V5.11 CONTINUA MÁXIMO
+     * ========================================================
+     */
+
+    teste(
+      '19 — V5.11 continua apto para Lead',
+      !!encaminhamentoSegundo &&
+      encaminhamentoSegundo.apto_para_lead ===
+        true &&
+      String(
+        encaminhamentoSegundo.classificacao || ''
+      ).toUpperCase() ===
+        'AVANCAR',
+      JSON.stringify(
+        encaminhamentoSegundo
+      )
+    );
+
+
+    /*
+     * ========================================================
+     * 22. LEAD NÃO É DUPLICADO
+     * ========================================================
+     */
+
+    const abaLeads =
+      obterAba_(
+        SHEETS.LEADS
+      );
+
+    const valoresLeads =
+      abaLeads
+        .getDataRange()
+        .getValues();
+
+    const cabecalhosLeads =
+      valoresLeads[0];
+
+    const indiceEmpresa =
+      cabecalhosLeads.indexOf(
+        'empresa_id'
+      );
+
+    const indiceDiagnostico =
+      cabecalhosLeads.indexOf(
+        'diagnostico_id'
+      );
+
+    let quantidadeMesmoDiagnostico =
+      0;
+
+    for (
+      let i = 1;
+      i < valoresLeads.length;
+      i++
+    ) {
+
+      if (
+        String(
+          valoresLeads[i][indiceEmpresa] || ''
+        ).trim() ===
+        String(
+          inicio.empresa_id
+        ).trim() &&
+
+        String(
+          valoresLeads[i][indiceDiagnostico] || ''
+        ).trim() ===
+        String(
+          inicio.diagnostico_id
+        ).trim()
+      ) {
+
+        quantidadeMesmoDiagnostico++;
+
+      }
+
+    }
+
+    teste(
+      '20 — Não existe Lead duplicado',
+      quantidadeMesmoDiagnostico === 1,
+      'Quantidade encontrada: ' +
+      quantidadeMesmoDiagnostico
+    );
+
+
+    /*
+     * ========================================================
+     * RESULTADO
+     * ========================================================
+     */
+
+    const aprovados =
+      resultados.filter(
+        function(item) {
+          return item.passou === true;
+        }
+      ).length;
+
+    const total =
+      resultados.length;
+
+    Logger.log(
+      '===================================================='
+    );
+
+    resultados.forEach(
+      function(item, indice) {
+
+        Logger.log(
+          (
+            item.passou
+              ? 'PASSOU'
+              : 'FALHOU'
+          ) +
+          ' — TESTE ' +
+          (indice + 1) +
+          ': ' +
+          item.nome +
+          ' — ' +
+          item.detalhe
+        );
+
+      }
+    );
+
+    Logger.log(
+      '===================================================='
+    );
+
+    Logger.log(
+      'RESULTADO INTEGRAÇÃO V6.1: ' +
+      aprovados +
+      '/' +
+      total
+    );
+
+    Logger.log(
+      'PERCENTUAL INTEGRAÇÃO V6.1: ' +
+      (
+        total > 0
+          ? (
+              aprovados /
+              total
+            ) * 100
+          : 0
+      ) +
+      '%'
+    );
+
+
+    if (
+      aprovados !==
+      total
+    ) {
+
+      throw new Error(
+        'INTEGRAÇÃO V6.1 FALHOU: ' +
+        aprovados +
+        '/' +
+        total
+      );
+
+    }
+
+
+    Logger.log(
+      'TESTAR_INTEGRACAO_REAL_V61: PASSOU'
+    );
+
+    return {
+
+      sucesso:
+        true,
+
+      aprovados:
+        aprovados,
+
+      total:
+        total,
+
+      percentual:
+        total > 0
+          ? (
+              aprovados /
+              total
+            ) * 100
+          : 0,
+
+      lead_primeiro:
+        leadPrimeiro,
+
+      lead_segundo:
+        leadSegundo
+
+    };
+
+
+  } finally {
+
+    /*
+     * ========================================================
+     * LIMPEZA
+     * ========================================================
+     */
+
+    try {
+
+      if (inicio) {
+
+        limparRegistrosPorCampoV510_(
+          SHEETS.LEADS,
+          'diagnostico_id',
+          inicio.diagnostico_id
+        );
+
+        limparRegistrosPorCampoV510_(
+          SHEETS.DIAGNOSTICOS,
+          'diagnostico_id',
+          inicio.diagnostico_id
+        );
+
+        limparRegistrosPorCampoV510_(
+          SHEETS.CONVERSAS,
+          'conversa_id',
+          inicio.conversa_id
+        );
+
+        limparRegistrosPorCampoV510_(
+          SHEETS.METRICAS,
+          'conversa_id',
+          inicio.conversa_id
+        );
+
+      }
+
+      Logger.log(
+        'LIMPEZA INTEGRAÇÃO V6.1 CONCLUÍDA'
+      );
+
+    } catch (erroLimpeza) {
+
+      Logger.log(
+        'Falha na limpeza V6.1: ' +
+        erroLimpeza.message
+      );
+
+    }
+
+  }
 
 }
