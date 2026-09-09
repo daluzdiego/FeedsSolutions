@@ -1,16 +1,16 @@
 /**
  * ============================================================
  * NEURO SOLUTIONS — MVP V1
- * AUTH.GS
+ * CODE.GS
  * ============================================================
  *
- * AUTENTICAÇÃO DO ADMINISTRADOR
+ * Núcleo da aplicação.
  *
- * IMPORTANTE:
- * - A senha NÃO fica neste arquivo.
- * - Credenciais ficam nas Script Properties.
- * - Dados administrativos só são retornados após validação
- *   da sessão no servidor.
+ * RESPONSABILIDADES:
+ * - Entrada do Web App
+ * - Roteamento público/admin
+ * - Inicialização do sistema
+ * - Comunicação com módulos
  *
  * ============================================================
  */
@@ -18,317 +18,207 @@
 
 /**
  * ------------------------------------------------------------
- * CONFIGURA CREDENCIAL ADMINISTRATIVA INICIAL
+ * DO GET
  * ------------------------------------------------------------
  *
- * EXECUTE MANUALMENTE UMA ÚNICA VEZ.
+ * Define qual página HTML será entregue.
  *
- * IMPORTANTE:
- * Troque os valores abaixo antes de executar.
+ * URLs:
+ *
+ * /exec
+ * → área pública
+ *
+ * /exec?page=admin
+ * → login administrativo
+ *
+ * /exec?page=admin&view=dashboard
+ * → painel administrativo
+ *
+ * A segurança REAL do admin não depende da URL.
+ * As funções administrativas também validam sessão no servidor.
  */
-function configurarAdministradorInicial() {
+function doGet(e) {
 
-  const email = 'diego.daluz@redeicm.org.br';
+  const params = e && e.parameter ? e.parameter : {};
 
-  const senha = 'Dlk163026@';
+  const page = params.page || 'public';
 
-  if (
-    email === 'admin@seudominio.com' ||
-    senha === 'ALTERE_ESTA_SENHA'
-  ) {
+  if (page === 'admin') {
 
-    throw new Error(
-      'Antes de executar, altere o e-mail e a senha dentro da função configurarAdministradorInicial().'
-    );
+    return HtmlService
+      .createTemplateFromFile('Admin')
+      .evaluate()
+      .setTitle(APP_NAME + ' — Administração')
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
   }
 
-  const props = PropertiesService.getScriptProperties();
+  return HtmlService
+    .createTemplateFromFile('Index')
+    .evaluate()
+    .setTitle(APP_NAME)
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
 
-  props.setProperties({
 
-    ADMIN_EMAIL: email,
+/**
+ * ------------------------------------------------------------
+ * INCLUIR ARQUIVOS HTML
+ * ------------------------------------------------------------
+ */
+function include(filename) {
 
-    ADMIN_PASSWORD_HASH: gerarHashSenha_(senha)
+  return HtmlService
+    .createHtmlOutputFromFile(filename)
+    .getContent();
+}
+
+
+/**
+ * ------------------------------------------------------------
+ * INICIALIZAÇÃO
+ * ------------------------------------------------------------
+ *
+ * Executar manualmente uma vez após instalar o código.
+ */
+function inicializarSistema() {
+
+  verificarEstruturaPlanilha_();
+
+  configurarPropriedadesIniciais_();
+
+  registrarEvento_(
+    'SISTEMA_INICIALIZADO',
+    '',
+    '',
+    'MVP V1'
+  );
+
+  return {
+    sucesso: true,
+    mensagem: 'Sistema inicializado com sucesso.',
+    versao: APP_VERSION
+  };
+}
+
+
+/**
+ * ------------------------------------------------------------
+ * VERIFICA ESTRUTURA
+ * ------------------------------------------------------------
+ */
+function verificarEstruturaPlanilha_() {
+
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+
+  const abasObrigatorias = [
+    'EMPRESAS',
+    'CONVERSAS',
+    'DIAGNOSTICOS',
+    'DORES',
+    'SOLUCOES',
+    'DIAGNOSTICO_SOLUCOES',
+    'LEADS',
+    'FEEDBACK',
+    'METRICAS',
+    'CONFIG'
+  ];
+
+  const faltantes = [];
+
+  abasObrigatorias.forEach(function(nome) {
+
+    if (!ss.getSheetByName(nome)) {
+      faltantes.push(nome);
+    }
 
   });
 
-  return {
-    sucesso: true,
-    mensagem: 'Administrador configurado.'
-  };
-}
-
-
-/**
- * ------------------------------------------------------------
- * LOGIN
- * ------------------------------------------------------------
- */
-function loginAdmin(email, senha) {
-
-  if (!email || !senha) {
-
-    return {
-      sucesso: false,
-      mensagem: 'Informe usuário e senha.'
-    };
-  }
-
-  const props = PropertiesService.getScriptProperties();
-
-  const emailConfigurado = props.getProperty('ADMIN_EMAIL');
-
-  const hashConfigurado = props.getProperty(
-    'ADMIN_PASSWORD_HASH'
-  );
-
-  if (!emailConfigurado || !hashConfigurado) {
-
-    return {
-      sucesso: false,
-      mensagem: 'Administrador ainda não configurado.'
-    };
-  }
-
-  const hashInformado = gerarHashSenha_(senha);
-
-  const emailValido =
-    normalizarTexto_(email) ===
-    normalizarTexto_(emailConfigurado);
-
-  const senhaValida =
-    hashInformado === hashConfigurado;
-
-  if (!emailValido || !senhaValida) {
-
-    registrarEvento_(
-      'LOGIN_ADMIN_FALHOU',
-      '',
-      '',
-      email
-    );
-
-    return {
-      sucesso: false,
-      mensagem: 'Usuário ou senha inválidos.'
-    };
-  }
-
-  const token = gerarTokenSessao_();
-
-  const agora = Date.now();
-
-  const expiraEm =
-    agora + (60 * 60 * 1000);
-
-  const dadosSessao = {
-
-    token: token,
-
-    email: emailConfigurado,
-
-    criadoEm: agora,
-
-    expiraEm: expiraEm
-
-  };
-
-  CacheService
-    .getScriptCache()
-    .put(
-      'ADMIN_SESSION_' + token,
-      JSON.stringify(dadosSessao),
-      3600
-    );
-
-  registrarEvento_(
-    'LOGIN_ADMIN_SUCESSO',
-    '',
-    '',
-    emailConfigurado
-  );
-
-  return {
-
-    sucesso: true,
-
-    token: token,
-
-    expiraEm: expiraEm,
-
-    email: emailConfigurado
-
-  };
-}
-
-
-/**
- * ------------------------------------------------------------
- * VALIDAR SESSÃO
- * ------------------------------------------------------------
- */
-function validarSessaoAdmin(token) {
-
-  if (!token) {
-
-    return {
-      valido: false,
-      mensagem: 'Sessão não informada.'
-    };
-  }
-
-  const cache = CacheService.getScriptCache();
-
-  const dados = cache.get(
-    'ADMIN_SESSION_' + token
-  );
-
-  if (!dados) {
-
-    return {
-      valido: false,
-      mensagem: 'Sessão expirada ou inválida.'
-    };
-  }
-
-  let sessao;
-
-  try {
-
-    sessao = JSON.parse(dados);
-
-  } catch (erro) {
-
-    return {
-      valido: false,
-      mensagem: 'Sessão inválida.'
-    };
-  }
-
-  if (
-    !sessao.expiraEm ||
-    Date.now() >= sessao.expiraEm
-  ) {
-
-    cache.remove(
-      'ADMIN_SESSION_' + token
-    );
-
-    return {
-      valido: false,
-      mensagem: 'Sessão expirada.'
-    };
-  }
-
-  return {
-
-    valido: true,
-
-    email: sessao.email,
-
-    expiraEm: sessao.expiraEm
-
-  };
-}
-
-
-/**
- * ------------------------------------------------------------
- * LOGOUT
- * ------------------------------------------------------------
- */
-function logoutAdmin(token) {
-
-  if (!token) {
-
-    return {
-      sucesso: true
-    };
-  }
-
-  CacheService
-    .getScriptCache()
-    .remove(
-      'ADMIN_SESSION_' + token
-    );
-
-  registrarEvento_(
-    'LOGOUT_ADMIN',
-    '',
-    '',
-    ''
-  );
-
-  return {
-    sucesso: true
-  };
-}
-
-
-/**
- * ------------------------------------------------------------
- * PROTEÇÃO CENTRAL
- * ------------------------------------------------------------
- *
- * Todas as funções administrativas deverão chamar esta
- * função antes de entregar dados.
- */
-function exigirSessaoAdmin_(token) {
-
-  const sessao = validarSessaoAdmin(token);
-
-  if (!sessao.valido) {
+  if (faltantes.length > 0) {
 
     throw new Error(
-      'ACESSO_NEGADO: ' +
-      (sessao.mensagem || 'Sessão inválida.')
+      'As seguintes abas não foram encontradas: ' +
+      faltantes.join(', ') +
+      '. Execute primeiro a função criarEstruturaMVP().'
     );
   }
 
-  return sessao;
+  return true;
 }
 
 
 /**
  * ------------------------------------------------------------
- * HASH DE SENHA
+ * HEALTH CHECK
  * ------------------------------------------------------------
+ *
+ * Função administrativa para verificar se a infraestrutura
+ * básica está funcionando.
  */
-function gerarHashSenha_(senha) {
+function verificarSistema() {
 
-  const bytes = Utilities
-    .computeDigest(
-      Utilities.DigestAlgorithm.SHA_256,
-      senha,
-      Utilities.Charset.UTF_8
-    );
+  verificarEstruturaPlanilha_();
 
-  return bytes
-    .map(function(byte) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
 
-      const valor = byte < 0
-        ? byte + 256
-        : byte;
-
-      return ('0' + valor.toString(16))
-        .slice(-2);
-
-    })
-    .join('');
+  return {
+    sucesso: true,
+    sistema: APP_NAME,
+    versao: APP_VERSION,
+    planilha: ss.getName(),
+    timestamp: new Date().toISOString()
+  };
 }
 
 
 /**
  * ------------------------------------------------------------
- * TOKEN DE SESSÃO
+ * TESTE DO NÚCLEO
  * ------------------------------------------------------------
+ *
+ * Executar manualmente depois da instalação.
  */
-function gerarTokenSessao_() {
+function testeNucleo() {
 
-  return Utilities
-    .getUuid()
-    .replace(/-/g, '') +
-    Utilities
-      .getUuid()
-      .replace(/-/g, '');
+  verificarEstruturaPlanilha_();
+
+  const empresa = salvarEmpresa_({
+    nome_empresa: 'EMPRESA TESTE MVP',
+    segmento: 'Teste',
+    porte: 'Pequeno',
+    nome_contato: 'Contato Teste',
+    whatsapp: '5599999999999',
+    email: 'teste@example.com',
+    cidade: 'Teste'
+  });
+
+  const conversaId = gerarId_('CONV');
+
+  salvarMensagem_({
+    mensagem_id: gerarId_('MSG'),
+    conversa_id: conversaId,
+    empresa_id: empresa.empresa_id,
+    remetente: 'usuario',
+    mensagem: 'Mensagem de teste do núcleo.',
+    tipo: 'teste',
+    ordem: 1
+  });
+
+  const diagnostico = criarDiagnostico_({
+    empresa_id: empresa.empresa_id,
+    conversa_id: conversaId
+  });
+
+  registrarEvento_(
+    'TESTE_NUCLEO',
+    conversaId,
+    empresa.empresa_id,
+    diagnostico.diagnostico_id
+  );
+
+  return {
+    sucesso: true,
+    empresa: empresa,
+    conversa_id: conversaId,
+    diagnostico: diagnostico
+  };
 }
