@@ -626,3 +626,628 @@ function normalizarTexto_(texto) {
     .toLowerCase();
 
 }
+
+/**
+ * ============================================================
+ * V6.2.1 — PERSISTÊNCIA DA INVESTIGAÇÃO
+ * ============================================================
+ */
+
+
+/**
+ * ------------------------------------------------------------
+ * SERIALIZA VALOR DA INVESTIGAÇÃO
+ * ------------------------------------------------------------
+ */
+function serializarInvestigacaoV62_(valor) {
+
+  if (
+    valor === null ||
+    valor === undefined ||
+    valor === ''
+  ) {
+    return '';
+  }
+
+  if (
+    typeof valor === 'object'
+  ) {
+    return JSON.stringify(valor);
+  }
+
+  return String(valor);
+
+}
+
+
+/**
+ * ------------------------------------------------------------
+ * DESSERIALIZA VALOR DA INVESTIGAÇÃO
+ * ------------------------------------------------------------
+ */
+function desserializarInvestigacaoV62_(valor) {
+
+  if (
+    valor === null ||
+    valor === undefined ||
+    valor === ''
+  ) {
+    return '';
+  }
+
+  const texto =
+    String(valor);
+
+  try {
+
+    return JSON.parse(texto);
+
+  } catch (erro) {
+
+    return texto;
+
+  }
+
+}
+
+
+/**
+ * ------------------------------------------------------------
+ * NORMALIZA REGISTRO RECUPERADO
+ * ------------------------------------------------------------
+ */
+function normalizarRegistroInvestigacaoV62_(
+  registro
+) {
+
+  if (!registro) {
+    return null;
+  }
+
+  const dados =
+    Object.assign(
+      {},
+      registro
+    );
+
+  const camposEstruturados = [
+
+    'processo',
+    'pontos_de_dor',
+    'impacto',
+    'excecoes',
+    'informacoes',
+    'lacunas',
+    'perguntas_realizadas'
+
+  ];
+
+  camposEstruturados.forEach(
+    function(campo) {
+
+      dados[campo] =
+        desserializarInvestigacaoV62_(
+          dados[campo]
+        );
+
+    }
+  );
+
+  return dados;
+
+}
+
+
+/**
+ * ------------------------------------------------------------
+ * BUSCAR INVESTIGAÇÃO
+ * ------------------------------------------------------------
+ *
+ * A busca é feita por um identificador específico.
+ *
+ * Prioridade:
+ *
+ * 1. diagnostico_id
+ * 2. conversa_id
+ * 3. investigacao_id
+ *
+ * empresa_id sozinho NÃO será utilizado para evitar
+ * recuperar uma investigação errada da mesma empresa.
+ * ------------------------------------------------------------
+ */
+function buscarInvestigacaoV62_(
+  filtros
+) {
+
+  const dadosFiltro =
+    filtros || {};
+
+  const sheet =
+    obterAba_(
+      SHEETS.INVESTIGACOES
+    );
+
+  const valores =
+    sheet
+      .getDataRange()
+      .getValues();
+
+  if (
+    valores.length <= 1
+  ) {
+    return null;
+  }
+
+  const cabecalhos =
+    valores[0];
+
+  const colunaInvestigacao =
+    cabecalhos.indexOf(
+      'investigacao_id'
+    );
+
+  const colunaDiagnostico =
+    cabecalhos.indexOf(
+      'diagnostico_id'
+    );
+
+  const colunaConversa =
+    cabecalhos.indexOf(
+      'conversa_id'
+    );
+
+
+  for (
+    let i = 1;
+    i < valores.length;
+    i++
+  ) {
+
+    const linha =
+      valores[i];
+
+    let corresponde =
+      false;
+
+
+    if (
+      dadosFiltro.investigacao_id &&
+      colunaInvestigacao !== -1 &&
+      String(
+        linha[colunaInvestigacao]
+      ) ===
+      String(
+        dadosFiltro.investigacao_id
+      )
+    ) {
+
+      corresponde = true;
+
+    }
+
+
+    if (
+      !corresponde &&
+      dadosFiltro.diagnostico_id &&
+      colunaDiagnostico !== -1 &&
+      String(
+        linha[colunaDiagnostico]
+      ) ===
+      String(
+        dadosFiltro.diagnostico_id
+      )
+    ) {
+
+      corresponde = true;
+
+    }
+
+
+    if (
+      !corresponde &&
+      dadosFiltro.conversa_id &&
+      colunaConversa !== -1 &&
+      String(
+        linha[colunaConversa]
+      ) ===
+      String(
+        dadosFiltro.conversa_id
+      )
+    ) {
+
+      corresponde = true;
+
+    }
+
+
+    if (corresponde) {
+
+      return normalizarRegistroInvestigacaoV62_(
+        objetoDaLinha_(
+          cabecalhos,
+          linha
+        )
+      );
+
+    }
+
+  }
+
+
+  return null;
+
+}
+
+
+/**
+ * ------------------------------------------------------------
+ * SALVAR INVESTIGAÇÃO
+ * ------------------------------------------------------------
+ *
+ * Regra:
+ *
+ * UMA investigação por diagnóstico.
+ *
+ * Se já existir investigação para o diagnóstico,
+ * atualiza em vez de criar outra.
+ * ------------------------------------------------------------
+ */
+function salvarInvestigacaoV62_(
+  investigacao
+) {
+
+  if (!investigacao) {
+
+    throw new Error(
+      'Investigação não informada.'
+    );
+
+  }
+
+
+  if (
+    !investigacao.diagnostico_id
+  ) {
+
+    throw new Error(
+      'diagnostico_id é obrigatório para salvar a investigação.'
+    );
+
+  }
+
+
+  const existente =
+    buscarInvestigacaoV62_({
+
+      diagnostico_id:
+        investigacao.diagnostico_id
+
+    });
+
+
+  if (existente) {
+
+    return atualizarInvestigacaoV62_(
+      existente.investigacao_id,
+      investigacao
+    );
+
+  }
+
+
+  const sheet =
+    obterAba_(
+      SHEETS.INVESTIGACOES
+    );
+
+
+  const investigacaoId =
+    investigacao.investigacao_id ||
+    gerarId_(
+      ID_PREFIXOS.INVESTIGACAO
+    );
+
+
+  const agora =
+    new Date();
+
+
+  const linha = [
+
+    investigacaoId,
+
+    investigacao.empresa_id || '',
+
+    investigacao.conversa_id || '',
+
+    investigacao.diagnostico_id || '',
+
+    investigacao.versao ||
+      INVESTIGACAO_V62.VERSAO,
+
+    serializarInvestigacaoV62_(
+      investigacao.problema_central
+    ),
+
+    serializarInvestigacaoV62_(
+      investigacao.processo
+    ),
+
+    serializarInvestigacaoV62_(
+      investigacao.pontos_de_dor
+    ),
+
+    serializarInvestigacaoV62_(
+      investigacao.impacto
+    ),
+
+    serializarInvestigacaoV62_(
+      investigacao.excecoes
+    ),
+
+    serializarInvestigacaoV62_(
+      investigacao.resultado_desejado
+    ),
+
+    serializarInvestigacaoV62_(
+      investigacao.informacoes
+    ),
+
+    serializarInvestigacaoV62_(
+      investigacao.lacunas
+    ),
+
+    investigacao.confianca || '',
+
+    investigacao.estado || '',
+
+    investigacao.proxima_dimensao || '',
+
+    investigacao.proxima_pergunta || '',
+
+    serializarInvestigacaoV62_(
+      investigacao.perguntas_realizadas
+    ),
+
+    investigacao.criado_em ||
+      agora,
+
+    agora
+
+  ];
+
+
+  sheet.appendRow(
+    linha
+  );
+
+
+  return {
+
+    investigacao_id:
+      investigacaoId,
+
+    empresa_id:
+      investigacao.empresa_id || '',
+
+    conversa_id:
+      investigacao.conversa_id || '',
+
+    diagnostico_id:
+      investigacao.diagnostico_id,
+
+    sucesso:
+      true,
+
+    acao:
+      'CRIADA'
+
+  };
+
+}
+
+
+/**
+ * ------------------------------------------------------------
+ * ATUALIZAR INVESTIGAÇÃO
+ * ------------------------------------------------------------
+ */
+function atualizarInvestigacaoV62_(
+  investigacaoId,
+  investigacao
+) {
+
+  const sheet =
+    obterAba_(
+      SHEETS.INVESTIGACOES
+    );
+
+
+  const valores =
+    sheet
+      .getDataRange()
+      .getValues();
+
+
+  if (
+    valores.length <= 1
+  ) {
+
+    throw new Error(
+      'Investigação não encontrada.'
+    );
+
+  }
+
+
+  const cabecalhos =
+    valores[0];
+
+
+  const colunaId =
+    cabecalhos.indexOf(
+      'investigacao_id'
+    );
+
+
+  if (
+    colunaId === -1
+  ) {
+
+    throw new Error(
+      'Coluna investigacao_id não encontrada.'
+    );
+
+  }
+
+
+  for (
+    let i = 1;
+    i < valores.length;
+    i++
+  ) {
+
+    if (
+      String(
+        valores[i][colunaId]
+      ) ===
+      String(
+        investigacaoId
+      )
+    ) {
+
+      const linhaPlanilha =
+        i + 1;
+
+
+      const dadosAtualizacao = {
+
+        empresa_id:
+          investigacao.empresa_id || '',
+
+        conversa_id:
+          investigacao.conversa_id || '',
+
+        diagnostico_id:
+          investigacao.diagnostico_id || '',
+
+        versao:
+          investigacao.versao ||
+          INVESTIGACAO_V62.VERSAO,
+
+        problema_central:
+          serializarInvestigacaoV62_(
+            investigacao.problema_central
+          ),
+
+        processo:
+          serializarInvestigacaoV62_(
+            investigacao.processo
+          ),
+
+        pontos_de_dor:
+          serializarInvestigacaoV62_(
+            investigacao.pontos_de_dor
+          ),
+
+        impacto:
+          serializarInvestigacaoV62_(
+            investigacao.impacto
+          ),
+
+        excecoes:
+          serializarInvestigacaoV62_(
+            investigacao.excecoes
+          ),
+
+        resultado_desejado:
+          serializarInvestigacaoV62_(
+            investigacao.resultado_desejado
+          ),
+
+        informacoes:
+          serializarInvestigacaoV62_(
+            investigacao.informacoes
+          ),
+
+        lacunas:
+          serializarInvestigacaoV62_(
+            investigacao.lacunas
+          ),
+
+        confianca:
+          investigacao.confianca || '',
+
+        estado:
+          investigacao.estado || '',
+
+        proxima_dimensao:
+          investigacao.proxima_dimensao || '',
+
+        proxima_pergunta:
+          investigacao.proxima_pergunta || '',
+
+        perguntas_realizadas:
+          serializarInvestigacaoV62_(
+            investigacao.perguntas_realizadas
+          ),
+
+        atualizado_em:
+          new Date()
+
+      };
+
+
+      Object.keys(
+        dadosAtualizacao
+      ).forEach(
+        function(campo) {
+
+          const coluna =
+            cabecalhos.indexOf(
+              campo
+            );
+
+          if (
+            coluna !== -1
+          ) {
+
+            sheet
+              .getRange(
+                linhaPlanilha,
+                coluna + 1
+              )
+              .setValue(
+                dadosAtualizacao[campo]
+              );
+
+          }
+
+        }
+      );
+
+
+      return {
+
+        investigacao_id:
+          investigacaoId,
+
+        sucesso:
+          true,
+
+        acao:
+          'ATUALIZADA'
+
+      };
+
+    }
+
+  }
+
+
+  throw new Error(
+    'Investigação não encontrada: ' +
+    investigacaoId
+  );
+
+}
