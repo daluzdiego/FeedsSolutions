@@ -755,47 +755,310 @@ function normalizarRegistroInvestigacaoV62_(
  * recuperar uma investigação errada da mesma empresa.
  * ------------------------------------------------------------
  */
-function buscarInvestigacaoV62_(
-  filtros
-) {
+/**
+ * ============================================================
+ * INVESTIGAÇÃO V6.2 — BUSCAR
+ * ============================================================
+ */
+function buscarInvestigacaoV62_(filtros) {
 
-  const dadosFiltro =
-    filtros || {};
+  filtros = filtros || {};
 
   const sheet =
-    obterAba_(
-      SHEETS.INVESTIGACOES
-    );
+    obterAba_(SHEETS.INVESTIGACOES);
 
   const valores =
-    sheet
-      .getDataRange()
-      .getValues();
+    sheet.getDataRange().getValues();
 
-  if (
-    valores.length <= 1
-  ) {
+  if (valores.length <= 1) {
     return null;
+  }
+
+  const cabecalhos = valores[0];
+
+  const idxId =
+    cabecalhos.indexOf('investigacao_id');
+
+  const idxDiagnostico =
+    cabecalhos.indexOf('diagnostico_id');
+
+  const idxConversa =
+    cabecalhos.indexOf('conversa_id');
+
+  if (idxId === -1) {
+    throw new Error(
+      'Coluna investigacao_id não encontrada.'
+    );
+  }
+
+  let alvo = null;
+
+  // ----------------------------------------------------------
+  // PRIORIDADE 1 — INVESTIGACAO_ID
+  // ----------------------------------------------------------
+
+  if (filtros.investigacao_id) {
+
+    alvo = valores.find(function(linha, index) {
+
+      if (index === 0) {
+        return false;
+      }
+
+      return String(linha[idxId] || '') ===
+        String(filtros.investigacao_id);
+
+    });
+
+  }
+
+  // ----------------------------------------------------------
+  // PRIORIDADE 2 — DIAGNOSTICO_ID
+  // ----------------------------------------------------------
+
+  if (!alvo && filtros.diagnostico_id) {
+
+    if (idxDiagnostico === -1) {
+      throw new Error(
+        'Coluna diagnostico_id não encontrada.'
+      );
+    }
+
+    alvo = valores.find(function(linha, index) {
+
+      if (index === 0) {
+        return false;
+      }
+
+      return String(linha[idxDiagnostico] || '') ===
+        String(filtros.diagnostico_id);
+
+    });
+
+  }
+
+  // ----------------------------------------------------------
+  // PRIORIDADE 3 — CONVERSA_ID
+  // ----------------------------------------------------------
+
+  if (!alvo && filtros.conversa_id) {
+
+    if (idxConversa === -1) {
+      throw new Error(
+        'Coluna conversa_id não encontrada.'
+      );
+    }
+
+    alvo = valores.find(function(linha, index) {
+
+      if (index === 0) {
+        return false;
+      }
+
+      return String(linha[idxConversa] || '') ===
+        String(filtros.conversa_id);
+
+    });
+
+  }
+
+  if (!alvo) {
+    return null;
+  }
+
+  return normalizarRegistroInvestigacaoV62_(
+    objetoDaLinha_(
+      cabecalhos,
+      alvo
+    )
+  );
+}
+
+
+/**
+ * ============================================================
+ * INVESTIGAÇÃO V6.2 — SALVAR
+ * ============================================================
+ */
+function salvarInvestigacaoV62_(investigacao) {
+
+  if (!investigacao) {
+    throw new Error(
+      'Investigação não informada.'
+    );
+  }
+
+  if (!investigacao.diagnostico_id) {
+    throw new Error(
+      'diagnostico_id é obrigatório para salvar investigação.'
+    );
+  }
+
+  // ----------------------------------------------------------
+  // UMA INVESTIGAÇÃO POR DIAGNÓSTICO
+  // ----------------------------------------------------------
+
+  const existente =
+    buscarInvestigacaoV62_({
+      diagnostico_id:
+        investigacao.diagnostico_id
+    });
+
+  if (existente) {
+
+    return atualizarInvestigacaoV62_(
+      existente.investigacao_id,
+      investigacao
+    );
+  }
+
+  const sheet =
+    obterAba_(SHEETS.INVESTIGACOES);
+
+  const agora = new Date();
+
+  const investigacaoId =
+    investigacao.investigacao_id ||
+    gerarId_(ID_PREFIXOS.INVESTIGACAO);
+
+  const registro =
+    Object.assign({}, investigacao, {
+
+      investigacao_id:
+        investigacaoId,
+
+      criado_em:
+        investigacao.criado_em || agora,
+
+      atualizado_em:
+        investigacao.atualizado_em || agora
+
+    });
+
+  const cabecalhos =
+    sheet
+      .getRange(
+        1,
+        1,
+        1,
+        sheet.getLastColumn()
+      )
+      .getValues()[0];
+
+  const linha =
+    cabecalhos.map(function(cabecalho) {
+
+      let valor =
+        registro[cabecalho];
+
+      // --------------------------------------------------------
+      // CAMPOS ESTRUTURADOS
+      // --------------------------------------------------------
+
+      if (
+        cabecalho === 'processo' ||
+        cabecalho === 'pontos_de_dor' ||
+        cabecalho === 'impacto' ||
+        cabecalho === 'excecoes' ||
+        cabecalho === 'informacoes' ||
+        cabecalho === 'lacunas' ||
+        cabecalho === 'perguntas_realizadas'
+      ) {
+
+        valor =
+          serializarInvestigacaoV62_(valor);
+
+      }
+
+      return valor === undefined ||
+        valor === null
+        ? ''
+        : valor;
+
+    });
+
+  sheet.appendRow(linha);
+
+  SpreadsheetApp.flush();
+
+  return {
+    sucesso: true,
+    operacao: 'CRIADA',
+    investigacao_id: investigacaoId,
+    diagnostico_id:
+      investigacao.diagnostico_id
+  };
+}
+
+
+/**
+ * ============================================================
+ * INVESTIGAÇÃO V6.2 — ATUALIZAR
+ * ============================================================
+ */
+/**
+ * ============================================================
+ * INVESTIGAÇÃO V6.2 — ATUALIZAR
+ * ============================================================
+ *
+ * Regra:
+ * - Atualização é PARCIAL.
+ * - Campos não enviados permanecem intactos.
+ * - Identificadores nunca são apagados.
+ * - investigacao_id nunca muda.
+ * - criado_em nunca muda.
+ * - atualizado_em é sempre atualizado.
+ *
+ * ============================================================
+ */
+function atualizarInvestigacaoV62_(
+  investigacaoId,
+  investigacao
+) {
+
+  if (!investigacaoId) {
+    throw new Error(
+      'investigacao_id é obrigatório para atualizar.'
+    );
+  }
+
+  const sheet =
+    obterAba_(SHEETS.INVESTIGACOES);
+
+  if (!sheet) {
+    throw new Error(
+      'Aba INVESTIGACOES não encontrada.'
+    );
+  }
+
+  const valores =
+    sheet.getDataRange().getValues();
+
+  if (valores.length <= 1) {
+    throw new Error(
+      'Nenhuma investigação encontrada.'
+    );
   }
 
   const cabecalhos =
     valores[0];
 
-  const colunaInvestigacao =
+  const idxId =
     cabecalhos.indexOf(
       'investigacao_id'
     );
 
-  const colunaDiagnostico =
-    cabecalhos.indexOf(
-      'diagnostico_id'
+  if (idxId === -1) {
+    throw new Error(
+      'Coluna investigacao_id não encontrada.'
     );
+  }
 
-  const colunaConversa =
-    cabecalhos.indexOf(
-      'conversa_id'
-    );
+  // ----------------------------------------------------------
+  // LOCALIZA A LINHA PELO ID
+  // ----------------------------------------------------------
 
+  let linhaEncontrada = -1;
 
   for (
     let i = 1;
@@ -803,79 +1066,216 @@ function buscarInvestigacaoV62_(
     i++
   ) {
 
-    const linha =
-      valores[i];
-
-    let corresponde =
-      false;
-
-
     if (
-      dadosFiltro.investigacao_id &&
-      colunaInvestigacao !== -1 &&
       String(
-        linha[colunaInvestigacao]
+        valores[i][idxId] || ''
       ) ===
-      String(
-        dadosFiltro.investigacao_id
-      )
+      String(investigacaoId)
     ) {
 
-      corresponde = true;
+      linhaEncontrada = i + 1;
+      break;
 
     }
+  }
 
+  if (linhaEncontrada === -1) {
+    throw new Error(
+      'Investigação não encontrada: ' +
+      investigacaoId
+    );
+  }
 
-    if (
-      !corresponde &&
-      dadosFiltro.diagnostico_id &&
-      colunaDiagnostico !== -1 &&
-      String(
-        linha[colunaDiagnostico]
-      ) ===
-      String(
-        dadosFiltro.diagnostico_id
+  // ----------------------------------------------------------
+  // IMPORTANTE:
+  // LÊ A LINHA ATUAL ANTES DE ALTERAR.
+  //
+  // Assim conseguimos fazer UPDATE PARCIAL sem apagar
+  // informações que não vieram no objeto recebido.
+  // ----------------------------------------------------------
+
+  const linhaAtual =
+    sheet
+      .getRange(
+        linhaEncontrada,
+        1,
+        1,
+        cabecalhos.length
       )
-    ) {
+      .getValues()[0];
 
-      corresponde = true;
+  // ----------------------------------------------------------
+  // CRIA CÓPIA DA LINHA ATUAL
+  // ----------------------------------------------------------
+
+  const novaLinha =
+    linhaAtual.slice();
+
+  // ----------------------------------------------------------
+  // CAMPOS QUE NUNCA PODEM SER APAGADOS
+  // ----------------------------------------------------------
+
+  const camposProtegidos = [
+    'investigacao_id',
+    'empresa_id',
+    'conversa_id',
+    'diagnostico_id',
+    'versao',
+    'criado_em'
+  ];
+
+  // ----------------------------------------------------------
+  // CAMPOS ESTRUTURADOS
+  // ----------------------------------------------------------
+
+  const camposEstruturados = [
+    'processo',
+    'pontos_de_dor',
+    'impacto',
+    'excecoes',
+    'informacoes',
+    'lacunas',
+    'perguntas_realizadas'
+  ];
+
+  // ----------------------------------------------------------
+  // ATUALIZA SOMENTE O QUE FOI REALMENTE ENVIADO
+  // ----------------------------------------------------------
+
+  Object.keys(investigacao || {}).forEach(
+    function(campo) {
+
+      // Campo não existe na estrutura da planilha.
+      if (
+        cabecalhos.indexOf(campo) === -1
+      ) {
+        return;
+      }
+
+      // ID nunca é alterado.
+      if (
+        campo === 'investigacao_id'
+      ) {
+        return;
+      }
+
+      // --------------------------------------------------------
+      // CAMPOS PROTEGIDOS
+      // --------------------------------------------------------
+      //
+      // Se vierem no objeto, mantemos o valor original.
+      // Isso impede que uma atualização parcial apague
+      // empresa/conversa/diagnóstico/criação.
+      // --------------------------------------------------------
+
+      if (
+        camposProtegidos.indexOf(campo) !== -1
+      ) {
+        return;
+      }
+
+      // --------------------------------------------------------
+      // SOMENTE undefined SIGNIFICA "NÃO INFORMADO"
+      //
+      // null ou [] podem ser valores válidos de atualização.
+      // Exemplo:
+      // proxima_pergunta = null
+      // proxima_dimensao = null
+      // lacunas = []
+      // --------------------------------------------------------
+
+      if (
+        investigacao[campo] === undefined
+      ) {
+        return;
+      }
+
+      let valor =
+        investigacao[campo];
+
+      // --------------------------------------------------------
+      // SERIALIZA CAMPOS ESTRUTURADOS
+      // --------------------------------------------------------
+
+      if (
+        camposEstruturados.indexOf(campo) !== -1
+      ) {
+
+        valor =
+          serializarInvestigacaoV62_(
+            valor
+          );
+
+      }
+
+      const coluna =
+        cabecalhos.indexOf(campo);
+
+      novaLinha[coluna] =
+        valor === undefined
+          ? novaLinha[coluna]
+          : valor;
 
     }
+  );
 
+  // ----------------------------------------------------------
+  // GARANTE QUE O ID CONTINUA INTACTO
+  // ----------------------------------------------------------
 
-    if (
-      !corresponde &&
-      dadosFiltro.conversa_id &&
-      colunaConversa !== -1 &&
-      String(
-        linha[colunaConversa]
-      ) ===
-      String(
-        dadosFiltro.conversa_id
-      )
-    ) {
+  novaLinha[idxId] =
+    linhaAtual[idxId];
 
-      corresponde = true;
+  // ----------------------------------------------------------
+  // ATUALIZADO_EM
+  // ----------------------------------------------------------
 
-    }
+  const idxAtualizado =
+    cabecalhos.indexOf(
+      'atualizado_em'
+    );
 
+  if (idxAtualizado !== -1) {
 
-    if (corresponde) {
-
-      return normalizarRegistroInvestigacaoV62_(
-        objetoDaLinha_(
-          cabecalhos,
-          linha
-        )
-      );
-
-    }
+    novaLinha[idxAtualizado] =
+      new Date();
 
   }
 
+  // ----------------------------------------------------------
+  // GRAVA A LINHA INTEIRA DE UMA VEZ
+  // ----------------------------------------------------------
 
-  return null;
+  sheet
+    .getRange(
+      linhaEncontrada,
+      1,
+      1,
+      cabecalhos.length
+    )
+    .setValues([
+      novaLinha
+    ]);
 
+  SpreadsheetApp.flush();
+
+  return {
+    sucesso: true,
+    acao: 'ATUALIZADA',
+    investigacao_id: investigacaoId,
+    empresa_id:
+      novaLinha[
+        cabecalhos.indexOf('empresa_id')
+      ],
+    conversa_id:
+      novaLinha[
+        cabecalhos.indexOf('conversa_id')
+      ],
+    diagnostico_id:
+      novaLinha[
+        cabecalhos.indexOf('diagnostico_id')
+      ]
+  };
 }
 
 
