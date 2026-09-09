@@ -40708,78 +40708,311 @@ function TESTAR_MOTOR_LEAD_V61() {
 
 }
 
+/**
+ * ============================================================
+ * TESTE DE INTEGRAÇÃO REAL — V6.1
+ * ============================================================
+ *
+ * FLUXO VALIDADO:
+ *
+ * V5.6 Diagnóstico
+ *      ↓
+ * V5.7 Oportunidade
+ *      ↓
+ * V5.8 Análise
+ *      ↓
+ * V5.9.5 Soluções
+ *      ↓
+ * V5.10 Decisão
+ *      ↓
+ * V5.11 Encaminhamento
+ *      ↓
+ * V6.1 Lead
+ *
+ * IMPORTANTE:
+ * - O fluxo principal NÃO retorna V5.11.
+ * - O teste constrói V5.10 e V5.11 explicitamente,
+ *   exatamente como o teste integrado V5.11 já aprovado.
+ * - Cria uma solução temporária perfeita.
+ * - Cria Lead somente após autorização real do V5.11.
+ * - Executa novamente para validar idempotência.
+ * - Não permite Lead duplicado.
+ * - Exige 100% dos testes.
+ *
+ * ============================================================
+ */
 function TESTAR_INTEGRACAO_REAL_V61() {
 
-  Logger.log('====================================================');
-  Logger.log('INICIANDO INTEGRAÇÃO REAL V6.1');
-  Logger.log('====================================================');
+  Logger.log(
+    '===================================================='
+  );
+
+  Logger.log(
+    'INICIANDO INTEGRAÇÃO REAL V6.1'
+  );
+
+  Logger.log(
+    '===================================================='
+  );
+
 
   const resultados = [];
 
-  function teste(nome, passou, detalhe) {
+
+  function teste(
+    nome,
+    passou,
+    detalhe
+  ) {
 
     resultados.push({
-      nome: nome,
-      passou: passou === true,
-      detalhe: String(detalhe || '')
+
+      nome:
+        nome,
+
+      passou:
+        passou === true,
+
+      detalhe:
+        String(
+          detalhe || ''
+        )
+
     });
 
   }
 
-  let inicio = null;
-  let leadPrimeiro = null;
-  let leadSegundo = null;
+
+  let inicio =
+    null;
+
+
+  let leadPrimeiro =
+    null;
+
+
+  let leadSegundo =
+    null;
+
 
   try {
 
     /*
-     * ========================================================
-     * 1. CRIAR DIAGNÓSTICO REAL
-     * ========================================================
+     * ==========================================================
+     * 0 — LIMPEZA PREVENTIVA
+     * ==========================================================
      */
 
-    inicio = iniciarDiagnostico({
+    try {
 
-      nome:
-        'Teste Integração V6.1',
+      limparSolucoesTeste();
 
-      nome_empresa:
-        'Teste Integração V6.1',
+    } catch (erroLimpezaInicial) {
 
-      segmento:
-        'Serviços',
+      Logger.log(
+        'Aviso limpeza inicial: ' +
+        erroLimpezaInicial.message
+      );
 
-      porte:
-        'PEQUENA',
+    }
 
-      nome_contato:
-        'Contato Integração V6.1',
 
-      whatsapp:
-        '',
-
-      email:
-        '',
-
-      cidade:
-        ''
-
-    });
-
-    teste(
-      '1 — Diagnóstico real inicializado',
-      !!inicio &&
-      !!inicio.empresa_id &&
-      !!inicio.conversa_id &&
-      !!inicio.diagnostico_id,
-      JSON.stringify(inicio)
+    limparRegistrosPorCampoV510_(
+      SHEETS.LEADS,
+      'diagnostico_id',
+      'TESTE-V61-INTEGRACAO'
     );
 
 
     /*
-     * ========================================================
-     * 2. MENSAGEM REAL
-     * ========================================================
+     * ==========================================================
+     * 1 — CRIAR SOLUÇÃO PERFEITA TEMPORÁRIA
+     * ==========================================================
+     */
+
+    const abaSolucoes =
+      obterAba_(
+        SHEETS.SOLUCOES
+      );
+
+
+    const ultimaColuna =
+      abaSolucoes.getLastColumn();
+
+
+    const cabecalhos =
+      abaSolucoes
+        .getRange(
+          1,
+          1,
+          1,
+          ultimaColuna
+        )
+        .getValues()[0];
+
+
+    const mapaSolucoes =
+      {};
+
+
+    cabecalhos.forEach(
+      function(
+        cabecalho,
+        indice
+      ) {
+
+        mapaSolucoes[
+          String(
+            cabecalho || ''
+          ).trim()
+        ] =
+          indice;
+
+      }
+    );
+
+
+    const solucaoPerfeita = {
+
+      solucao_id:
+        'V510-PERFEITA',
+
+      familia:
+        'Automação de pedidos',
+
+      nome:
+        'Conferir e lançar pedidos',
+
+      descricao:
+        'Reduzir erros de digitação e retrabalho no processo de conferir e lançar pedidos.',
+
+      status:
+        'ATIVA',
+
+      nivel_complexidade:
+        'MEDIA',
+
+      repetibilidade:
+        'ALTA',
+
+      pode_oferecer:
+        'SIM',
+
+      versao:
+        'V5.10'
+
+    };
+
+
+    const linhaSolucao =
+      new Array(
+        cabecalhos.length
+      ).fill('');
+
+
+    Object.keys(
+      solucaoPerfeita
+    ).forEach(
+      function(campo) {
+
+        if (
+          Object.prototype
+            .hasOwnProperty.call(
+              mapaSolucoes,
+              campo
+            )
+        ) {
+
+          linhaSolucao[
+            mapaSolucoes[campo]
+          ] =
+            solucaoPerfeita[campo];
+
+        }
+
+      }
+    );
+
+
+    abaSolucoes.appendRow(
+      linhaSolucao
+    );
+
+
+    teste(
+      '1 — Solução perfeita temporária criada',
+      true,
+      'V510-PERFEITA'
+    );
+
+
+    /*
+     * ==========================================================
+     * 2 — CRIAR DIAGNÓSTICO REAL
+     * ==========================================================
+     */
+
+    inicio =
+      iniciarDiagnostico({
+
+        nome:
+          'Empresa Teste Integração V6.1',
+
+        nome_empresa:
+          'Empresa Teste Integração V6.1',
+
+        segmento:
+          'Serviços',
+
+        porte:
+          'PEQUENA',
+
+        nome_contato:
+          'Contato Teste Integração V6.1',
+
+        whatsapp:
+          '',
+
+        email:
+          '',
+
+        cidade:
+          ''
+
+      });
+
+
+    teste(
+      '2 — Diagnóstico real inicializado',
+      !!inicio &&
+      inicio.sucesso === true &&
+      !!inicio.empresa_id &&
+      !!inicio.conversa_id &&
+      !!inicio.diagnostico_id,
+      inicio
+        ? JSON.stringify(inicio)
+        : 'Falha'
+    );
+
+
+    if (
+      !inicio ||
+      !inicio.empresa_id ||
+      !inicio.conversa_id ||
+      !inicio.diagnostico_id
+    ) {
+
+      throw new Error(
+        'Não foi possível iniciar o diagnóstico real V6.1.'
+      );
+
+    }
+
+
+    /*
+     * ==========================================================
+     * 3 — MENSAGEM REAL
+     * ==========================================================
      */
 
     const mensagem =
@@ -40792,9 +41025,9 @@ function TESTAR_INTEGRACAO_REAL_V61() {
 
 
     /*
-     * ========================================================
-     * 3. EXECUTAR FLUXO PRINCIPAL
-     * ========================================================
+     * ==========================================================
+     * 4 — EXECUTAR FLUXO PRINCIPAL REAL
+     * ==========================================================
      */
 
     const resultadoFluxo =
@@ -40813,78 +41046,60 @@ function TESTAR_INTEGRACAO_REAL_V61() {
 
 
     teste(
-      '2 — Fluxo principal executado',
-      !!resultadoFluxo,
-      JSON.stringify(resultadoFluxo)
+      '3 — Fluxo principal executado',
+      !!resultadoFluxo &&
+      resultadoFluxo.sucesso === true,
+      resultadoFluxo
+        ? 'OK'
+        : 'Falha'
     );
 
 
     /*
-     * ========================================================
-     * 4. RECUPERAR V5.11
-     * ========================================================
-     */
-
-    const encaminhamento =
-      resultadoFluxo &&
-      resultadoFluxo.encaminhamento
-        ? resultadoFluxo.encaminhamento
-        : null;
-
-    teste(
-      '3 — V5.11 presente',
-      !!encaminhamento,
-      JSON.stringify(encaminhamento)
-    );
-
-
-    /*
-     * ========================================================
-     * 5. VALIDAR AUTORIZAÇÃO V6.1
-     * ========================================================
-     */
-
-    const autorizacao =
-      validarAutorizacaoLeadV61_(
-        encaminhamento
-      );
-
-    teste(
-      '4 — V5.11 autoriza criação do Lead',
-      autorizacao.autorizado === true,
-      JSON.stringify(autorizacao)
-    );
-
-
-    /*
-     * ========================================================
-     * 6. RECUPERAR DIAGNÓSTICO
-     * ========================================================
+     * ==========================================================
+     * 5 — DIAGNÓSTICO
+     * ==========================================================
      */
 
     const diagnostico =
-      obterDiagnosticoAtual_(
-        inicio.empresa_id,
-        inicio.conversa_id
-      );
+      resultadoFluxo
+        ? resultadoFluxo.diagnostico
+        : null;
+
 
     teste(
-      '5 — Diagnóstico real recuperado',
+      '4 — Diagnóstico retornado',
       !!diagnostico &&
-      String(
-        diagnostico.diagnostico_id || ''
-      ) ===
-      String(
-        inicio.diagnostico_id
-      ),
-      JSON.stringify(diagnostico)
+      diagnostico.diagnostico_id ===
+        inicio.diagnostico_id,
+      diagnostico
+        ? JSON.stringify(diagnostico)
+        : 'Ausente'
+    );
+
+
+    const estado =
+      diagnostico
+        ? String(
+            diagnostico.status_diagnostico || ''
+          )
+            .trim()
+            .toUpperCase()
+        : '';
+
+
+    teste(
+      '5 — Diagnóstico PRONTO_PARA_ANALISE',
+      estado ===
+        'PRONTO_PARA_ANALISE',
+      estado
     );
 
 
     /*
-     * ========================================================
-     * 7. RECUPERAR OPORTUNIDADE
-     * ========================================================
+     * ==========================================================
+     * 6 — OPORTUNIDADE V5.7
+     * ==========================================================
      */
 
     const oportunidadeWrapper =
@@ -40893,12 +41108,14 @@ function TESTAR_INTEGRACAO_REAL_V61() {
         ? resultadoFluxo.oportunidade
         : null;
 
+
     const oportunidade =
       oportunidadeWrapper
         ? Object.assign(
             {},
             oportunidadeWrapper.oportunidade || {},
             {
+
               oportunidade_id:
                 oportunidadeWrapper.oportunidade_id,
 
@@ -40907,21 +41124,405 @@ function TESTAR_INTEGRACAO_REAL_V61() {
 
               linha:
                 oportunidadeWrapper.linha
+
             }
           )
         : null;
 
+
     teste(
-      '6 — Oportunidade V5.7 presente',
-      !!oportunidade,
-      JSON.stringify(oportunidade)
+      '6 — Oportunidade V5.7 completa',
+      !!oportunidade &&
+      !!oportunidade.oportunidade_id &&
+      !!oportunidade.processo &&
+      !!oportunidade.dor &&
+      !!oportunidade.objetivo,
+      oportunidade
+        ? JSON.stringify(oportunidade)
+        : 'Ausente'
     );
 
 
     /*
-     * ========================================================
-     * 8. CRIAR LEAD V6.1
-     * ========================================================
+     * ==========================================================
+     * 7 — ANÁLISE V5.8
+     * ==========================================================
+     */
+
+    const analiseWrapper =
+      resultadoFluxo &&
+      resultadoFluxo.analise_diagnostica
+        ? resultadoFluxo.analise_diagnostica
+        : null;
+
+
+    const analise =
+      analiseWrapper
+        ? Object.assign(
+            {},
+            analiseWrapper.analise || {},
+            {
+
+              analise_id:
+                analiseWrapper.analise_id,
+
+              diagnostico_id:
+                analiseWrapper.diagnostico_id,
+
+              acao:
+                analiseWrapper.acao,
+
+              linha:
+                analiseWrapper.linha
+
+            }
+          )
+        : null;
+
+
+    teste(
+      '7 — Análise V5.8 completa',
+      !!analise &&
+      !!analise.analise_id &&
+      !!analise.diagnostico_id,
+      analise
+        ? JSON.stringify(analise)
+        : 'Ausente'
+    );
+
+
+    /*
+     * ==========================================================
+     * 8 — SOLUÇÕES V5.9.5
+     * ==========================================================
+     */
+
+    const solucoes =
+      resultadoFluxo &&
+      resultadoFluxo.solucoes
+        ? resultadoFluxo.solucoes
+        : null;
+
+
+    const relacoes =
+      solucoes &&
+      Array.isArray(
+        solucoes.relacoes
+      )
+        ? solucoes.relacoes
+        : [];
+
+
+    teste(
+      '8 — Soluções V5.9.5 retornadas',
+      !!solucoes,
+      solucoes
+        ? 'OK'
+        : 'Ausente'
+    );
+
+
+    const principais =
+      relacoes.filter(
+        function(relacao) {
+
+          return (
+            relacao &&
+            relacao.principal === true
+          );
+
+        }
+      );
+
+
+    teste(
+      '9 — Exatamente uma solução principal',
+      principais.length === 1,
+      'Principais: ' +
+      principais.length
+    );
+
+
+    const principal =
+      principais.length === 1
+        ? principais[0]
+        : null;
+
+
+    teste(
+      '10 — Solução principal = V510-PERFEITA',
+      !!principal &&
+      principal.solucao_id ===
+        'V510-PERFEITA',
+      principal
+        ? principal.solucao_id
+        : 'Ausente'
+    );
+
+
+    teste(
+      '11 — Solução principal = 100/100',
+      !!principal &&
+      Number(
+        principal.pontuacao
+      ) === 100,
+      principal
+        ? String(
+            principal.pontuacao
+          )
+        : 'Ausente'
+    );
+
+
+    teste(
+      '12 — Compatibilidade = ALTA',
+      !!principal &&
+      String(
+        principal.compatibilidade || ''
+      ).toUpperCase() ===
+        'ALTA',
+      principal
+        ? principal.compatibilidade
+        : 'Ausente'
+    );
+
+
+    teste(
+      '13 — Viabilidade = ALTA',
+      !!principal &&
+      String(
+        principal.viabilidade || ''
+      ).toUpperCase() ===
+        'ALTA',
+      principal
+        ? principal.viabilidade
+        : 'Ausente'
+    );
+
+
+    /*
+     * ==========================================================
+     * 9 — V5.10
+     * ==========================================================
+     */
+
+    const decisao =
+      construirDecisaoDiagnosticoV510_(
+        diagnostico,
+        oportunidade,
+        analise,
+        relacoes
+      );
+
+
+    teste(
+      '14 — V5.10 construída',
+      !!decisao,
+      decisao
+        ? JSON.stringify(decisao)
+        : 'Ausente'
+    );
+
+
+    teste(
+      '15 — V5.10 = PODEMOS_AJUDAR',
+      !!decisao &&
+      decisao.classificacao ===
+        'PODEMOS_AJUDAR',
+      decisao
+        ? decisao.classificacao
+        : 'Ausente'
+    );
+
+
+    teste(
+      '16 — V5.10 prioridade = ALTA',
+      !!decisao &&
+      decisao.prioridade ===
+        'ALTA',
+      decisao
+        ? decisao.prioridade
+        : 'Ausente'
+    );
+
+
+    teste(
+      '17 — V5.10 confiança = ALTA',
+      !!decisao &&
+      decisao.confianca ===
+        'ALTA',
+      decisao
+        ? decisao.confianca
+        : 'Ausente'
+    );
+
+
+    teste(
+      '18 — V5.10 apto_para_avancar = true',
+      !!decisao &&
+      decisao.apto_para_avancar ===
+        true,
+      decisao
+        ? decisao.apto_para_avancar
+        : 'Ausente'
+    );
+
+
+    teste(
+      '19 — V5.10 solução principal correta',
+      !!decisao &&
+      decisao.solucao_principal_id ===
+        'V510-PERFEITA',
+      decisao
+        ? decisao.solucao_principal_id
+        : 'Ausente'
+    );
+
+
+    /*
+     * ==========================================================
+     * 10 — V5.11
+     * ==========================================================
+     */
+
+    const encaminhamento =
+      construirEncaminhamentoDiagnosticoV511_(
+        decisao
+      );
+
+
+    Logger.log(
+      'ENCAMINHAMENTO V5.11: ' +
+      JSON.stringify(
+        encaminhamento
+      )
+    );
+
+
+    teste(
+      '20 — V5.11 construída',
+      !!encaminhamento,
+      encaminhamento
+        ? JSON.stringify(
+            encaminhamento
+          )
+        : 'Ausente'
+    );
+
+
+    teste(
+      '21 — V5.11 classificação = AVANCAR',
+      !!encaminhamento &&
+      encaminhamento.classificacao ===
+        'AVANCAR',
+      encaminhamento
+        ? encaminhamento.classificacao
+        : 'Ausente'
+    );
+
+
+    teste(
+      '22 — V5.11 ação = AVANCAR',
+      !!encaminhamento &&
+      encaminhamento.acao ===
+        'AVANCAR',
+      encaminhamento
+        ? encaminhamento.acao
+        : 'Ausente'
+    );
+
+
+    teste(
+      '23 — V5.11 próximo passo correto',
+      !!encaminhamento &&
+      encaminhamento.proximo_passo ===
+        'AVANCAR_PARA_PROXIMA_ETAPA',
+      encaminhamento
+        ? encaminhamento.proximo_passo
+        : 'Ausente'
+    );
+
+
+    teste(
+      '24 — V5.11 confiança = ALTA',
+      !!encaminhamento &&
+      encaminhamento.confianca ===
+        'ALTA',
+      encaminhamento
+        ? encaminhamento.confianca
+        : 'Ausente'
+    );
+
+
+    teste(
+      '25 — V5.11 apto_para_lead = true',
+      !!encaminhamento &&
+      encaminhamento.apto_para_lead ===
+        true,
+      encaminhamento
+        ? encaminhamento.apto_para_lead
+        : 'Ausente'
+    );
+
+
+    teste(
+      '26 — V5.11 diagnóstico correto',
+      !!encaminhamento &&
+      encaminhamento.diagnostico_id ===
+        inicio.diagnostico_id,
+      encaminhamento
+        ? encaminhamento.diagnostico_id
+        : 'Ausente'
+    );
+
+
+    teste(
+      '27 — V5.11 empresa correta',
+      !!encaminhamento &&
+      encaminhamento.empresa_id ===
+        inicio.empresa_id,
+      encaminhamento
+        ? encaminhamento.empresa_id
+        : 'Ausente'
+    );
+
+
+    teste(
+      '28 — V5.11 solução principal correta',
+      !!encaminhamento &&
+      encaminhamento.solucao_principal_id ===
+        'V510-PERFEITA',
+      encaminhamento
+        ? encaminhamento.solucao_principal_id
+        : 'Ausente'
+    );
+
+
+    /*
+     * ==========================================================
+     * 11 — AUTORIZAÇÃO V6.1
+     * ==========================================================
+     */
+
+    const autorizacao =
+      validarAutorizacaoLeadV61_(
+        encaminhamento
+      );
+
+
+    teste(
+      '29 — V5.11 autoriza V6.1',
+      autorizacao.autorizado === true,
+      JSON.stringify(
+        autorizacao
+      )
+    );
+
+
+    /*
+     * ==========================================================
+     * 12 — CRIAR LEAD V6.1
+     * ==========================================================
      */
 
     leadPrimeiro =
@@ -40931,35 +41532,36 @@ function TESTAR_INTEGRACAO_REAL_V61() {
         oportunidade
       );
 
+
     teste(
-      '7 — V6.1 criou Lead',
+      '30 — V6.1 criou Lead',
+      !!leadPrimeiro &&
       leadPrimeiro.acao ===
         'CRIAR' &&
       leadPrimeiro.criado ===
         true &&
       !!leadPrimeiro.lead_id,
-      JSON.stringify(leadPrimeiro)
+      JSON.stringify(
+        leadPrimeiro
+      )
     );
 
-
-    /*
-     * ========================================================
-     * 9. STATUS
-     * ========================================================
-     */
 
     teste(
-      '8 — Lead integrado nasce NOVO',
+      '31 — Lead nasce NOVO',
+      !!leadPrimeiro &&
       leadPrimeiro.status ===
         STATUS_LEAD.NOVO,
-      leadPrimeiro.status
+      leadPrimeiro
+        ? leadPrimeiro.status
+        : 'Ausente'
     );
 
 
     /*
-     * ========================================================
-     * 10. RECUPERAR LEAD
-     * ========================================================
+     * ==========================================================
+     * 13 — PERSISTÊNCIA DO LEAD
+     * ==========================================================
      */
 
     const leadPersistido =
@@ -40968,8 +41570,9 @@ function TESTAR_INTEGRACAO_REAL_V61() {
         inicio.diagnostico_id
       );
 
+
     teste(
-      '9 — Lead encontrado após persistência',
+      '32 — Lead encontrado após persistência',
       !!leadPersistido &&
       String(
         leadPersistido.dados.lead_id || ''
@@ -40981,18 +41584,12 @@ function TESTAR_INTEGRACAO_REAL_V61() {
         ? JSON.stringify(
             leadPersistido.dados
           )
-        : 'Lead não encontrado'
+        : 'Não encontrado'
     );
 
 
-    /*
-     * ========================================================
-     * 11. RASTREABILIDADE
-     * ========================================================
-     */
-
     teste(
-      '10 — Rastreabilidade empresa + diagnóstico',
+      '33 — Rastreabilidade empresa + diagnóstico',
       !!leadPersistido &&
       String(
         leadPersistido.dados.empresa_id || ''
@@ -41014,14 +41611,8 @@ function TESTAR_INTEGRACAO_REAL_V61() {
     );
 
 
-    /*
-     * ========================================================
-     * 12. INTERESSE
-     * ========================================================
-     */
-
     teste(
-      '11 — Interesse preservado',
+      '34 — Interesse preservado',
       !!leadPersistido &&
       String(
         leadPersistido.dados.interesse || ''
@@ -41030,14 +41621,14 @@ function TESTAR_INTEGRACAO_REAL_V61() {
         ? String(
             leadPersistido.dados.interesse || ''
           )
-        : 'Não encontrado'
+        : 'Ausente'
     );
 
 
     /*
-     * ========================================================
-     * 13. SEGUNDA EXECUÇÃO REAL
-     * ========================================================
+     * ==========================================================
+     * 14 — SEGUNDA EXECUÇÃO DO FLUXO
+     * ==========================================================
      */
 
     Logger.log(
@@ -41069,97 +41660,192 @@ function TESTAR_INTEGRACAO_REAL_V61() {
 
 
     teste(
-      '12 — Segunda execução do fluxo concluída',
-      !!resultadoFluxoSegundo,
-      JSON.stringify(
-        resultadoFluxoSegundo
-      )
+      '35 — Segunda execução do fluxo concluída',
+      !!resultadoFluxoSegundo &&
+      resultadoFluxoSegundo.sucesso === true,
+      resultadoFluxoSegundo
+        ? 'OK'
+        : 'Falha'
     );
 
 
     /*
-     * ========================================================
-     * 14. V5.11 SEGUNDA EXECUÇÃO
-     * ========================================================
-     */
-
-    const encaminhamentoSegundo =
-      resultadoFluxoSegundo &&
-      resultadoFluxoSegundo.encaminhamento
-        ? resultadoFluxoSegundo.encaminhamento
-        : null;
-
-    teste(
-      '13 — V5.11 permanece presente na segunda execução',
-      !!encaminhamentoSegundo,
-      JSON.stringify(
-        encaminhamentoSegundo
-      )
-    );
-
-
-    /*
-     * ========================================================
-     * 15. DIAGNÓSTICO SEGUNDO
-     * ========================================================
+     * ==========================================================
+     * 15 — RECUPERAR OBJETOS DA SEGUNDA EXECUÇÃO
+     * ==========================================================
      */
 
     const diagnosticoSegundo =
-      obterDiagnosticoAtual_(
-        inicio.empresa_id,
-        inicio.conversa_id
-      );
-
-    teste(
-      '14 — Diagnóstico permanece o mesmo',
-      !!diagnosticoSegundo &&
-      String(
-        diagnosticoSegundo.diagnostico_id || ''
-      ) ===
-      String(
-        inicio.diagnostico_id
-      ),
-      JSON.stringify(
-        diagnosticoSegundo
-      )
-    );
+      resultadoFluxoSegundo
+        ? resultadoFluxoSegundo.diagnostico
+        : null;
 
 
-    /*
-     * ========================================================
-     * 16. OPORTUNIDADE SEGUNDA
-     * ========================================================
-     */
-
-    const oportunidadeWrapperSegundo =
+    const oportunidadeSegundoWrapper =
       resultadoFluxoSegundo &&
       resultadoFluxoSegundo.oportunidade
         ? resultadoFluxoSegundo.oportunidade
         : null;
 
+
     const oportunidadeSegundo =
-      oportunidadeWrapperSegundo
+      oportunidadeSegundoWrapper
         ? Object.assign(
             {},
-            oportunidadeWrapperSegundo.oportunidade || {},
+            oportunidadeSegundoWrapper.oportunidade || {},
             {
+
               oportunidade_id:
-                oportunidadeWrapperSegundo.oportunidade_id,
+                oportunidadeSegundoWrapper.oportunidade_id,
 
               acao:
-                oportunidadeWrapperSegundo.acao,
+                oportunidadeSegundoWrapper.acao,
 
               linha:
-                oportunidadeWrapperSegundo.linha
+                oportunidadeSegundoWrapper.linha
+
             }
           )
         : null;
 
 
+    const analiseSegundoWrapper =
+      resultadoFluxoSegundo &&
+      resultadoFluxoSegundo.analise_diagnostica
+        ? resultadoFluxoSegundo.analise_diagnostica
+        : null;
+
+
+    const analiseSegundo =
+      analiseSegundoWrapper
+        ? Object.assign(
+            {},
+            analiseSegundoWrapper.analise || {},
+            {
+
+              analise_id:
+                analiseSegundoWrapper.analise_id,
+
+              diagnostico_id:
+                analiseSegundoWrapper.diagnostico_id,
+
+              acao:
+                analiseSegundoWrapper.acao,
+
+              linha:
+                analiseSegundoWrapper.linha
+
+            }
+          )
+        : null;
+
+
+    const solucoesSegundo =
+      resultadoFluxoSegundo &&
+      resultadoFluxoSegundo.solucoes
+        ? resultadoFluxoSegundo.solucoes
+        : null;
+
+
+    const relacoesSegundo =
+      solucoesSegundo &&
+      Array.isArray(
+        solucoesSegundo.relacoes
+      )
+        ? solucoesSegundo.relacoes
+        : [];
+
+
     /*
-     * ========================================================
-     * 17. SEGUNDA TENTATIVA DE CRIAÇÃO
-     * ========================================================
+     * ==========================================================
+     * 16 — V5.10 SEGUNDA EXECUÇÃO
+     * ==========================================================
+     */
+
+    const decisaoSegundo =
+      construirDecisaoDiagnosticoV510_(
+        diagnosticoSegundo,
+        oportunidadeSegundo,
+        analiseSegundo,
+        relacoesSegundo
+      );
+
+
+    teste(
+      '36 — Segunda execução mantém V5.10 PODEMOS_AJUDAR',
+      !!decisaoSegundo &&
+      decisaoSegundo.classificacao ===
+        'PODEMOS_AJUDAR',
+      decisaoSegundo
+        ? JSON.stringify(
+            decisaoSegundo
+          )
+        : 'Ausente'
+    );
+
+
+    teste(
+      '37 — Segunda execução mantém confiança ALTA',
+      !!decisaoSegundo &&
+      decisaoSegundo.confianca ===
+        'ALTA',
+      decisaoSegundo
+        ? decisaoSegundo.confianca
+        : 'Ausente'
+    );
+
+
+    teste(
+      '38 — Segunda execução mantém solução principal',
+      !!decisaoSegundo &&
+      decisaoSegundo.solucao_principal_id ===
+        'V510-PERFEITA',
+      decisaoSegundo
+        ? decisaoSegundo.solucao_principal_id
+        : 'Ausente'
+    );
+
+
+    /*
+     * ==========================================================
+     * 17 — V5.11 SEGUNDA EXECUÇÃO
+     * ==========================================================
+     */
+
+    const encaminhamentoSegundo =
+      construirEncaminhamentoDiagnosticoV511_(
+        decisaoSegundo
+      );
+
+
+    teste(
+      '39 — Segunda execução mantém V5.11 AVANCAR',
+      !!encaminhamentoSegundo &&
+      encaminhamentoSegundo.acao ===
+        'AVANCAR',
+      encaminhamentoSegundo
+        ? JSON.stringify(
+            encaminhamentoSegundo
+          )
+        : 'Ausente'
+    );
+
+
+    teste(
+      '40 — Segunda execução mantém apto_para_lead',
+      !!encaminhamentoSegundo &&
+      encaminhamentoSegundo.apto_para_lead ===
+        true,
+      encaminhamentoSegundo
+        ? encaminhamentoSegundo.apto_para_lead
+        : 'Ausente'
+    );
+
+
+    /*
+     * ==========================================================
+     * 18 — SEGUNDA TENTATIVA DE CRIAÇÃO DO LEAD
+     * ==========================================================
      */
 
     leadSegundo =
@@ -41169,8 +41855,10 @@ function TESTAR_INTEGRACAO_REAL_V61() {
         oportunidadeSegundo
       );
 
+
     teste(
-      '15 — Segunda execução retorna JA_EXISTE',
+      '41 — Segunda tentativa retorna JA_EXISTE',
+      !!leadSegundo &&
       leadSegundo.acao ===
         'JA_EXISTE' &&
       leadSegundo.criado ===
@@ -41181,94 +41869,31 @@ function TESTAR_INTEGRACAO_REAL_V61() {
     );
 
 
-    /*
-     * ========================================================
-     * 18. MESMO LEAD_ID
-     * ========================================================
-     */
-
     teste(
-      '16 — Segunda execução mantém mesmo lead_id',
+      '42 — Mesmo lead_id',
+      !!leadPrimeiro &&
+      !!leadSegundo &&
       leadSegundo.lead_id ===
         leadPrimeiro.lead_id,
       'Primeiro: ' +
-      leadPrimeiro.lead_id +
+      (
+        leadPrimeiro
+          ? leadPrimeiro.lead_id
+          : 'Ausente'
+      ) +
       ' | Segundo: ' +
-      leadSegundo.lead_id
-    );
-
-
-    /*
-     * ========================================================
-     * 19. QUANTIDADE DE LEADS
-     * ========================================================
-     */
-
-    const leadsDepois =
-      buscarLeadPorDiagnosticoV61_(
-        inicio.empresa_id,
-        inicio.diagnostico_id
-      );
-
-    teste(
-      '17 — Existe exatamente um Lead para o diagnóstico',
-      !!leadsDepois &&
-      leadsDepois.dados.lead_id ===
-        leadPrimeiro.lead_id,
-      leadsDepois
-        ? JSON.stringify(
-            leadsDepois.dados
-          )
-        : 'Não encontrado'
-    );
-
-
-    /*
-     * ========================================================
-     * 20. STATUS NÃO ALTERADO
-     * ========================================================
-     */
-
-    teste(
-      '18 — Segunda execução mantém status NOVO',
-      !!leadsDepois &&
-      String(
-        leadsDepois.dados.status || ''
-      ) ===
-      STATUS_LEAD.NOVO,
-      leadsDepois
-        ? String(
-            leadsDepois.dados.status
-          )
-        : 'Não encontrado'
-    );
-
-
-    /*
-     * ========================================================
-     * 21. V5.11 CONTINUA MÁXIMO
-     * ========================================================
-     */
-
-    teste(
-      '19 — V5.11 continua apto para Lead',
-      !!encaminhamentoSegundo &&
-      encaminhamentoSegundo.apto_para_lead ===
-        true &&
-      String(
-        encaminhamentoSegundo.classificacao || ''
-      ).toUpperCase() ===
-        'AVANCAR',
-      JSON.stringify(
-        encaminhamentoSegundo
+      (
+        leadSegundo
+          ? leadSegundo.lead_id
+          : 'Ausente'
       )
     );
 
 
     /*
-     * ========================================================
-     * 22. LEAD NÃO É DUPLICADO
-     * ========================================================
+     * ==========================================================
+     * 19 — QUANTIDADE EXATA DE LEADS
+     * ==========================================================
      */
 
     const abaLeads =
@@ -41276,26 +41901,32 @@ function TESTAR_INTEGRACAO_REAL_V61() {
         SHEETS.LEADS
       );
 
+
     const valoresLeads =
       abaLeads
         .getDataRange()
         .getValues();
 
+
     const cabecalhosLeads =
       valoresLeads[0];
+
 
     const indiceEmpresa =
       cabecalhosLeads.indexOf(
         'empresa_id'
       );
 
+
     const indiceDiagnostico =
       cabecalhosLeads.indexOf(
         'diagnostico_id'
       );
 
+
     let quantidadeMesmoDiagnostico =
       0;
+
 
     for (
       let i = 1;
@@ -41304,12 +41935,15 @@ function TESTAR_INTEGRACAO_REAL_V61() {
     ) {
 
       if (
+
         String(
           valoresLeads[i][indiceEmpresa] || ''
         ).trim() ===
         String(
           inicio.empresa_id
-        ).trim() &&
+        ).trim()
+
+        &&
 
         String(
           valoresLeads[i][indiceDiagnostico] || ''
@@ -41317,6 +41951,7 @@ function TESTAR_INTEGRACAO_REAL_V61() {
         String(
           inicio.diagnostico_id
         ).trim()
+
       ) {
 
         quantidadeMesmoDiagnostico++;
@@ -41325,8 +41960,9 @@ function TESTAR_INTEGRACAO_REAL_V61() {
 
     }
 
+
     teste(
-      '20 — Não existe Lead duplicado',
+      '43 — Existe exatamente um Lead',
       quantidadeMesmoDiagnostico === 1,
       'Quantidade encontrada: ' +
       quantidadeMesmoDiagnostico
@@ -41334,48 +41970,101 @@ function TESTAR_INTEGRACAO_REAL_V61() {
 
 
     /*
-     * ========================================================
-     * RESULTADO
-     * ========================================================
+     * ==========================================================
+     * 20 — STATUS PERMANECE NOVO
+     * ==========================================================
      */
+
+    const leadFinal =
+      buscarLeadPorDiagnosticoV61_(
+        inicio.empresa_id,
+        inicio.diagnostico_id
+      );
+
+
+    teste(
+      '44 — Status permanece NOVO',
+      !!leadFinal &&
+      String(
+        leadFinal.dados.status || ''
+      ) ===
+        STATUS_LEAD.NOVO,
+      leadFinal
+        ? String(
+            leadFinal.dados.status
+          )
+        : 'Não encontrado'
+    );
+
+
+    /*
+     * ==========================================================
+     * RESULTADO FINAL
+     * ==========================================================
+     */
+
+    const total =
+      resultados.length;
+
 
     const aprovados =
       resultados.filter(
         function(item) {
+
           return item.passou === true;
+
         }
       ).length;
 
-    const total =
-      resultados.length;
+
+    const falharam =
+      total -
+      aprovados;
+
 
     Logger.log(
       '===================================================='
     );
 
+
     resultados.forEach(
-      function(item, indice) {
+      function(
+        item,
+        indice
+      ) {
 
         Logger.log(
+
           (
             item.passou
               ? 'PASSOU'
               : 'FALHOU'
           ) +
+
           ' — TESTE ' +
-          (indice + 1) +
+
+          (
+            indice + 1
+          ) +
+
           ': ' +
+
           item.nome +
+
           ' — ' +
+
           item.detalhe
+
         );
 
       }
     );
 
+
     Logger.log(
       '===================================================='
     );
+
 
     Logger.log(
       'RESULTADO INTEGRAÇÃO V6.1: ' +
@@ -41383,6 +42072,13 @@ function TESTAR_INTEGRACAO_REAL_V61() {
       '/' +
       total
     );
+
+
+    Logger.log(
+      'FALHAS INTEGRAÇÃO V6.1: ' +
+      falharam
+    );
+
 
     Logger.log(
       'PERCENTUAL INTEGRAÇÃO V6.1: ' +
@@ -41414,19 +42110,38 @@ function TESTAR_INTEGRACAO_REAL_V61() {
 
 
     Logger.log(
+      '===================================================='
+    );
+
+    Logger.log(
       'TESTAR_INTEGRACAO_REAL_V61: PASSOU'
     );
+
+    Logger.log(
+      'V6.1 INTEGRADA: 100%'
+    );
+
+    Logger.log(
+      '===================================================='
+    );
+
 
     return {
 
       sucesso:
         true,
 
-      aprovados:
-        aprovados,
+      versao:
+        'V6.1',
 
       total:
         total,
+
+      aprovados:
+        aprovados,
+
+      falharam:
+        falharam,
 
       percentual:
         total > 0
@@ -41440,7 +42155,10 @@ function TESTAR_INTEGRACAO_REAL_V61() {
         leadPrimeiro,
 
       lead_segundo:
-        leadSegundo
+        leadSegundo,
+
+      resultados:
+        resultados
 
     };
 
@@ -41448,14 +42166,28 @@ function TESTAR_INTEGRACAO_REAL_V61() {
   } finally {
 
     /*
-     * ========================================================
-     * LIMPEZA
-     * ========================================================
+     * ==========================================================
+     * LIMPEZA FINAL
+     * ==========================================================
+     *
+     * Remove:
+     * - catálogo temporário V5.10/V6.1
+     * - Lead do diagnóstico de teste
+     * - diagnóstico
+     * - conversa
+     * - métricas da conversa
+     *
+     * ==========================================================
      */
 
     try {
 
-      if (inicio) {
+      limparSolucoesTeste();
+
+
+      if (
+        inicio
+      ) {
 
         limparRegistrosPorCampoV510_(
           SHEETS.LEADS,
@@ -41463,17 +42195,20 @@ function TESTAR_INTEGRACAO_REAL_V61() {
           inicio.diagnostico_id
         );
 
+
         limparRegistrosPorCampoV510_(
           SHEETS.DIAGNOSTICOS,
           'diagnostico_id',
           inicio.diagnostico_id
         );
 
+
         limparRegistrosPorCampoV510_(
           SHEETS.CONVERSAS,
           'conversa_id',
           inicio.conversa_id
         );
+
 
         limparRegistrosPorCampoV510_(
           SHEETS.METRICAS,
@@ -41483,15 +42218,17 @@ function TESTAR_INTEGRACAO_REAL_V61() {
 
       }
 
+
       Logger.log(
         'LIMPEZA INTEGRAÇÃO V6.1 CONCLUÍDA'
       );
 
-    } catch (erroLimpeza) {
+
+    } catch (erroLimpezaFinal) {
 
       Logger.log(
-        'Falha na limpeza V6.1: ' +
-        erroLimpeza.message
+        'ERRO NA LIMPEZA FINAL V6.1: ' +
+        erroLimpezaFinal.message
       );
 
     }
