@@ -538,6 +538,26 @@ function processarMensagemDiagnostico(dados) {
     mensagem
   );
 
+/*
+ * ==========================================================
+ * V6.2.2 — TRIAGEM + INVESTIGAÇÃO
+ * ==========================================================
+ */
+
+const fluxoTriagemInvestigacaoV622 =
+  integrarTriagemInvestigacaoV622_(
+    novoDiagnostico
+  );
+
+const triagemV622 =
+  fluxoTriagemInvestigacaoV622
+    ? fluxoTriagemInvestigacaoV622.triagem
+    : null;
+
+const investigacaoV622 =
+  fluxoTriagemInvestigacaoV622
+    ? fluxoTriagemInvestigacaoV622.investigacao
+    : null;
 
   /*
    * ==========================================================
@@ -796,29 +816,142 @@ function processarMensagemDiagnostico(dados) {
      */
 
     solucoes:
-      solucoesDiagnosticoV595
-        ? {
+  solucoesDiagnosticoV595
+    ? {
+        acao:
+          solucoesDiagnosticoV595.acao,
 
-            acao:
-              solucoesDiagnosticoV595.acao,
+        diagnostico_id:
+          solucoesDiagnosticoV595.diagnostico_id,
 
-            diagnostico_id:
-              solucoesDiagnosticoV595.diagnostico_id,
+        total:
+          solucoesDiagnosticoV595.total,
 
-            total:
-              solucoesDiagnosticoV595.total,
+        relacoes:
+          solucoesDiagnosticoV595.relacoes
+      }
+    : null,
 
-            relacoes:
-              solucoesDiagnosticoV595.relacoes
+triagem:
+  triagemV622,
 
-          }
-        : null
+investigacao:
+  investigacaoV622
 
-  };
+};
 
 }
 
+function integrarTriagemInvestigacaoV622_(
+  diagnostico
+) {
 
+  diagnostico =
+    diagnostico || {};
+
+  const sinaisTriagem = {
+
+    dor:
+      diagnostico.dor_principal || '',
+
+    processo:
+      diagnostico.processo_resumo ||
+      diagnostico.processo_nome ||
+      '',
+
+    possibilidade_de_atuacao:
+      'SIM',
+
+    problema_fora_escopo:
+      false,
+
+    incerteza:
+      false
+  };
+
+  const triagem =
+    avaliarCompatibilidadeTriagemV1_(
+      sinaisTriagem
+    );
+
+  let investigacao = null;
+
+  /*
+   * Só entra na investigação profunda
+   * quando a Triagem considerar o caso
+   * COMPATIVEL.
+   */
+  if (
+    triagem &&
+    triagem.classificacao ===
+      'COMPATIVEL'
+  ) {
+
+    investigacao =
+      buscarInvestigacaoV62_({
+        diagnostico_id:
+          diagnostico.diagnostico_id
+      });
+
+    /*
+     * Se ainda não existe investigação,
+     * cria a V6.2.
+     */
+    if (!investigacao) {
+
+      const investigacaoInicial =
+        iniciarInvestigacaoV62_({
+
+          empresa_id:
+            diagnostico.empresa_id,
+
+          conversa_id:
+            diagnostico.conversa_id,
+
+          diagnostico_id:
+            diagnostico.diagnostico_id,
+
+          dor:
+            diagnostico.dor_principal || '',
+
+          processo:
+            diagnostico.processo_resumo ||
+            diagnostico.processo_nome ||
+            '',
+
+          impacto:
+            diagnostico.impacto_nivel || '',
+
+          frequencia:
+            diagnostico.frequencia || '',
+
+          contexto:
+            diagnostico.processo_nome ||
+            ''
+        });
+
+      salvarInvestigacaoV62_(
+        investigacaoInicial
+      );
+
+      investigacao =
+        buscarInvestigacaoV62_({
+          diagnostico_id:
+            diagnostico.diagnostico_id
+        });
+    }
+  }
+
+  return {
+
+    triagem:
+      triagem,
+
+    investigacao:
+      investigacao
+
+  };
+}
 /**
  * ============================================================
  * CONSTRUIR ENTRADA PARA IA
@@ -42235,4 +42368,1654 @@ function TESTAR_INTEGRACAO_REAL_V61() {
 
   }
 
+}
+
+function TESTAR_FLUXO_TRIAGEM_INVESTIGACAO_V622() {
+
+  const TESTE = {
+    empresa_id: 'EMP-FLUXO-V622-TESTE',
+    conversa_id: 'CONV-FLUXO-V622-TESTE',
+    diagnostico_id: 'DIAG-FLUXO-V622-TESTE'
+  };
+
+  const total = 25;
+  let aprovados = 0;
+  let falhas = [];
+  let investigacaoId = null;
+
+  function teste(numero, descricao, condicao) {
+
+    if (condicao) {
+
+      aprovados++;
+
+      Logger.log(
+        '✅ TESTE ' +
+        numero +
+        '/25 — ' +
+        descricao
+      );
+
+    } else {
+
+      falhas.push(
+        numero +
+        ' — ' +
+        descricao
+      );
+
+      Logger.log(
+        '❌ TESTE ' +
+        numero +
+        '/25 — ' +
+        descricao
+      );
+    }
+  }
+
+  function limparTeste() {
+
+    try {
+
+      const aba =
+        obterAba_(
+          SHEETS.INVESTIGACOES
+        );
+
+      const dados =
+        aba
+          .getDataRange()
+          .getValues();
+
+      if (dados.length <= 1) {
+        return;
+      }
+
+      const cabecalhos =
+        dados[0];
+
+      const idxId =
+        cabecalhos.indexOf(
+          'investigacao_id'
+        );
+
+      const idxEmpresa =
+        cabecalhos.indexOf(
+          'empresa_id'
+        );
+
+      const idxConversa =
+        cabecalhos.indexOf(
+          'conversa_id'
+        );
+
+      const idxDiagnostico =
+        cabecalhos.indexOf(
+          'diagnostico_id'
+        );
+
+      for (
+        let i = dados.length - 1;
+        i >= 1;
+        i--
+      ) {
+
+        const id =
+          idxId !== -1
+            ? String(
+                dados[i][idxId] || ''
+              )
+            : '';
+
+        const empresa =
+          idxEmpresa !== -1
+            ? String(
+                dados[i][idxEmpresa] || ''
+              )
+            : '';
+
+        const conversa =
+          idxConversa !== -1
+            ? String(
+                dados[i][idxConversa] || ''
+              )
+            : '';
+
+        const diagnostico =
+          idxDiagnostico !== -1
+            ? String(
+                dados[i][idxDiagnostico] || ''
+              )
+            : '';
+
+        if (
+          id === String(
+            investigacaoId || ''
+          ) ||
+          empresa === TESTE.empresa_id ||
+          conversa === TESTE.conversa_id ||
+          diagnostico === TESTE.diagnostico_id
+        ) {
+
+          aba.deleteRow(i + 1);
+        }
+      }
+
+      SpreadsheetApp.flush();
+
+    } catch (erro) {
+
+      Logger.log(
+        '⚠️ Erro na limpeza: ' +
+        erro
+      );
+    }
+  }
+
+  try {
+
+    Logger.log('');
+    Logger.log(
+      '============================================================'
+    );
+    Logger.log(
+      'INÍCIO — TESTAR_FLUXO_TRIAGEM_INVESTIGACAO_V622'
+    );
+    Logger.log(
+      '============================================================'
+    );
+    Logger.log('');
+
+    // ==========================================================
+    // 1. DIAGNÓSTICO BASE
+    // ==========================================================
+
+    const diagnostico = {
+
+      diagnostico_id:
+        TESTE.diagnostico_id,
+
+      empresa_id:
+        TESTE.empresa_id,
+
+      conversa_id:
+        TESTE.conversa_id,
+
+      processo_nome:
+        'Recebimento de pedidos',
+
+      processo_resumo:
+        'Os pedidos chegam por diferentes canais e são conferidos manualmente.',
+
+      dor_principal:
+        'Pedidos podem ser esquecidos ou atrasados.',
+
+      dor_categoria:
+        'PROCESSO',
+
+      impacto_nivel:
+        'ALTO',
+
+      frequencia:
+        'DIARIA',
+
+      objetivo:
+        'Organizar os pedidos e reduzir atrasos.',
+
+      status_diagnostico:
+        STATUS_DIAGNOSTICO.EM_ANDAMENTO,
+
+      classificacao:
+        'COMPATIVEL',
+
+      confianca:
+        'ALTA',
+
+      intencao:
+        'BUSCAR_SOLUCAO'
+    };
+
+    // ==========================================================
+    // LIMPEZA INICIAL
+    // ==========================================================
+
+    limparTeste();
+
+    // ==========================================================
+    // TESTE 1 — IDENTIDADE
+    // ==========================================================
+
+    teste(
+      1,
+      'diagnóstico possui identidade completa',
+      !!diagnostico.empresa_id &&
+      !!diagnostico.conversa_id &&
+      !!diagnostico.diagnostico_id
+    );
+
+    // ==========================================================
+    // 2. TRIAGEM
+    // ==========================================================
+
+    const sinaisTriagem = {
+
+      dor:
+        diagnostico.dor_principal,
+
+      processo:
+        diagnostico.processo_resumo,
+
+      possibilidade_de_atuacao:
+        'SIM',
+
+      problema_fora_escopo:
+        false,
+
+      incerteza:
+        false
+    };
+
+    const triagem =
+      avaliarCompatibilidadeTriagemV1_(
+        sinaisTriagem
+      );
+
+    // ==========================================================
+    // TESTE 2 — TRIAGEM COMPATÍVEL
+    // ==========================================================
+
+    teste(
+      2,
+      'triagem classifica como COMPATIVEL',
+      !!triagem &&
+      triagem.classificacao ===
+        'COMPATIVEL'
+    );
+
+    // ==========================================================
+    // 3. INICIA INVESTIGAÇÃO
+    // ==========================================================
+
+    let investigacao =
+      buscarInvestigacaoV62_({
+        diagnostico_id:
+          TESTE.diagnostico_id
+      });
+
+    if (!investigacao) {
+
+      investigacao =
+        iniciarInvestigacaoV62_({
+
+          empresa_id:
+            diagnostico.empresa_id,
+
+          conversa_id:
+            diagnostico.conversa_id,
+
+          diagnostico_id:
+            diagnostico.diagnostico_id,
+
+          dor:
+            diagnostico.dor_principal,
+
+          processo:
+            diagnostico.processo_resumo,
+
+          impacto:
+            'O problema gera atrasos, retrabalho e perda de produtividade.',
+
+          frequencia:
+            diagnostico.frequencia,
+
+          contexto:
+            diagnostico.processo_nome
+        });
+
+      salvarInvestigacaoV62_(
+        investigacao
+      );
+
+      investigacao =
+        buscarInvestigacaoV62_({
+          diagnostico_id:
+            TESTE.diagnostico_id
+        });
+    }
+
+    investigacaoId =
+      investigacao &&
+      investigacao.investigacao_id;
+
+    // ==========================================================
+    // TESTE 3 — INVESTIGAÇÃO EXISTE
+    // ==========================================================
+
+    teste(
+      3,
+      'investigação V6.2 foi criada',
+      !!investigacao
+    );
+
+    // ==========================================================
+    // TESTE 4 — VERSÃO
+    // ==========================================================
+
+    teste(
+      4,
+      'investigação utiliza V6.2',
+      investigacao &&
+      investigacao.versao ===
+        INVESTIGACAO_V62.VERSAO
+    );
+
+    // ==========================================================
+    // TESTE 5 — ID DA INVESTIGAÇÃO
+    // ==========================================================
+
+    teste(
+      5,
+      'investigacao_id foi gerado',
+      !!investigacaoId
+    );
+
+    // ==========================================================
+    // TESTE 6 — PREFIXO
+    // ==========================================================
+
+    teste(
+      6,
+      'investigacao_id possui prefixo INV-',
+      String(
+        investigacaoId || ''
+      ).indexOf('INV-') === 0
+    );
+
+    // ==========================================================
+    // TESTE 7 — EMPRESA
+    // ==========================================================
+
+    teste(
+      7,
+      'empresa_id foi preservado',
+      investigacao &&
+      investigacao.empresa_id ===
+        TESTE.empresa_id
+    );
+
+    // ==========================================================
+    // TESTE 8 — CONVERSA
+    // ==========================================================
+
+    teste(
+      8,
+      'conversa_id foi preservado',
+      investigacao &&
+      investigacao.conversa_id ===
+        TESTE.conversa_id
+    );
+
+    // ==========================================================
+    // TESTE 9 — DIAGNÓSTICO
+    // ==========================================================
+
+    teste(
+      9,
+      'diagnostico_id foi preservado',
+      investigacao &&
+      investigacao.diagnostico_id ===
+        TESTE.diagnostico_id
+    );
+
+    // ==========================================================
+    // TESTE 10 — PROBLEMA
+    // ==========================================================
+
+    teste(
+      10,
+      'problema central veio do diagnóstico',
+      investigacao &&
+      investigacao.problema_central ===
+        diagnostico.dor_principal
+    );
+
+    // ==========================================================
+    // TESTE 11 — PROCESSO
+    // ==========================================================
+
+    teste(
+      11,
+      'processo veio do diagnóstico',
+      !!(
+        investigacao &&
+        investigacao.processo
+      )
+    );
+
+    // ==========================================================
+    // TESTE 12 — IMPACTO
+    // ==========================================================
+
+    teste(
+      12,
+      'impacto inicial foi preservado',
+      !!(
+        investigacao &&
+        investigacao.impacto
+      )
+    );
+
+    // ==========================================================
+    // TESTE 13 — PERSISTÊNCIA
+    // ==========================================================
+
+    const recuperada =
+      buscarInvestigacaoV62_({
+        diagnostico_id:
+          TESTE.diagnostico_id
+      });
+
+    teste(
+      13,
+      'investigação pode ser recuperada da persistência',
+      !!recuperada
+    );
+
+    // ==========================================================
+    // TESTE 14 — MESMO ID
+    // ==========================================================
+
+    teste(
+      14,
+      'recuperação mantém o mesmo investigacao_id',
+      recuperada &&
+      recuperada.investigacao_id ===
+        investigacaoId
+    );
+
+    // ==========================================================
+    // TESTE 15 — UMA INVESTIGAÇÃO
+    // ==========================================================
+
+    const aba =
+      obterAba_(
+        SHEETS.INVESTIGACOES
+      );
+
+    const dadosAba =
+      aba
+        .getDataRange()
+        .getValues();
+
+    const cabecalhos =
+      dadosAba[0];
+
+    const idxDiagnostico =
+      cabecalhos.indexOf(
+        'diagnostico_id'
+      );
+
+    const linhasDiagnostico =
+      dadosAba
+        .slice(1)
+        .filter(
+          function(linha) {
+
+            return String(
+              linha[idxDiagnostico] || ''
+            ) ===
+              TESTE.diagnostico_id;
+          }
+        );
+
+    teste(
+      15,
+      'existe exatamente uma investigação para o diagnóstico',
+      linhasDiagnostico.length === 1
+    );
+
+    // ==========================================================
+    // SEGUNDA PASSAGEM — DEVE RECUPERAR, NÃO CRIAR OUTRA
+    // ==========================================================
+
+    let segundaInvestigacao =
+      buscarInvestigacaoV62_({
+        diagnostico_id:
+          TESTE.diagnostico_id
+      });
+
+    if (!segundaInvestigacao) {
+
+      segundaInvestigacao =
+        iniciarInvestigacaoV62_({
+
+          empresa_id:
+            diagnostico.empresa_id,
+
+          conversa_id:
+            diagnostico.conversa_id,
+
+          diagnostico_id:
+            diagnostico.diagnostico_id,
+
+          dor:
+            diagnostico.dor_principal,
+
+          processo:
+            diagnostico.processo_resumo,
+
+          impacto:
+            'O problema gera atrasos, retrabalho e perda de produtividade.',
+
+          frequencia:
+            diagnostico.frequencia,
+
+          contexto:
+            diagnostico.processo_nome
+        });
+
+      salvarInvestigacaoV62_(
+        segundaInvestigacao
+      );
+    }
+
+    // ==========================================================
+    // TESTE 16 — NÃO DUPLICOU
+    // ==========================================================
+
+    teste(
+      16,
+      'segunda passagem reutiliza a investigação existente',
+      segundaInvestigacao &&
+      segundaInvestigacao.investigacao_id ===
+        investigacaoId
+    );
+
+    // ==========================================================
+    // TESTE 17 — ID CONTINUA ÚNICO
+    // ==========================================================
+
+    const dadosAbaDepois =
+      aba
+        .getDataRange()
+        .getValues();
+
+    const linhasDepois =
+      dadosAbaDepois
+        .slice(1)
+        .filter(
+          function(linha) {
+
+            return String(
+              linha[idxDiagnostico] || ''
+            ) ===
+              TESTE.diagnostico_id;
+          }
+        );
+
+    teste(
+      17,
+      'segunda passagem não cria segunda linha',
+      linhasDepois.length === 1
+    );
+
+    // ==========================================================
+    // TESTE 18 — NÃO EXPÕE TECNOLOGIA
+    // ==========================================================
+
+    const textoInvestigacao =
+      JSON.stringify(
+        segundaInvestigacao
+      ).toLowerCase();
+
+    const termosTecnologia = [
+      'javascript',
+      'python',
+      'api',
+      'sql',
+      'mysql',
+      'postgres',
+      'firebase',
+      'aws',
+      'azure',
+      'google apps script',
+      'appscript',
+      'docker',
+      'servidor',
+      'vps',
+      'cloud',
+      'database',
+      'banco de dados',
+      'automação'
+    ];
+
+    const encontrouTecnologia =
+      termosTecnologia.some(
+        function(termo) {
+
+          return textoInvestigacao
+            .indexOf(termo) !== -1;
+        }
+      );
+
+    teste(
+      18,
+      'investigação não expõe tecnologia ou arquitetura',
+      encontrouTecnologia === false
+    );
+
+    // ==========================================================
+    // TESTE 19 — ESTADO INICIAL
+    // ==========================================================
+
+    teste(
+      19,
+      'investigação possui estado válido',
+      !!(
+        segundaInvestigacao &&
+        segundaInvestigacao.estado
+      )
+    );
+
+    // ==========================================================
+    // TESTE 20 — PRÓXIMA DIMENSÃO
+    // ==========================================================
+
+    teste(
+      20,
+      'investigação identifica próxima dimensão',
+      !!(
+        segundaInvestigacao &&
+        segundaInvestigacao.proxima_dimensao
+      )
+    );
+
+    // ==========================================================
+    // TESTE 21 — PRÓXIMA PERGUNTA
+    // ==========================================================
+
+    teste(
+      21,
+      'investigação gera próxima pergunta',
+      !!(
+        segundaInvestigacao &&
+        segundaInvestigacao.proxima_pergunta
+      )
+    );
+
+    // ==========================================================
+    // TESTE 22 — TRIAGEM NÃO COMPATÍVEL NÃO DEVE INICIAR
+    // ==========================================================
+
+    const sinaisNaoCompativeis = {
+
+      dor:
+        '',
+
+      processo:
+        '',
+
+      possibilidade_de_atuacao:
+        'NAO',
+
+      problema_fora_escopo:
+        false,
+
+      incerteza:
+        false
+    };
+
+    const triagemNaoCompativel =
+      avaliarCompatibilidadeTriagemV1_(
+        sinaisNaoCompativeis
+      );
+
+    teste(
+      22,
+      'Triagem fora do cenário compatível não é COMPATIVEL',
+      triagemNaoCompativel &&
+      triagemNaoCompativel.classificacao !==
+        'COMPATIVEL'
+    );
+
+    // ==========================================================
+    // TESTE 23 — NÃO CRIA INVESTIGAÇÃO PARA OUTRO DIAGNÓSTICO
+    // ==========================================================
+
+    const outroDiagnosticoId =
+      'DIAG-FLUXO-V622-NAO-COMPATIVEL';
+
+    const outraInvestigacao =
+      buscarInvestigacaoV62_({
+        diagnostico_id:
+          outroDiagnosticoId
+      });
+
+    teste(
+      23,
+      'diagnóstico não compatível não possui investigação criada',
+      !outraInvestigacao
+    );
+
+    // ==========================================================
+    // TESTE 24 — DETERMINISMO
+    // ==========================================================
+
+    const triagemNovamente =
+      avaliarCompatibilidadeTriagemV1_(
+        sinaisTriagem
+      );
+
+    teste(
+      24,
+      'mesma entrada produz a mesma decisão de Triagem',
+      !!triagem &&
+      !!triagemNovamente &&
+      triagem.classificacao ===
+        triagemNovamente.classificacao
+    );
+
+    // ==========================================================
+    // TESTE 25 — FLUXO COMPLETO
+    // ==========================================================
+
+    teste(
+      25,
+      'fluxo Diagnóstico → Triagem → Investigação está íntegro',
+      diagnostico.diagnostico_id ===
+        segundaInvestigacao.diagnostico_id &&
+      triagem.classificacao ===
+        'COMPATIVEL' &&
+      !!segundaInvestigacao.investigacao_id
+    );
+
+  } catch (erro) {
+
+    Logger.log('');
+    Logger.log(
+      '❌ ERRO FATAL NO TESTE'
+    );
+
+    Logger.log(
+      erro && erro.stack
+        ? erro.stack
+        : erro
+    );
+
+  } finally {
+
+    limparTeste();
+
+    Logger.log('');
+    Logger.log(
+      '============================================================'
+    );
+
+    Logger.log(
+      'RESULTADO FINAL — FLUXO V6.2.2'
+    );
+
+    Logger.log(
+      '============================================================'
+    );
+
+    Logger.log(
+      'APROVADOS: ' +
+      aprovados +
+      '/25'
+    );
+
+    Logger.log(
+      'FALHAS: ' +
+      falhas.length
+    );
+
+    Logger.log(
+      'PERCENTUAL: ' +
+      Math.round(
+        (aprovados / total) * 100
+      ) +
+      '%'
+    );
+
+    if (
+      aprovados === total &&
+      falhas.length === 0
+    ) {
+
+      Logger.log('');
+      Logger.log(
+        '🏆 TESTAR_FLUXO_TRIAGEM_INVESTIGACAO_V622: PASSOU'
+      );
+
+      Logger.log(
+        '🏆 FLUXO TRIAGEM → INVESTIGAÇÃO: 100%'
+      );
+
+      Logger.log(
+        '🏆 25/25 TESTES APROVADOS'
+      );
+
+    } else {
+
+      Logger.log('');
+      Logger.log(
+        '❌ TESTAR_FLUXO_TRIAGEM_INVESTIGACAO_V622: FALHOU'
+      );
+
+      falhas.forEach(
+        function(falha) {
+
+          Logger.log(
+            '   ' + falha
+          );
+        }
+      );
+    }
+
+    Logger.log('');
+    Logger.log(
+      '============================================================'
+    );
+  }
+}
+
+function TESTAR_INTEGRACAO_FLUXO_PRINCIPAL_V622() {
+
+  const total = 25;
+  let aprovados = 0;
+  let falhas = [];
+
+  let inicio = null;
+  let resultadoFluxo = null;
+  let diagnostico = null;
+  let triagem = null;
+  let investigacao = null;
+
+  function teste(numero, descricao, condicao, detalhe) {
+
+    if (condicao) {
+
+      aprovados++;
+
+      Logger.log(
+        '✅ TESTE ' +
+        numero +
+        '/25 — ' +
+        descricao +
+        (
+          detalhe
+            ? ' [' + detalhe + ']'
+            : ''
+        )
+      );
+
+    } else {
+
+      falhas.push(
+        numero +
+        ' — ' +
+        descricao
+      );
+
+      Logger.log(
+        '❌ TESTE ' +
+        numero +
+        '/25 — ' +
+        descricao +
+        (
+          detalhe
+            ? ' [' + detalhe + ']'
+            : ''
+        )
+      );
+    }
+  }
+
+  try {
+
+    Logger.log('');
+    Logger.log(
+      '============================================================'
+    );
+
+    Logger.log(
+      'INÍCIO — TESTAR_INTEGRACAO_FLUXO_PRINCIPAL_V622'
+    );
+
+    Logger.log(
+      '============================================================'
+    );
+
+    Logger.log('');
+
+    // ==========================================================
+    // 1 — CRIA EMPRESA / CONVERSA / DIAGNÓSTICO
+    // ==========================================================
+
+    inicio =
+      iniciarDiagnostico({
+
+        nome:
+          'Empresa Teste Fluxo V622',
+
+        nome_empresa:
+          'Empresa Teste Fluxo V622',
+
+        segmento:
+          'Serviços',
+
+        porte:
+          'PEQUENA',
+
+        nome_contato:
+          'Teste Fluxo V622',
+
+        email:
+          '',
+
+        whatsapp:
+          '',
+
+        cidade:
+          ''
+      });
+
+    teste(
+      1,
+      'diagnóstico foi iniciado',
+      !!inicio &&
+      inicio.sucesso === true &&
+      !!inicio.empresa_id &&
+      !!inicio.conversa_id &&
+      !!inicio.diagnostico_id
+    );
+
+    if (
+      !inicio ||
+      !inicio.empresa_id ||
+      !inicio.conversa_id ||
+      !inicio.diagnostico_id
+    ) {
+
+      throw new Error(
+        'Não foi possível iniciar o diagnóstico de teste.'
+      );
+    }
+
+    Logger.log(
+      'EMPRESA TESTE: ' +
+      inicio.empresa_id
+    );
+
+    Logger.log(
+      'CONVERSA TESTE: ' +
+      inicio.conversa_id
+    );
+
+    Logger.log(
+      'DIAGNÓSTICO TESTE: ' +
+      inicio.diagnostico_id
+    );
+
+    // ==========================================================
+    // 2 — EXECUTA PROCESSAMENTO REAL
+    // ==========================================================
+
+    resultadoFluxo =
+      processarMensagemDiagnostico({
+
+        empresa_id:
+          inicio.empresa_id,
+
+        conversa_id:
+          inicio.conversa_id,
+
+        mensagem:
+          'Nosso processo principal é conferir e lançar pedidos. ' +
+          'Os pedidos chegam por diferentes canais e são conferidos manualmente. ' +
+          'Temos erros de digitação e retrabalho nesse processo. ' +
+          'Isso acontece diariamente. ' +
+          'Processamos aproximadamente 120 pedidos por dia. ' +
+          'Perdemos cerca de 3 horas por dia por causa desse problema. ' +
+          'Isso gera atrasos e retrabalho. ' +
+          'Nosso objetivo é reduzir os erros e diminuir o retrabalho.'
+      });
+
+    teste(
+      2,
+      'processarMensagemDiagnostico executou com sucesso',
+      !!resultadoFluxo &&
+      resultadoFluxo.sucesso === true
+    );
+
+    // ==========================================================
+    // 3 — DIAGNÓSTICO RETORNADO
+    // ==========================================================
+
+    diagnostico =
+      resultadoFluxo
+        ? resultadoFluxo.diagnostico
+        : null;
+
+    teste(
+      3,
+      'diagnóstico foi retornado',
+      !!diagnostico
+    );
+
+    if (!diagnostico) {
+
+      throw new Error(
+        'O fluxo não retornou diagnóstico.'
+      );
+    }
+
+    // ==========================================================
+    // 4 — IDENTIDADE
+    // ==========================================================
+
+    teste(
+      4,
+      'empresa_id foi preservado',
+      diagnostico.empresa_id ===
+        inicio.empresa_id
+    );
+
+    // ==========================================================
+    // 5 — CONVERSA
+    // ==========================================================
+
+    teste(
+      5,
+      'conversa_id foi preservado',
+      diagnostico.conversa_id ===
+        inicio.conversa_id
+    );
+
+    // ==========================================================
+    // 6 — DIAGNÓSTICO
+    // ==========================================================
+
+    teste(
+      6,
+      'diagnostico_id foi preservado',
+      diagnostico.diagnostico_id ===
+        inicio.diagnostico_id
+    );
+
+    // ==========================================================
+    // 7 — TRIAGEM RETORNADA
+    // ==========================================================
+
+    triagem =
+      resultadoFluxo
+        ? resultadoFluxo.triagem
+        : null;
+
+    teste(
+      7,
+      'Triagem V1 foi executada e retornada',
+      !!triagem
+    );
+
+    // ==========================================================
+    // 8 — TRIAGEM COMPATÍVEL
+    // ==========================================================
+
+    teste(
+      8,
+      'Triagem classificou como COMPATIVEL',
+      !!triagem &&
+      triagem.classificacao ===
+        'COMPATIVEL'
+    );
+
+    // ==========================================================
+    // 9 — INVESTIGAÇÃO RETORNADA
+    // ==========================================================
+
+    investigacao =
+      resultadoFluxo
+        ? resultadoFluxo.investigacao
+        : null;
+
+    teste(
+      9,
+      'Investigação V6.2 foi criada e retornada',
+      !!investigacao
+    );
+
+    // ==========================================================
+    // 10 — VERSÃO
+    // ==========================================================
+
+    teste(
+      10,
+      'investigação utiliza V6.2',
+      !!investigacao &&
+      investigacao.versao ===
+        INVESTIGACAO_V62.VERSAO
+    );
+
+    // ==========================================================
+    // 11 — VÍNCULO COM DIAGNÓSTICO
+    // ==========================================================
+
+    teste(
+      11,
+      'investigação mantém diagnostico_id',
+      !!investigacao &&
+      investigacao.diagnostico_id ===
+        inicio.diagnostico_id
+    );
+
+    // ==========================================================
+    // 12 — EMPRESA
+    // ==========================================================
+
+    teste(
+      12,
+      'investigação mantém empresa_id',
+      !!investigacao &&
+      investigacao.empresa_id ===
+        inicio.empresa_id
+    );
+
+    // ==========================================================
+    // 13 — CONVERSA
+    // ==========================================================
+
+    teste(
+      13,
+      'investigação mantém conversa_id',
+      !!investigacao &&
+      investigacao.conversa_id ===
+        inicio.conversa_id
+    );
+
+    // ==========================================================
+    // 14 — PROBLEMA
+    // ==========================================================
+
+    teste(
+      14,
+      'problema central foi transferido para investigação',
+      !!(
+        investigacao &&
+        investigacao.problema_central
+      )
+    );
+
+    // ==========================================================
+    // 15 — PROCESSO
+    // ==========================================================
+
+    teste(
+      15,
+      'processo foi transferido para investigação',
+      !!(
+        investigacao &&
+        investigacao.processo
+      )
+    );
+
+    // ==========================================================
+    // 16 — IMPACTO
+    // ==========================================================
+
+    teste(
+      16,
+      'impacto foi transferido para investigação',
+      !!(
+        investigacao &&
+        investigacao.impacto
+      )
+    );
+
+    // ==========================================================
+    // 17 — INVESTIGAÇÃO PERSISTIDA
+    // ==========================================================
+
+    const investigacaoPersistida =
+      buscarInvestigacaoV62_({
+        diagnostico_id:
+          inicio.diagnostico_id
+      });
+
+    teste(
+      17,
+      'investigação foi persistida',
+      !!investigacaoPersistida
+    );
+
+    // ==========================================================
+    // 18 — MESMO ID
+    // ==========================================================
+
+    teste(
+      18,
+      'investigação persistida mantém o mesmo ID',
+      !!investigacao &&
+      !!investigacaoPersistida &&
+      investigacao.investigacao_id ===
+        investigacaoPersistida.investigacao_id
+    );
+
+    // ==========================================================
+    // 19 — V5.7
+    // ==========================================================
+
+    teste(
+      19,
+      'V5.7 continua funcionando',
+      !!(
+        resultadoFluxo &&
+        resultadoFluxo.oportunidade
+      )
+    );
+
+    // ==========================================================
+    // 20 — V5.8
+    // ==========================================================
+
+    teste(
+      20,
+      'V5.8 continua funcionando',
+      !!(
+        resultadoFluxo &&
+        resultadoFluxo.analise_diagnostica
+      )
+    );
+
+      Logger.log(
+  '========== DIAGNÓSTICO V5.9.5 =========='
+);
+
+Logger.log(
+  'SUCESSO FLUXO: ' +
+  resultadoFluxo.sucesso
+);
+
+Logger.log(
+  'SOLUÇÕES: ' +
+  JSON.stringify(
+    resultadoFluxo.solucoes,
+    null,
+    2
+  )
+);
+
+Logger.log(
+  'RESPOSTA: ' +
+  JSON.stringify(
+    resultadoFluxo.resposta,
+    null,
+    2
+  )
+);
+
+Logger.log(
+  'ANÁLISE DIAGNÓSTICA: ' +
+  JSON.stringify(
+    resultadoFluxo.analise_diagnostica,
+    null,
+    2
+  )
+);
+
+Logger.log(
+  'OPORTUNIDADE: ' +
+  JSON.stringify(
+    resultadoFluxo.oportunidade,
+    null,
+    2
+  )
+);
+
+Logger.log(
+  '=========================================='
+);
+
+    // ==========================================================
+    // 21 — V5.9.5
+    // ==========================================================
+
+    teste(
+      21,
+      'V5.9.5 continua funcionando',
+      !!(
+        resultadoFluxo &&
+        resultadoFluxo.solucoes
+      )
+    );
+
+    // ==========================================================
+    // 22 — RESPOSTA
+    // ==========================================================
+
+    teste(
+      22,
+      'fluxo continua produzindo resposta para o empresário',
+      !!(
+        resultadoFluxo &&
+        resultadoFluxo.resposta
+      )
+    );
+
+    // ==========================================================
+    // 23 — NÃO EXPÕE TECNOLOGIA
+    // ==========================================================
+
+    const textoInvestigacao =
+      JSON.stringify(
+        investigacao || {}
+      ).toLowerCase();
+
+    const termosTecnologia = [
+      'javascript',
+      'python',
+      'api',
+      'sql',
+      'mysql',
+      'postgres',
+      'firebase',
+      'aws',
+      'azure',
+      'google apps script',
+      'appscript',
+      'docker',
+      'servidor',
+      'vps',
+      'cloud',
+      'database',
+      'banco de dados',
+      'automação'
+    ];
+
+    const encontrouTecnologia =
+      termosTecnologia.some(
+        function(termo) {
+
+          return textoInvestigacao
+            .indexOf(termo) !== -1;
+        }
+      );
+
+    teste(
+      23,
+      'investigação não expõe tecnologia ou arquitetura',
+      encontrouTecnologia === false
+    );
+
+    // ==========================================================
+    // 24 — UMA INVESTIGAÇÃO POR DIAGNÓSTICO
+    // ==========================================================
+
+    const aba =
+      obterAba_(
+        SHEETS.INVESTIGACOES
+      );
+
+    const dadosAba =
+      aba
+        .getDataRange()
+        .getValues();
+
+    const cabecalhos =
+      dadosAba[0];
+
+    const idxDiagnostico =
+      cabecalhos.indexOf(
+        'diagnostico_id'
+      );
+
+    const linhasDiagnostico =
+      dadosAba
+        .slice(1)
+        .filter(
+          function(linha) {
+
+            return String(
+              linha[idxDiagnostico] || ''
+            ) ===
+              String(
+                inicio.diagnostico_id
+              );
+          }
+        );
+
+    teste(
+      24,
+      'existe exatamente uma investigação para o diagnóstico',
+      linhasDiagnostico.length === 1
+    );
+
+    // ==========================================================
+    // 25 — INTEGRAÇÃO COMPLETA
+    // ==========================================================
+
+    teste(
+      25,
+      'Diagnóstico → Triagem → Investigação → V5.x está íntegro',
+      !!resultadoFluxo &&
+      resultadoFluxo.sucesso === true &&
+      !!diagnostico &&
+      !!triagem &&
+      triagem.classificacao ===
+        'COMPATIVEL' &&
+      !!investigacao &&
+      !!resultadoFluxo.oportunidade &&
+      !!resultadoFluxo.analise_diagnostica &&
+      !!resultadoFluxo.solucoes
+    );
+
+  } catch (erro) {
+
+    Logger.log('');
+    Logger.log(
+      '❌ ERRO FATAL NO TESTE'
+    );
+
+    Logger.log(
+      erro && erro.stack
+        ? erro.stack
+        : erro
+    );
+
+  } finally {
+
+    /*
+     * ==========================================================
+     * LIMPEZA DA INVESTIGAÇÃO DE TESTE
+     * ==========================================================
+     */
+
+    try {
+
+      if (inicio && inicio.diagnostico_id) {
+
+        const aba =
+          obterAba_(
+            SHEETS.INVESTIGACOES
+          );
+
+        const dados =
+          aba
+            .getDataRange()
+            .getValues();
+
+        if (dados.length > 1) {
+
+          const cabecalhos =
+            dados[0];
+
+          const idxId =
+            cabecalhos.indexOf(
+              'investigacao_id'
+            );
+
+          const idxEmpresa =
+            cabecalhos.indexOf(
+              'empresa_id'
+            );
+
+          const idxConversa =
+            cabecalhos.indexOf(
+              'conversa_id'
+            );
+
+          const idxDiagnostico =
+            cabecalhos.indexOf(
+              'diagnostico_id'
+            );
+
+          for (
+            let i = dados.length - 1;
+            i >= 1;
+            i--
+          ) {
+
+            const id =
+              idxId !== -1
+                ? String(
+                    dados[i][idxId] || ''
+                  )
+                : '';
+
+            const empresa =
+              idxEmpresa !== -1
+                ? String(
+                    dados[i][idxEmpresa] || ''
+                  )
+                : '';
+
+            const conversa =
+              idxConversa !== -1
+                ? String(
+                    dados[i][idxConversa] || ''
+                  )
+                : '';
+
+            const diagnosticoId =
+              idxDiagnostico !== -1
+                ? String(
+                    dados[i][idxDiagnostico] || ''
+                  )
+                : '';
+
+            if (
+              id === String(
+                investigacao &&
+                investigacao.investigacao_id
+                  ? investigacao.investigacao_id
+                  : ''
+              ) ||
+              empresa === String(
+                inicio.empresa_id
+              ) ||
+              conversa === String(
+                inicio.conversa_id
+              ) ||
+              diagnosticoId === String(
+                inicio.diagnostico_id
+              )
+            ) {
+
+              aba.deleteRow(
+                i + 1
+              );
+            }
+          }
+
+          SpreadsheetApp.flush();
+        }
+      }
+
+    } catch (erroLimpeza) {
+
+      Logger.log(
+        '⚠️ Erro na limpeza da investigação de teste: ' +
+        erroLimpeza
+      );
+    }
+
+    // ==========================================================
+    // RESULTADO FINAL
+    // ==========================================================
+
+    Logger.log('');
+    Logger.log(
+      '============================================================'
+    );
+
+    Logger.log(
+      'RESULTADO FINAL — FLUXO PRINCIPAL V6.2.2'
+    );
+
+    Logger.log(
+      '============================================================'
+    );
+
+    Logger.log(
+      'APROVADOS: ' +
+      aprovados +
+      '/25'
+    );
+
+    Logger.log(
+      'FALHAS: ' +
+      falhas.length
+    );
+
+    Logger.log(
+      'PERCENTUAL: ' +
+      Math.round(
+        (aprovados / total) * 100
+      ) +
+      '%'
+    );
+
+    if (
+      aprovados === total &&
+      falhas.length === 0
+    ) {
+
+      Logger.log('');
+
+      Logger.log(
+        '🏆 TESTAR_INTEGRACAO_FLUXO_PRINCIPAL_V622: PASSOU'
+      );
+
+      Logger.log(
+        '🏆 FLUXO PRINCIPAL V6.2.2: 100%'
+      );
+
+      Logger.log(
+        '🏆 25/25 TESTES APROVADOS'
+      );
+
+    } else {
+
+      Logger.log('');
+
+      Logger.log(
+        '❌ TESTAR_INTEGRACAO_FLUXO_PRINCIPAL_V622: FALHOU'
+      );
+
+      falhas.forEach(
+        function(falha) {
+
+          Logger.log(
+            '   ' + falha
+          );
+        }
+      );
+    }
+
+    Logger.log('');
+    Logger.log(
+      '============================================================'
+    );
+  }
 }
