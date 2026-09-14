@@ -907,6 +907,25 @@ function iniciarInvestigacaoV62_(
   const entrada =
     dados || {};
 
+  const dor =
+    entrada.dor ||
+    entrada.dor_principal ||
+    '';
+
+  const processo =
+    entrada.processo ||
+    entrada.processo_resumo ||
+    '';
+
+  const impacto =
+    entrada.impacto ||
+    '';
+
+  const objetivo =
+    entrada.objetivo ||
+    entrada.resultado_desejado ||
+    '';
+
   const investigacao = {
 
     versao:
@@ -922,21 +941,21 @@ function iniciarInvestigacaoV62_(
       entrada.diagnostico_id || '',
 
     problema_central:
-      entrada.dor || '',
+      dor,
 
     processo:
-      entrada.processo || '',
+      processo,
 
     pontos_de_dor:
-      entrada.dor
-        ? [entrada.dor]
+      dor
+        ? [dor]
         : [],
 
     impacto:
-      entrada.impacto
+      impacto
         ? {
             descricao:
-              entrada.impacto
+              impacto
           }
         : {},
 
@@ -948,7 +967,8 @@ function iniciarInvestigacaoV62_(
 
     excecoes: [],
 
-    resultado_desejado: '',
+    resultado_desejado:
+      objetivo,
 
     informacoes: [],
 
