@@ -33,6 +33,8 @@ const SHEETS = {
 
   DIAGNOSTICOS: 'DIAGNOSTICOS',
 
+  INVESTIGACOES: 'INVESTIGACOES',
+
   DORES: 'DORES',
 
   OPORTUNIDADES: 'OPORTUNIDADES',
@@ -47,7 +49,9 @@ const SHEETS = {
 
   METRICAS: 'METRICAS',
 
-  CONFIG: 'CONFIG'
+  CONFIG: 'CONFIG',
+
+  BIBLIOTECA_RESOLUCOES: 'BIBLIOTECA_RESOLUCOES'
 
 };
 
@@ -186,6 +190,8 @@ const ID_PREFIXOS = {
 
   DIAGNOSTICO: 'DIAG',
 
+  INVESTIGACAO: 'INV',
+
   DOR: 'DOR',
 
   OPORTUNIDADE: 'OPP',
@@ -198,7 +204,9 @@ const ID_PREFIXOS = {
 
   FEEDBACK: 'FDB',
 
-  EVENTO: 'EVT'
+  EVENTO: 'EVT',
+
+  RESOLUCAO: 'RES'
 
 };
 /**
@@ -233,7 +241,7 @@ function configurarPropriedadesIniciais_() {
 
     STATUS_SISTEMA: 'DESENVOLVIMENTO',
 
-    MODO_MVP: 'ATIVO'
+    MODO_MVP: 'ATIVO',
 
   };
 
