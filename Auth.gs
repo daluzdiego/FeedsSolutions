@@ -1,16 +1,16 @@
 /**
  * ============================================================
  * NEURO SOLUTIONS — MVP V1
- * CODE.GS
+ * AUTH.GS
  * ============================================================
  *
- * Núcleo da aplicação.
+ * AUTENTICAÇÃO DO ADMINISTRADOR
  *
- * RESPONSABILIDADES:
- * - Entrada do Web App
- * - Roteamento público/admin
- * - Inicialização do sistema
- * - Comunicação com módulos
+ * IMPORTANTE:
+ * - A senha NÃO fica neste arquivo.
+ * - Credenciais ficam nas Script Properties.
+ * - Dados administrativos só são retornados após validação
+ *   da sessão no servidor.
  *
  * ============================================================
  */
@@ -18,207 +18,317 @@
 
 /**
  * ------------------------------------------------------------
- * DO GET
+ * CONFIGURA CREDENCIAL ADMINISTRATIVA INICIAL
  * ------------------------------------------------------------
  *
- * Define qual página HTML será entregue.
+ * EXECUTE MANUALMENTE UMA ÚNICA VEZ.
  *
- * URLs:
- *
- * /exec
- * → área pública
- *
- * /exec?page=admin
- * → login administrativo
- *
- * /exec?page=admin&view=dashboard
- * → painel administrativo
- *
- * A segurança REAL do admin não depende da URL.
- * As funções administrativas também validam sessão no servidor.
+ * IMPORTANTE:
+ * Troque os valores abaixo antes de executar.
  */
-function doGet(e) {
+function configurarAdministradorInicial() {
 
-  const params = e && e.parameter ? e.parameter : {};
+  const email = 'diego.daluz@redeicm.org.br';
 
-  const page = params.page || 'public';
+  const senha = 'Dlk163026@';
 
-  if (page === 'admin') {
-
-    return HtmlService
-      .createTemplateFromFile('Admin')
-      .evaluate()
-      .setTitle(APP_NAME + ' — Administração')
-      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
-  }
-
-  return HtmlService
-    .createTemplateFromFile('Index')
-    .evaluate()
-    .setTitle(APP_NAME)
-    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
-}
-
-
-/**
- * ------------------------------------------------------------
- * INCLUIR ARQUIVOS HTML
- * ------------------------------------------------------------
- */
-function include(filename) {
-
-  return HtmlService
-    .createHtmlOutputFromFile(filename)
-    .getContent();
-}
-
-
-/**
- * ------------------------------------------------------------
- * INICIALIZAÇÃO
- * ------------------------------------------------------------
- *
- * Executar manualmente uma vez após instalar o código.
- */
-function inicializarSistema() {
-
-  verificarEstruturaPlanilha_();
-
-  configurarPropriedadesIniciais_();
-
-  registrarEvento_(
-    'SISTEMA_INICIALIZADO',
-    '',
-    '',
-    'MVP V1'
-  );
-
-  return {
-    sucesso: true,
-    mensagem: 'Sistema inicializado com sucesso.',
-    versao: APP_VERSION
-  };
-}
-
-
-/**
- * ------------------------------------------------------------
- * VERIFICA ESTRUTURA
- * ------------------------------------------------------------
- */
-function verificarEstruturaPlanilha_() {
-
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-
-  const abasObrigatorias = [
-    'EMPRESAS',
-    'CONVERSAS',
-    'DIAGNOSTICOS',
-    'DORES',
-    'SOLUCOES',
-    'DIAGNOSTICO_SOLUCOES',
-    'LEADS',
-    'FEEDBACK',
-    'METRICAS',
-    'CONFIG'
-  ];
-
-  const faltantes = [];
-
-  abasObrigatorias.forEach(function(nome) {
-
-    if (!ss.getSheetByName(nome)) {
-      faltantes.push(nome);
-    }
-
-  });
-
-  if (faltantes.length > 0) {
+  if (
+    email === 'admin@seudominio.com' ||
+    senha === 'ALTERE_ESTA_SENHA'
+  ) {
 
     throw new Error(
-      'As seguintes abas não foram encontradas: ' +
-      faltantes.join(', ') +
-      '. Execute primeiro a função criarEstruturaMVP().'
+      'Antes de executar, altere o e-mail e a senha dentro da função configurarAdministradorInicial().'
     );
   }
 
-  return true;
-}
+  const props = PropertiesService.getScriptProperties();
 
+  props.setProperties({
 
-/**
- * ------------------------------------------------------------
- * HEALTH CHECK
- * ------------------------------------------------------------
- *
- * Função administrativa para verificar se a infraestrutura
- * básica está funcionando.
- */
-function verificarSistema() {
+    ADMIN_EMAIL: email,
 
-  verificarEstruturaPlanilha_();
+    ADMIN_PASSWORD_HASH: gerarHashSenha_(senha)
 
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  });
 
   return {
     sucesso: true,
-    sistema: APP_NAME,
-    versao: APP_VERSION,
-    planilha: ss.getName(),
-    timestamp: new Date().toISOString()
+    mensagem: 'Administrador configurado.'
   };
 }
 
 
 /**
  * ------------------------------------------------------------
- * TESTE DO NÚCLEO
+ * LOGIN
  * ------------------------------------------------------------
- *
- * Executar manualmente depois da instalação.
  */
-function testeNucleo() {
+function loginAdmin(email, senha) {
 
-  verificarEstruturaPlanilha_();
+  if (!email || !senha) {
 
-  const empresa = salvarEmpresa_({
-    nome_empresa: 'EMPRESA TESTE MVP',
-    segmento: 'Teste',
-    porte: 'Pequeno',
-    nome_contato: 'Contato Teste',
-    whatsapp: '5599999999999',
-    email: 'teste@example.com',
-    cidade: 'Teste'
-  });
+    return {
+      sucesso: false,
+      mensagem: 'Informe usuário e senha.'
+    };
+  }
 
-  const conversaId = gerarId_('CONV');
+  const props = PropertiesService.getScriptProperties();
 
-  salvarMensagem_({
-    mensagem_id: gerarId_('MSG'),
-    conversa_id: conversaId,
-    empresa_id: empresa.empresa_id,
-    remetente: 'usuario',
-    mensagem: 'Mensagem de teste do núcleo.',
-    tipo: 'teste',
-    ordem: 1
-  });
+  const emailConfigurado = props.getProperty('ADMIN_EMAIL');
 
-  const diagnostico = criarDiagnostico_({
-    empresa_id: empresa.empresa_id,
-    conversa_id: conversaId
-  });
+  const hashConfigurado = props.getProperty(
+    'ADMIN_PASSWORD_HASH'
+  );
+
+  if (!emailConfigurado || !hashConfigurado) {
+
+    return {
+      sucesso: false,
+      mensagem: 'Administrador ainda não configurado.'
+    };
+  }
+
+  const hashInformado = gerarHashSenha_(senha);
+
+  const emailValido =
+    normalizarTexto_(email) ===
+    normalizarTexto_(emailConfigurado);
+
+  const senhaValida =
+    hashInformado === hashConfigurado;
+
+  if (!emailValido || !senhaValida) {
+
+    registrarEvento_(
+      'LOGIN_ADMIN_FALHOU',
+      '',
+      '',
+      email
+    );
+
+    return {
+      sucesso: false,
+      mensagem: 'Usuário ou senha inválidos.'
+    };
+  }
+
+  const token = gerarTokenSessao_();
+
+  const agora = Date.now();
+
+  const expiraEm =
+    agora + (60 * 60 * 1000);
+
+  const dadosSessao = {
+
+    token: token,
+
+    email: emailConfigurado,
+
+    criadoEm: agora,
+
+    expiraEm: expiraEm
+
+  };
+
+  CacheService
+    .getScriptCache()
+    .put(
+      'ADMIN_SESSION_' + token,
+      JSON.stringify(dadosSessao),
+      3600
+    );
 
   registrarEvento_(
-    'TESTE_NUCLEO',
-    conversaId,
-    empresa.empresa_id,
-    diagnostico.diagnostico_id
+    'LOGIN_ADMIN_SUCESSO',
+    '',
+    '',
+    emailConfigurado
   );
 
   return {
+
     sucesso: true,
-    empresa: empresa,
-    conversa_id: conversaId,
-    diagnostico: diagnostico
+
+    token: token,
+
+    expiraEm: expiraEm,
+
+    email: emailConfigurado
+
   };
+}
+
+
+/**
+ * ------------------------------------------------------------
+ * VALIDAR SESSÃO
+ * ------------------------------------------------------------
+ */
+function validarSessaoAdmin(token) {
+
+  if (!token) {
+
+    return {
+      valido: false,
+      mensagem: 'Sessão não informada.'
+    };
+  }
+
+  const cache = CacheService.getScriptCache();
+
+  const dados = cache.get(
+    'ADMIN_SESSION_' + token
+  );
+
+  if (!dados) {
+
+    return {
+      valido: false,
+      mensagem: 'Sessão expirada ou inválida.'
+    };
+  }
+
+  let sessao;
+
+  try {
+
+    sessao = JSON.parse(dados);
+
+  } catch (erro) {
+
+    return {
+      valido: false,
+      mensagem: 'Sessão inválida.'
+    };
+  }
+
+  if (
+    !sessao.expiraEm ||
+    Date.now() >= sessao.expiraEm
+  ) {
+
+    cache.remove(
+      'ADMIN_SESSION_' + token
+    );
+
+    return {
+      valido: false,
+      mensagem: 'Sessão expirada.'
+    };
+  }
+
+  return {
+
+    valido: true,
+
+    email: sessao.email,
+
+    expiraEm: sessao.expiraEm
+
+  };
+}
+
+
+/**
+ * ------------------------------------------------------------
+ * LOGOUT
+ * ------------------------------------------------------------
+ */
+function logoutAdmin(token) {
+
+  if (!token) {
+
+    return {
+      sucesso: true
+    };
+  }
+
+  CacheService
+    .getScriptCache()
+    .remove(
+      'ADMIN_SESSION_' + token
+    );
+
+  registrarEvento_(
+    'LOGOUT_ADMIN',
+    '',
+    '',
+    ''
+  );
+
+  return {
+    sucesso: true
+  };
+}
+
+
+/**
+ * ------------------------------------------------------------
+ * PROTEÇÃO CENTRAL
+ * ------------------------------------------------------------
+ *
+ * Todas as funções administrativas deverão chamar esta
+ * função antes de entregar dados.
+ */
+function exigirSessaoAdmin_(token) {
+
+  const sessao = validarSessaoAdmin(token);
+
+  if (!sessao.valido) {
+
+    throw new Error(
+      'ACESSO_NEGADO: ' +
+      (sessao.mensagem || 'Sessão inválida.')
+    );
+  }
+
+  return sessao;
+}
+
+
+/**
+ * ------------------------------------------------------------
+ * HASH DE SENHA
+ * ------------------------------------------------------------
+ */
+function gerarHashSenha_(senha) {
+
+  const bytes = Utilities
+    .computeDigest(
+      Utilities.DigestAlgorithm.SHA_256,
+      senha,
+      Utilities.Charset.UTF_8
+    );
+
+  return bytes
+    .map(function(byte) {
+
+      const valor = byte < 0
+        ? byte + 256
+        : byte;
+
+      return ('0' + valor.toString(16))
+        .slice(-2);
+
+    })
+    .join('');
+}
+
+
+/**
+ * ------------------------------------------------------------
+ * TOKEN DE SESSÃO
+ * ------------------------------------------------------------
+ */
+function gerarTokenSessao_() {
+
+  return Utilities
+    .getUuid()
+    .replace(/-/g, '') +
+    Utilities
+      .getUuid()
+      .replace(/-/g, '');
 }
