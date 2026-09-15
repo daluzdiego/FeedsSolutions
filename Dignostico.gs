@@ -608,15 +608,141 @@ const investigacaoV622 =
 
   /*
    * ==========================================================
-   * DETERMINAR RESPOSTA
+   * V6.3 — INTEGRAÇÃO DEFINITIVA DA RESPOSTA
+   * ==========================================================
+   *
+   * O legado continua sendo calculado normalmente.
+   *
+   * A V6.3 só pode assumir a resposta quando:
+   *
+   * - Triagem = COMPATIVEL
+   * - Investigação = PRONTA_PARA_SOLUCAO
+   * - contexto possui todos os IDs
+   * - Ponte V6.3 retorna resultado válido
+   * - resposta segura existe
+   *
+   * Se qualquer condição falhar:
+   * → resposta legada permanece.
+   *
    * ==========================================================
    */
 
-  const resposta =
+  const respostaLegada =
     obterRespostaConversa_(
       analiseContinuidade,
       novoEstado
     );
+
+
+  const resultadoFluxoParaV63 = {
+
+    empresa_id:
+      empresaId,
+
+    conversa_id:
+      conversaId,
+
+    diagnostico_id:
+      novoDiagnostico.diagnostico_id,
+
+    resposta:
+      respostaLegada,
+
+    diagnostico:
+      novoDiagnostico,
+
+    triagem:
+      triagemV622,
+
+    investigacao:
+      investigacaoV622,
+
+    oportunidade:
+      oportunidadeV57,
+
+    analise_diagnostica:
+      analiseDiagnosticaV58,
+
+    solucoes:
+      solucoesDiagnosticoV595
+
+  };
+
+
+  let integracaoV63 =
+    null;
+
+
+  try {
+
+    integracaoV63 =
+      integrarV63AoFluxoPrincipal_(
+        mensagem,
+        resultadoFluxoParaV63
+      );
+
+  } catch (erroV63) {
+
+    /*
+     * A integração V6.3 nunca pode derrubar
+     * o fluxo principal.
+     */
+
+    Logger.log(
+      '⚠️ ERRO NÃO FATAL NA INTEGRAÇÃO V6.3: ' +
+      (
+        erroV63 &&
+        erroV63.message
+          ? erroV63.message
+          : erroV63
+      )
+    );
+
+
+    integracaoV63 = {
+
+      sucesso:
+        true,
+
+      ativada:
+        false,
+
+      motivo:
+        'V63_INDISPONIVEL',
+
+      resposta_cliente:
+        respostaLegada,
+
+      resposta_legada:
+        respostaLegada,
+
+      resultado_v63:
+        null,
+
+      contexto:
+        null,
+
+      fallback:
+        true
+
+    };
+
+  }
+
+
+  /*
+   * A resposta oficial só muda se a V6.3
+   * tiver sido realmente aprovada pelo adaptador.
+   */
+
+  const resposta =
+    (
+      integracaoV63 &&
+      integracaoV63.ativada === true &&
+      integracaoV63.resposta_cliente
+    )
+      ? integracaoV63.resposta_cliente
+      : respostaLegada;
 
 
   /*
@@ -832,11 +958,25 @@ const investigacaoV622 =
       }
     : null,
 
-triagem:
-  triagemV622,
+ triagem:
+    triagemV622,
 
-investigacao:
-  investigacaoV622
+  investigacao:
+    investigacaoV622,
+
+  /*
+   * ----------------------------------------------------------
+   * V6.3 — RESULTADO DA INTEGRAÇÃO
+   * ----------------------------------------------------------
+   *
+   * Mantemos o objeto completo para a interface,
+   * auditoria e próximos testes.
+   *
+   * ----------------------------------------------------------
+   */
+
+  integracao_v63:
+    integracaoV63
 
 };
 
@@ -45801,11 +45941,12 @@ function TESTAR_DIAGNOSTICO_OBJETIVO_V623() {
     );
 
     teste(
-      6,
-      'investigação V6.2 criada',
-      !!investigacao &&
-      !!investigacao.investigacao_id
-    );
+  6,
+  'investigação V6.2 criada',
+  !!investigacao &&
+  investigacao.diagnostico_id ===
+    diagnosticoId
+);
 
 
     // ==========================================================
@@ -45826,17 +45967,78 @@ function TESTAR_DIAGNOSTICO_OBJETIVO_V623() {
 
     let investigacaoPersistida = null;
 
-    if (
-      investigacao &&
-      investigacao.investigacao_id
-    ) {
+Logger.log('');
+Logger.log('============================================================');
+Logger.log('DEBUG — ANTES DA PERSISTÊNCIA');
+Logger.log('============================================================');
 
-      investigacaoPersistida =
-        salvarInvestigacaoV62_(
-          investigacao
-        );
+Logger.log(
+  'investigacao_id: ' +
+  String(
+    investigacao &&
+    investigacao.investigacao_id || ''
+  )
+);
 
-    }
+Logger.log(
+  'diagnostico_id: ' +
+  String(
+    investigacao &&
+    investigacao.diagnostico_id || ''
+  )
+);
+
+Logger.log(
+  'resultado_desejado: ' +
+  String(
+    investigacao &&
+    investigacao.resultado_desejado || ''
+  )
+);
+
+Logger.log(
+  'investigacao completa:'
+);
+
+Logger.log(
+  JSON.stringify(
+    investigacao,
+    null,
+    2
+  )
+);
+
+if (
+  investigacao &&
+  investigacao.diagnostico_id
+) {
+
+  investigacaoPersistida =
+    salvarInvestigacaoV62_(
+      investigacao
+    );
+}
+
+ else {
+
+  Logger.log(
+    '❌ NÃO EXECUTOU salvarInvestigacaoV62_(): investigação sem ID.'
+  );
+
+}
+
+Logger.log('');
+Logger.log('============================================================');
+Logger.log('DEBUG — DEPOIS DA PERSISTÊNCIA');
+Logger.log('============================================================');
+
+Logger.log(
+  JSON.stringify(
+    investigacaoPersistida,
+    null,
+    2
+  )
+);
 
     Logger.log('');
     Logger.log(
@@ -45894,16 +46096,18 @@ function TESTAR_DIAGNOSTICO_OBJETIVO_V623() {
     // 10 — INTEGRIDADE FINAL
     // ==========================================================
 
-    teste(
-      10,
-      'objetivo percorre todo o caminho sem perda',
-      analiseIA.objetivo === objetivo &&
-      analiseNormalizada.objetivo === objetivo &&
-      analiseContinuidade.objetivo === objetivo &&
-      novoDiagnostico.objetivo === objetivo &&
-      investigacao.resultado_desejado === objetivo &&
-      recuperada.resultado_desejado === objetivo
-    );
+   teste(
+  10,
+  'objetivo percorre todo o caminho sem perda',
+  analiseIA.objetivo === objetivo &&
+  analiseNormalizada.objetivo === objetivo &&
+  analiseContinuidade.objetivo === objetivo &&
+  novoDiagnostico.objetivo === objetivo &&
+  !!investigacao &&
+  investigacao.resultado_desejado === objetivo &&
+  !!recuperada &&
+  recuperada.resultado_desejado === objetivo
+);
 
 
     // ==========================================================
@@ -46206,4 +46410,140 @@ if (investigacaoIdPersistida) {
     Logger.log(erro && erro.stack ? erro.stack : erro);
 
   }
+}
+
+function TESTAR_PERSISTENCIA_DIRETA_V623() {
+
+  Logger.log('');
+  Logger.log('============================================================');
+  Logger.log('V6.2.3 — TESTE DIRETO DA PERSISTÊNCIA');
+  Logger.log('============================================================');
+
+  const diagnosticoId =
+    gerarIdDiagnostico_('DIA');
+
+  const investigacao = {
+
+    investigacao_id:
+      gerarId_(ID_PREFIXOS.INVESTIGACAO),
+
+    empresa_id:
+      'TESTE-DIRETO-V623',
+
+    conversa_id:
+      'TESTE-DIRETO-CONV-V623',
+
+    diagnostico_id:
+      diagnosticoId,
+
+    versao:
+      'V6.2',
+
+    problema_central:
+      'Teste direto de persistência',
+
+    processo:
+      'Teste controlado',
+
+    pontos_de_dor: [
+      'Teste de persistência'
+    ],
+
+    impacto: {
+      descricao:
+        'Teste controlado'
+    },
+
+    excecoes: [],
+
+    resultado_desejado:
+      'Persistir corretamente esta investigação',
+
+    informacoes: [],
+
+    lacunas: [],
+
+    confianca:
+      'ALTA',
+
+    estado:
+      'PRONTA_PARA_SOLUCAO',
+
+    proxima_dimensao:
+      null,
+
+    proxima_pergunta:
+      '',
+
+    perguntas_realizadas: []
+
+  };
+
+  Logger.log('');
+  Logger.log('INVESTIGAÇÃO ENVIADA:');
+  Logger.log(
+    JSON.stringify(
+      investigacao,
+      null,
+      2
+    )
+  );
+
+  const retorno =
+    salvarInvestigacaoV62_(
+      investigacao
+    );
+
+  Logger.log('');
+  Logger.log('RETORNO REAL DA FUNÇÃO:');
+  Logger.log(
+    JSON.stringify(
+      retorno,
+      null,
+      2
+    )
+  );
+
+  Logger.log('');
+  Logger.log('BUSCA IMEDIATA POR ID:');
+
+  const recuperada =
+    buscarInvestigacaoV62_({
+      investigacao_id:
+        investigacao.investigacao_id
+    });
+
+  Logger.log(
+    JSON.stringify(
+      recuperada,
+      null,
+      2
+    )
+  );
+
+  Logger.log('');
+  Logger.log('RESULTADO:');
+
+  if (
+    retorno &&
+    retorno.sucesso === true &&
+    recuperada &&
+    recuperada.investigacao_id ===
+      investigacao.investigacao_id &&
+    recuperada.resultado_desejado ===
+      investigacao.resultado_desejado
+  ) {
+
+    Logger.log(
+      '🏆 PERSISTÊNCIA DIRETA: 100/100'
+    );
+
+  } else {
+
+    Logger.log(
+      '❌ PERSISTÊNCIA DIRETA: FALHOU'
+    );
+
+  }
+
 }
