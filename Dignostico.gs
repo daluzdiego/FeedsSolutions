@@ -46547,3 +46547,894 @@ function TESTAR_PERSISTENCIA_DIRETA_V623() {
   }
 
 }
+
+function TESTAR_DEDUPLICACAO_MEDIDAS_V561() {
+
+  Logger.log('');
+  Logger.log('============================================================');
+  Logger.log('V5.6.1 — TESTE CIRÚRGICO DE DEDUPLICAÇÃO DE MEDIDAS');
+  Logger.log('============================================================');
+
+  let passou = 0;
+  let falhou = 0;
+
+  function teste(numero, descricao, condicao) {
+
+    if (condicao) {
+
+      passou++;
+
+      Logger.log(
+        '✅ ' +
+        numero +
+        ' — ' +
+        descricao
+      );
+
+    } else {
+
+      falhou++;
+
+      Logger.log(
+        '❌ ' +
+        numero +
+        ' — ' +
+        descricao
+      );
+
+    }
+
+  }
+
+
+  try {
+
+    // ==========================================================
+    // 1. CRIAR DIAGNÓSTICO ISOLADO
+    // ==========================================================
+
+    const inicio =
+      iniciarDiagnostico({
+
+        nome:
+          'TESTE V5.6.1 — DEDUPLICAÇÃO',
+
+        celular:
+          '51999999999',
+
+        whatsapp:
+          '51999999999',
+
+        email:
+          'teste-v561@mvp.local',
+
+        segmento:
+          'Teste',
+
+        porte:
+          'Teste',
+
+        cidade:
+          'Teste'
+
+      });
+
+
+    Logger.log('');
+    Logger.log('IDENTIFICADORES DO TESTE:');
+
+    Logger.log(
+      JSON.stringify(
+        inicio,
+        null,
+        2
+      )
+    );
+
+
+    teste(
+      1,
+      'diagnóstico de teste criado',
+      !!inicio &&
+      !!inicio.empresa_id &&
+      !!inicio.conversa_id &&
+      !!inicio.diagnostico_id
+    );
+
+
+    // ==========================================================
+    // 2. PRIMEIRA MEDIDA
+    // ==========================================================
+
+    const diagnostico =
+      obterDiagnosticoAtual_(
+        inicio.empresa_id,
+        inicio.conversa_id
+      );
+
+
+    teste(
+      2,
+      'diagnóstico recuperado',
+      !!diagnostico
+    );
+
+
+    const analiseBase = {
+
+      processo:
+        'Teste controlado',
+
+      dor_principal:
+        '',
+
+      frequencia:
+        'Diária',
+
+      impacto:
+        '',
+
+      volume:
+        '80 pedidos por dia',
+
+      objetivo:
+        ''
+
+    };
+
+
+    registrarNovasInformacoesDiagnostico_(
+      diagnostico,
+      analiseBase,
+      'São 80 pedidos por dia.'
+    );
+
+
+    // ==========================================================
+    // 3. LER MEDIDAS APÓS PRIMEIRA GRAVAÇÃO
+    // ==========================================================
+
+    let medidas =
+      obterMedidasDiagnostico_(
+        inicio.empresa_id,
+        inicio.conversa_id
+      );
+
+
+    Logger.log('');
+    Logger.log('MEDIDAS APÓS PRIMEIRA GRAVAÇÃO:');
+
+    Logger.log(
+      JSON.stringify(
+        medidas,
+        null,
+        2
+      )
+    );
+
+
+    const volumes1 =
+      medidas.filter(
+        function(medida) {
+
+          return (
+            medida &&
+            String(
+              medida.tipo || ''
+            ).toUpperCase() ===
+              'VOLUME'
+          );
+
+        }
+      );
+
+
+    teste(
+      3,
+      'primeiro VOLUME foi registrado',
+      volumes1.length === 1
+    );
+
+
+    // ==========================================================
+    // 4. TENTAR REGISTRAR EXATAMENTE A MESMA MEDIDA
+    // ==========================================================
+
+    registrarNovasInformacoesDiagnostico_(
+      diagnostico,
+      analiseBase,
+      'São 80 pedidos por dia.'
+    );
+
+
+    medidas =
+      obterMedidasDiagnostico_(
+        inicio.empresa_id,
+        inicio.conversa_id
+      );
+
+
+    const volumes2 =
+      medidas.filter(
+        function(medida) {
+
+          return (
+            medida &&
+            String(
+              medida.tipo || ''
+            ).toUpperCase() ===
+              'VOLUME'
+          );
+
+        }
+      );
+
+
+    teste(
+      4,
+      'mesma medida não foi duplicada',
+      volumes2.length === 1
+    );
+
+
+    // ==========================================================
+    // 5. TENTAR REGISTRAR VARIAÇÃO SEMÂNTICA
+    // ==========================================================
+    //
+    // "80 pedidos/dia"
+    //
+    // deve ser tratado como equivalente a:
+    //
+    // "80 pedidos por dia"
+    //
+    // ==========================================================
+
+    registrarEventoDiagnostico_(
+      'MEDIDA_DIAGNOSTICO',
+      {
+
+        empresa_id:
+          inicio.empresa_id,
+
+        conversa_id:
+          inicio.conversa_id,
+
+        valor:
+          {
+            tipo:
+              'VOLUME',
+
+            texto:
+              '80 pedidos/dia'
+          }
+
+      }
+    );
+
+
+    medidas =
+      obterMedidasDiagnostico_(
+        inicio.empresa_id,
+        inicio.conversa_id
+      );
+
+
+    const volumes3 =
+      medidas.filter(
+        function(medida) {
+
+          return (
+            medida &&
+            String(
+              medida.tipo || ''
+            ).toUpperCase() ===
+              'VOLUME'
+          );
+
+        }
+      );
+
+
+    teste(
+      5,
+      'variação equivalente 80 pedidos/dia também foi bloqueada',
+      volumes3.length === 1
+    );
+
+
+    // ==========================================================
+    // 6. TENTAR REGISTRAR UMA MEDIDA REALMENTE DIFERENTE
+    // ==========================================================
+    //
+    // 120 pedidos por dia
+    //
+    // ESTA deve ser aceita.
+    //
+    // ==========================================================
+
+    registrarEventoDiagnostico_(
+      'MEDIDA_DIAGNOSTICO',
+      {
+
+        empresa_id:
+          inicio.empresa_id,
+
+        conversa_id:
+          inicio.conversa_id,
+
+        valor:
+          {
+            tipo:
+              'VOLUME',
+
+            texto:
+              '120 pedidos por dia'
+          }
+
+      }
+    );
+
+
+    medidas =
+      obterMedidasDiagnostico_(
+        inicio.empresa_id,
+        inicio.conversa_id
+      );
+
+
+    const volumes4 =
+      medidas.filter(
+        function(medida) {
+
+          return (
+            medida &&
+            String(
+              medida.tipo || ''
+            ).toUpperCase() ===
+              'VOLUME'
+          );
+
+        }
+      );
+
+
+    teste(
+      6,
+      'medida diferente foi aceita',
+      volumes4.length === 2
+    );
+
+
+    // ==========================================================
+    // 7. TENTAR DUPLICAR NOVAMENTE O NOVO VOLUME
+    // ==========================================================
+
+    registrarEventoDiagnostico_(
+      'MEDIDA_DIAGNOSTICO',
+      {
+
+        empresa_id:
+          inicio.empresa_id,
+
+        conversa_id:
+          inicio.conversa_id,
+
+        valor:
+          {
+            tipo:
+              'VOLUME',
+
+            texto:
+              '120 pedidos por dia'
+          }
+
+      }
+    );
+
+
+    medidas =
+      obterMedidasDiagnostico_(
+        inicio.empresa_id,
+        inicio.conversa_id
+      );
+
+
+    const volumes5 =
+      medidas.filter(
+        function(medida) {
+
+          return (
+            medida &&
+            String(
+              medida.tipo || ''
+            ).toUpperCase() ===
+              'VOLUME'
+          );
+
+        }
+      );
+
+
+    teste(
+      7,
+      'segunda ocorrência de 120 pedidos por dia foi bloqueada',
+      volumes5.length === 2
+    );
+
+
+    // ==========================================================
+    // 8. VERIFICAR TOTAL DE MEDIDAS
+    // ==========================================================
+
+    Logger.log('');
+    Logger.log('MEDIDAS FINAIS:');
+
+    Logger.log(
+      JSON.stringify(
+        medidas,
+        null,
+        2
+      )
+    );
+
+
+    teste(
+      8,
+      'total final de VOLUMES é exatamente 2',
+      volumes5.length === 2
+    );
+
+
+    // ==========================================================
+    // 9. VERIFICAR ÚLTIMO VOLUME
+    // ==========================================================
+
+    const ultimoVolume =
+      obterUltimoVolumeDiagnostico_(
+        medidas
+      );
+
+
+    Logger.log('');
+    Logger.log(
+      'ÚLTIMO VOLUME: ' +
+      ultimoVolume
+    );
+
+
+    teste(
+      9,
+      'último volume recuperado corretamente',
+      ultimoVolume ===
+        '120 pedidos por dia'
+    );
+
+
+    // ==========================================================
+    // 10. RESULTADO FINAL
+    // ==========================================================
+
+    Logger.log('');
+    Logger.log('============================================================');
+
+    Logger.log(
+      'RESULTADO V5.6.1: ' +
+      passou +
+      '/' +
+      (passou + falhou)
+    );
+
+    Logger.log('============================================================');
+
+
+    if (falhou === 0) {
+
+      Logger.log('');
+      Logger.log(
+        '🏆 TESTAR_DEDUPLICACAO_MEDIDAS_V561: PASSOU'
+      );
+
+      Logger.log(
+        'A proteção contra duplicação de medidas está funcionando.'
+      );
+
+    } else {
+
+      Logger.log('');
+      Logger.log(
+        '❌ TESTAR_DEDUPLICACAO_MEDIDAS_V561: FALHOU'
+      );
+
+      throw new Error(
+        'V5.6.1 FALHOU: ' +
+        falhou +
+        ' teste(s) reprovado(s).'
+      );
+
+    }
+
+
+    return {
+
+      aprovado:
+        falhou === 0,
+
+      passou:
+        passou,
+
+      falhou:
+        falhou,
+
+      empresa_id:
+        inicio.empresa_id,
+
+      conversa_id:
+        inicio.conversa_id,
+
+      diagnostico_id:
+        inicio.diagnostico_id,
+
+      medidas:
+        medidas,
+
+      ultimo_volume:
+        ultimoVolume
+
+    };
+
+
+  } catch (erro) {
+
+    Logger.log('');
+    Logger.log(
+      '💥 ERRO NO TESTE V5.6.1'
+    );
+
+    Logger.log(
+      erro &&
+      erro.stack
+        ? erro.stack
+        : erro
+    );
+
+    throw erro;
+
+  }
+
+}
+
+function TESTAR_FLUXO_REAL_DEDUPLICACAO_MEDIDAS_V562() {
+
+  Logger.log("============================================================");
+  Logger.log("TESTAR_FLUXO_REAL_DEDUPLICACAO_MEDIDAS_V562");
+  Logger.log("============================================================");
+
+  var erros = [];
+  var resultados = {};
+
+  try {
+
+    // ============================================================
+    // 1. CRIAR EMPRESA / DIAGNÓSTICO ISOLADO
+    // ============================================================
+
+    var dadosEmpresa = {
+      nome: "TESTE V5.6.2 - EMPRESA ISOLADA",
+      segmento: "Teste",
+      responsavel: "Teste V5.6.2"
+    };
+
+    var inicio = iniciarDiagnostico(dadosEmpresa);
+
+    if (!inicio || !inicio.empresa_id || !inicio.conversa_id || !inicio.diagnostico_id) {
+      erros.push("Não foi possível iniciar o diagnóstico isolado.");
+      throw new Error("Falha ao iniciar diagnóstico.");
+    }
+
+    var empresaId = inicio.empresa_id;
+    var conversaId = inicio.conversa_id;
+
+    Logger.log("EMPRESA_ID: " + empresaId);
+    Logger.log("CONVERSA_ID: " + conversaId);
+    Logger.log("DIAGNOSTICO_ID: " + inicio.diagnostico_id);
+
+    // ============================================================
+    // 2. MENSAGEM 1 — TEMPO
+    // ============================================================
+
+    var m1 =
+      "Minha funcionária perde três horas por dia colocando pedidos manualmente em uma planilha.";
+
+    var r1 = processarMensagemDiagnostico({
+      empresa_id: empresaId,
+      conversa_id: conversaId,
+      mensagem: m1
+    });
+
+    if (!r1) {
+      erros.push("Rodada 1 não retornou resultado.");
+    }
+
+    // ============================================================
+    // 3. MENSAGEM 2 — PROCESSO
+    // ============================================================
+
+    var m2 =
+      "Depois que entram na planilha, usamos essas informações para separar os pedidos e enviar para a produção.";
+
+    var r2 = processarMensagemDiagnostico({
+      empresa_id: empresaId,
+      conversa_id: conversaId,
+      mensagem: m2
+    });
+
+    if (!r2) {
+      erros.push("Rodada 2 não retornou resultado.");
+    }
+
+    // ============================================================
+    // 4. MENSAGEM 3 — VOLUME
+    // ============================================================
+
+    var m3 =
+      "São aproximadamente 80 pedidos por dia.";
+
+    var r3 = processarMensagemDiagnostico({
+      empresa_id: empresaId,
+      conversa_id: conversaId,
+      mensagem: m3
+    });
+
+    if (!r3) {
+      erros.push("Rodada 3 não retornou resultado.");
+    }
+
+    // ============================================================
+    // 5. MENSAGEM 4 — DOR
+    // ============================================================
+
+    var m4 =
+      "Depois disso, alguns pedidos ainda precisam ser conferidos novamente porque às vezes há erros de digitação.";
+
+    var r4 = processarMensagemDiagnostico({
+      empresa_id: empresaId,
+      conversa_id: conversaId,
+      mensagem: m4
+    });
+
+    if (!r4) {
+      erros.push("Rodada 4 não retornou resultado.");
+    }
+
+    // ============================================================
+    // 6. LER ESTADO FINAL
+    // ============================================================
+
+    var diagnosticoFinal = obterDiagnosticoAtual_(empresaId, conversaId);
+
+    if (!diagnosticoFinal) {
+      erros.push("Diagnóstico final não encontrado.");
+      throw new Error("Diagnóstico final inexistente.");
+    }
+
+    // ============================================================
+    // 7. MEDIDAS
+    // ============================================================
+
+    var medidas = obterMedidasDiagnostico_(empresaId, conversaId) || [];
+
+    var volumes = medidas.filter(function(m) {
+      return String(m.tipo || "").toUpperCase() === "VOLUME";
+    });
+
+    var tempos = medidas.filter(function(m) {
+      return String(m.tipo || "").toUpperCase() === "TEMPO";
+    });
+
+    resultados.total_medidas = medidas.length;
+    resultados.total_volume = volumes.length;
+    resultados.total_tempo = tempos.length;
+
+    Logger.log("------------------------------------------------------------");
+    Logger.log("MEDIDAS FINAIS");
+    Logger.log(JSON.stringify(medidas, null, 2));
+    Logger.log("TOTAL DE MEDIDAS: " + medidas.length);
+    Logger.log("TOTAL VOLUME: " + volumes.length);
+    Logger.log("TOTAL TEMPO: " + tempos.length);
+
+    // ============================================================
+    // 8. VERIFICAR DUPLICAÇÃO DE MEDIDAS
+    // ============================================================
+
+    var chavesMedidas = {};
+
+    medidas.forEach(function(m) {
+
+      var chave = normalizarChaveMedidaDiagnostico_(
+        m.tipo,
+        m.texto
+      );
+
+      if (chavesMedidas[chave]) {
+        erros.push(
+          "Medida duplicada encontrada no fluxo real: " + chave
+        );
+      }
+
+      chavesMedidas[chave] = true;
+    });
+
+    resultados.medidas_unicas =
+      Object.keys(chavesMedidas).length === medidas.length;
+
+    // ============================================================
+    // 9. VOLUME FINAL
+    // ============================================================
+
+    var ultimoVolume = obterUltimoVolumeDiagnostico_(medidas);
+
+    resultados.ultimo_volume = ultimoVolume;
+
+    Logger.log("ÚLTIMO VOLUME: " + ultimoVolume);
+
+    if (
+      !ultimoVolume ||
+      normalizarVolumeDiagnostico_(ultimoVolume) !==
+      normalizarVolumeDiagnostico_("80 pedidos por dia")
+    ) {
+      erros.push(
+        "Volume final incorreto. Esperado: 80 pedidos por dia. Obtido: " +
+        ultimoVolume
+      );
+    }
+
+    // ============================================================
+    // 10. DORES
+    // ============================================================
+
+    var dores = diagnosticoFinal.dores || [];
+
+    resultados.total_dores = dores.length;
+
+    Logger.log("TOTAL DE DORES: " + dores.length);
+    Logger.log("DORES: " + JSON.stringify(dores, null, 2));
+
+    if (dores.length !== 1) {
+      erros.push(
+        "Quantidade de dores incorreta. Esperado: 1. Obtido: " +
+        dores.length
+      );
+    }
+
+    // ============================================================
+    // 11. PROCESSO
+    // ============================================================
+
+    resultados.processo = diagnosticoFinal.processo || "";
+
+    Logger.log("PROCESSO FINAL: " + resultados.processo);
+
+    if (!resultados.processo) {
+      erros.push("Processo não foi acumulado no diagnóstico.");
+    }
+
+    // ============================================================
+    // 12. FREQUÊNCIA
+    // ============================================================
+
+    resultados.frequencia = diagnosticoFinal.frequencia || "";
+
+    Logger.log("FREQUÊNCIA FINAL: " + resultados.frequencia);
+
+    if (!resultados.frequencia) {
+      erros.push("Frequência não foi preservada.");
+    }
+
+    // ============================================================
+    // 13. IMPACTO
+    // ============================================================
+
+    resultados.impacto = diagnosticoFinal.impacto || "";
+
+    Logger.log("IMPACTO FINAL: " + resultados.impacto);
+
+    if (!resultados.impacto) {
+      erros.push("Impacto não foi preservado.");
+    }
+
+    // ============================================================
+    // 14. OBJETIVO
+    // ============================================================
+
+    resultados.objetivo = diagnosticoFinal.objetivo || "";
+
+    Logger.log("OBJETIVO FINAL: " + resultados.objetivo);
+
+    // O objetivo pode ainda não estar concluído neste fluxo.
+    // Portanto, aqui apenas registramos o estado, sem reprovar
+    // o teste por ausência de objetivo.
+
+    // ============================================================
+    // 15. IDEMPOTÊNCIA
+    // ============================================================
+
+    var quantidadeAntesIdempotencia = medidas.length;
+
+    var medidasDepois = obterMedidasDiagnostico_(
+      empresaId,
+      conversaId
+    ) || [];
+
+    var quantidadeDepoisIdempotencia = medidasDepois.length;
+
+    resultados.idempotencia =
+      quantidadeAntesIdempotencia === quantidadeDepoisIdempotencia;
+
+    if (!resultados.idempotencia) {
+      erros.push(
+        "Falha de idempotência: quantidade de medidas mudou entre leituras."
+      );
+    }
+
+    // ============================================================
+    // 16. VALIDAÇÕES FINAIS
+    // ============================================================
+
+    if (resultados.total_volume !== 1) {
+      erros.push(
+        "Esperado exatamente 1 medida VOLUME. Encontrado: " +
+        resultados.total_volume
+      );
+    }
+
+    if (resultados.total_tempo !== 1) {
+      erros.push(
+        "Esperado exatamente 1 medida TEMPO. Encontrado: " +
+        resultados.total_tempo
+      );
+    }
+
+    if (resultados.total_medidas !== 2) {
+      erros.push(
+        "Esperadas exatamente 2 medidas finais. Encontrado: " +
+        resultados.total_medidas
+      );
+    }
+
+    if (!resultados.medidas_unicas) {
+      erros.push("As medidas finais não são únicas.");
+    }
+
+    // ============================================================
+    // 17. RESULTADO
+    // ============================================================
+
+    resultados.aprovado = erros.length === 0;
+    resultados.erros = erros;
+
+    Logger.log("============================================================");
+    Logger.log("RESULTADO V5.6.2");
+    Logger.log("============================================================");
+    Logger.log(JSON.stringify(resultados, null, 2));
+
+    Logger.log(
+      resultados.aprovado
+        ? "🏆 TESTAR_FLUXO_REAL_DEDUPLICACAO_MEDIDAS_V562: PASSOU"
+        : "❌ TESTAR_FLUXO_REAL_DEDUPLICACAO_MEDIDAS_V562: FALHOU"
+    );
+
+    return resultados;
+
+  } catch (e) {
+
+    Logger.log("❌ ERRO FATAL V5.6.2: " + e.message);
+    Logger.log(e.stack || "");
+
+    return {
+      aprovado: false,
+      erros: erros.concat([
+        "ERRO FATAL: " + e.message
+      ])
+    };
+  }
+}
