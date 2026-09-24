@@ -47438,3 +47438,729 @@ function TESTAR_FLUXO_REAL_DEDUPLICACAO_MEDIDAS_V562() {
     };
   }
 }
+
+function TESTAR_CONTRATO_DIAGNOSTICO_V562() {
+
+  Logger.log("============================================================");
+  Logger.log("TESTAR_CONTRATO_DIAGNOSTICO_V562");
+  Logger.log("============================================================");
+
+  try {
+
+    // ==========================================================
+    // 1. CRIAR DIAGNÓSTICO ISOLADO
+    // ==========================================================
+
+    var inicio = iniciarDiagnostico({
+      nome: "TESTE CONTRATO V5.6.2",
+      segmento: "Teste",
+      responsavel: "Teste"
+    });
+
+    var empresaId = inicio.empresa_id;
+    var conversaId = inicio.conversa_id;
+
+    Logger.log("EMPRESA_ID: " + empresaId);
+    Logger.log("CONVERSA_ID: " + conversaId);
+    Logger.log("DIAGNOSTICO_ID: " + inicio.diagnostico_id);
+
+    // ==========================================================
+    // 2. RODADA 1
+    // ==========================================================
+
+    processarMensagemDiagnostico({
+      empresa_id: empresaId,
+      conversa_id: conversaId,
+      mensagem:
+        "Minha funcionária perde três horas por dia colocando pedidos manualmente em uma planilha."
+    });
+
+    // ==========================================================
+    // 3. RODADA 2
+    // ==========================================================
+
+    processarMensagemDiagnostico({
+      empresa_id: empresaId,
+      conversa_id: conversaId,
+      mensagem:
+        "Depois que entram na planilha, usamos essas informações para separar os pedidos e enviar para a produção."
+    });
+
+    // ==========================================================
+    // 4. RODADA 3
+    // ==========================================================
+
+    processarMensagemDiagnostico({
+      empresa_id: empresaId,
+      conversa_id: conversaId,
+      mensagem:
+        "São aproximadamente 80 pedidos por dia."
+    });
+
+    // ==========================================================
+    // 5. RODADA 4
+    // ==========================================================
+
+    processarMensagemDiagnostico({
+      empresa_id: empresaId,
+      conversa_id: conversaId,
+      mensagem:
+        "Depois disso, alguns pedidos ainda precisam ser conferidos novamente porque às vezes há erros de digitação."
+    });
+
+    // ==========================================================
+    // 6. RECUPERAR DIAGNÓSTICO REAL
+    // ==========================================================
+
+    var diagnosticoFinal =
+      obterDiagnosticoAtual_(
+        empresaId,
+        conversaId
+      );
+
+    Logger.log("");
+    Logger.log("============================================================");
+    Logger.log("OBJETO COMPLETO RETORNADO POR obterDiagnosticoAtual_()");
+    Logger.log("============================================================");
+
+    Logger.log(
+      JSON.stringify(
+        diagnosticoFinal,
+        null,
+        2
+      )
+    );
+
+    // ==========================================================
+    // 7. CAMPOS PRINCIPAIS
+    // ==========================================================
+
+    Logger.log("");
+    Logger.log("============================================================");
+    Logger.log("CAMPOS INDIVIDUAIS");
+    Logger.log("============================================================");
+
+    Logger.log(
+      "processo: [" +
+      String(diagnosticoFinal.processo || "") +
+      "]"
+    );
+
+    Logger.log(
+      "processo_nome: [" +
+      String(diagnosticoFinal.processo_nome || "") +
+      "]"
+    );
+
+    Logger.log(
+      "processo_resumo: [" +
+      String(diagnosticoFinal.processo_resumo || "") +
+      "]"
+    );
+
+    Logger.log(
+      "dor_principal: [" +
+      String(diagnosticoFinal.dor_principal || "") +
+      "]"
+    );
+
+    Logger.log(
+      "dores: " +
+      JSON.stringify(
+        diagnosticoFinal.dores || [],
+        null,
+        2
+      )
+    );
+
+    Logger.log(
+      "frequencia: [" +
+      String(diagnosticoFinal.frequencia || "") +
+      "]"
+    );
+
+    Logger.log(
+      "impacto: [" +
+      String(diagnosticoFinal.impacto || "") +
+      "]"
+    );
+
+    Logger.log(
+      "impacto_nivel: [" +
+      String(diagnosticoFinal.impacto_nivel || "") +
+      "]"
+    );
+
+    Logger.log(
+      "objetivo: [" +
+      String(diagnosticoFinal.objetivo || "") +
+      "]"
+    );
+
+    Logger.log(
+      "volume: [" +
+      String(diagnosticoFinal.volume || "") +
+      "]"
+    );
+
+    // ==========================================================
+    // 8. LER DIRETAMENTE AS DORES
+    // ==========================================================
+
+    var doresDiretas =
+      obterDoresDiagnostico_(
+        diagnosticoFinal.diagnostico_id
+      );
+
+    Logger.log("");
+    Logger.log("============================================================");
+    Logger.log("DORES LIDAS DIRETAMENTE DA ABA DORES");
+    Logger.log("============================================================");
+
+    Logger.log(
+      JSON.stringify(
+        doresDiretas,
+        null,
+        2
+      )
+    );
+
+    // ==========================================================
+    // 9. LER DIRETAMENTE AS MEDIDAS
+    // ==========================================================
+
+    var medidasDiretas =
+      obterMedidasDiagnostico_(
+        empresaId,
+        conversaId
+      );
+
+    Logger.log("");
+    Logger.log("============================================================");
+    Logger.log("MEDIDAS LIDAS DIRETAMENTE DA ABA METRICAS");
+    Logger.log("============================================================");
+
+    Logger.log(
+      JSON.stringify(
+        medidasDiretas,
+        null,
+        2
+      )
+    );
+
+    // ==========================================================
+    // 10. PROCESSO NORMALIZADO
+    // ==========================================================
+
+    var etapasProcesso =
+      extrairEtapasProcessoDiagnostico_(
+        diagnosticoFinal.processo_resumo ||
+        diagnosticoFinal.processo_nome ||
+        ""
+      );
+
+    Logger.log("");
+    Logger.log("============================================================");
+    Logger.log("ETAPAS DO PROCESSO");
+    Logger.log("============================================================");
+
+    Logger.log(
+      JSON.stringify(
+        etapasProcesso,
+        null,
+        2
+      )
+    );
+
+    // ==========================================================
+    // 11. RESUMO FINAL
+    // ==========================================================
+
+    Logger.log("");
+    Logger.log("============================================================");
+    Logger.log("RESUMO DO CONTRATO");
+    Logger.log("============================================================");
+
+    Logger.log(
+      "PROCESSO REAL: " +
+      (
+        diagnosticoFinal.processo_resumo ||
+        diagnosticoFinal.processo_nome ||
+        "(vazio)"
+      )
+    );
+
+    Logger.log(
+      "DOR PRINCIPAL REAL: " +
+      (
+        diagnosticoFinal.dor_principal ||
+        "(vazio)"
+      )
+    );
+
+    Logger.log(
+      "TOTAL DE DORES DIRETAS: " +
+      doresDiretas.length
+    );
+
+    Logger.log(
+      "FREQUÊNCIA REAL: " +
+      (
+        diagnosticoFinal.frequencia ||
+        "(vazio)"
+      )
+    );
+
+    Logger.log(
+      "IMPACTO REAL: " +
+      (
+        diagnosticoFinal.impacto_nivel ||
+        diagnosticoFinal.impacto ||
+        "(vazio)"
+      )
+    );
+
+    Logger.log(
+      "OBJETIVO REAL: " +
+      (
+        diagnosticoFinal.objetivo ||
+        "(vazio)"
+      )
+    );
+
+    Logger.log(
+      "TOTAL DE MEDIDAS: " +
+      medidasDiretas.length
+    );
+
+    Logger.log(
+      "VOLUME CONSOLIDADO: " +
+      obterUltimoVolumeDiagnostico_(
+        medidasDiretas
+      )
+    );
+
+    Logger.log("");
+    Logger.log("============================================================");
+    Logger.log("FIM DO TESTE DE CONTRATO");
+    Logger.log("============================================================");
+
+    return {
+      sucesso: true,
+      empresa_id: empresaId,
+      conversa_id: conversaId,
+      diagnostico: diagnosticoFinal,
+      dores: doresDiretas,
+      medidas: medidasDiretas,
+      etapas_processo: etapasProcesso
+    };
+
+  } catch (erro) {
+
+    Logger.log("");
+    Logger.log("============================================================");
+    Logger.log("ERRO NO TESTE DE CONTRATO");
+    Logger.log("============================================================");
+
+    Logger.log(
+      erro && erro.stack
+        ? erro.stack
+        : erro
+    );
+
+    throw erro;
+  }
+}
+
+function TESTAR_FLUXO_REAL_V562() {
+
+  Logger.log('============================================================');
+  Logger.log('TESTAR_FLUXO_REAL_V562');
+  Logger.log('============================================================');
+
+  var empresaId = 'EMP-' + Utilities.getUuid();
+  var conversaId = 'CONV-' + Utilities.getUuid();
+
+  Logger.log('EMPRESA_ID: ' + empresaId);
+  Logger.log('CONVERSA_ID: ' + conversaId);
+
+  // ============================================================
+  // MENSAGENS DO FLUXO REAL
+  // ============================================================
+
+  var mensagens = [
+    'Minha funcionária perde três horas por dia colocando pedidos manualmente em uma planilha.',
+
+    'Depois que entram na planilha, usamos essas informações para separar os pedidos e enviar para a produção.',
+
+    'São aproximadamente 80 pedidos por dia.',
+
+    'Depois disso, alguns pedidos ainda precisam ser conferidos novamente porque às vezes há erros de digitação.'
+  ];
+
+  // ============================================================
+  // 1. PROCESSAR FLUXO REAL
+  // ============================================================
+
+  for (var i = 0; i < mensagens.length; i++) {
+
+    Logger.log('');
+    Logger.log('------------------------------------------------------------');
+    Logger.log('ROUND ' + (i + 1));
+    Logger.log('MENSAGEM: ' + mensagens[i]);
+    Logger.log('------------------------------------------------------------');
+
+    var resposta = processarMensagemDiagnostico({
+      empresa_id: empresaId,
+      conversa_id: conversaId,
+      mensagem: mensagens[i]
+    });
+
+    if (!resposta) {
+      throw new Error(
+        'processarMensagemDiagnostico retornou vazio no round ' +
+        (i + 1)
+      );
+    }
+  }
+
+  // ============================================================
+  // 2. RECUPERAR DIAGNÓSTICO REAL
+  // ============================================================
+
+  var diagnosticoFinal =
+    obterDiagnosticoAtual_(empresaId, conversaId);
+
+  if (!diagnosticoFinal) {
+    throw new Error(
+      'Diagnóstico final não encontrado após o fluxo real.'
+    );
+  }
+
+  var diagnosticoId =
+    diagnosticoFinal.diagnostico_id;
+
+  Logger.log('');
+  Logger.log('DIAGNOSTICO_ID: ' + diagnosticoId);
+
+  // ============================================================
+  // 3. LER DORES PELO REPOSITÓRIO REAL
+  // ============================================================
+
+  var dores =
+    obterDoresDiagnostico_(diagnosticoId) || [];
+
+  // ============================================================
+  // 4. LER MEDIDAS PELO REPOSITÓRIO REAL
+  // ============================================================
+
+  var medidas =
+    obterMedidasDiagnostico_(empresaId, conversaId) || [];
+
+  // ============================================================
+  // 5. PROCESSO REAL
+  // ============================================================
+
+  var processoResumo =
+    String(
+      diagnosticoFinal.processo_resumo || ''
+    ).trim();
+
+  var etapasProcesso = processoResumo
+    ? processoResumo
+        .split(/\s*→\s*|\n|\|/)
+        .map(function (item) {
+          return String(item || '').trim();
+        })
+        .filter(function (item) {
+          return item !== '';
+        })
+    : [];
+
+  // ============================================================
+  // 6. SEPARAR MEDIDAS
+  // ============================================================
+
+  var medidasVolume = medidas.filter(function (medida) {
+    return String(medida.tipo || '').toUpperCase() === 'VOLUME';
+  });
+
+  var medidasTempo = medidas.filter(function (medida) {
+    return String(medida.tipo || '').toUpperCase() === 'TEMPO';
+  });
+
+  // ============================================================
+  // 7. VOLUME CONSOLIDADO
+  // ============================================================
+
+  var volume =
+    obterUltimoVolumeDiagnostico_(
+      empresaId,
+      conversaId
+    );
+
+  // ============================================================
+  // 8. LOG DO CONTRATO REAL
+  // ============================================================
+
+  Logger.log('');
+  Logger.log('============================================================');
+  Logger.log('CONTRATO REAL V5.6.2');
+  Logger.log('============================================================');
+
+  Logger.log(
+    'PROCESSO_NOME: [' +
+    String(diagnosticoFinal.processo_nome || '') +
+    ']'
+  );
+
+  Logger.log(
+    'PROCESSO_RESUMO: [' +
+    processoResumo +
+    ']'
+  );
+
+  Logger.log(
+    'ETAPAS: ' +
+    JSON.stringify(etapasProcesso)
+  );
+
+  Logger.log(
+    'TOTAL DE DORES: ' +
+    dores.length
+  );
+
+  Logger.log(
+    'DORES: ' +
+    JSON.stringify(dores)
+  );
+
+  Logger.log(
+    'FREQUENCIA: [' +
+    String(diagnosticoFinal.frequencia || '') +
+    ']'
+  );
+
+  Logger.log(
+    'IMPACTO_NIVEL: [' +
+    String(diagnosticoFinal.impacto_nivel || '') +
+    ']'
+  );
+
+  Logger.log(
+    'OBJETIVO: [' +
+    String(diagnosticoFinal.objetivo || '') +
+    ']'
+  );
+
+  Logger.log(
+    'TOTAL DE MEDIDAS: ' +
+    medidas.length
+  );
+
+  Logger.log(
+    'MEDIDAS: ' +
+    JSON.stringify(medidas)
+  );
+
+  Logger.log(
+    'MEDIDAS TEMPO: ' +
+    medidasTempo.length
+  );
+
+  Logger.log(
+    'MEDIDAS VOLUME: ' +
+    medidasVolume.length
+  );
+
+  Logger.log(
+    'VOLUME: [' +
+    String(volume || '') +
+    ']'
+  );
+
+  // ============================================================
+  // 9. VALIDAÇÃO
+  // ============================================================
+
+  var erros = [];
+
+  // PROCESSO
+  if (etapasProcesso.length < 3) {
+    erros.push(
+      'Processo não foi acumulado corretamente. ' +
+      'Esperadas pelo menos 3 etapas; obtidas: ' +
+      etapasProcesso.length
+    );
+  }
+
+  // DORES
+  if (dores.length !== 2) {
+    erros.push(
+      'Quantidade de dores incorreta. ' +
+      'Esperado: 2. Obtido: ' +
+      dores.length
+    );
+  }
+
+  // FREQUÊNCIA
+  if (
+    String(diagnosticoFinal.frequencia || '')
+      .trim()
+      .toLowerCase() !== 'diária'
+  ) {
+    erros.push(
+      'Frequência incorreta: ' +
+      String(diagnosticoFinal.frequencia || '')
+    );
+  }
+
+  // IMPACTO
+  if (
+    !String(
+      diagnosticoFinal.impacto_nivel || ''
+    ).trim()
+  ) {
+    erros.push(
+      'Impacto não foi preservado.'
+    );
+  }
+
+  // MEDIDAS
+  if (medidas.length !== 2) {
+    erros.push(
+      'Quantidade de medidas incorreta. ' +
+      'Esperado: 2. Obtido: ' +
+      medidas.length
+    );
+  }
+
+  if (medidasTempo.length !== 1) {
+    erros.push(
+      'Quantidade de medidas TEMPO incorreta. ' +
+      'Esperado: 1. Obtido: ' +
+      medidasTempo.length
+    );
+  }
+
+  if (medidasVolume.length !== 1) {
+    erros.push(
+      'Quantidade de medidas VOLUME incorreta. ' +
+      'Esperado: 1. Obtido: ' +
+      medidasVolume.length
+    );
+  }
+
+  // VOLUME
+  var volumeNormalizado =
+    normalizarVolumeDiagnostico_(
+      String(volume || '')
+    );
+
+  if (
+    volumeNormalizado !==
+    '80 pedidos por dia'
+  ) {
+    erros.push(
+      'Volume incorreto. ' +
+      'Esperado: 80 pedidos por dia. ' +
+      'Obtido: ' +
+      String(volume || '')
+    );
+  }
+
+  // ============================================================
+  // 10. IDEMPOTÊNCIA
+  // ============================================================
+
+  var doresAntes = dores.length;
+  var medidasAntes = medidas.length;
+
+  Logger.log('');
+  Logger.log('============================================================');
+  Logger.log('TESTE DE IDEMPOTÊNCIA');
+  Logger.log('============================================================');
+
+  processarMensagemDiagnostico({
+    empresa_id: empresaId,
+    conversa_id: conversaId,
+    mensagem: mensagens[2]
+  });
+
+  var doresDepois =
+    obterDoresDiagnostico_(diagnosticoId) || [];
+
+  var medidasDepois =
+    obterMedidasDiagnostico_(
+      empresaId,
+      conversaId
+    ) || [];
+
+  Logger.log(
+    'DORES ANTES: ' +
+    doresAntes
+  );
+
+  Logger.log(
+    'DORES DEPOIS: ' +
+    doresDepois.length
+  );
+
+  Logger.log(
+    'MEDIDAS ANTES: ' +
+    medidasAntes
+  );
+
+  Logger.log(
+    'MEDIDAS DEPOIS: ' +
+    medidasDepois.length
+  );
+
+  if (doresDepois.length !== doresAntes) {
+    erros.push(
+      'Idempotência das dores falhou.'
+    );
+  }
+
+  if (medidasDepois.length !== medidasAntes) {
+    erros.push(
+      'Idempotência das medidas falhou.'
+    );
+  }
+
+  // ============================================================
+  // 11. RESULTADO FINAL
+  // ============================================================
+
+  var aprovado =
+    erros.length === 0;
+
+  Logger.log('');
+  Logger.log('============================================================');
+  Logger.log(
+    'RESULTADO V5.6.2: ' +
+    (aprovado ? 'PASSOU' : 'FALHOU')
+  );
+  Logger.log('============================================================');
+
+  Logger.log(
+    'ERROS: ' +
+    JSON.stringify(erros)
+  );
+
+  return {
+    aprovado: aprovado,
+    erros: erros,
+    diagnostico_id: diagnosticoId,
+    processo_etapas: etapasProcesso,
+    dores: dores.length,
+    frequencia:
+      diagnosticoFinal.frequencia || '',
+    impacto:
+      diagnosticoFinal.impacto_nivel || '',
+    medidas: medidas.length,
+    medidas_tempo: medidasTempo.length,
+    medidas_volume: medidasVolume.length,
+    volume: volume || ''
+  };
+}
