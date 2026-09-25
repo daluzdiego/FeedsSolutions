@@ -47778,14 +47778,33 @@ function TESTAR_FLUXO_REAL_V562() {
   Logger.log('TESTAR_FLUXO_REAL_V562');
   Logger.log('============================================================');
 
-  var empresaId = 'EMP-' + Utilities.getUuid();
-  var conversaId = 'CONV-' + Utilities.getUuid();
+  // ============================================================
+  // 1. INICIAR DIAGNÓSTICO PELO FLUXO OFICIAL
+  // ============================================================
+
+  var inicio = iniciarDiagnostico({
+    nome: 'EMPRESA TESTE V5.6.2',
+    segmento: 'TESTE',
+    porte: 'PEQUENO',
+    nome_contato: 'Teste V5.6.2'
+  });
+
+  if (!inicio || !inicio.sucesso) {
+    throw new Error(
+      'Falha ao iniciar diagnóstico pelo fluxo oficial.'
+    );
+  }
+
+  var empresaId = inicio.empresa_id;
+  var conversaId = inicio.conversa_id;
+  var diagnosticoId = inicio.diagnostico_id;
 
   Logger.log('EMPRESA_ID: ' + empresaId);
   Logger.log('CONVERSA_ID: ' + conversaId);
+  Logger.log('DIAGNOSTICO_ID: ' + diagnosticoId);
 
   // ============================================================
-  // MENSAGENS DO FLUXO REAL
+  // 2. MENSAGENS DO FLUXO REAL
   // ============================================================
 
   var mensagens = [
@@ -47799,7 +47818,7 @@ function TESTAR_FLUXO_REAL_V562() {
   ];
 
   // ============================================================
-  // 1. PROCESSAR FLUXO REAL
+  // 3. PROCESSAR AS QUATRO MENSAGENS
   // ============================================================
 
   for (var i = 0; i < mensagens.length; i++) {
@@ -47825,40 +47844,42 @@ function TESTAR_FLUXO_REAL_V562() {
   }
 
   // ============================================================
-  // 2. RECUPERAR DIAGNÓSTICO REAL
+  // 4. RECUPERAR DIAGNÓSTICO FINAL
   // ============================================================
 
   var diagnosticoFinal =
-    obterDiagnosticoAtual_(empresaId, conversaId);
+    obterDiagnosticoAtual_(
+      empresaId,
+      conversaId
+    );
 
   if (!diagnosticoFinal) {
     throw new Error(
-      'Diagnóstico final não encontrado após o fluxo real.'
+      'Diagnóstico final não encontrado.'
     );
   }
 
-  var diagnosticoId =
-    diagnosticoFinal.diagnostico_id;
-
-  Logger.log('');
-  Logger.log('DIAGNOSTICO_ID: ' + diagnosticoId);
-
   // ============================================================
-  // 3. LER DORES PELO REPOSITÓRIO REAL
+  // 5. LER DORES PELO REPOSITÓRIO REAL
   // ============================================================
 
   var dores =
-    obterDoresDiagnostico_(diagnosticoId) || [];
+    obterDoresDiagnostico_(
+      diagnosticoFinal.diagnostico_id
+    ) || [];
 
   // ============================================================
-  // 4. LER MEDIDAS PELO REPOSITÓRIO REAL
+  // 6. LER MEDIDAS PELO REPOSITÓRIO REAL
   // ============================================================
 
   var medidas =
-    obterMedidasDiagnostico_(empresaId, conversaId) || [];
+    obterMedidasDiagnostico_(
+      empresaId,
+      conversaId
+    ) || [];
 
   // ============================================================
-  // 5. PROCESSO REAL
+  // 7. PROCESSO
   // ============================================================
 
   var processoResumo =
@@ -47866,46 +47887,55 @@ function TESTAR_FLUXO_REAL_V562() {
       diagnosticoFinal.processo_resumo || ''
     ).trim();
 
-  var etapasProcesso = processoResumo
-    ? processoResumo
-        .split(/\s*→\s*|\n|\|/)
-        .map(function (item) {
-          return String(item || '').trim();
-        })
-        .filter(function (item) {
-          return item !== '';
-        })
-    : [];
+  var etapasProcesso =
+    processoResumo
+      ? processoResumo
+          .split(/\s*→\s*|\n|\|/)
+          .map(function (item) {
+            return String(item || '').trim();
+          })
+          .filter(function (item) {
+            return item !== '';
+          })
+      : [];
 
   // ============================================================
-  // 6. SEPARAR MEDIDAS
+  // 8. MEDIDAS POR TIPO
   // ============================================================
 
-  var medidasVolume = medidas.filter(function (medida) {
-    return String(medida.tipo || '').toUpperCase() === 'VOLUME';
-  });
+  var medidasTempo =
+    medidas.filter(function (medida) {
+      return String(medida.tipo || '')
+        .toUpperCase() === 'TEMPO';
+    });
 
-  var medidasTempo = medidas.filter(function (medida) {
-    return String(medida.tipo || '').toUpperCase() === 'TEMPO';
-  });
-
-  // ============================================================
-  // 7. VOLUME CONSOLIDADO
-  // ============================================================
-
-  var volume =
-    obterUltimoVolumeDiagnostico_(
-      empresaId,
-      conversaId
-    );
+  var medidasVolume =
+    medidas.filter(function (medida) {
+      return String(medida.tipo || '')
+        .toUpperCase() === 'VOLUME';
+    });
 
   // ============================================================
-  // 8. LOG DO CONTRATO REAL
+  // 9. VOLUME CONSOLIDADO
+  // ============================================================
+
+ var medidaVolume =
+  medidasVolume.length
+    ? medidasVolume[medidasVolume.length - 1]
+    : null;
+
+var volume =
+  medidaVolume
+    ? String(medidaVolume.texto || '').trim()
+    : '';
+
+  // ============================================================
+  // 10. LOG DO RESULTADO
   // ============================================================
 
   Logger.log('');
   Logger.log('============================================================');
-  Logger.log('CONTRATO REAL V5.6.2');
+  Logger.log('CONTRATO FINAL V5.6.2');
   Logger.log('============================================================');
 
   Logger.log(
@@ -47980,7 +48010,7 @@ function TESTAR_FLUXO_REAL_V562() {
   );
 
   // ============================================================
-  // 9. VALIDAÇÃO
+  // 11. VALIDAÇÃO
   // ============================================================
 
   var erros = [];
@@ -48070,7 +48100,7 @@ function TESTAR_FLUXO_REAL_V562() {
   }
 
   // ============================================================
-  // 10. IDEMPOTÊNCIA
+  // 12. IDEMPOTÊNCIA
   // ============================================================
 
   var doresAntes = dores.length;
@@ -48088,7 +48118,9 @@ function TESTAR_FLUXO_REAL_V562() {
   });
 
   var doresDepois =
-    obterDoresDiagnostico_(diagnosticoId) || [];
+    obterDoresDiagnostico_(
+      diagnosticoFinal.diagnostico_id
+    ) || [];
 
   var medidasDepois =
     obterMedidasDiagnostico_(
@@ -48129,7 +48161,7 @@ function TESTAR_FLUXO_REAL_V562() {
   }
 
   // ============================================================
-  // 11. RESULTADO FINAL
+  // 13. RESULTADO FINAL
   // ============================================================
 
   var aprovado =
@@ -48151,16 +48183,2294 @@ function TESTAR_FLUXO_REAL_V562() {
   return {
     aprovado: aprovado,
     erros: erros,
-    diagnostico_id: diagnosticoId,
-    processo_etapas: etapasProcesso,
-    dores: dores.length,
+    diagnostico_id:
+      diagnosticoFinal.diagnostico_id,
+    processo_etapas:
+      etapasProcesso,
+    dores:
+      dores.length,
     frequencia:
       diagnosticoFinal.frequencia || '',
     impacto:
       diagnosticoFinal.impacto_nivel || '',
-    medidas: medidas.length,
-    medidas_tempo: medidasTempo.length,
-    medidas_volume: medidasVolume.length,
-    volume: volume || ''
+    medidas:
+      medidas.length,
+    medidas_tempo:
+      medidasTempo.length,
+    medidas_volume:
+      medidasVolume.length,
+    volume:
+      volume || ''
   };
+}
+
+function TESTAR_V57_CONTRATO_REAL_V56_2() {
+
+  Logger.log('');
+  Logger.log('============================================================');
+  Logger.log(' FEEDS SOLUTIONS — TESTE V5.7');
+  Logger.log(' CONTRATO REAL V5.6.2 → OPORTUNIDADE');
+  Logger.log('============================================================');
+  Logger.log('');
+
+  let passou = 0;
+  let falhou = 0;
+
+  function testar_(numero, descricao, callback) {
+
+    Logger.log('');
+    Logger.log(numero + ' — ' + descricao);
+
+    try {
+
+      callback();
+
+      Logger.log('✅ PASSOU');
+      passou++;
+
+    } catch (erro) {
+
+      Logger.log(
+        '❌ FALHOU: ' +
+        (
+          erro &&
+          erro.message
+            ? erro.message
+            : String(erro)
+        )
+      );
+
+      falhou++;
+
+    }
+
+  }
+
+
+  /*
+   * ==========================================================
+   * DIAGNÓSTICO BASEADO NO CONTRATO REAL V5.6.2
+   * ==========================================================
+   *
+   * O V5.6.2 consolidou:
+   *
+   * processo_nome:
+   * colocação de pedidos manualmente em uma planilha
+   *
+   * processo_resumo:
+   * colocação de pedidos manualmente em uma planilha
+   * → separar os pedidos e enviar para a produção
+   * → Conferência de pedidos
+   *
+   * dor_principal:
+   * funcionária perde três horas por dia colocando
+   * pedidos manualmente
+   *
+   * impacto_nivel:
+   * perde três horas por dia
+   *
+   * frequência:
+   * diária
+   *
+   * volume:
+   * 80 pedidos por dia
+   *
+   * objetivo:
+   * ainda vazio no cenário V5.6.2
+   *
+   * IMPORTANTE:
+   * V5.7 exige objetivo.
+   *
+   * Portanto este teste primeiro confirma que o motor
+   * BLOQUEIA corretamente o diagnóstico ainda incompleto.
+   */
+
+  const diagnosticoIncompleto = {
+
+    diagnostico_id:
+      'DIA-TESTE-V57-CONTRATO-REAL',
+
+    empresa_id:
+      'EMP-TESTE-V57-CONTRATO-REAL',
+
+    conversa_id:
+      'CONV-TESTE-V57-CONTRATO-REAL',
+
+    processo_nome:
+      'colocando pedidos manualmente em uma planilha',
+
+    processo_resumo:
+      'colocando pedidos manualmente em uma planilha → separar os pedidos e enviar para a produção → Conferência de pedidos',
+
+    dor_principal:
+      'funcionária perde três horas por dia colocando pedidos manualmente',
+
+    frequencia:
+      'diária',
+
+    impacto_nivel:
+      'perde três horas por dia',
+
+    volume:
+      '80 pedidos por dia',
+
+    objetivo:
+      '',
+
+    status_diagnostico:
+      DIAGNOSTICO_ESTADOS.INVESTIGACAO
+
+  };
+
+
+  /*
+   * ==========================================================
+   * 01 — NÃO PODE GERAR OPORTUNIDADE SEM OBJETIVO
+   * ==========================================================
+   */
+
+  testar_(
+    '01',
+    'Diagnóstico V5.6.2 incompleto deve permanecer bloqueado',
+    function() {
+
+      const resultado =
+        construirOportunidadeSeProntoDiagnosticoV57_(
+          diagnosticoIncompleto
+        );
+
+      if (
+        resultado !== null
+      ) {
+
+        throw new Error(
+          'V5.7 criou oportunidade sem objetivo.'
+        );
+
+      }
+
+    }
+  );
+
+
+  /*
+   * ==========================================================
+   * DIAGNÓSTICO COMPLETO
+   * ==========================================================
+   *
+   * Agora simulamos somente a informação que falta:
+   * o objetivo.
+   *
+   * Nenhum outro campo é alterado.
+   */
+
+  const diagnosticoCompleto =
+    Object.assign(
+      {},
+      diagnosticoIncompleto,
+      {
+
+        objetivo:
+          'reduzir erros e retrabalho'
+
+      }
+    );
+
+
+  /*
+   * ==========================================================
+   * 02 — DEVE GERAR OPORTUNIDADE
+   * ==========================================================
+   */
+
+  testar_(
+    '02',
+    'Diagnóstico completo deve gerar oportunidade',
+    function() {
+
+      const resultado =
+        construirOportunidadeSeProntoDiagnosticoV57_(
+          diagnosticoCompleto
+        );
+
+      if (
+        !resultado
+      ) {
+
+        throw new Error(
+          'V5.7 não gerou oportunidade para diagnóstico completo.'
+        );
+
+      }
+
+    }
+  );
+
+
+  /*
+   * ==========================================================
+   * 03 — PROCESSO
+   * ==========================================================
+   */
+
+  testar_(
+    '03',
+    'Processo deve ser preservado',
+    function() {
+
+      const resultado =
+        construirOportunidadeSeProntoDiagnosticoV57_(
+          diagnosticoCompleto
+        );
+
+      if (
+        resultado.processo !==
+        diagnosticoCompleto.processo_nome
+      ) {
+
+        throw new Error(
+          'Processo divergente.'
+        );
+
+      }
+
+    }
+  );
+
+
+  /*
+   * ==========================================================
+   * 04 — DOR
+   * ==========================================================
+   */
+
+  testar_(
+    '04',
+    'Dor principal deve ser preservada',
+    function() {
+
+      const resultado =
+        construirOportunidadeSeProntoDiagnosticoV57_(
+          diagnosticoCompleto
+        );
+
+      if (
+        resultado.dor !==
+        diagnosticoCompleto.dor_principal
+      ) {
+
+        throw new Error(
+          'Dor divergente.'
+        );
+
+      }
+
+    }
+  );
+
+
+  /*
+   * ==========================================================
+   * 05 — FREQUÊNCIA
+   * ==========================================================
+   */
+
+  testar_(
+    '05',
+    'Frequência deve ser preservada',
+    function() {
+
+      const resultado =
+        construirOportunidadeSeProntoDiagnosticoV57_(
+          diagnosticoCompleto
+        );
+
+      if (
+        resultado.frequencia !==
+        diagnosticoCompleto.frequencia
+      ) {
+
+        throw new Error(
+          'Frequência divergente.'
+        );
+
+      }
+
+    }
+  );
+
+
+  /*
+   * ==========================================================
+   * 06 — VOLUME
+   * ==========================================================
+   */
+
+  testar_(
+    '06',
+    'Volume V5.6.2 deve chegar ao V5.7',
+    function() {
+
+      const resultado =
+        construirOportunidadeSeProntoDiagnosticoV57_(
+          diagnosticoCompleto
+        );
+
+      if (
+        resultado.volume !==
+        '80 pedidos por dia'
+      ) {
+
+        throw new Error(
+          'Volume incorreto: ' +
+          resultado.volume
+        );
+
+      }
+
+    }
+  );
+
+
+  /*
+   * ==========================================================
+   * 07 — IMPACTO
+   * ==========================================================
+   */
+
+  testar_(
+    '07',
+    'Impacto deve ser preservado',
+    function() {
+
+      const resultado =
+        construirOportunidadeSeProntoDiagnosticoV57_(
+          diagnosticoCompleto
+        );
+
+      if (
+        resultado.impacto !==
+        diagnosticoCompleto.impacto_nivel
+      ) {
+
+        throw new Error(
+          'Impacto divergente.'
+        );
+
+      }
+
+    }
+  );
+
+
+  /*
+   * ==========================================================
+   * 08 — OBJETIVO
+   * ==========================================================
+   */
+
+  testar_(
+    '08',
+    'Objetivo deve ser preservado',
+    function() {
+
+      const resultado =
+        construirOportunidadeSeProntoDiagnosticoV57_(
+          diagnosticoCompleto
+        );
+
+      if (
+        resultado.objetivo !==
+        diagnosticoCompleto.objetivo
+      ) {
+
+        throw new Error(
+          'Objetivo divergente.'
+        );
+
+      }
+
+    }
+  );
+
+
+  /*
+   * ==========================================================
+   * 09 — NÃO INVENTAR NÚMEROS
+   * ==========================================================
+   */
+
+  testar_(
+    '09',
+    'Descrição e justificativa não podem inventar números',
+    function() {
+
+      const resultado =
+        construirOportunidadeSeProntoDiagnosticoV57_(
+          diagnosticoCompleto
+        );
+
+      const texto =
+        (
+          String(resultado.descricao || '') +
+          ' ' +
+          String(resultado.justificativa || '')
+        ).toLowerCase();
+
+      const numeros =
+        texto.match(
+          /\b\d+(?:[.,]\d+)?\b/g
+        ) || [];
+
+      numeros.forEach(function(numero) {
+
+        const permitido =
+          (
+            String(
+              diagnosticoCompleto.volume || ''
+            ).indexOf(numero) !== -1
+          ) ||
+          (
+            String(
+              diagnosticoCompleto.impacto_nivel || ''
+            ).indexOf(numero) !== -1
+          );
+
+        if (!permitido) {
+
+          throw new Error(
+            'Número inventado encontrado: ' +
+            numero
+          );
+
+        }
+
+      });
+
+    }
+  );
+
+
+  /*
+   * ==========================================================
+   * 10 — NÃO ANTECIPAR SOLUÇÃO
+   * ==========================================================
+   */
+
+  testar_(
+    '10',
+    'Oportunidade não pode antecipar solução',
+    function() {
+
+      const resultado =
+        construirOportunidadeSeProntoDiagnosticoV57_(
+          diagnosticoCompleto
+        );
+
+      const texto =
+        (
+          String(resultado.descricao || '') +
+          ' ' +
+          String(resultado.justificativa || '')
+        ).toLowerCase();
+
+      const proibidos = [
+
+        'automatizar',
+        'automação',
+        'automacao',
+        'software',
+        'sistema',
+        'chatbot',
+        'erp',
+        'api',
+        'robô',
+        'robo',
+        'aplicativo',
+        'plataforma',
+        'integração',
+        'integracao'
+
+      ];
+
+      proibidos.forEach(function(termo) {
+
+        if (
+          texto.indexOf(termo) !== -1
+        ) {
+
+          throw new Error(
+            'Solução antecipada encontrada: ' +
+            termo
+          );
+
+        }
+
+      });
+
+    }
+  );
+
+
+  /*
+   * ==========================================================
+   * 11 — PRIORIDADE VÁLIDA
+   * ==========================================================
+   */
+
+  testar_(
+    '11',
+    'Prioridade deve ser válida',
+    function() {
+
+      const resultado =
+        construirOportunidadeSeProntoDiagnosticoV57_(
+          diagnosticoCompleto
+        );
+
+      const prioridades = [
+        'Baixa',
+        'Média',
+        'Alta'
+      ];
+
+      if (
+        prioridades.indexOf(
+          resultado.prioridade
+        ) === -1
+      ) {
+
+        throw new Error(
+          'Prioridade inválida: ' +
+          resultado.prioridade
+        );
+
+      }
+
+    }
+  );
+
+
+  /*
+   * ==========================================================
+   * 12 — MOTOR NÃO PODE ALTERAR DIAGNÓSTICO
+   * ==========================================================
+   */
+
+  testar_(
+    '12',
+    'Motor não pode alterar o diagnóstico original',
+    function() {
+
+      const diagnostico =
+        Object.assign(
+          {},
+          diagnosticoCompleto
+        );
+
+      const antes =
+        JSON.stringify(diagnostico);
+
+      construirOportunidadeSeProntoDiagnosticoV57_(
+        diagnostico
+      );
+
+      const depois =
+        JSON.stringify(diagnostico);
+
+      if (
+        antes !== depois
+      ) {
+
+        throw new Error(
+          'Diagnóstico foi alterado pelo motor.'
+        );
+
+      }
+
+    }
+  );
+
+
+  /*
+   * ==========================================================
+   * RESULTADO
+   * ==========================================================
+   */
+
+  Logger.log('');
+  Logger.log(
+    '============================================================'
+  );
+
+  Logger.log(
+    'RESULTADO V5.7 — CONTRATO REAL V5.6.2'
+  );
+
+  Logger.log(
+    '============================================================'
+  );
+
+  Logger.log(
+    'TOTAL: ' +
+    (passou + falhou)
+  );
+
+  Logger.log(
+    'PASSARAM: ' +
+    passou
+  );
+
+  Logger.log(
+    'FALHARAM: ' +
+    falhou
+  );
+
+  if (
+    falhou === 0
+  ) {
+
+    Logger.log(
+      '🟢 V5.7 — CONTRATO REAL V5.6.2 PASSOU'
+    );
+
+  } else {
+
+    Logger.log(
+      '🔴 V5.7 — CONTRATO REAL V5.6.2 POSSUI FALHAS'
+    );
+
+  }
+
+  Logger.log(
+    '============================================================'
+  );
+
+}
+
+function TESTAR_V57_CONTRATO_REAL_V56_2() {
+
+  Logger.log('');
+  Logger.log('============================================================');
+  Logger.log(' FEEDS SOLUTIONS — TESTE V5.7');
+  Logger.log(' CONTRATO REAL V5.6.2 → OPORTUNIDADE');
+  Logger.log('============================================================');
+  Logger.log('');
+
+  let passou = 0;
+  let falhou = 0;
+
+  function testar_(numero, descricao, callback) {
+
+    Logger.log('');
+    Logger.log(numero + ' — ' + descricao);
+
+    try {
+
+      callback();
+
+      Logger.log('✅ PASSOU');
+      passou++;
+
+    } catch (erro) {
+
+      Logger.log(
+        '❌ FALHOU: ' +
+        (
+          erro &&
+          erro.message
+            ? erro.message
+            : String(erro)
+        )
+      );
+
+      falhou++;
+
+    }
+
+  }
+
+
+  /*
+   * ==========================================================
+   * DIAGNÓSTICO BASEADO NO CONTRATO REAL V5.6.2
+   * ==========================================================
+   *
+   * O V5.6.2 consolidou:
+   *
+   * processo_nome:
+   * colocação de pedidos manualmente em uma planilha
+   *
+   * processo_resumo:
+   * colocação de pedidos manualmente em uma planilha
+   * → separar os pedidos e enviar para a produção
+   * → Conferência de pedidos
+   *
+   * dor_principal:
+   * funcionária perde três horas por dia colocando
+   * pedidos manualmente
+   *
+   * impacto_nivel:
+   * perde três horas por dia
+   *
+   * frequência:
+   * diária
+   *
+   * volume:
+   * 80 pedidos por dia
+   *
+   * objetivo:
+   * ainda vazio no cenário V5.6.2
+   *
+   * IMPORTANTE:
+   * V5.7 exige objetivo.
+   *
+   * Portanto este teste primeiro confirma que o motor
+   * BLOQUEIA corretamente o diagnóstico ainda incompleto.
+   */
+
+  const diagnosticoIncompleto = {
+
+    diagnostico_id:
+      'DIA-TESTE-V57-CONTRATO-REAL',
+
+    empresa_id:
+      'EMP-TESTE-V57-CONTRATO-REAL',
+
+    conversa_id:
+      'CONV-TESTE-V57-CONTRATO-REAL',
+
+    processo_nome:
+      'colocando pedidos manualmente em uma planilha',
+
+    processo_resumo:
+      'colocando pedidos manualmente em uma planilha → separar os pedidos e enviar para a produção → Conferência de pedidos',
+
+    dor_principal:
+      'funcionária perde três horas por dia colocando pedidos manualmente',
+
+    frequencia:
+      'diária',
+
+    impacto_nivel:
+      'perde três horas por dia',
+
+    volume:
+      '80 pedidos por dia',
+
+    objetivo:
+      '',
+
+    status_diagnostico:
+      DIAGNOSTICO_ESTADOS.INVESTIGACAO
+
+  };
+
+
+  /*
+   * ==========================================================
+   * 01 — NÃO PODE GERAR OPORTUNIDADE SEM OBJETIVO
+   * ==========================================================
+   */
+
+  testar_(
+    '01',
+    'Diagnóstico V5.6.2 incompleto deve permanecer bloqueado',
+    function() {
+
+      const resultado =
+        construirOportunidadeSeProntoDiagnosticoV57_(
+          diagnosticoIncompleto
+        );
+
+      if (
+        resultado !== null
+      ) {
+
+        throw new Error(
+          'V5.7 criou oportunidade sem objetivo.'
+        );
+
+      }
+
+    }
+  );
+
+
+  /*
+   * ==========================================================
+   * DIAGNÓSTICO COMPLETO
+   * ==========================================================
+   *
+   * Agora simulamos somente a informação que falta:
+   * o objetivo.
+   *
+   * Nenhum outro campo é alterado.
+   */
+
+  const diagnosticoCompleto =
+    Object.assign(
+      {},
+      diagnosticoIncompleto,
+      {
+
+        objetivo:
+          'reduzir erros e retrabalho'
+
+      }
+    );
+
+
+  /*
+   * ==========================================================
+   * 02 — DEVE GERAR OPORTUNIDADE
+   * ==========================================================
+   */
+
+  testar_(
+    '02',
+    'Diagnóstico completo deve gerar oportunidade',
+    function() {
+
+      const resultado =
+        construirOportunidadeSeProntoDiagnosticoV57_(
+          diagnosticoCompleto
+        );
+
+      if (
+        !resultado
+      ) {
+
+        throw new Error(
+          'V5.7 não gerou oportunidade para diagnóstico completo.'
+        );
+
+      }
+
+    }
+  );
+
+
+  /*
+   * ==========================================================
+   * 03 — PROCESSO
+   * ==========================================================
+   */
+
+  testar_(
+    '03',
+    'Processo deve ser preservado',
+    function() {
+
+      const resultado =
+        construirOportunidadeSeProntoDiagnosticoV57_(
+          diagnosticoCompleto
+        );
+
+      if (
+        resultado.processo !==
+        diagnosticoCompleto.processo_nome
+      ) {
+
+        throw new Error(
+          'Processo divergente.'
+        );
+
+      }
+
+    }
+  );
+
+
+  /*
+   * ==========================================================
+   * 04 — DOR
+   * ==========================================================
+   */
+
+  testar_(
+    '04',
+    'Dor principal deve ser preservada',
+    function() {
+
+      const resultado =
+        construirOportunidadeSeProntoDiagnosticoV57_(
+          diagnosticoCompleto
+        );
+
+      if (
+        resultado.dor !==
+        diagnosticoCompleto.dor_principal
+      ) {
+
+        throw new Error(
+          'Dor divergente.'
+        );
+
+      }
+
+    }
+  );
+
+
+  /*
+   * ==========================================================
+   * 05 — FREQUÊNCIA
+   * ==========================================================
+   */
+
+  testar_(
+    '05',
+    'Frequência deve ser preservada',
+    function() {
+
+      const resultado =
+        construirOportunidadeSeProntoDiagnosticoV57_(
+          diagnosticoCompleto
+        );
+
+      if (
+        resultado.frequencia !==
+        diagnosticoCompleto.frequencia
+      ) {
+
+        throw new Error(
+          'Frequência divergente.'
+        );
+
+      }
+
+    }
+  );
+
+
+  /*
+   * ==========================================================
+   * 06 — VOLUME
+   * ==========================================================
+   */
+
+  testar_(
+    '06',
+    'Volume V5.6.2 deve chegar ao V5.7',
+    function() {
+
+      const resultado =
+        construirOportunidadeSeProntoDiagnosticoV57_(
+          diagnosticoCompleto
+        );
+
+      if (
+        resultado.volume !==
+        '80 pedidos por dia'
+      ) {
+
+        throw new Error(
+          'Volume incorreto: ' +
+          resultado.volume
+        );
+
+      }
+
+    }
+  );
+
+
+  /*
+   * ==========================================================
+   * 07 — IMPACTO
+   * ==========================================================
+   */
+
+  testar_(
+    '07',
+    'Impacto deve ser preservado',
+    function() {
+
+      const resultado =
+        construirOportunidadeSeProntoDiagnosticoV57_(
+          diagnosticoCompleto
+        );
+
+      if (
+        resultado.impacto !==
+        diagnosticoCompleto.impacto_nivel
+      ) {
+
+        throw new Error(
+          'Impacto divergente.'
+        );
+
+      }
+
+    }
+  );
+
+
+  /*
+   * ==========================================================
+   * 08 — OBJETIVO
+   * ==========================================================
+   */
+
+  testar_(
+    '08',
+    'Objetivo deve ser preservado',
+    function() {
+
+      const resultado =
+        construirOportunidadeSeProntoDiagnosticoV57_(
+          diagnosticoCompleto
+        );
+
+      if (
+        resultado.objetivo !==
+        diagnosticoCompleto.objetivo
+      ) {
+
+        throw new Error(
+          'Objetivo divergente.'
+        );
+
+      }
+
+    }
+  );
+
+
+  /*
+   * ==========================================================
+   * 09 — NÃO INVENTAR NÚMEROS
+   * ==========================================================
+   */
+
+  testar_(
+    '09',
+    'Descrição e justificativa não podem inventar números',
+    function() {
+
+      const resultado =
+        construirOportunidadeSeProntoDiagnosticoV57_(
+          diagnosticoCompleto
+        );
+
+      const texto =
+        (
+          String(resultado.descricao || '') +
+          ' ' +
+          String(resultado.justificativa || '')
+        ).toLowerCase();
+
+      const numeros =
+        texto.match(
+          /\b\d+(?:[.,]\d+)?\b/g
+        ) || [];
+
+      numeros.forEach(function(numero) {
+
+        const permitido =
+          (
+            String(
+              diagnosticoCompleto.volume || ''
+            ).indexOf(numero) !== -1
+          ) ||
+          (
+            String(
+              diagnosticoCompleto.impacto_nivel || ''
+            ).indexOf(numero) !== -1
+          );
+
+        if (!permitido) {
+
+          throw new Error(
+            'Número inventado encontrado: ' +
+            numero
+          );
+
+        }
+
+      });
+
+    }
+  );
+
+
+  /*
+   * ==========================================================
+   * 10 — NÃO ANTECIPAR SOLUÇÃO
+   * ==========================================================
+   */
+
+  testar_(
+    '10',
+    'Oportunidade não pode antecipar solução',
+    function() {
+
+      const resultado =
+        construirOportunidadeSeProntoDiagnosticoV57_(
+          diagnosticoCompleto
+        );
+
+      const texto =
+        (
+          String(resultado.descricao || '') +
+          ' ' +
+          String(resultado.justificativa || '')
+        ).toLowerCase();
+
+      const proibidos = [
+
+        'automatizar',
+        'automação',
+        'automacao',
+        'software',
+        'sistema',
+        'chatbot',
+        'erp',
+        'api',
+        'robô',
+        'robo',
+        'aplicativo',
+        'plataforma',
+        'integração',
+        'integracao'
+
+      ];
+
+      proibidos.forEach(function(termo) {
+
+        if (
+          texto.indexOf(termo) !== -1
+        ) {
+
+          throw new Error(
+            'Solução antecipada encontrada: ' +
+            termo
+          );
+
+        }
+
+      });
+
+    }
+  );
+
+
+  /*
+   * ==========================================================
+   * 11 — PRIORIDADE VÁLIDA
+   * ==========================================================
+   */
+
+  testar_(
+    '11',
+    'Prioridade deve ser válida',
+    function() {
+
+      const resultado =
+        construirOportunidadeSeProntoDiagnosticoV57_(
+          diagnosticoCompleto
+        );
+
+      const prioridades = [
+        'Baixa',
+        'Média',
+        'Alta'
+      ];
+
+      if (
+        prioridades.indexOf(
+          resultado.prioridade
+        ) === -1
+      ) {
+
+        throw new Error(
+          'Prioridade inválida: ' +
+          resultado.prioridade
+        );
+
+      }
+
+    }
+  );
+
+
+  /*
+   * ==========================================================
+   * 12 — MOTOR NÃO PODE ALTERAR DIAGNÓSTICO
+   * ==========================================================
+   */
+
+  testar_(
+    '12',
+    'Motor não pode alterar o diagnóstico original',
+    function() {
+
+      const diagnostico =
+        Object.assign(
+          {},
+          diagnosticoCompleto
+        );
+
+      const antes =
+        JSON.stringify(diagnostico);
+
+      construirOportunidadeSeProntoDiagnosticoV57_(
+        diagnostico
+      );
+
+      const depois =
+        JSON.stringify(diagnostico);
+
+      if (
+        antes !== depois
+      ) {
+
+        throw new Error(
+          'Diagnóstico foi alterado pelo motor.'
+        );
+
+      }
+
+    }
+  );
+
+
+  /*
+   * ==========================================================
+   * RESULTADO
+   * ==========================================================
+   */
+
+  Logger.log('');
+  Logger.log(
+    '============================================================'
+  );
+
+  Logger.log(
+    'RESULTADO V5.7 — CONTRATO REAL V5.6.2'
+  );
+
+  Logger.log(
+    '============================================================'
+  );
+
+  Logger.log(
+    'TOTAL: ' +
+    (passou + falhou)
+  );
+
+  Logger.log(
+    'PASSARAM: ' +
+    passou
+  );
+
+  Logger.log(
+    'FALHARAM: ' +
+    falhou
+  );
+
+  if (
+    falhou === 0
+  ) {
+
+    Logger.log(
+      '🟢 V5.7 — CONTRATO REAL V5.6.2 PASSOU'
+    );
+
+  } else {
+
+    Logger.log(
+      '🔴 V5.7 — CONTRATO REAL V5.6.2 POSSUI FALHAS'
+    );
+
+  }
+
+  Logger.log(
+    '============================================================'
+  );
+
+}
+
+function TESTAR_CARDINALIDADE_DIAGNOSTICO_OPORTUNIDADE_V57() {
+
+  Logger.log('');
+  Logger.log('============================================================');
+  Logger.log(' FEEDS SOLUTIONS — CARDINALIDADE DIAGNÓSTICO → OPORTUNIDADE');
+  Logger.log(' V5.7');
+  Logger.log('============================================================');
+  Logger.log('');
+
+  let passou = 0;
+  let falhou = 0;
+
+  const diagnostico = {
+
+    diagnostico_id:
+      'DIA-TESTE-CARDINALIDADE-V57',
+
+    empresa_id:
+      'EMP-TESTE-CARDINALIDADE-V57',
+
+    conversa_id:
+      'CONV-TESTE-CARDINALIDADE-V57',
+
+    processo_nome:
+      'Conferir e lançar pedidos',
+
+    processo_resumo:
+      'Conferir pedidos → lançar pedidos → conferir novamente',
+
+    dor_principal:
+      'Erros de digitação',
+
+    frequencia:
+      'Diária',
+
+    volume:
+      '80 pedidos por dia',
+
+    impacto_nivel:
+      '3 horas por dia',
+
+    objetivo:
+      'Reduzir erros e retrabalho',
+
+    status_diagnostico:
+      DIAGNOSTICO_ESTADOS.PRONTO_PARA_ANALISE,
+
+    dores: [
+
+      {
+        descricao:
+          'Erros de digitação'
+      },
+
+      {
+        descricao:
+          'Retrabalho na conferência dos pedidos'
+      }
+
+    ]
+
+  };
+
+
+  // ============================================================
+  // 01 — DIAGNÓSTICO POSSUI DUAS DORES
+  // ============================================================
+
+  Logger.log(
+    '01 — Diagnóstico possui duas dores confirmadas'
+  );
+
+
+  try {
+
+    if (
+      !Array.isArray(diagnostico.dores)
+    ) {
+
+      throw new Error(
+        'O diagnóstico de teste não possui coleção de dores.'
+      );
+
+    }
+
+
+    if (
+      diagnostico.dores.length !== 2
+    ) {
+
+      throw new Error(
+        'O diagnóstico de teste não possui exatamente duas dores.'
+      );
+
+    }
+
+
+    Logger.log(
+      'Dores confirmadas: ' +
+      diagnostico.dores.length
+    );
+
+    Logger.log(
+      '✅ PASSOU'
+    );
+
+    passou++;
+
+
+  } catch (erro) {
+
+    Logger.log(
+      '❌ FALHOU: ' +
+      (
+        erro.message ||
+        String(erro)
+      )
+    );
+
+    falhou++;
+
+  }
+
+
+  // ============================================================
+  // 02 — MOTOR DEVE GERAR UMA ÚNICA OPORTUNIDADE
+  // ============================================================
+
+  Logger.log('');
+  Logger.log(
+    '02 — Duas dores devem gerar uma única oportunidade'
+  );
+
+
+  try {
+
+    const oportunidade =
+      construirOportunidadeDiagnosticoV57_(
+        diagnostico
+      );
+
+
+    if (
+      !oportunidade
+    ) {
+
+      throw new Error(
+        'Diagnóstico completo não gerou oportunidade.'
+      );
+
+    }
+
+
+    Logger.log(
+      'Oportunidades geradas pelo construtor: 1'
+    );
+
+
+    Logger.log(
+      'Dor utilizada: ' +
+      oportunidade.dor
+    );
+
+
+    if (
+      oportunidade.dor !==
+      diagnostico.dor_principal
+    ) {
+
+      throw new Error(
+        'A oportunidade não utilizou a dor_principal.'
+      );
+
+    }
+
+
+    Logger.log(
+      '✅ PASSOU'
+    );
+
+    passou++;
+
+
+  } catch (erro) {
+
+    Logger.log(
+      '❌ FALHOU: ' +
+      (
+        erro.message ||
+        String(erro)
+      )
+    );
+
+    falhou++;
+
+  }
+
+
+  // ============================================================
+  // 03 — OPORTUNIDADE NÃO DEVE CRIAR UMA SEGUNDA DOR
+  // ============================================================
+
+  Logger.log('');
+  Logger.log(
+    '03 — A segunda dor não deve virar segunda oportunidade'
+  );
+
+
+  try {
+
+    const oportunidade =
+      construirOportunidadeDiagnosticoV57_(
+        diagnostico
+      );
+
+
+    if (
+      !oportunidade
+    ) {
+
+      throw new Error(
+        'Oportunidade não foi construída.'
+      );
+
+    }
+
+
+    if (
+      oportunidade.dor ===
+      'Retrabalho na conferência dos pedidos'
+    ) {
+
+      throw new Error(
+        'A segunda dor foi promovida indevidamente a oportunidade independente.'
+      );
+
+    }
+
+
+    Logger.log(
+      'Segunda dor permanece no diagnóstico, sem criar nova oportunidade.'
+    );
+
+    Logger.log(
+      '✅ PASSOU'
+    );
+
+    passou++;
+
+
+  } catch (erro) {
+
+    Logger.log(
+      '❌ FALHOU: ' +
+      (
+        erro.message ||
+        String(erro)
+      )
+    );
+
+    falhou++;
+
+  }
+
+
+  // ============================================================
+  // 04 — DIAGNÓSTICO → OPORTUNIDADE É 1:1
+  // ============================================================
+
+  Logger.log('');
+  Logger.log(
+    '04 — Relação diagnóstico → oportunidade deve ser 1:1'
+  );
+
+
+  try {
+
+    const oportunidade1 =
+      construirOportunidadeDiagnosticoV57_(
+        diagnostico
+      );
+
+
+    const oportunidade2 =
+      construirOportunidadeDiagnosticoV57_(
+        diagnostico
+      );
+
+
+    if (
+      !oportunidade1 ||
+      !oportunidade2
+    ) {
+
+      throw new Error(
+        'Uma das execuções não gerou oportunidade.'
+      );
+
+    }
+
+
+    if (
+      oportunidade1.dor !==
+      oportunidade2.dor
+    ) {
+
+      throw new Error(
+        'Reprocessamento mudou a dor da oportunidade.'
+      );
+
+    }
+
+
+    if (
+      oportunidade1.processo !==
+      oportunidade2.processo
+    ) {
+
+      throw new Error(
+        'Reprocessamento mudou o processo.'
+      );
+
+    }
+
+
+    if (
+      oportunidade1.volume !==
+      oportunidade2.volume
+    ) {
+
+      throw new Error(
+        'Reprocessamento mudou o volume.'
+      );
+
+    }
+
+
+    Logger.log(
+      'Mesmo diagnóstico → mesma oportunidade lógica.'
+    );
+
+    Logger.log(
+      '✅ PASSOU'
+    );
+
+    passou++;
+
+
+  } catch (erro) {
+
+    Logger.log(
+      '❌ FALHOU: ' +
+      (
+        erro.message ||
+        String(erro)
+      )
+    );
+
+    falhou++;
+
+  }
+
+
+  // ============================================================
+  // RESULTADO
+  // ============================================================
+
+  Logger.log('');
+  Logger.log(
+    '============================================================'
+  );
+
+  Logger.log(
+    'RESULTADO — CARDINALIDADE V5.7'
+  );
+
+  Logger.log(
+    '============================================================'
+  );
+
+  Logger.log(
+    'TOTAL: 4'
+  );
+
+  Logger.log(
+    'PASSARAM: ' +
+    passou
+  );
+
+  Logger.log(
+    'FALHARAM: ' +
+    falhou
+  );
+
+
+  if (
+    falhou === 0
+  ) {
+
+    Logger.log(
+      '🟢 CARDINALIDADE 1 DIAGNÓSTICO → 1 OPORTUNIDADE CONFIRMADA'
+    );
+
+  } else {
+
+    Logger.log(
+      '🔴 CARDINALIDADE V5.7 POSSUI FALHAS'
+    );
+
+  }
+
+
+  Logger.log(
+    '============================================================'
+  );
+
+}
+
+function TESTAR_CONTRATO_V562_V58() {
+
+  Logger.log('============================================================');
+  Logger.log('FEEDS SOLUTIONS — V5.8');
+  Logger.log('TESTE 1/5 — CONTRATO V5.6.2 → V5.8');
+  Logger.log('============================================================');
+
+  let ids = null;
+
+  try {
+
+    // ==========================================================
+    // 01 — CRIAR DIAGNÓSTICO REAL
+    // ==========================================================
+
+    Logger.log('01 — Iniciando diagnóstico real...');
+
+    const inicio = iniciarDiagnostico({
+      nome: 'TESTE CONTRATO V562 V58',
+      nome_empresa: 'TESTE CONTRATO V562 V58',
+      segmento: 'TESTE',
+      porte: 'TESTE',
+      nome_contato: 'TESTE',
+      cidade: 'TESTE'
+    });
+
+    if (!inicio || !inicio.diagnostico_id) {
+      throw new Error(
+        'Falha ao criar diagnóstico real.'
+      );
+    }
+
+    ids = inicio;
+
+    Logger.log(
+      'Diagnóstico criado: ' +
+      ids.diagnostico_id
+    );
+
+
+    // ==========================================================
+    // 02 — REPRODUZIR CENÁRIO REAL DA V5.6.2
+    // ==========================================================
+
+    Logger.log('02 — Reproduzindo cenário real da V5.6.2...');
+
+    const mensagens = [
+
+      'Minha funcionária perde três horas por dia colocando pedidos manualmente em uma planilha.',
+
+      'Depois que entram na planilha, usamos essas informações para separar os pedidos e enviar para a produção.',
+
+      'São aproximadamente 80 pedidos por dia.',
+
+      'Depois disso, alguns pedidos ainda precisam ser conferidos novamente porque às vezes há erros de digitação.'
+
+    ];
+
+    mensagens.forEach(function(mensagem, indice) {
+
+      Logger.log(
+        '02.' + (indice + 1) +
+        ' — Processando mensagem...'
+      );
+
+      const resposta = processarMensagemDiagnostico({
+        empresa_id: ids.empresa_id,
+        conversa_id: ids.conversa_id,
+        mensagem: mensagem
+      });
+
+      if (!resposta || resposta.sucesso === false) {
+        throw new Error(
+          'Falha ao processar mensagem ' +
+          (indice + 1) +
+          ' do cenário V5.6.2.'
+        );
+      }
+
+    });
+
+    Logger.log(
+      'Cenário V5.6.2 processado.'
+    );
+
+
+    // ==========================================================
+    // 03 — RECUPERAR DIAGNÓSTICO
+    // ==========================================================
+
+    Logger.log(
+      '03 — Recuperando diagnóstico real...'
+    );
+
+    const diagnostico =
+      obterDiagnosticoAtual_(
+        ids.empresa_id,
+        ids.conversa_id
+      );
+
+    if (!diagnostico) {
+      throw new Error(
+        'Diagnóstico real não foi recuperado.'
+      );
+    }
+
+    Logger.log(
+      'Estado inicial recuperado: ' +
+      diagnostico.status_diagnostico
+    );
+
+
+    // ==========================================================
+    // 04 — VALIDAR CONTRATO V5.6.2
+    // ==========================================================
+
+    Logger.log('');
+    Logger.log(
+      '04 — Validando contrato V5.6.2...'
+    );
+
+    // IMPORTANTE:
+    // obterDoresDiagnostico_ recebe DIAGNOSTICO_ID.
+    const dores =
+      obterDoresDiagnostico_(
+        diagnostico.diagnostico_id
+      );
+
+    if (!Array.isArray(dores)) {
+      throw new Error(
+        'obterDoresDiagnostico_ não retornou uma lista.'
+      );
+    }
+
+    if (dores.length !== 2) {
+      throw new Error(
+        'Esperadas 2 dores no contrato V5.6.2. Encontradas: ' +
+        dores.length
+      );
+    }
+
+    Logger.log(
+      '✓ 2 dores confirmadas.'
+    );
+
+
+    // ==========================================================
+    // 05 — VALIDAR MÉTRICAS V5.6.2
+    // ==========================================================
+
+    const medidas =
+      obterMedidasDiagnostico_(
+        ids.empresa_id,
+        ids.conversa_id
+      );
+
+    if (!Array.isArray(medidas)) {
+      throw new Error(
+        'obterMedidasDiagnostico_ não retornou uma lista.'
+      );
+    }
+
+    const medidasVolume =
+      medidas.filter(function(medida) {
+
+        return String(
+          medida &&
+          medida.tipo ||
+          ''
+        ).toUpperCase() === 'VOLUME';
+
+      });
+
+    const medidasTempo =
+      medidas.filter(function(medida) {
+
+        return String(
+          medida &&
+          medida.tipo ||
+          ''
+        ).toUpperCase() === 'TEMPO';
+
+      });
+
+    if (medidasVolume.length !== 1) {
+      throw new Error(
+        'Esperada exatamente 1 medida VOLUME. Encontradas: ' +
+        medidasVolume.length
+      );
+    }
+
+    if (medidasTempo.length !== 1) {
+      throw new Error(
+        'Esperada exatamente 1 medida TEMPO. Encontradas: ' +
+        medidasTempo.length
+      );
+    }
+
+    const volumeV562 =
+      obterUltimoVolumeDiagnostico_(
+        medidas
+      );
+
+    if (
+      String(volumeV562 || '').trim() !==
+      '80 pedidos por dia'
+    ) {
+      throw new Error(
+        'Volume V5.6.2 incorreto. Esperado: "80 pedidos por dia". ' +
+        'Encontrado: "' +
+        volumeV562 +
+        '"'
+      );
+    }
+
+    Logger.log(
+      '✓ Volume confirmado: 80 pedidos por dia.'
+    );
+
+    Logger.log(
+      '✓ Tempo confirmado.'
+    );
+
+
+    // ==========================================================
+    // 06 — VALIDAR PROCESSO E DADOS DO DIAGNÓSTICO
+    // ==========================================================
+
+    if (
+      !String(
+        diagnostico.processo_nome || ''
+      ).trim()
+    ) {
+      throw new Error(
+        'processo_nome não foi preservado.'
+      );
+    }
+
+    if (
+      !String(
+        diagnostico.dor_principal || ''
+      ).trim()
+    ) {
+      throw new Error(
+        'dor_principal não foi preservada.'
+      );
+    }
+
+    if (
+      !String(
+        diagnostico.frequencia || ''
+      ).trim()
+    ) {
+      throw new Error(
+        'frequencia não foi preservada.'
+      );
+    }
+
+    if (
+      !String(
+        diagnostico.impacto_nivel || ''
+      ).trim()
+    ) {
+      throw new Error(
+        'impacto_nivel não foi preservado.'
+      );
+    }
+
+    Logger.log(
+      '✓ Processo, dor, frequência e impacto confirmados.'
+    );
+
+
+    // ==========================================================
+    // 07 — TESTAR BLOQUEIO ANTES DO OBJETIVO
+    // ==========================================================
+
+    Logger.log(
+      '05 — Validando bloqueio de análise sem objetivo...'
+    );
+
+    const diagnosticoIncompleto =
+      JSON.parse(
+        JSON.stringify(diagnostico)
+      );
+
+    diagnosticoIncompleto.objetivo = '';
+
+    diagnosticoIncompleto.status_diagnostico =
+      DIAGNOSTICO_ESTADOS.PRONTO_PARA_ANALISE;
+
+    const analiseBloqueada =
+      analisarDiagnosticoV58_(
+        diagnosticoIncompleto
+      );
+
+    if (analiseBloqueada !== null) {
+      throw new Error(
+        'V5.8 gerou análise mesmo sem objetivo.'
+      );
+    }
+
+    Logger.log(
+      '✓ Análise corretamente bloqueada sem objetivo.'
+    );
+
+
+    // ==========================================================
+    // 08 — COMPLETAR CONTRATO V5.6.2
+    // ==========================================================
+
+    Logger.log(
+      '06 — Completando objetivo para testar V5.8...'
+    );
+
+    const diagnosticoCompleto =
+      JSON.parse(
+        JSON.stringify(diagnostico)
+      );
+
+    diagnosticoCompleto.objetivo =
+      'reduzir os erros e diminuir o retrabalho';
+
+    diagnosticoCompleto.status_diagnostico =
+      DIAGNOSTICO_ESTADOS.PRONTO_PARA_ANALISE;
+
+
+    // ==========================================================
+    // 09 — EXECUTAR V5.8
+    // ==========================================================
+
+    Logger.log(
+      '07 — Executando Motor de Análise V5.8...'
+    );
+
+    const analise =
+      analisarDiagnosticoV58_(
+        diagnosticoCompleto
+      );
+
+    if (!analise) {
+      throw new Error(
+        'V5.8 não gerou análise para diagnóstico completo.'
+      );
+    }
+
+    Logger.log(
+      '✓ Análise V5.8 gerada.'
+    );
+
+
+    // ==========================================================
+    // 10 — VALIDAR CAMPOS OBRIGATÓRIOS
+    // ==========================================================
+
+    const camposObrigatorios = [
+      'diagnostico_id',
+      'empresa_id',
+      'conversa_id',
+      'processo',
+      'problema',
+      'frequencia',
+      'volume',
+      'impacto',
+      'objetivo',
+      'resumo',
+      'oportunidade',
+      'prioridade',
+      'evidencias',
+      'lacunas',
+      'confianca'
+    ];
+
+    camposObrigatorios.forEach(function(campo) {
+
+      if (
+        analise[campo] === undefined ||
+        analise[campo] === null ||
+        (
+          typeof analise[campo] === 'string' &&
+          !String(analise[campo]).trim()
+        )
+      ) {
+        throw new Error(
+          'Campo obrigatório ausente na V5.8: ' +
+          campo
+        );
+      }
+
+    });
+
+    Logger.log(
+      '✓ Todos os campos obrigatórios preenchidos.'
+    );
+
+
+    // ==========================================================
+    // 11 — VALIDAR VOLUME REAL
+    // ==========================================================
+
+    if (
+      String(
+        analise.volume || ''
+      ).trim() !==
+      '80 pedidos por dia'
+    ) {
+      throw new Error(
+        'V5.8 não preservou o volume real. ' +
+        'Esperado: "80 pedidos por dia". ' +
+        'Encontrado: "' +
+        analise.volume +
+        '"'
+      );
+    }
+
+    Logger.log(
+      '✓ V5.8 preservou volume: 80 pedidos por dia.'
+    );
+
+
+    // ==========================================================
+    // 12 — VALIDAR RASTREABILIDADE
+    // ==========================================================
+
+    if (
+      String(analise.diagnostico_id) !==
+      String(diagnosticoCompleto.diagnostico_id)
+    ) {
+      throw new Error(
+        'diagnostico_id não foi preservado.'
+      );
+    }
+
+    if (
+      String(analise.empresa_id) !==
+      String(diagnosticoCompleto.empresa_id)
+    ) {
+      throw new Error(
+        'empresa_id não foi preservado.'
+      );
+    }
+
+    if (
+      String(analise.conversa_id) !==
+      String(diagnosticoCompleto.conversa_id)
+    ) {
+      throw new Error(
+        'conversa_id não foi preservado.'
+      );
+    }
+
+    Logger.log(
+      '✓ Rastreabilidade confirmada.'
+    );
+
+
+    // ==========================================================
+    // 13 — VALIDAR AUSÊNCIA DE NÚMEROS INVENTADOS
+    // ==========================================================
+
+    const textoAnalise =
+      JSON.stringify(analise);
+
+    const numerosEncontrados =
+      textoAnalise.match(/\b\d+(?:[.,]\d+)?\b/g) || [];
+
+    const numerosPermitidos = [
+      '80',
+      '5.8'
+    ];
+
+    const numerosProibidos =
+      numerosEncontrados.filter(function(numero) {
+
+        return numerosPermitidos.indexOf(numero) === -1;
+
+      });
+
+    if (numerosProibidos.length > 0) {
+
+      throw new Error(
+        'V5.8 apresentou números não presentes no contrato: ' +
+        JSON.stringify(numerosProibidos)
+      );
+
+    }
+
+    Logger.log(
+      '✓ Nenhum número inventado detectado.'
+    );
+
+
+    // ==========================================================
+    // 14 — VALIDAR PRESERVAÇÃO DO DIAGNÓSTICO ORIGINAL
+    // ==========================================================
+
+    const snapshotOriginal =
+      JSON.stringify(diagnostico);
+
+    const diagnosticoDepois =
+      obterDiagnosticoAtual_(
+        ids.empresa_id,
+        ids.conversa_id
+      );
+
+    const snapshotDepois =
+      JSON.stringify(diagnosticoDepois);
+
+    if (
+      snapshotOriginal !==
+      snapshotDepois
+    ) {
+      throw new Error(
+        'V5.8 alterou o diagnóstico original.'
+      );
+    }
+
+    Logger.log(
+      '✓ Diagnóstico original preservado.'
+    );
+
+
+    // ==========================================================
+    // RESULTADO
+    // ==========================================================
+
+    Logger.log('');
+    Logger.log(
+      '============================================================'
+    );
+    Logger.log(
+      '🟢 TESTE 1/5 — CONTRATO V5.6.2 → V5.8 — PASSOU'
+    );
+    Logger.log(
+      '============================================================'
+    );
+
+    return {
+      aprovado: true,
+      teste: 'TESTE 1/5 — CONTRATO V5.6.2 → V5.8',
+      diagnostico_id: ids.diagnostico_id,
+      dores: dores.length,
+      medidas: medidas.length,
+      volume: volumeV562,
+      analise_gerada: true,
+      erros: []
+    };
+
+
+  } catch (erro) {
+
+    Logger.log('');
+    Logger.log(
+      '🔴 TESTE 1/5 — CONTRATO V5.6.2 → V5.8 — FALHOU'
+    );
+
+    Logger.log(
+      'ERRO: ' +
+      erro.message
+    );
+
+    throw erro;
+  }
 }
