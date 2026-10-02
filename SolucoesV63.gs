@@ -4550,7 +4550,7 @@ function TESTAR_EMPATE_SOLUCOES_V63() {
     const decisao = decidirSolucaoV63_(classificacao, { investigacao: investigacao });
     teste(21, 'decisão foi produzida', !!decisao);
     teste(22, 'decisão não descarta as duas soluções validadas', !!decisao && decisao.solucoes_validadas >= 2);
-    teste(23, 'decisão preserva a classificação de múltiplas soluções', !!decisao && decisao.classificacao === 'SOLUCOES_ENCONTRADAS');
+    teste(23, 'decisão preserva a classificação de múltiplas soluções', !!decisao && decisao.classificacao_reconhecimento === 'SOLUCOES_ENCONTRADAS');
 
     const resposta = gerarRespostaSeguraV63_(decisao);
     teste(24, 'resposta segura foi produzida', !!(resposta && resposta.resposta_cliente));
