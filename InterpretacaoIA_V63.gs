@@ -771,7 +771,7 @@ function normalizarImpactoSemanticoV63_(
  * INTERPRETAÇÃO PRINCIPAL
  * ------------------------------------------------------------
  */
-function interpretarMensagemSemanticaV63_((
+function interpretarMensagemSemanticaV63_(
   mensagem
 ) {
 
