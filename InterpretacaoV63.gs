@@ -181,7 +181,7 @@ function criarInterpretacaoSemanticaV63_(
   dados =
     dados || {};
 
-  return {
+  const interpretacao = {
 
     versao:
       INTERPRETACAO_V63.VERSAO,
@@ -276,9 +276,75 @@ function criarInterpretacaoSemanticaV63_(
           dados.status.padrao_problema
         )
 
-    }
+    },
+
+    lacunas:
+      normalizarArrayInterpretacaoV63_(
+        dados.lacunas
+      )
 
   };
+
+  const campos =
+    [
+      'problema',
+      'processo',
+      'dores',
+      'impactos',
+      'resultado_desejado',
+      'contexto',
+      'restricoes',
+      'padrao_problema'
+    ];
+
+  campos.forEach(
+    function(campo) {
+
+      const valor =
+        interpretacao[campo];
+
+      const status =
+        interpretacao.status[campo];
+
+      const vazio =
+        Array.isArray(valor)
+          ? valor.length === 0
+          : !String(
+              valor || ''
+            ).trim();
+
+      const desconhecido =
+        status ===
+        INTERPRETACAO_V63.STATUS.DESCONHECIDO;
+
+      if (
+        vazio ||
+        desconhecido
+      ) {
+
+        if (
+          interpretacao.lacunas.indexOf(
+            campo
+          ) === -1
+        ) {
+
+          interpretacao.lacunas.push(
+            campo
+          );
+
+        }
+
+      }
+
+    }
+  );
+
+  interpretacao.lacunas =
+    normalizarArrayInterpretacaoV63_(
+      interpretacao.lacunas
+    );
+
+  return interpretacao;
 
 }
 
