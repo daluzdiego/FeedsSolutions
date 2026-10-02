@@ -4432,3 +4432,168 @@ function TESTAR_RECONHECIMENTO_POR_PARAFRASE_V63() {
   Logger.log('============================================================');
   return {sucesso:resultados.length===25&&falhas===0,aprovados:aprovados,falhas:falhas,percentual:percentual,resultados:resultados};
 }
+
+
+/**
+ * ============================================================
+ * TESTE OFICIAL — EMPATE ENTRE SOLUÇÕES V6.3
+ * ============================================================
+ * Objetivo:
+ * verificar o comportamento quando duas soluções VALIDADA
+ * possuem a mesma aderência ao caso analisado.
+ */
+function TESTAR_EMPATE_SOLUCOES_V63() {
+
+  Logger.log('============================================================');
+  Logger.log('INÍCIO — TESTAR_EMPATE_SOLUCOES_V63');
+  Logger.log('============================================================');
+
+  const resultados = [];
+  const marcador = 'TESTE-EMPATE-V63-' + new Date().getTime();
+  const idsTeste = [];
+
+  function teste(numero, descricao, condicao) {
+    const passou = condicao === true;
+    resultados.push({ numero: numero, descricao: descricao, passou: passou });
+    Logger.log((passou ? '✅' : '❌') + ' TESTE ' + numero + '/25 — ' + descricao);
+    return passou;
+  }
+
+  try {
+    const investigacao = {
+      problema_central: 'Erros de digitação e retrabalho na conferência e lançamento de pedidos.',
+      processo: 'Conferir e lançar pedidos recebidos por diferentes canais.',
+      pontos_de_dor: ['erros de digitação', 'retrabalho'],
+      impacto: { descricao: 'perda de tempo no processo' },
+      resultado_desejado: 'Reduzir erros e retrabalho no lançamento de pedidos.',
+      contexto: 'Processamento diário de pedidos.'
+    };
+
+    teste(1, 'investigação foi criada', !!investigacao);
+    teste(2, 'problema está definido', !!investigacao.problema_central);
+    teste(3, 'processo está definido', !!investigacao.processo);
+
+    // As duas soluções usam exatamente as mesmas dimensões de reconhecimento.
+    // Elas diferem apenas no identificador e na descrição interna.
+    const base = {
+      descricao_problema: 'Erros de digitação e retrabalho na conferência e lançamento de pedidos.',
+      padrao_problema: 'Ineficiência operacional em lançamento manual de pedidos.',
+      processo: 'Conferir e lançar pedidos recebidos por diferentes canais.',
+      dores: ['erros de digitação', 'retrabalho'],
+      impactos: ['perda de tempo no processo'],
+      resultados_desejados: ['reduzir erros e retrabalho no lançamento de pedidos'],
+      contexto: 'Processamento diário de pedidos.',
+      restricoes: [],
+      alternativas: [],
+      status: 'VALIDADA',
+      confianca: 'ALTA',
+      evidencias: ['caso validado de teste'],
+      casos_relacionados: [],
+      origem: 'TESTE_V6.3',
+      versao: 'V6.3'
+    };
+
+    const solucaoA = Object.assign({}, base, {
+      resolucao_id: marcador + '-A',
+      titulo_interno: marcador + ' — solução A',
+      abordagem_interna: 'Abordagem validada A.',
+      descricao_solucao_interna: 'Solução validada A para o mesmo caso.'
+    });
+
+    const solucaoB = Object.assign({}, base, {
+      resolucao_id: marcador + '-B',
+      titulo_interno: marcador + ' — solução B',
+      abordagem_interna: 'Abordagem validada B.',
+      descricao_solucao_interna: 'Solução validada B para o mesmo caso.'
+    });
+
+    const retornoA = salvarResolucaoV63_(solucaoA);
+    const retornoB = salvarResolucaoV63_(solucaoB);
+    idsTeste.push(retornoA.resolucao_id, retornoB.resolucao_id);
+
+    const persistidaA = buscarResolucaoV63_({ resolucao_id: retornoA.resolucao_id });
+    const persistidaB = buscarResolucaoV63_({ resolucao_id: retornoB.resolucao_id });
+
+    teste(4, 'solução A foi persistida', !!persistidaA);
+    teste(5, 'solução B foi persistida', !!persistidaB);
+    teste(6, 'solução A está VALIDADA', !!(persistidaA && persistidaA.status === 'VALIDADA'));
+    teste(7, 'solução B está VALIDADA', !!(persistidaB && persistidaB.status === 'VALIDADA'));
+
+    const comparacaoA = compararInvestigacaoResolucaoV63_(investigacao, persistidaA);
+    const comparacaoB = compararInvestigacaoResolucaoV63_(investigacao, persistidaB);
+
+    teste(8, 'comparação A foi produzida', !!comparacaoA);
+    teste(9, 'comparação B foi produzida', !!comparacaoB);
+    teste(10, 'pontuação A é numérica', typeof comparacaoA.pontuacao === 'number');
+    teste(11, 'pontuação B é numérica', typeof comparacaoB.pontuacao === 'number');
+    teste(12, 'as pontuações são iguais', comparacaoA.pontuacao === comparacaoB.pontuacao);
+
+    const encontrados = buscarResolucoesRelacionadasV63_(investigacao, { pontuacao_minima: 20, limite: 10 });
+    const encontradoA = encontrados.find(function(item) { return item.resolucao_id === retornoA.resolucao_id; });
+    const encontradoB = encontrados.find(function(item) { return item.resolucao_id === retornoB.resolucao_id; });
+
+    teste(13, 'busca relacionada executou', Array.isArray(encontrados));
+    teste(14, 'solução A foi reconhecida', !!encontradoA);
+    teste(15, 'solução B foi reconhecida', !!encontradoB);
+    teste(16, 'as duas soluções permanecem disponíveis', !!encontradoA && !!encontradoB);
+    teste(17, 'as duas soluções permanecem VALIDADA', !!encontradoA && !!encontradoB && encontradoA.status === 'VALIDADA' && encontradoB.status === 'VALIDADA');
+    teste(18, 'as pontuações retornadas permanecem empatadas', !!encontradoA && !!encontradoB && Number(encontradoA.pontuacao) === Number(encontradoB.pontuacao));
+
+    const candidatos = encontrados.filter(function(item) {
+      return item.resolucao_id === retornoA.resolucao_id || item.resolucao_id === retornoB.resolucao_id;
+    });
+    const classificacao = classificarReconhecimentoV63_(candidatos);
+
+    teste(19, 'classificação foi produzida', !!classificacao);
+    teste(20, 'classificação identifica múltiplas soluções', !!classificacao && classificacao.classificacao === 'SOLUCOES_ENCONTRADAS');
+
+    const decisao = decidirSolucaoV63_(classificacao, { investigacao: investigacao });
+    teste(21, 'decisão foi produzida', !!decisao);
+    teste(22, 'decisão não descarta as duas soluções validadas', !!decisao && decisao.solucoes_validadas >= 2);
+    teste(23, 'decisão não inventa diferença de aderência', !!decisao && decisao.classificacao === 'SOLUCOES_ENCONTRADAS');
+
+    const resposta = gerarRespostaSeguraV63_(decisao);
+    teste(24, 'resposta segura foi produzida', !!(resposta && resposta.resposta_cliente));
+    const filtro = verificarSegurancaRespostaSeguraV63_(resposta.resposta_cliente);
+    teste(25, 'resposta final passa pelo filtro de segurança', !!(filtro && filtro.segura === true));
+
+  } catch (erro) {
+    Logger.log('ERRO GERAL TESTE: ' + (erro.message || erro));
+  } finally {
+    try {
+      const sheet = obterAba_(SHEETS.BIBLIOTECA_RESOLUCOES);
+      const valores = sheet.getDataRange().getValues();
+      const cabecalhos = valores[0] || [];
+      const colunaId = cabecalhos.indexOf('resolucao_id');
+      const colunaTitulo = cabecalhos.indexOf('titulo_interno');
+      for (let i = valores.length - 1; i >= 1; i--) {
+        const idLinha = colunaId >= 0 ? String(valores[i][colunaId]) : '';
+        const tituloLinha = colunaTitulo >= 0 ? String(valores[i][colunaTitulo]) : '';
+        if (idsTeste.indexOf(idLinha) !== -1 || tituloLinha.indexOf(marcador) === 0) sheet.deleteRow(i + 1);
+      }
+      Logger.log('LIMPEZA EMPATE V6.3: CONCLUÍDA');
+    } catch (erroLimpeza) {
+      Logger.log('⚠️ AVISO LIMPEZA EMPATE: ' + (erroLimpeza.message || erroLimpeza));
+    }
+  }
+
+  const aprovados = resultados.filter(function(item) { return item.passou; }).length;
+  const falhas = resultados.length - aprovados;
+  const percentual = resultados.length ? Math.round((aprovados / resultados.length) * 100) : 0;
+
+  Logger.log('============================================================');
+  Logger.log('RESULTADO FINAL — EMPATE ENTRE SOLUÇÕES V6.3');
+  Logger.log('============================================================');
+  Logger.log('APROVADOS: ' + aprovados + '/' + resultados.length);
+  Logger.log('FALHAS: ' + falhas);
+  Logger.log('PERCENTUAL: ' + percentual + '%');
+  if (resultados.length === 25 && falhas === 0) {
+    Logger.log('🏆 TESTAR_EMPATE_SOLUCOES_V63: PASSOU');
+    Logger.log('🏆 EMPATE ENTRE SOLUÇÕES V6.3: 100%');
+  } else {
+    Logger.log('❌ TESTAR_EMPATE_SOLUCOES_V63: FALHOU');
+  }
+  Logger.log('============================================================');
+
+  return { sucesso: resultados.length === 25 && falhas === 0, aprovados: aprovados, falhas: falhas, percentual: percentual, resultados: resultados };
+}
