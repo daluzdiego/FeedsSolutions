@@ -4118,3 +4118,175 @@ function TESTAR_FALSO_POSITIVO_SEMANTICO_V63() {
 
   return { sucesso: resultados.length === 25 && falhas === 0, aprovados: aprovados, falhas: falhas, percentual: percentual, resultados: resultados };
 }
+
+
+/**
+ * ============================================================
+ * TESTE OFICIAL — RANKING DE SOLUÇÕES COMPATÍVEIS V6.3
+ * ============================================================
+ * Objetivo:
+ * garantir que duas soluções VALIDADA compatíveis sejam
+ * reconhecidas, ordenadas pela aderência e preservadas para a
+ * camada de decisão.
+ */
+function TESTAR_RANKING_SOLUCOES_COMPATIVEIS_V63() {
+
+  Logger.log('============================================================');
+  Logger.log('INÍCIO — TESTAR_RANKING_SOLUCOES_COMPATIVEIS_V63');
+  Logger.log('============================================================');
+
+  const resultados = [];
+  const marcador = 'TESTE-RANKING-V63-' + new Date().getTime();
+  const idsTeste = [];
+
+  function teste(numero, descricao, condicao) {
+    const passou = condicao === true;
+    resultados.push({ numero: numero, descricao: descricao, passou: passou });
+    Logger.log((passou ? '✅' : '❌') + ' TESTE ' + numero + '/25 — ' + descricao);
+    return passou;
+  }
+
+  try {
+    const investigacao = {
+      problema_central: 'Erros de digitação e retrabalho na conferência e lançamento de pedidos.',
+      processo: 'Conferir e lançar pedidos recebidos por diferentes canais.',
+      pontos_de_dor: ['erros de digitação', 'retrabalho', 'atrasos'],
+      impacto: { descricao: 'perda de tempo no processo' },
+      resultado_desejado: 'Reduzir erros e retrabalho no lançamento de pedidos.',
+      contexto: 'Processamento diário de pedidos.'
+    };
+
+    teste(1, 'investigação do caso foi criada', !!investigacao);
+    teste(2, 'problema central está definido', investigacao.problema_central.indexOf('pedidos') !== -1);
+    teste(3, 'processo está definido', investigacao.processo.indexOf('pedidos') !== -1);
+
+    const solucaoAlta = {
+      resolucao_id: marcador + '-ALTA',
+      titulo_interno: marcador + ' — solução específica',
+      descricao_problema: 'Erros de digitação e retrabalho na conferência e lançamento de pedidos.',
+      padrao_problema: 'Ineficiência operacional em lançamento manual de pedidos.',
+      processo: 'Conferir e lançar pedidos recebidos por diferentes canais.',
+      dores: ['erros de digitação', 'retrabalho', 'atrasos'],
+      impactos: ['perda de tempo no processo'],
+      resultados_desejados: ['reduzir erros e retrabalho no lançamento de pedidos'],
+      contexto: 'Processamento diário de pedidos.',
+      restricoes: [],
+      abordagem_interna: 'Abordagem específica validada para lançamento de pedidos.',
+      descricao_solucao_interna: 'Solução validada específica para conferência e lançamento de pedidos.',
+      alternativas: [],
+      status: 'VALIDADA',
+      confianca: 'ALTA',
+      evidencias: ['caso validado específico'],
+      casos_relacionados: [],
+      origem: 'TESTE_V6.3',
+      versao: 'V6.3'
+    };
+
+    const solucaoMedia = {
+      resolucao_id: marcador + '-MEDIA',
+      titulo_interno: marcador + ' — solução administrativa',
+      descricao_problema: 'Retrabalho e erros em processos administrativos que envolvem pedidos.',
+      padrao_problema: 'Ineficiência em processos administrativos manuais.',
+      processo: 'Conferência e registro de informações administrativas.',
+      dores: ['retrabalho', 'erros'],
+      impactos: ['perda de tempo'],
+      resultados_desejados: ['reduzir retrabalho em processos administrativos'],
+      contexto: 'Processos administrativos com movimentação de pedidos.',
+      restricoes: [],
+      abordagem_interna: 'Abordagem administrativa validada.',
+      descricao_solucao_interna: 'Solução validada para redução de retrabalho administrativo.',
+      alternativas: [],
+      status: 'VALIDADA',
+      confianca: 'MEDIA',
+      evidencias: ['caso administrativo validado'],
+      casos_relacionados: [],
+      origem: 'TESTE_V6.3',
+      versao: 'V6.3'
+    };
+
+    const retornoAlta = salvarResolucaoV63_(solucaoAlta);
+    const retornoMedia = salvarResolucaoV63_(solucaoMedia);
+    idsTeste.push(retornoAlta.resolucao_id, retornoMedia.resolucao_id);
+
+    const persistidaAlta = buscarResolucaoV63_({ resolucao_id: retornoAlta.resolucao_id });
+    const persistidaMedia = buscarResolucaoV63_({ resolucao_id: retornoMedia.resolucao_id });
+
+    teste(4, 'solução específica foi persistida', !!persistidaAlta);
+    teste(5, 'solução administrativa foi persistida', !!persistidaMedia);
+    teste(6, 'solução específica está VALIDADA', !!(persistidaAlta && persistidaAlta.status === 'VALIDADA'));
+    teste(7, 'solução administrativa está VALIDADA', !!(persistidaMedia && persistidaMedia.status === 'VALIDADA'));
+
+    const comparacaoAlta = compararInvestigacaoResolucaoV63_(investigacao, persistidaAlta);
+    const comparacaoMedia = compararInvestigacaoResolucaoV63_(investigacao, persistidaMedia);
+
+    teste(8, 'comparação da solução específica foi produzida', !!comparacaoAlta);
+    teste(9, 'comparação da solução administrativa foi produzida', !!comparacaoMedia);
+    teste(10, 'pontuação específica é numérica', typeof comparacaoAlta.pontuacao === 'number');
+    teste(11, 'pontuação administrativa é numérica', typeof comparacaoMedia.pontuacao === 'number');
+    teste(12, 'solução específica possui maior aderência', comparacaoAlta.pontuacao > comparacaoMedia.pontuacao);
+
+    const encontrados = buscarResolucoesRelacionadasV63_(investigacao, { pontuacao_minima: 20, limite: 10 });
+    const encontradoAlta = encontrados.find(function(item) { return item.resolucao_id === retornoAlta.resolucao_id; });
+    const encontradoMedia = encontrados.find(function(item) { return item.resolucao_id === retornoMedia.resolucao_id; });
+
+    teste(13, 'busca relacionada executou', Array.isArray(encontrados));
+    teste(14, 'solução específica foi reconhecida', !!encontradoAlta);
+    teste(15, 'solução administrativa foi reconhecida', !!encontradoMedia);
+    teste(16, 'as duas soluções permanecem disponíveis', !!encontradoAlta && !!encontradoMedia);
+    teste(17, 'solução específica aparece antes da administrativa', !!encontradoAlta && !!encontradoMedia && encontrados.indexOf(encontradoAlta) < encontrados.indexOf(encontradoMedia));
+    teste(18, 'pontuação retornada da específica é maior', !!encontradoAlta && !!encontradoMedia && Number(encontradoAlta.pontuacao) > Number(encontradoMedia.pontuacao));
+    teste(19, 'ambas permanecem VALIDADA', !!encontradoAlta && !!encontradoMedia && encontradoAlta.status === 'VALIDADA' && encontradoMedia.status === 'VALIDADA');
+
+    const classificacao = classificarReconhecimentoV63_(encontrados.filter(function(item) {
+      return item.resolucao_id === retornoAlta.resolucao_id || item.resolucao_id === retornoMedia.resolucao_id;
+    }));
+
+    teste(20, 'classificação identifica múltiplas soluções', !!classificacao && classificacao.classificacao === 'SOLUCOES_ENCONTRADAS');
+    teste(21, 'melhor solução preservada é a específica', !!classificacao && classificacao.melhor && classificacao.melhor.resolucao_id === retornoAlta.resolucao_id);
+
+    const decisao = decidirSolucaoV63_(classificacao, { investigacao: investigacao });
+    teste(22, 'decisão foi produzida com múltiplas soluções', !!decisao);
+    teste(23, 'decisão preserva a solução de maior aderência', !!decisao && decisao.resolucao_principal === retornoAlta.resolucao_id);
+    teste(24, 'decisão preserva as duas soluções validadas', !!decisao && decisao.solucoes_validadas >= 2);
+    teste(25, 'resultado permanece sem tecnologia, preço ou negociação', !!decisao && decisao.tecnologia_exposta === false && decisao.preco_informado === false && decisao.negociacao_realizada === false);
+
+  } catch (erro) {
+    Logger.log('ERRO GERAL TESTE: ' + (erro.message || erro));
+  } finally {
+    try {
+      const sheet = obterAba_(SHEETS.BIBLIOTECA_RESOLUCOES);
+      const valores = sheet.getDataRange().getValues();
+      const cabecalhos = valores[0] || [];
+      const colunaId = cabecalhos.indexOf('resolucao_id');
+      const colunaTitulo = cabecalhos.indexOf('titulo_interno');
+      for (let i = valores.length - 1; i >= 1; i--) {
+        const idLinha = colunaId >= 0 ? String(valores[i][colunaId]) : '';
+        const tituloLinha = colunaTitulo >= 0 ? String(valores[i][colunaTitulo]) : '';
+        if (idsTeste.indexOf(idLinha) !== -1 || tituloLinha.indexOf(marcador) === 0) sheet.deleteRow(i + 1);
+      }
+      Logger.log('LIMPEZA RANKING V6.3: CONCLUÍDA');
+    } catch (erroLimpeza) {
+      Logger.log('⚠️ AVISO LIMPEZA RANKING: ' + (erroLimpeza.message || erroLimpeza));
+    }
+  }
+
+  const aprovados = resultados.filter(function(item) { return item.passou; }).length;
+  const falhas = resultados.length - aprovados;
+  const percentual = resultados.length ? Math.round((aprovados / resultados.length) * 100) : 0;
+
+  Logger.log('============================================================');
+  Logger.log('RESULTADO FINAL — RANKING DE SOLUÇÕES COMPATÍVEIS V6.3');
+  Logger.log('============================================================');
+  Logger.log('APROVADOS: ' + aprovados + '/' + resultados.length);
+  Logger.log('FALHAS: ' + falhas);
+  Logger.log('PERCENTUAL: ' + percentual + '%');
+  if (resultados.length === 25 && falhas === 0) {
+    Logger.log('🏆 TESTAR_RANKING_SOLUCOES_COMPATIVEIS_V63: PASSOU');
+    Logger.log('🏆 RANKING DE SOLUÇÕES COMPATÍVEIS V6.3: 100%');
+  } else {
+    Logger.log('❌ TESTAR_RANKING_SOLUCOES_COMPATIVEIS_V63: FALHOU');
+  }
+  Logger.log('============================================================');
+
+  return { sucesso: resultados.length === 25 && falhas === 0, aprovados: aprovados, falhas: falhas, percentual: percentual, resultados: resultados };
+}
