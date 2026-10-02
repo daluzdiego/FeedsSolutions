@@ -4620,3 +4620,189 @@ function TESTAR_CENARIO_INFORMACAO_INCOMPLETA_V63() {
   };
 
 }
+
+
+/**
+ * ============================================================
+ * TESTE OFICIAL — SOLUÇÃO NÃO COMPATÍVEL V6.3
+ * ============================================================
+ * Objetivo:
+ * garantir que uma solução VALIDADA para um problema diferente
+ * não seja associada ao problema atual por semelhança superficial.
+ */
+function TESTAR_SOLUCAO_NAO_COMPATIVEL_V63() {
+
+  Logger.log('============================================================');
+  Logger.log('INÍCIO — TESTAR_SOLUCAO_NAO_COMPATIVEL_V63');
+  Logger.log('============================================================');
+
+  const resultados = [];
+  const marcador = 'TESTE-NAO-COMPATIVEL-V63-' + new Date().getTime();
+  let resolucaoId = '';
+
+  function teste(numero, descricao, condicao) {
+    const passou = condicao === true;
+    resultados.push({ numero: numero, descricao: descricao, passou: passou });
+    Logger.log((passou ? '✅' : '❌') + ' TESTE ' + numero + '/25 — ' + descricao);
+    return passou;
+  }
+
+  try {
+    // ------------------------------------------------------------
+    // 1 — Criar solução VALIDADA para outro problema
+    // ------------------------------------------------------------
+    let criada = null;
+    try {
+      criada = salvarResolucaoV63_({
+        titulo_interno: marcador,
+        descricao_problema: 'Atrasos no processo de manutenção preventiva de veículos.',
+        padrao_problema: 'Controle manual de manutenção e vencimento de revisões.',
+        processo: 'Agendamento e acompanhamento de revisões de veículos.',
+        dores: ['atrasos de manutenção', 'perda de prazo'],
+        impactos: ['veículos ficam indisponíveis', 'atrasos operacionais'],
+        resultados_desejados: ['cumprir prazos de manutenção'],
+        contexto: 'Gestão de manutenção de frota.',
+        restricoes: ['manter veículos disponíveis'],
+        abordagem_interna: 'Organizar o acompanhamento das revisões.',
+        descricao_solucao_interna: 'Processo validado para controle de manutenção preventiva.',
+        alternativas: [],
+        status: 'HIPOTESE',
+        confianca: 'ALTA',
+        evidencias: [],
+        casos_relacionados: [],
+        origem: 'TESTE_V6.3'
+      });
+      resolucaoId = criada && criada.resolucao_id ? criada.resolucao_id : '';
+      if (resolucaoId) {
+        validarResolucaoV63_(resolucaoId, {
+          evidencias: [marcador + '-EVIDENCIA'],
+          confianca: 'ALTA',
+          descricao_solucao_interna: 'Processo validado para controle de manutenção preventiva.'
+        });
+      }
+    } catch (erroCriacao) {
+      Logger.log('ERRO CRIAÇÃO SOLUÇÃO TESTE: ' + (erroCriacao.message || erroCriacao));
+    }
+
+    const solucaoValidada = resolucaoId
+      ? buscarResolucaoV63_({ resolucao_id: resolucaoId })
+      : null;
+
+    teste(1, 'solução de controle de manutenção foi criada', !!solucaoValidada);
+    teste(2, 'solução de controle de manutenção está VALIDADA', !!(solucaoValidada && solucaoValidada.status === 'VALIDADA'));
+    teste(3, 'solução possui ID próprio', !!resolucaoId);
+
+    // ------------------------------------------------------------
+    // 2 — Criar interpretação para problema diferente
+    // ------------------------------------------------------------
+    const interpretacao = criarInterpretacaoSemanticaV63_({
+      problema: 'Erros de digitação e retrabalho na conferência e lançamento de pedidos.',
+      processo: 'Conferir e lançar pedidos recebidos por diferentes canais.',
+      dores: ['erros de digitação', 'retrabalho', 'atrasos'],
+      impactos: ['perda de tempo no processo', 'atrasos'],
+      resultado_desejado: 'Reduzir erros e retrabalho no lançamento de pedidos.',
+      contexto: 'Processamento diário de pedidos.',
+      restricoes: [],
+      padrao_problema: 'Ineficiência operacional em lançamento manual de pedidos.',
+      lacunas: [],
+      status: {
+        problema: 'CONFIRMADO',
+        processo: 'CONFIRMADO',
+        dores: 'CONFIRMADO',
+        impactos: 'CONFIRMADO',
+        resultado_desejado: 'CONFIRMADO',
+        contexto: 'CONFIRMADO',
+        restricoes: 'DESCONHECIDO',
+        padrao_problema: 'INFERIDO'
+      }
+    });
+
+    teste(4, 'interpretação do problema atual foi criada', !!interpretacao);
+    teste(5, 'interpretação possui problema central correto', !!(interpretacao && interpretacao.problema && interpretacao.problema.indexOf('pedidos') !== -1));
+    teste(6, 'interpretação possui processo correto', !!(interpretacao && interpretacao.processo && interpretacao.processo.indexOf('pedidos') !== -1));
+    teste(7, 'interpretação não contém o problema de manutenção', !!(JSON.stringify(interpretacao).toLowerCase().indexOf('manutenção') === -1));
+
+    const entrada = prepararParaReconhecimentoV63_(interpretacao);
+    teste(8, 'preparação para reconhecimento executou', !!entrada);
+    teste(9, 'entrada de reconhecimento contém o problema atual', !!(entrada && JSON.stringify(entrada).toLowerCase().indexOf('pedidos') !== -1));
+
+    // ------------------------------------------------------------
+    // 3 — Reconhecimento deve rejeitar a solução incompatível
+    // ------------------------------------------------------------
+    const encontrados = buscarResolucoesRelacionadasV63_(entrada, { pontuacao_minima: 80 });
+    teste(10, 'reconhecimento executou sem erro', Array.isArray(encontrados));
+    teste(11, 'solução de manutenção não foi reconhecida', Array.isArray(encontrados) && !encontrados.some(function(item) { return item.resolucao_id === resolucaoId; }));
+    teste(12, 'nenhuma solução incompatível foi aceita com score alto', Array.isArray(encontrados) && encontrados.every(function(item) { return item.resolucao_id !== resolucaoId || Number(item.pontuacao || item.score || 0) < 80; }));
+
+    const resultadoReconhecimento = {
+      classificacao: encontrados.length > 0 ? 'SOLUCOES_ENCONTRADAS' : 'ANALISE_NECESSARIA',
+      resultados: encontrados
+    };
+
+    const classificacao = determinarClassificacaoIntegracaoV63_(resultadoReconhecimento);
+    teste(13, 'classificação foi produzida', !!classificacao);
+    teste(14, 'classificação é ANALISE_NECESSARIA', classificacao === INTEGRACAO_V63.CLASSIFICACOES.ANALISE_NECESSARIA);
+
+    const decisao = decidirSolucaoV63_(resultadoReconhecimento, { interpretacao: interpretacao });
+    teste(15, 'decisão foi produzida', !!decisao);
+    teste(16, 'decisão exige análise', !!(decisao && decisao.estado === 'ANALISE_NECESSARIA'));
+    teste(17, 'decisão não escolhe a solução incompatível', !(decisao && decisao.resolucao_principal === resolucaoId));
+    teste(18, 'decisão não inventa solução principal', !!(decisao && !decisao.resolucao_principal));
+
+    const resposta = gerarRespostaSeguraV63_(decisao);
+    const textoResposta = resposta && resposta.resposta_cliente ? String(resposta.resposta_cliente).toLowerCase() : '';
+    teste(19, 'resposta segura foi produzida', !!(resposta && resposta.resposta_cliente));
+    teste(20, 'resposta não afirma solução encontrada', textoResposta.indexOf('encontrei uma solução') === -1 && textoResposta.indexOf('encontrei a solução') === -1);
+    teste(21, 'resposta orienta análise', textoResposta.indexOf('analis') !== -1 || textoResposta.indexOf('entendi') !== -1 || textoResposta.indexOf('context') !== -1);
+    teste(22, 'resposta não expõe tecnologia', ['api','endpoint','token','apikey','arquitetura','gemini','script','sql'].every(function(t) { return textoResposta.indexOf(t) === -1; }));
+    teste(23, 'resposta não expõe preço ou negociação', ['preço','preco','r$','orçamento','orcamento','negociação','negociacao'].every(function(t) { return textoResposta.indexOf(t) === -1; }));
+
+    const filtro = verificarSegurancaRespostaSeguraV63_(resposta.resposta_cliente);
+    teste(24, 'resposta final passa pelo filtro de segurança', !!(filtro && filtro.segura === true));
+    teste(25, 'fluxo completo preserva ANALISE_NECESSARIA sem solução incompatível', classificacao === 'ANALISE_NECESSARIA' && decisao && decisao.estado === 'ANALISE_NECESSARIA' && resposta && resposta.resposta_cliente);
+
+  } catch (erro) {
+    Logger.log('ERRO GERAL TESTE: ' + (erro.message || erro));
+  } finally {
+    // Limpeza exclusiva do registro criado por este teste.
+    if (resolucaoId) {
+      try {
+        const sheet = obterAba_(SHEETS.BIBLIOTECA_RESOLUCOES);
+        const valores = sheet.getDataRange().getValues();
+        const cabecalhos = valores[0] || [];
+        const colunaId = cabecalhos.indexOf('resolucao_id');
+        const colunaTitulo = cabecalhos.indexOf('titulo_interno');
+        for (let i = valores.length - 1; i >= 1; i--) {
+          const idLinha = colunaId >= 0 ? String(valores[i][colunaId]) : '';
+          const tituloLinha = colunaTitulo >= 0 ? String(valores[i][colunaTitulo]) : '';
+          if (idLinha === String(resolucaoId) || tituloLinha === marcador) sheet.deleteRow(i + 1);
+        }
+        Logger.log('LIMPEZA SOLUÇÃO INCOMPATÍVEL V6.3: CONCLUÍDA');
+      } catch (erroLimpeza) {
+        Logger.log('⚠️ AVISO LIMPEZA: ' + (erroLimpeza.message || erroLimpeza));
+      }
+    }
+  }
+
+  const aprovados = resultados.filter(function(item) { return item.passou; }).length;
+  const falhas = resultados.length - aprovados;
+  const percentual = resultados.length ? Math.round((aprovados / resultados.length) * 100) : 0;
+
+  Logger.log('============================================================');
+  Logger.log('RESULTADO FINAL — SOLUÇÃO NÃO COMPATÍVEL V6.3');
+  Logger.log('============================================================');
+  Logger.log('APROVADOS: ' + aprovados + '/' + resultados.length);
+  Logger.log('FALHAS: ' + falhas);
+  Logger.log('PERCENTUAL: ' + percentual + '%');
+
+  if (resultados.length === 25 && falhas === 0) {
+    Logger.log('🏆 TESTAR_SOLUCAO_NAO_COMPATIVEL_V63: PASSOU');
+    Logger.log('🏆 SOLUÇÃO NÃO COMPATÍVEL V6.3: 100%');
+  } else {
+    Logger.log('❌ TESTAR_SOLUCAO_NAO_COMPATIVEL_V63: FALHOU');
+  }
+
+  Logger.log('============================================================');
+
+  return { sucesso: falhas === 0 && resultados.length === 25, aprovados: aprovados, falhas: falhas, percentual: percentual, resultados: resultados };
+}
