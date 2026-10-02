@@ -3945,3 +3945,176 @@ function TESTAR_BIBLIOTECA_RESOLUCOES_V63() {
   };
 
 }
+
+
+/**
+ * ============================================================
+ * TESTE OFICIAL — FALSO POSITIVO POR SEMELHANÇA V6.3
+ * ============================================================
+ * Objetivo:
+ * verificar se o reconhecimento rejeita uma solução VALIDADA
+ * que compartilha palavras genéricas com o caso atual, mas
+ * representa um problema/processo diferente.
+ */
+function TESTAR_FALSO_POSITIVO_SEMANTICO_V63() {
+
+  Logger.log('============================================================');
+  Logger.log('INÍCIO — TESTAR_FALSO_POSITIVO_SEMANTICO_V63');
+  Logger.log('============================================================');
+
+  const resultados = [];
+  const marcador = 'TESTE-FALSO-POSITIVO-V63-' + new Date().getTime();
+  let resolucaoId = '';
+
+  function teste(numero, descricao, condicao) {
+    const passou = condicao === true;
+    resultados.push({ numero: numero, descricao: descricao, passou: passou });
+    Logger.log((passou ? '✅' : '❌') + ' TESTE ' + numero + '/25 — ' + descricao);
+    return passou;
+  }
+
+  try {
+    // ------------------------------------------------------------
+    // CASO ATUAL — pedidos
+    // ------------------------------------------------------------
+    const investigacao = {
+      problema_central: 'Erros e retrabalho na conferência e lançamento de pedidos.',
+      processo: 'Conferir e lançar pedidos recebidos por diferentes canais.',
+      pontos_de_dor: ['erros de digitação', 'retrabalho'],
+      impacto: { descricao: 'perda de tempo no processo' },
+      resultado_desejado: 'Reduzir erros e retrabalho no lançamento de pedidos.',
+      contexto: 'Processamento diário de pedidos.'
+    };
+
+    teste(1, 'investigação atual foi criada', !!investigacao);
+    teste(2, 'problema atual contém pedidos', investigacao.problema_central.indexOf('pedidos') !== -1);
+    teste(3, 'processo atual contém lançamento de pedidos', investigacao.processo.indexOf('pedidos') !== -1);
+
+    // ------------------------------------------------------------
+    // SOLUÇÃO VALIDADA DIFERENTE, mas com palavras genéricas em comum
+    // ------------------------------------------------------------
+    let criada = null;
+    try {
+      criada = salvarResolucaoV63_({
+        titulo_interno: marcador,
+        descricao_problema: 'Erros e retrabalho no controle manual de estoque.',
+        padrao_problema: 'Processo manual de conferência e registro de estoque.',
+        processo: 'Conferir estoque e lançar entradas e saídas de produtos.',
+        dores: ['erros de registro', 'retrabalho de conferência'],
+        impactos: ['perda de tempo no processo', 'atrasos no controle'],
+        resultados_desejados: ['reduzir erros e retrabalho no controle de estoque'],
+        contexto: 'Controle diário de estoque e movimentação de produtos.',
+        restricoes: [],
+        abordagem_interna: 'Processo validado de conferência e registro de estoque.',
+        descricao_solucao_interna: 'Solução validada para controle manual de estoque.',
+        alternativas: [],
+        status: 'HIPOTESE',
+        confianca: 'ALTA',
+        evidencias: [],
+        casos_relacionados: [],
+        origem: 'TESTE_V6.3'
+      });
+      resolucaoId = criada && criada.resolucao_id ? criada.resolucao_id : '';
+      if (resolucaoId) {
+        validarResolucaoV63_(resolucaoId, {
+          evidencias: [marcador + '-EVIDENCIA'],
+          confianca: 'ALTA',
+          descricao_solucao_interna: 'Solução validada para controle manual de estoque.'
+        });
+      }
+    } catch (erroCriacao) {
+      Logger.log('ERRO CRIAÇÃO SOLUÇÃO TESTE: ' + (erroCriacao.message || erroCriacao));
+    }
+
+    const solucao = resolucaoId ? buscarResolucaoV63_({ resolucao_id: resolucaoId }) : null;
+    teste(4, 'solução diferente foi criada', !!solucao);
+    teste(5, 'solução diferente está VALIDADA', !!(solucao && solucao.status === 'VALIDADA'));
+    teste(6, 'solução possui ID próprio', !!resolucaoId);
+
+    // ------------------------------------------------------------
+    // COMPARAÇÃO DIMENSIONAL
+    // ------------------------------------------------------------
+    const comparacao = compararInvestigacaoResolucaoV63_(investigacao, solucao || {});
+    teste(7, 'comparação foi produzida', !!comparacao);
+    teste(8, 'pontuação é numérica', typeof comparacao.pontuacao === 'number');
+    teste(9, 'pontuação permanece entre 0 e 100', comparacao.pontuacao >= 0 && comparacao.pontuacao <= 100);
+    teste(10, 'dimensão de problema não é perfeita', comparacao.dimensoes.problema < 100);
+    teste(11, 'dimensão de processo não é perfeita', comparacao.dimensoes.processo < 100);
+    teste(12, 'pontuação global não atinge o limiar de solução', comparacao.pontuacao < 80);
+
+    // ------------------------------------------------------------
+    // BUSCA COM LIMIAR DE SOLUÇÃO
+    // ------------------------------------------------------------
+    const encontrados = buscarResolucoesRelacionadasV63_(investigacao, { pontuacao_minima: 80 });
+    teste(13, 'busca relacionada executou', Array.isArray(encontrados));
+    teste(14, 'solução de estoque não aparece como correspondência forte', !encontrados.some(function(item) { return item.resolucao_id === resolucaoId; }));
+    teste(15, 'nenhuma correspondência incompatível foi aceita acima de 80', encontrados.every(function(item) { return item.resolucao_id !== resolucaoId || Number(item.pontuacao || 0) < 80; }));
+
+    // ------------------------------------------------------------
+    // CLASSIFICAÇÃO E DECISÃO
+    // ------------------------------------------------------------
+    const reconhecimento = classificarReconhecimentoV63_(encontrados);
+    teste(16, 'classificação do reconhecimento foi produzida', !!reconhecimento);
+    teste(17, 'solução incompatível não vira SOLUCAO_ENCONTRADA por si só', reconhecimento.classificacao !== 'SOLUCAO_ENCONTRADA' || !reconhecimento.melhor || reconhecimento.melhor.resolucao_id !== resolucaoId);
+
+    const resultadoDecisao = {
+      classificacao: encontrados.length > 0 ? 'SOLUCOES_ENCONTRADAS' : 'ANALISE_NECESSARIA',
+      resultados: encontrados
+    };
+    const decisao = decidirSolucaoV63_(resultadoDecisao, { interpretacao: investigacao });
+    teste(18, 'decisão foi produzida', !!decisao);
+    teste(19, 'decisão não escolhe a solução de estoque', !(decisao && decisao.resolucao_principal === resolucaoId));
+    teste(20, 'solução de estoque não é tratada como validada para este caso', !(decisao && decisao.resolucao_principal === resolucaoId && decisao.estado === 'SOLUCAO_VALIDADA'));
+
+    const resposta = gerarRespostaSeguraV63_(decisao);
+    const textoResposta = resposta && resposta.resposta_cliente ? String(resposta.resposta_cliente).toLowerCase() : '';
+    teste(21, 'resposta segura foi produzida', !!(resposta && resposta.resposta_cliente));
+    teste(22, 'resposta não afirma que encontrou a solução de estoque', textoResposta.indexOf('encontrei uma solução') === -1 && textoResposta.indexOf('encontrei a solução') === -1);
+    teste(23, 'resposta não expõe tecnologia ou preço', ['api','endpoint','token','gemini','script','sql','r$','preço','preco','orçamento','orcamento'].every(function(t) { return textoResposta.indexOf(t) === -1; }));
+
+    const filtro = verificarSegurancaRespostaSeguraV63_(resposta.resposta_cliente);
+    teste(24, 'resposta final passa pelo filtro de segurança', !!(filtro && filtro.segura === true));
+    teste(25, 'falso positivo não altera o fluxo para solução validada', !(decisao && decisao.resolucao_principal === resolucaoId && decisao.estado === 'SOLUCAO_VALIDADA'));
+
+  } catch (erro) {
+    Logger.log('ERRO GERAL TESTE: ' + (erro.message || erro));
+  } finally {
+    if (resolucaoId) {
+      try {
+        const sheet = obterAba_(SHEETS.BIBLIOTECA_RESOLUCOES);
+        const valores = sheet.getDataRange().getValues();
+        const cabecalhos = valores[0] || [];
+        const colunaId = cabecalhos.indexOf('resolucao_id');
+        const colunaTitulo = cabecalhos.indexOf('titulo_interno');
+        for (let i = valores.length - 1; i >= 1; i--) {
+          const idLinha = colunaId >= 0 ? String(valores[i][colunaId]) : '';
+          const tituloLinha = colunaTitulo >= 0 ? String(valores[i][colunaTitulo]) : '';
+          if (idLinha === String(resolucaoId) || tituloLinha === marcador) sheet.deleteRow(i + 1);
+        }
+        Logger.log('LIMPEZA FALSO POSITIVO V6.3: CONCLUÍDA');
+      } catch (erroLimpeza) {
+        Logger.log('⚠️ AVISO LIMPEZA: ' + (erroLimpeza.message || erroLimpeza));
+      }
+    }
+  }
+
+  const aprovados = resultados.filter(function(item) { return item.passou; }).length;
+  const falhas = resultados.length - aprovados;
+  const percentual = resultados.length ? Math.round((aprovados / resultados.length) * 100) : 0;
+
+  Logger.log('============================================================');
+  Logger.log('RESULTADO FINAL — FALSO POSITIVO SEMÂNTICO V6.3');
+  Logger.log('============================================================');
+  Logger.log('APROVADOS: ' + aprovados + '/' + resultados.length);
+  Logger.log('FALHAS: ' + falhas);
+  Logger.log('PERCENTUAL: ' + percentual + '%');
+  if (resultados.length === 25 && falhas === 0) {
+    Logger.log('🏆 TESTAR_FALSO_POSITIVO_SEMANTICO_V63: PASSOU');
+    Logger.log('🏆 FALSO POSITIVO SEMÂNTICO V6.3: 100%');
+  } else {
+    Logger.log('❌ TESTAR_FALSO_POSITIVO_SEMANTICO_V63: FALHOU');
+  }
+  Logger.log('============================================================');
+
+  return { sucesso: resultados.length === 25 && falhas === 0, aprovados: aprovados, falhas: falhas, percentual: percentual, resultados: resultados };
+}
