@@ -768,6 +768,64 @@ function normalizarImpactoSemanticoV63_(
 
 /**
  * ------------------------------------------------------------
+/**
+ * ------------------------------------------------------------
+ * PRESERVAÇÃO DETERMINÍSTICA DE IMPACTO EXPLÍCITO
+ * ------------------------------------------------------------
+ */
+function preservarImpactoExplicitoV63_(
+  dados,
+  mensagem
+) {
+
+  if (
+    !dados ||
+    typeof dados !== 'object'
+  ) {
+    return dados;
+  }
+
+  if (!Array.isArray(dados.impactos)) {
+    dados.impactos = [];
+  }
+
+  if (dados.impactos.length > 0) {
+    return dados;
+  }
+
+  const texto =
+    String(mensagem || '')
+      .trim()
+      .toLowerCase();
+
+  if (!texto) {
+    return dados;
+  }
+
+  if (
+    /\b(perdemos|perde|perder|gasta|gastamos|gastar)\b[^.?!]{0,80}\btempo\b/.test(texto) ||
+    /\bperda\s+de\s+tempo\b/.test(texto)
+  ) {
+
+    dados.impactos.push(
+      'Perda de tempo no processo.'
+    );
+
+    if (
+      !dados.status ||
+      typeof dados.status !== 'object'
+    ) {
+      dados.status = {};
+    }
+
+    dados.status.impactos =
+      'INFERIDO';
+  }
+
+  return dados;
+}
+
+
  * INTERPRETAÇÃO PRINCIPAL
  * ------------------------------------------------------------
  */
@@ -820,6 +878,11 @@ function interpretarMensagemSemanticaV63_(
    */
 
   normalizarImpactoSemanticoV63_(
+    objeto,
+    texto
+  );
+
+  preservarImpactoExplicitoV63_(
     objeto,
     texto
   );
