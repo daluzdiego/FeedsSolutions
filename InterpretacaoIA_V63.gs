@@ -848,6 +848,67 @@ function interpretarMensagemSemanticaV63_(
 
   /*
    * ----------------------------------------------------------
+   * 4.1 — PRESERVAÇÃO DETERMINÍSTICA DE LACUNAS
+   * ----------------------------------------------------------
+   */
+
+  if (
+    interpretacao &&
+    typeof interpretacao === 'object'
+  ) {
+
+    if (!Array.isArray(interpretacao.lacunas)) {
+      interpretacao.lacunas = [];
+    }
+
+    const camposLacunas = [
+      'problema',
+      'processo',
+      'dores',
+      'impactos',
+      'resultado_desejado',
+      'contexto',
+      'restricoes',
+      'padrao_problema'
+    ];
+
+    camposLacunas.forEach(function(campo) {
+
+      const valor = interpretacao[campo];
+      const status =
+        interpretacao.status &&
+        interpretacao.status[campo];
+
+      const vazio =
+        Array.isArray(valor)
+          ? valor.length === 0
+          : !String(valor || '').trim();
+
+      const desconhecido =
+        String(status || '').trim().toUpperCase() ===
+        'DESCONHECIDO';
+
+      if (vazio || desconhecido) {
+
+        if (interpretacao.lacunas.indexOf(campo) === -1) {
+          interpretacao.lacunas.push(campo);
+        }
+
+      }
+
+    });
+
+    interpretacao.lacunas =
+      normalizarArrayInterpretacaoV63_(
+        interpretacao.lacunas
+      );
+
+  }
+
+
+
+  /*
+   * ----------------------------------------------------------
    * 5. VALIDAÇÃO
    * ----------------------------------------------------------
    */
