@@ -4290,3 +4290,145 @@ function TESTAR_RANKING_SOLUCOES_COMPATIVEIS_V63() {
 
   return { sucesso: resultados.length === 25 && falhas === 0, aprovados: aprovados, falhas: falhas, percentual: percentual, resultados: resultados };
 }
+
+
+/**
+ * ============================================================
+ * TESTE OFICIAL — RECONHECIMENTO POR PARÁFRASE V6.3
+ * ============================================================
+ * Objetivo:
+ * verificar se uma solução VALIDADA continua reconhecível quando
+ * a investigação real usa formulação diferente da solução salva.
+ */
+function TESTAR_RECONHECIMENTO_POR_PARAFRASE_V63() {
+
+  Logger.log('============================================================');
+  Logger.log('INÍCIO — TESTAR_RECONHECIMENTO_POR_PARAFRASE_V63');
+  Logger.log('============================================================');
+
+  const resultados=[];
+  const marcador='TESTE-PARAFRASE-V63-'+new Date().getTime();
+  let resolucaoId='';
+
+  function teste(numero,descricao,condicao){
+    const passou=condicao===true;
+    resultados.push({numero:numero,descricao:descricao,passou:passou});
+    Logger.log((passou?'✅':'❌')+' TESTE '+numero+'/25 — '+descricao);
+    return passou;
+  }
+
+  try {
+    const investigacao={
+      problema_central:'A equipe perde horas corrigindo registros porque as solicitações recebidas por diferentes canais precisam ser digitadas manualmente.',
+      processo:'Conferência e registro manual de solicitações que chegam por diferentes canais.',
+      pontos_de_dor:['erros de registro','retrabalho','atrasos'],
+      impacto:{descricao:'perda de tempo da equipe'},
+      resultado_desejado:'Diminuir erros e tempo gasto com correções.',
+      contexto:'Rotina administrativa com solicitações recebidas por múltiplos canais.'
+    };
+
+    teste(1,'investigação por paráfrase foi criada',!!investigacao);
+    teste(2,'problema está presente',!!investigacao.problema_central);
+    teste(3,'processo está presente',!!investigacao.processo);
+
+    const solucao={
+      titulo_interno:marcador,
+      descricao_problema:'Erros de digitação e retrabalho na conferência e lançamento de pedidos.',
+      padrao_problema:'Ineficiência operacional em lançamento manual de pedidos.',
+      processo:'Conferir e lançar pedidos recebidos por diferentes canais.',
+      dores:['erros de digitação','retrabalho','atrasos'],
+      impactos:['perda de tempo no processo'],
+      resultados_desejados:['reduzir erros e retrabalho no lançamento de pedidos'],
+      contexto:'Processamento diário de pedidos.',
+      restricoes:[],
+      abordagem_interna:'Abordagem validada para conferência e lançamento de pedidos.',
+      descricao_solucao_interna:'Solução validada para reduzir erros e retrabalho em pedidos.',
+      alternativas:[],
+      status:'HIPOTESE',
+      confianca:'ALTA',
+      evidencias:[],
+      casos_relacionados:[],
+      origem:'TESTE_V6.3',
+      versao:'V6.3'
+    };
+
+    const criada=salvarResolucaoV63_(solucao);
+    resolucaoId=criada&&criada.resolucao_id?criada.resolucao_id:'';
+    if(resolucaoId){
+      validarResolucaoV63_(resolucaoId,{evidencias:[marcador+'-EVIDENCIA'],confianca:'ALTA',descricao_solucao_interna:solucao.descricao_solucao_interna});
+    }
+
+    const persistida=resolucaoId?buscarResolucaoV63_({resolucao_id:resolucaoId}):null;
+    teste(4,'solução foi persistida',!!persistida);
+    teste(5,'solução está VALIDADA',!!(persistida&&persistida.status==='VALIDADA'));
+    teste(6,'solução possui ID',!!resolucaoId);
+
+    const comparacao=compararInvestigacaoResolucaoV63_(investigacao,persistida||{});
+    teste(7,'comparação foi produzida',!!comparacao);
+    teste(8,'pontuação é numérica',typeof comparacao.pontuacao==='number');
+    teste(9,'pontuação está entre 0 e 100',comparacao.pontuacao>=0&&comparacao.pontuacao<=100);
+    teste(10,'problema não depende de texto idêntico',investigacao.problema_central!==persistida.descricao_problema);
+    teste(11,'processo não depende de texto idêntico',investigacao.processo!==persistida.processo);
+    teste(12,'há alguma aderência entre os casos',comparacao.pontuacao>0);
+
+    const encontrados=buscarResolucoesRelacionadasV63_(investigacao,{pontuacao_minima:20,limite:10});
+    const encontrado=encontrados.find(function(item){return item.resolucao_id===resolucaoId;});
+    teste(13,'busca relacionada executou',Array.isArray(encontrados));
+    teste(14,'solução validada foi reconhecida',!!encontrado);
+    teste(15,'resultado reconhecido mantém VALIDADA',!!encontrado&&encontrado.status==='VALIDADA');
+    teste(16,'pontuação do reconhecimento é preservada',!!encontrado&&Number(encontrado.pontuacao)===Number(comparacao.pontuacao));
+    teste(17,'reconhecimento não exige igualdade literal do problema',!!encontrado&&investigacao.problema_central!==persistida.descricao_problema);
+    teste(18,'reconhecimento não exige igualdade literal do processo',!!encontrado&&investigacao.processo!==persistida.processo);
+
+    const classificados=classificarReconhecimentoV63_(encontrados);
+    teste(19,'classificação foi produzida',!!classificados);
+    teste(20,'solução validada reconhecida não vira hipótese',!!classificados&&classificados.resultados.some(function(item){return item.resolucao_id===resolucaoId&&item.status==='VALIDADA';}));
+
+    const decisao=decidirSolucaoV63_(classificados,{investigacao:investigacao});
+    teste(21,'decisão foi produzida',!!decisao);
+    teste(22,'decisão preserva a solução reconhecida',!!decisao&&decisao.resolucao_principal===resolucaoId);
+    teste(23,'decisão não expõe tecnologia ou preço',!!decisao&&decisao.tecnologia_exposta===false&&decisao.preco_informado===false);
+
+    const resposta=gerarRespostaSeguraV63_(decisao);
+    teste(24,'resposta segura foi produzida',!!(resposta&&resposta.resposta_cliente));
+    const filtro=verificarSegurancaRespostaSeguraV63_(resposta.resposta_cliente);
+    teste(25,'resposta final passa pelo filtro de segurança',!!(filtro&&filtro.segura===true));
+
+  } catch(erro) {
+    Logger.log('ERRO GERAL TESTE: '+(erro.message||erro));
+  } finally {
+    if(resolucaoId){
+      try{
+        const sheet=obterAba_(SHEETS.BIBLIOTECA_RESOLUCOES);
+        const valores=sheet.getDataRange().getValues();
+        const cabecalhos=valores[0]||[];
+        const colunaId=cabecalhos.indexOf('resolucao_id');
+        const colunaTitulo=cabecalhos.indexOf('titulo_interno');
+        for(let i=valores.length-1;i>=1;i--){
+          const idLinha=colunaId>=0?String(valores[i][colunaId]):'';
+          const tituloLinha=colunaTitulo>=0?String(valores[i][colunaTitulo]):'';
+          if(idLinha===String(resolucaoId)||tituloLinha===marcador)sheet.deleteRow(i+1);
+        }
+        Logger.log('LIMPEZA PARÁFRASE V6.3: CONCLUÍDA');
+      }catch(erroLimpeza){Logger.log('⚠️ AVISO LIMPEZA PARÁFRASE: '+(erroLimpeza.message||erroLimpeza));}
+    }
+  }
+
+  const aprovados=resultados.filter(function(item){return item.passou;}).length;
+  const falhas=resultados.length-aprovados;
+  const percentual=resultados.length?Math.round((aprovados/resultados.length)*100):0;
+  Logger.log('============================================================');
+  Logger.log('RESULTADO FINAL — RECONHECIMENTO POR PARÁFRASE V6.3');
+  Logger.log('============================================================');
+  Logger.log('APROVADOS: '+aprovados+'/'+resultados.length);
+  Logger.log('FALHAS: '+falhas);
+  Logger.log('PERCENTUAL: '+percentual+'%');
+  if(resultados.length===25&&falhas===0){
+    Logger.log('🏆 TESTAR_RECONHECIMENTO_POR_PARAFRASE_V63: PASSOU');
+    Logger.log('🏆 RECONHECIMENTO POR PARÁFRASE V6.3: 100%');
+  }else{
+    Logger.log('❌ TESTAR_RECONHECIMENTO_POR_PARAFRASE_V63: FALHOU');
+  }
+  Logger.log('============================================================');
+  return {sucesso:resultados.length===25&&falhas===0,aprovados:aprovados,falhas:falhas,percentual:percentual,resultados:resultados};
+}
