@@ -4759,7 +4759,9 @@ function TESTAR_SOLUCAO_NAO_COMPATIVEL_V63() {
 
     const filtro = verificarSegurancaRespostaSeguraV63_(resposta.resposta_cliente);
     teste(24, 'resposta final passa pelo filtro de segurança', !!(filtro && filtro.segura === true));
-    teste(25, 'fluxo completo preserva ANALISE_NECESSARIA sem solução incompatível', classificacao === 'ANALISE_NECESSARIA' && decisao && decisao.estado === 'ANALISE_NECESSARIA' && resposta && resposta.resposta_cliente);
+    Logger.log('DIAGNÓSTICO TESTE 25 — classificacao=[' + String(classificacao) + '] decisao.estado=[' + String(decisao && decisao.estado) + '] resposta_cliente=[' + String(resposta && resposta.resposta_cliente) + ']');
+    const fluxoIncompativelSeguro = classificacao === 'ANALISE_NECESSARIA' && !!decisao && decisao.estado === 'ANALISE_NECESSARIA' && !!resposta && !!resposta.resposta_cliente;
+    teste(25, 'fluxo completo preserva ANALISE_NECESSARIA sem solução incompatível', fluxoIncompativelSeguro);
 
   } catch (erro) {
     Logger.log('ERRO GERAL TESTE: ' + (erro.message || erro));
