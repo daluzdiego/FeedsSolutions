@@ -6623,10 +6623,11 @@ function TESTAR_CATALOGO_MISTO_PRODUCAO_V63() {
   }
 
   const investigacao = {
-    problema: 'Erros de digitação e retrabalho na conferência e lançamento de pedidos.',
+    problema_central: 'Erros de digitação e retrabalho na conferência e lançamento de pedidos.',
     processo: 'Conferir e lançar pedidos recebidos por diferentes canais.',
     pontos_de_dor: ['erros de digitação', 'retrabalho', 'conferência manual'],
     impactos: ['perda de tempo no processo'],
+    resultado_desejado: 'Reduzir erros e retrabalho no lançamento de pedidos.',
     objetivo: 'Reduzir erros e retrabalho no lançamento de pedidos.',
     contexto: 'Processamento diário de pedidos administrativos.'
   };
