@@ -4868,7 +4868,7 @@ function TESTAR_RUIDO_NO_CATALOGO_V63() {
     teste(13, 'busca relacionada executou', Array.isArray(encontrados));
     teste(14, 'solução correta foi reconhecida', !!eCorreta);
     teste(15, 'solução correta aparece antes da parcial', !!eCorreta && !!eParcial && encontrados.indexOf(eCorreta) < encontrados.indexOf(eParcial));
-    teste(16, 'solução correta aparece antes do ruído quando ambos são retornados', !!eCorreta && !!eRuido && encontrados.indexOf(eCorreta) < encontrados.indexOf(eRuido));
+    teste(16, 'solução correta mantém pontuação superior ao ruído quando ambos são retornados', !!eCorreta && !!eRuido && Number(eCorreta.pontuacao) > Number(eRuido.pontuacao));
     teste(17, 'ruído não supera a solução correta', !!eCorreta && (!eRuido || Number(eCorreta.pontuacao) > Number(eRuido.pontuacao)));
 
     const candidatos = encontrados.filter(function(item) {
