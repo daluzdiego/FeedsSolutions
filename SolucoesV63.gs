@@ -7108,3 +7108,220 @@ function TESTAR_CATALOGO_MISTO_PRODUCAO_V63() {
     resultados: resultados
   };
 }
+
+
+/**
+ * TESTAR_INVESTIGACAO_REAL_PARAFRASE_V63
+ * Valida reconhecimento de uma investigação realista/parcial,
+ * escrita em linguagem diferente do registro da biblioteca.
+ * Não utiliza Gemini: o objetivo é medir a camada determinística
+ * de reconhecimento sobre dados que poderiam vir da investigação real.
+ */
+function TESTAR_INVESTIGACAO_REAL_PARAFRASE_V63() {
+  Logger.log('============================================================');
+  Logger.log('INÍCIO — TESTAR_INVESTIGACAO_REAL_PARAFRASE_V63');
+  Logger.log('============================================================');
+
+  const resultados = [];
+  const idsTeste = [];
+  const marcador = 'TESTE INVESTIGACAO REAL PARAFRASE V6.3 — ';
+
+  function teste(numero, descricao, condicao) {
+    const passou = !!condicao;
+    resultados.push({ numero: numero, descricao: descricao, passou: passou });
+    Logger.log((passou ? '✅' : '❌') + ' TESTE ' + numero + '/25 — ' + descricao);
+  }
+
+  const investigacao = {
+    problema_central: 'A equipe perde muito tempo digitando novamente os pedidos que chegam por WhatsApp e e-mail, o que gera erros e retrabalho.',
+    processo: 'Os pedidos recebidos em diferentes canais precisam ser conferidos e lançados manualmente no processo administrativo.',
+    pontos_de_dor: [
+      'redigitação de informações',
+      'erros de lançamento',
+      'retrabalho da equipe'
+    ],
+    impactos: [
+      'perda de tempo',
+      'aumento do retrabalho'
+    ],
+    resultado_desejado: 'Diminuir a redigitação, os erros e o tempo gasto no lançamento dos pedidos.',
+    contexto: 'Rotina administrativa com pedidos chegando por canais diferentes.'
+  };
+
+  function adicionar(sufixo, titulo, status, problema, processo, dores, impactos, resultado, contexto) {
+    const solucao = {
+      resolucao_id: '',
+      titulo_interno: marcador + sufixo + ' — ' + titulo,
+      status: status,
+      descricao_problema: problema,
+      padrao_problema: problema,
+      processo: processo,
+      dores: dores,
+      impactos: impactos,
+      resultados_desejados: [resultado],
+      contexto: contexto,
+      evidencias: status === 'VALIDADA' ? ['Teste automatizado V6.3'] : [],
+      prioridade: status === 'VALIDADA' ? 'ALTA' : 'MEDIA'
+    };
+    idsTeste.push(solucao);
+    return solucao;
+  }
+
+  const catalogo = [];
+
+  try {
+    teste(1, 'investigação realista foi criada', !!investigacao && !!investigacao.problema_central);
+    teste(2, 'investigação contém processo operacional', !!investigacao.processo);
+    teste(3, 'investigação contém dores observáveis', Array.isArray(investigacao.pontos_de_dor) && investigacao.pontos_de_dor.length >= 2);
+    teste(4, 'investigação contém impactos', Array.isArray(investigacao.impactos) && investigacao.impactos.length >= 1);
+    teste(5, 'investigação contém resultado desejado', !!investigacao.resultado_desejado);
+
+    catalogo.push(adicionar('01', 'solução-base — conferência e lançamento', 'VALIDADA',
+      'Erros de digitação e retrabalho na conferência e lançamento de pedidos.',
+      'Conferir e lançar pedidos recebidos por diferentes canais.',
+      ['erros de digitação', 'retrabalho', 'conferência manual'],
+      ['perda de tempo no processo'],
+      'Reduzir erros e retrabalho no lançamento de pedidos.',
+      'Processamento diário de pedidos administrativos.'
+    ));
+
+    catalogo.push(adicionar('02', 'concorrente — pedidos digitais', 'VALIDADA',
+      'Redigitação e erros no cadastro de pedidos recebidos digitalmente.',
+      'Registrar pedidos digitais e conferir informações antes do lançamento.',
+      ['redigitação', 'erros', 'retrabalho'],
+      ['perda de tempo'],
+      'Reduzir erros no registro de pedidos.',
+      'Operação administrativa.'
+    ));
+
+    catalogo.push(adicionar('03', 'parcial — conferência administrativa', 'VALIDADA',
+      'Retrabalho causado por conferência manual de informações.',
+      'Conferir dados administrativos antes do registro.',
+      ['retrabalho', 'conferência manual'],
+      ['perda de tempo'],
+      'Reduzir o retrabalho administrativo.',
+      'Processos administrativos.'
+    ));
+
+    catalogo.push(adicionar('04', 'hipótese — automação de cadastro', 'HIPOTESE',
+      'Erros de cadastro e digitação em processos administrativos.',
+      'Cadastrar informações administrativas manualmente.',
+      ['erros de digitação'],
+      ['perda de tempo'],
+      'Diminuir erros de cadastro.',
+      'Rotina administrativa.'
+    ));
+
+    catalogo.push(adicionar('05', 'ruído — estoque', 'VALIDADA',
+      'Divergências no controle de estoque.',
+      'Conferir quantidades e registrar movimentações de estoque.',
+      ['erros de estoque'],
+      ['atrasos'],
+      'Melhorar controle de estoque.',
+      'Operação logística.'
+    ));
+
+    catalogo.push(adicionar('06', 'ruído — financeiro', 'VALIDADA',
+      'Atrasos na conciliação financeira.',
+      'Conferir extratos e lançamentos bancários.',
+      ['conferência manual'],
+      ['perda de tempo'],
+      'Acelerar conciliação financeira.',
+      'Financeiro.'
+    ));
+
+    for (let i = 7; i <= 20; i++) {
+      catalogo.push(adicionar(
+        String(i).padStart(2, '0'),
+        'ruído ampliado ' + i,
+        i % 4 === 0 ? 'HIPOTESE' : 'VALIDADA',
+        'Problema operacional diferente do cenário de pedidos.',
+        'Executar atividade administrativa sem relação direta com lançamento de pedidos.',
+        ['retrabalho'],
+        ['perda de tempo'],
+        'Melhorar eficiência operacional.',
+        'Processo diferente do cenário investigado.'
+      ));
+    }
+
+    teste(6, 'catálogo possui exatamente 20 soluções temporárias', catalogo.length === 20);
+
+    const salvas = catalogo.map(function(solucao) { return salvarResolucaoV63_(solucao); });
+    teste(7, '20 soluções foram persistidas', salvas.length === 20 && salvas.every(function(item) { return !!item && !!item.resolucao_id; }));
+
+    salvas.forEach(function(item, index) { idsTeste[index] = item.resolucao_id; });
+    teste(8, 'todos os IDs persistidos são únicos', new Set(idsTeste).size === 20);
+
+    const persistidas = idsTeste.map(function(id) { return buscarResolucaoV63_({ resolucao_id: id }); });
+    teste(9, 'todas as soluções podem ser recuperadas', persistidas.filter(Boolean).length === 20);
+
+    const comparacoes = persistidas.map(function(solucao) { return compararInvestigacaoResolucaoV63_(investigacao, solucao); });
+    teste(10, 'todas as 20 comparações foram produzidas', comparacoes.length === 20 && comparacoes.every(function(item) { return item && typeof item.pontuacao === 'number'; }));
+
+    const ranking = buscarResolucoesRelacionadasV63_(investigacao, { pontuacao_minima: 20, limite: 20 });
+    teste(11, 'o reconhecimento por paráfrase produz ranking', Array.isArray(ranking) && ranking.length > 0);
+
+    const referencia = ranking.find(function(item) { return item.resolucao_id === idsTeste[0]; });
+    teste(12, 'a solução-base foi encontrada', !!referencia);
+    teste(13, 'a solução-base alcança aderência alta', !!referencia && Number(referencia.pontuacao) >= 70);
+
+    const melhor = ranking[0];
+    teste(14, 'a solução-base fica no topo ou empatada no topo', !!melhor && Number(referencia.pontuacao) === Number(melhor.pontuacao));
+
+    teste(15, 'a solução-base supera ou empata com a concorrente mais próxima', !!referencia && ranking.slice(0, 3).every(function(item) { return item.resolucao_id === idsTeste[0] || Number(referencia.pontuacao) >= Number(item.pontuacao); }));
+
+    const validadas = buscarResolucoesValidadasRelacionadasV63_(investigacao, { pontuacao_minima: 20, limite: 20 });
+    teste(16, 'busca exclusiva retorna somente validadas', validadas.length > 0 && validadas.every(function(item) { return item.status === 'VALIDADA'; }));
+    teste(17, 'a solução-base está entre as validadas', validadas.some(function(item) { return item.resolucao_id === idsTeste[0]; }));
+
+    const classificacao = classificarReconhecimentoV63_(validadas);
+    teste(18, 'classificação reconhece solução ou soluções encontradas', !!classificacao && (classificacao.classificacao === 'SOLUCAO_ENCONTRADA' || classificacao.classificacao === 'SOLUCOES_ENCONTRADAS'));
+
+    const decisao = decidirSolucaoV63_(classificacao, { investigacao: investigacao });
+    teste(19, 'decisão é produzida para investigação parafraseada', !!decisao && typeof decisao.estado === 'string');
+    teste(20, 'decisão preserva a solução-base como principal', !!decisao && decisao.resolucao_principal === idsTeste[0]);
+    teste(21, 'decisão informa soluções validadas disponíveis', !!decisao && Number(decisao.solucoes_validadas) > 0);
+
+    const resposta = gerarRespostaSeguraV63_(decisao);
+    teste(22, 'resposta segura é produzida', !!resposta && !!resposta.resposta_cliente);
+    teste(23, 'resposta não expõe tecnologia, preço ou negociação', !!resposta && resposta.tecnologia_exposta !== true && resposta.preco_informado !== true && resposta.negociacao_realizada !== true);
+
+    const filtro = verificarSegurancaRespostaSeguraV63_(resposta.resposta_cliente);
+    teste(24, 'resposta final passa pelo filtro de segurança', !!filtro && filtro.segura === true);
+
+    const ranking2 = buscarResolucoesRelacionadasV63_(investigacao, { pontuacao_minima: 20, limite: 20 });
+    teste(25, 'duas execuções consecutivas mantêm a mesma ordem', ranking.length === ranking2.length && ranking.every(function(item, i) { return item.resolucao_id === ranking2[i].resolucao_id; }));
+
+  } catch (erro) {
+    Logger.log('ERRO GERAL TESTE: ' + (erro.message || erro));
+  } finally {
+    try {
+      const sheet = obterAba_(SHEETS.BIBLIOTECA_RESOLUCOES);
+      const valores = sheet.getDataRange().getValues();
+      const cabecalhos = valores[0] || [];
+      const colunaId = cabecalhos.indexOf('resolucao_id');
+      const colunaTitulo = cabecalhos.indexOf('titulo_interno');
+      for (let i = valores.length - 1; i >= 1; i--) {
+        const idLinha = colunaId >= 0 ? String(valores[i][colunaId]) : '';
+        const tituloLinha = colunaTitulo >= 0 ? String(valores[i][colunaTitulo]) : '';
+        if (idsTeste.some(function(item) { return typeof item === 'string' && item === idLinha; }) || tituloLinha.indexOf(marcador) === 0) sheet.deleteRow(i + 1);
+      }
+      Logger.log('LIMPEZA INVESTIGACAO REAL PARAFRASE V6.3: CONCLUÍDA');
+    } catch (erroLimpeza) {
+      Logger.log('⚠️ AVISO LIMPEZA INVESTIGAÇÃO REAL: ' + (erroLimpeza.message || erroLimpeza));
+    }
+  }
+
+  const aprovados = resultados.filter(function(item) { return item.passou; }).length;
+  const falhas = resultados.length - aprovados;
+  const percentual = resultados.length ? Math.round((aprovados / resultados.length) * 100) : 0;
+  Logger.log('============================================================');
+  Logger.log('RESULTADO FINAL — INVESTIGAÇÃO REAL/PARÁFRASE V6.3');
+  Logger.log('============================================================');
+  Logger.log('APROVADOS: ' + aprovados + '/' + resultados.length);
+  Logger.log('FALHAS: ' + falhas);
+  Logger.log('PERCENTUAL: ' + percentual + '%');
+  Logger.log(falhas === 0 && resultados.length === 25 ? '🏆 TESTAR_INVESTIGACAO_REAL_PARAFRASE_V63: PASSOU' : '❌ TESTAR_INVESTIGACAO_REAL_PARAFRASE_V63: FALHOU');
+  Logger.log('============================================================');
+  return { sucesso: resultados.length === 25 && falhas === 0, aprovados: aprovados, falhas: falhas, percentual: percentual, resultados: resultados };
+}
