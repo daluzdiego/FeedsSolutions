@@ -5069,3 +5069,895 @@ function TESTAR_CATALOGO_COM_MULTIPLAS_SOLUCOES_V63() {
   Logger.log('============================================================');
   return { sucesso: resultados.length === 25 && falhas === 0, aprovados: aprovados, falhas: falhas, percentual: percentual, resultados: resultados };
 }
+
+
+
+/**
+ * ============================================================
+ * TESTE OFICIAL — ESCALA + SEMELHANÇA + ESTABILIDADE V6.3
+ */
+function TESTAR_ESCALA_SEMELHANCA_ESTABILIDADE_V63() {
+  Logger.log('============================================================');
+  Logger.log('INÍCIO — TESTAR_ESCALA_SEMELHANCA_ESTABILIDADE_V63');
+  Logger.log('============================================================');
+
+  const resultados = [];
+  const marcador = 'TESTE-ESCALA-SEMELHANCA-V63-' + new Date().getTime();
+  const idsTeste = [];
+
+  function teste(numero, descricao, condicao) {
+    const passou = condicao === true;
+    resultados.push({
+      numero: numero,
+      descricao: descricao,
+      passou: passou
+    });
+    Logger.log(
+      (passou ? '✅' : '❌') +
+      ' TESTE ' +
+      numero +
+      '/25 — ' +
+      descricao
+    );
+    return passou;
+  }
+
+  try {
+    const investigacao = {
+      problema_central:
+        'Erros de digitação e retrabalho na conferência e lançamento de pedidos.',
+      processo:
+        'Conferir e lançar pedidos recebidos por diferentes canais.',
+      pontos_de_dor: [
+        'erros de digitação',
+        'retrabalho',
+        'conferência manual'
+      ],
+      impacto: {
+        descricao: 'perda de tempo no processo'
+      },
+      resultado_desejado:
+        'Reduzir erros e retrabalho no lançamento de pedidos.',
+      contexto:
+        'Processamento diário de pedidos administrativos.'
+    };
+
+    teste(
+      1,
+      'investigação de referência foi criada',
+      !!investigacao
+    );
+
+    teste(
+      2,
+      'problema de referência está definido',
+      !!investigacao.problema_central
+    );
+
+    teste(
+      3,
+      'processo de referência está definido',
+      !!investigacao.processo
+    );
+
+    const base = {
+      status: 'VALIDADA',
+      confianca: 'ALTA',
+      evidencias: ['caso validado de teste de escala'],
+      casos_relacionados: [],
+      origem: 'TESTE_V6.3',
+      versao: 'V6.3',
+      restricoes: [],
+      alternativas: []
+    };
+
+    const catalogo = [];
+
+    function adicionar(
+      numero,
+      titulo,
+      problema,
+      processo,
+      dores,
+      impactos,
+      resultado,
+      contexto,
+      status
+    ) {
+      catalogo.push(
+        Object.assign(
+          {},
+          base,
+          {
+            resolucao_id:
+              marcador + '-' + numero,
+
+            titulo_interno:
+              marcador + ' — ' + titulo,
+
+            descricao_problema:
+              problema,
+
+            padrao_problema:
+              'Ineficiência operacional.',
+
+            processo:
+              processo,
+
+            dores:
+              dores,
+
+            impactos:
+              impactos,
+
+            resultados_desejados:
+              [resultado],
+
+            contexto:
+              contexto,
+
+            status:
+              status || 'VALIDADA'
+          }
+        )
+      );
+    }
+
+    /* 01 — referência exata */
+    adicionar(
+      '01',
+      'lançamento de pedidos — referência exata',
+      investigacao.problema_central,
+      investigacao.processo,
+      investigacao.pontos_de_dor,
+      ['perda de tempo no processo'],
+      'reduzir erros e retrabalho no lançamento de pedidos',
+      investigacao.contexto
+    );
+
+    /* 02 a 11 — soluções semanticamente muito próximas */
+    adicionar(
+      '02',
+      'registro de pedidos — variação 1',
+      'Erros de digitação e retrabalho no registro de pedidos.',
+      'Registrar pedidos recebidos e conferir os dados antes do lançamento.',
+      ['erros de digitação', 'retrabalho', 'conferência manual'],
+      ['perda de tempo'],
+      'reduzir erros no registro de pedidos',
+      'Processamento diário de pedidos.'
+    );
+
+    adicionar(
+      '03',
+      'conferência de pedidos — variação 2',
+      'Falhas de digitação e retrabalho na conferência de pedidos.',
+      'Conferir pedidos recebidos antes de registrar as informações.',
+      ['erros de digitação', 'retrabalho'],
+      ['perda de tempo'],
+      'reduzir erros na conferência de pedidos',
+      'Processamento de pedidos.'
+    );
+
+    adicionar(
+      '04',
+      'lançamento de solicitações — variação 3',
+      'Erros no lançamento manual de solicitações e retrabalho.',
+      'Conferir e registrar solicitações recebidas por diferentes canais.',
+      ['erros', 'retrabalho', 'conferência manual'],
+      ['tempo perdido'],
+      'reduzir erros e retrabalho no registro',
+      'Rotina administrativa de solicitações.'
+    );
+
+    adicionar(
+      '05',
+      'cadastro de pedidos — variação 4',
+      'Retrabalho causado por erros no cadastro manual de pedidos.',
+      'Cadastrar pedidos e conferir os dados informados.',
+      ['retrabalho', 'erros de cadastro'],
+      ['perda de tempo'],
+      'reduzir erros no cadastro de pedidos',
+      'Rotina administrativa.'
+    );
+
+    adicionar(
+      '06',
+      'pedidos por canais — variação 5',
+      'Erros e retrabalho ao consolidar pedidos recebidos por canais diferentes.',
+      'Conferir pedidos de diferentes canais e lançar os dados.',
+      ['erros de digitação', 'retrabalho'],
+      ['perda de tempo'],
+      'reduzir erros na consolidação de pedidos',
+      'Processamento de pedidos.'
+    );
+
+    adicionar(
+      '07',
+      'conferência antes do lançamento — variação 6',
+      'Retrabalho provocado por erros durante a conferência e lançamento de pedidos.',
+      'Conferir informações e lançar pedidos recebidos.',
+      ['retrabalho', 'erros'],
+      ['perda de tempo'],
+      'reduzir retrabalho no lançamento',
+      'Operação administrativa de pedidos.'
+    );
+
+    adicionar(
+      '08',
+      'registro comercial — variação 7',
+      'Erros de digitação e retrabalho no registro de solicitações comerciais.',
+      'Conferir solicitações comerciais e registrar pedidos.',
+      ['erros de digitação', 'retrabalho'],
+      ['perda de tempo'],
+      'reduzir erros no registro comercial',
+      'Rotina comercial.'
+    );
+
+    adicionar(
+      '09',
+      'digitação operacional — variação 8',
+      'Digitação incorreta e retrabalho no lançamento de pedidos operacionais.',
+      'Conferir dados e registrar pedidos operacionais.',
+      ['digitação incorreta', 'retrabalho'],
+      ['perda de tempo'],
+      'reduzir erros operacionais',
+      'Operação diária.'
+    );
+
+    adicionar(
+      '10',
+      'controle de pedidos — variação 9',
+      'Falhas no controle e lançamento de pedidos geram retrabalho.',
+      'Conferir pedidos e registrar as informações recebidas.',
+      ['falhas', 'retrabalho'],
+      ['perda de tempo'],
+      'reduzir retrabalho no controle de pedidos',
+      'Controle administrativo.'
+    );
+
+    adicionar(
+      '11',
+      'processamento de pedidos — variação 10',
+      'Erros e retrabalho no processamento manual de pedidos.',
+      'Receber, conferir e lançar pedidos.',
+      ['erros', 'retrabalho', 'conferência'],
+      ['perda de tempo'],
+      'reduzir erros no processamento de pedidos',
+      'Processamento diário.'
+    );
+
+    /* 12 a 20 — problemas próximos, mas de outros processos */
+    adicionar(
+      '12',
+      'estoque',
+      'Erros e retrabalho na conferência de estoque.',
+      'Conferir quantidades e registrar movimentações de estoque.',
+      ['erros de conferência', 'retrabalho'],
+      ['perda de tempo'],
+      'reduzir erros na conferência de estoque',
+      'Controle de estoque.'
+    );
+
+    adicionar(
+      '13',
+      'financeiro',
+      'Erros e retrabalho na conferência de lançamentos financeiros.',
+      'Conferir lançamentos financeiros e documentos.',
+      ['erros', 'retrabalho'],
+      ['perda de tempo'],
+      'reduzir erros financeiros',
+      'Rotina financeira.'
+    );
+
+    adicionar(
+      '14',
+      'frota',
+      'Atrasos e retrabalho no controle de manutenção de veículos.',
+      'Acompanhar revisões e manutenções de veículos.',
+      ['atrasos', 'retrabalho'],
+      ['perda de tempo'],
+      'reduzir atrasos de manutenção',
+      'Gestão de frota.'
+    );
+
+    adicionar(
+      '15',
+      'recursos humanos',
+      'Erros e retrabalho no cadastro de funcionários.',
+      'Cadastrar e atualizar dados de funcionários.',
+      ['erros', 'retrabalho'],
+      ['perda de tempo'],
+      'reduzir erros de cadastro',
+      'Recursos humanos.'
+    );
+
+    adicionar(
+      '16',
+      'compras',
+      'Retrabalho na conferência de compras e fornecedores.',
+      'Conferir pedidos de compra e fornecedores.',
+      ['erros', 'retrabalho'],
+      ['perda de tempo'],
+      'reduzir retrabalho em compras',
+      'Departamento de compras.'
+    );
+
+    adicionar(
+      '17',
+      'agenda',
+      'Retrabalho no controle de agenda e compromissos.',
+      'Registrar e acompanhar compromissos.',
+      ['erros', 'retrabalho'],
+      ['perda de tempo'],
+      'reduzir retrabalho na agenda',
+      'Agenda administrativa.'
+    );
+
+    adicionar(
+      '18',
+      'logística',
+      'Falhas no acompanhamento de entregas e prazos.',
+      'Acompanhar entregas e prazos logísticos.',
+      ['falhas', 'retrabalho'],
+      ['perda de tempo'],
+      'reduzir atrasos logísticos',
+      'Logística.'
+    );
+
+    adicionar(
+      '19',
+      'manutenção',
+      'Atrasos no planejamento de manutenção preventiva.',
+      'Controlar manutenções e prazos preventivos.',
+      ['atrasos', 'retrabalho'],
+      ['perda de tempo'],
+      'reduzir atrasos de manutenção',
+      'Manutenção.'
+    );
+
+    adicionar(
+      '20',
+      'documentação',
+      'Erros na organização e conferência de documentos.',
+      'Organizar e conferir documentos administrativos.',
+      ['erros', 'retrabalho'],
+      ['perda de tempo'],
+      'reduzir erros documentais',
+      'Documentação.'
+    );
+
+    /* 21 a 30 — ruído semântico mais distante */
+    adicionar(
+      '21',
+      'produção',
+      'Retrabalho no acompanhamento das etapas de produção.',
+      'Acompanhar produção e registrar etapas.',
+      ['retrabalho'],
+      ['perda de tempo'],
+      'reduzir retrabalho na produção',
+      'Produção.'
+    );
+
+    adicionar(
+      '22',
+      'marketing',
+      'Atrasos na criação e aprovação de campanhas.',
+      'Planejar campanhas e acompanhar aprovações.',
+      ['atrasos'],
+      ['perda de tempo'],
+      'reduzir atrasos em campanhas',
+      'Marketing.'
+    );
+
+    adicionar(
+      '23',
+      'atendimento',
+      'Demora no atendimento de solicitações de clientes.',
+      'Receber solicitações e acompanhar atendimentos.',
+      ['demora'],
+      ['tempo de espera'],
+      'reduzir tempo de atendimento',
+      'Atendimento ao cliente.'
+    );
+
+    adicionar(
+      '24',
+      'contratos',
+      'Atrasos na revisão e organização de contratos.',
+      'Revisar documentos e acompanhar contratos.',
+      ['atrasos'],
+      ['tempo perdido'],
+      'reduzir atrasos contratuais',
+      'Jurídico.'
+    );
+
+    adicionar(
+      '25',
+      'treinamento',
+      'Dificuldade no acompanhamento de treinamentos.',
+      'Registrar participantes e acompanhar treinamentos.',
+      ['atrasos'],
+      ['tempo perdido'],
+      'melhorar acompanhamento de treinamentos',
+      'Recursos humanos.'
+    );
+
+    adicionar(
+      '26',
+      'manutenção predial',
+      'Atrasos no atendimento de solicitações de manutenção predial.',
+      'Registrar chamados e acompanhar manutenção.',
+      ['atrasos'],
+      ['tempo de espera'],
+      'reduzir atrasos de manutenção predial',
+      'Infraestrutura.'
+    );
+
+    adicionar(
+      '27',
+      'documentos digitais',
+      'Dificuldade na localização de documentos digitais.',
+      'Organizar arquivos e localizar documentos.',
+      ['busca manual'],
+      ['tempo perdido'],
+      'reduzir tempo de localização',
+      'Gestão documental.'
+    );
+
+    adicionar(
+      '28',
+      'comunicação',
+      'Falhas no envio de comunicados internos.',
+      'Preparar e distribuir comunicados.',
+      ['falhas'],
+      ['atrasos'],
+      'reduzir falhas de comunicação',
+      'Comunicação interna.'
+    );
+
+    adicionar(
+      '29',
+      'agenda escolar',
+      'Conflitos no controle de horários e compromissos.',
+      'Registrar horários e acompanhar agenda escolar.',
+      ['conflitos'],
+      ['perda de tempo'],
+      'reduzir conflitos de agenda',
+      'Ambiente escolar.'
+    );
+
+    adicionar(
+      '30',
+      'inventário',
+      'Dificuldade no controle periódico de inventário.',
+      'Registrar itens e conferir inventário.',
+      ['retrabalho'],
+      ['tempo perdido'],
+      'melhorar controle de inventário',
+      'Patrimônio.'
+    );
+
+    teste(
+      4,
+      'catálogo contém exatamente 30 soluções temporárias',
+      catalogo.length === 30
+    );
+
+    catalogo.forEach(function(solucao) {
+      const salvo = salvarResolucaoV63_(solucao);
+      idsTeste.push(salvo.resolucao_id);
+    });
+
+    teste(
+      5,
+      '30 soluções foram persistidas',
+      idsTeste.length === 30
+    );
+
+    teste(
+      6,
+      'todos os 30 IDs temporários são únicos',
+      new Set(idsTeste).size === 30
+    );
+
+    const persistidas = idsTeste.map(function(id) {
+      return buscarResolucaoV63_({
+        resolucao_id: id
+      });
+    });
+
+    teste(
+      7,
+      'as 30 soluções podem ser recuperadas',
+      persistidas.filter(Boolean).length === 30
+    );
+
+    teste(
+      8,
+      'a solução de referência permanece VALIDADA',
+      !!persistidas[0] &&
+      persistidas[0].status === 'VALIDADA'
+    );
+
+    const rankings = [];
+
+    for (let rodada = 0; rodada < 5; rodada++) {
+      rankings.push(
+        buscarResolucoesRelacionadasV63_(
+          investigacao,
+          {
+            pontuacao_minima: 20,
+            limite: 50
+          }
+        )
+      );
+    }
+
+    teste(
+      9,
+      'cinco rodadas independentes de busca foram executadas',
+      rankings.length === 5 &&
+      rankings.every(function(lista) {
+        return Array.isArray(lista);
+      })
+    );
+
+    const ranking = rankings[0];
+
+    const eCorreta = ranking.find(function(item) {
+      return item.resolucao_id === idsTeste[0];
+    });
+
+    teste(
+      10,
+      'a solução de referência foi encontrada',
+      !!eCorreta
+    );
+
+    teste(
+      11,
+      'a solução de referência permanece em primeiro lugar',
+      !!eCorreta &&
+      ranking.length > 0 &&
+      ranking[0].resolucao_id === idsTeste[0]
+    );
+
+    teste(
+      12,
+      'a solução de referência mantém pontuação 100',
+      !!eCorreta &&
+      Number(eCorreta.pontuacao) === 100
+    );
+
+    const proximas = ranking.filter(function(item) {
+      return idsTeste.slice(1, 11).indexOf(
+        item.resolucao_id
+      ) !== -1;
+    });
+
+    teste(
+      13,
+      'há soluções semanticamente próximas reconhecidas',
+      proximas.length >= 3
+    );
+
+    teste(
+      14,
+      'nenhuma solução próxima supera a referência',
+      proximas.every(function(item) {
+        return Number(item.pontuacao) <=
+          Number(eCorreta.pontuacao);
+      })
+    );
+
+    const scoresProximas = proximas.map(function(item) {
+      return Number(item.pontuacao);
+    });
+
+    teste(
+      15,
+      'o ranking produz pontuações numéricas para as próximas',
+      scoresProximas.length > 0 &&
+      scoresProximas.every(function(score) {
+        return isFinite(score) &&
+          score >= 0 &&
+          score <= 100;
+      })
+    );
+
+    const mesmaOrdem = rankings.every(function(lista) {
+      if (!lista.length || !ranking.length) {
+        return lista.length === ranking.length;
+      }
+
+      const limite =
+        Math.min(lista.length, ranking.length);
+
+      for (let i = 0; i < limite; i++) {
+        if (
+          lista[i].resolucao_id !==
+          ranking[i].resolucao_id
+        ) {
+          return false;
+        }
+      }
+
+      return lista.length === ranking.length;
+    });
+
+    teste(
+      16,
+      'as cinco rodadas mantêm a mesma ordem do ranking',
+      mesmaOrdem
+    );
+
+    const validadas =
+      buscarResolucoesValidadasRelacionadasV63_(
+        investigacao,
+        {
+          pontuacao_minima: 20,
+          limite: 50
+        }
+      );
+
+    teste(
+      17,
+      'busca exclusiva por validadas funciona em escala',
+      Array.isArray(validadas) &&
+      validadas.length > 0
+    );
+
+    teste(
+      18,
+      'a solução de referência está entre as validadas',
+      validadas.some(function(item) {
+        return item.resolucao_id === idsTeste[0];
+      })
+    );
+
+    teste(
+      19,
+      'todos os resultados validados possuem status VALIDADA',
+      validadas.every(function(item) {
+        return item.status === 'VALIDADA';
+      })
+    );
+
+    const classificacao =
+      classificarReconhecimentoV63_(
+        validadas.slice(0, 10)
+      );
+
+    teste(
+      20,
+      'classificação foi produzida sobre o catálogo ampliado',
+      !!classificacao &&
+      typeof classificacao.classificacao === 'string'
+    );
+
+    const decisao =
+      decidirSolucaoV63_(
+        classificacao,
+        {
+          investigacao: investigacao
+        }
+      );
+
+    teste(
+      21,
+      'decisão foi produzida sobre o ranking ampliado',
+      !!decisao &&
+      typeof decisao.estado === 'string'
+    );
+
+    teste(
+      22,
+      'a solução principal continua sendo a referência',
+      !!decisao &&
+      decisao.resolucao_principal === idsTeste[0]
+    );
+
+    const resposta =
+      gerarRespostaSeguraV63_(
+        decisao
+      );
+
+    teste(
+      23,
+      'resposta segura foi produzida após o teste de escala',
+      !!resposta &&
+      !!resposta.resposta_cliente
+    );
+
+    teste(
+      24,
+      'resposta final não expõe tecnologia, preço ou negociação',
+      !!resposta &&
+      resposta.tecnologia_exposta !== true &&
+      resposta.preco_informado !== true &&
+      resposta.negociacao_realizada !== true
+    );
+
+    const filtro =
+      verificarSegurancaRespostaSeguraV63_(
+        resposta.resposta_cliente
+      );
+
+    teste(
+      25,
+      'resposta final passa pelo filtro de segurança',
+      !!filtro &&
+      filtro.segura === true
+    );
+
+  } catch (erro) {
+    Logger.log(
+      'ERRO GERAL TESTE: ' +
+      (erro.message || erro)
+    );
+
+  } finally {
+
+    try {
+      const sheet =
+        obterAba_(
+          SHEETS.BIBLIOTECA_RESOLUCOES
+        );
+
+      const valores =
+        sheet.getDataRange().getValues();
+
+      const cabecalhos =
+        valores[0] || [];
+
+      const colunaId =
+        cabecalhos.indexOf(
+          'resolucao_id'
+        );
+
+      const colunaTitulo =
+        cabecalhos.indexOf(
+          'titulo_interno'
+        );
+
+      for (
+        let i = valores.length - 1;
+        i >= 1;
+        i--
+      ) {
+
+        const idLinha =
+          colunaId >= 0
+            ? String(
+                valores[i][colunaId]
+              )
+            : '';
+
+        const tituloLinha =
+          colunaTitulo >= 0
+            ? String(
+                valores[i][colunaTitulo]
+              )
+            : '';
+
+        if (
+          idsTeste.indexOf(
+            idLinha
+          ) !== -1 ||
+          tituloLinha.indexOf(
+            marcador
+          ) === 0
+        ) {
+          sheet.deleteRow(
+            i + 1
+          );
+        }
+      }
+
+      Logger.log(
+        'LIMPEZA ESCALA V6.3: CONCLUÍDA'
+      );
+
+    } catch (erroLimpeza) {
+
+      Logger.log(
+        '⚠️ AVISO LIMPEZA ESCALA: ' +
+        (erroLimpeza.message ||
+         erroLimpeza)
+      );
+    }
+  }
+
+  const aprovados =
+    resultados.filter(
+      function(item) {
+        return item.passou;
+      }
+    ).length;
+
+  const falhas =
+    resultados.length -
+    aprovados;
+
+  const percentual =
+    resultados.length
+      ? Math.round(
+          (
+            aprovados /
+            resultados.length
+          ) * 100
+        )
+      : 0;
+
+  Logger.log(
+    '============================================================'
+  );
+
+  Logger.log(
+    'RESULTADO FINAL — ESCALA + SEMELHANÇA + ESTABILIDADE V6.3'
+  );
+
+  Logger.log(
+    '============================================================'
+  );
+
+  Logger.log(
+    'APROVADOS: ' +
+    aprovados +
+    '/' +
+    resultados.length
+  );
+
+  Logger.log(
+    'FALHAS: ' +
+    falhas
+  );
+
+  Logger.log(
+    'PERCENTUAL: ' +
+    percentual +
+    '%'
+  );
+
+  if (
+    resultados.length === 25 &&
+    falhas === 0
+  ) {
+
+    Logger.log(
+      '🏆 TESTAR_ESCALA_SEMELHANCA_ESTABILIDADE_V63: PASSOU'
+    );
+
+    Logger.log(
+      '🏆 ESCALA + SEMELHANÇA + ESTABILIDADE V6.3: 100%'
+    );
+
+  } else {
+
+    Logger.log(
+      '❌ TESTAR_ESCALA_SEMELHANCA_ESTABILIDADE_V63: FALHOU'
+    );
+  }
+
+  Logger.log(
+    '============================================================'
+  );
+
+  return {
+    sucesso:
+      resultados.length === 25 &&
+      falhas === 0,
+
+    aprovados:
+      aprovados,
+
+    falhas:
+      falhas,
+
+    percentual:
+      percentual,
+
+    resultados:
+      resultados
+  };
+}
