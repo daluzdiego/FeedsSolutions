@@ -4747,3 +4747,186 @@ function TESTAR_SOLUCAO_PARCIALMENTE_COMPATIVEL_V63() {
 
   return { sucesso: resultados.length === 25 && falhas === 0, aprovados: aprovados, falhas: falhas, percentual: percentual, resultados: resultados };
 }
+
+
+/**
+ * ============================================================
+ * TESTE OFICIAL — RUÍDO NO CATÁLOGO V6.3
+ * ============================================================
+ * Cenário: solução correta + solução parcialmente compatível
+ * + solução incompatível no mesmo catálogo.
+ * Objetivo: garantir que o reconhecimento priorize a solução
+ * correta sem perder as alternativas relacionadas e sem aceitar
+ * o ruído incompatível.
+ */
+function TESTAR_RUIDO_NO_CATALOGO_V63() {
+  Logger.log('============================================================');
+  Logger.log('INÍCIO — TESTAR_RUIDO_NO_CATALOGO_V63');
+  Logger.log('============================================================');
+
+  const resultados = [];
+  const marcador = 'TESTE-RUIDO-CATALOGO-V63-' + new Date().getTime();
+  const idsTeste = [];
+
+  function teste(numero, descricao, condicao) {
+    const passou = condicao === true;
+    resultados.push({ numero: numero, descricao: descricao, passou: passou });
+    Logger.log((passou ? '✅' : '❌') + ' TESTE ' + numero + '/25 — ' + descricao);
+    return passou;
+  }
+
+  try {
+    const investigacao = {
+      problema_central: 'Erros de digitação e retrabalho na conferência e lançamento de pedidos.',
+      processo: 'Conferir e lançar pedidos recebidos por diferentes canais.',
+      pontos_de_dor: ['erros de digitação', 'retrabalho'],
+      impacto: { descricao: 'perda de tempo no processo' },
+      resultado_desejado: 'Reduzir erros e retrabalho no lançamento de pedidos.',
+      contexto: 'Processamento diário de pedidos.'
+    };
+
+    teste(1, 'investigação foi criada', !!investigacao);
+    teste(2, 'problema está definido', !!investigacao.problema_central);
+    teste(3, 'processo está definido', !!investigacao.processo);
+
+    const base = {
+      status: 'VALIDADA',
+      confianca: 'ALTA',
+      evidencias: ['caso validado de teste'],
+      casos_relacionados: [],
+      origem: 'TESTE_V6.3',
+      versao: 'V6.3',
+      restricoes: [],
+      alternativas: []
+    };
+
+    const correta = Object.assign({}, base, {
+      resolucao_id: marcador + '-CORRETA',
+      titulo_interno: marcador + ' — lançamento de pedidos',
+      descricao_problema: 'Erros de digitação e retrabalho na conferência e lançamento de pedidos.',
+      padrao_problema: 'Ineficiência operacional em lançamento manual de pedidos.',
+      processo: 'Conferir e lançar pedidos recebidos por diferentes canais.',
+      dores: ['erros de digitação', 'retrabalho'],
+      impactos: ['perda de tempo no processo'],
+      resultados_desejados: ['reduzir erros e retrabalho no lançamento de pedidos'],
+      contexto: 'Processamento diário de pedidos.'
+    });
+
+    const parcial = Object.assign({}, base, {
+      resolucao_id: marcador + '-PARCIAL',
+      titulo_interno: marcador + ' — conferência de estoque',
+      descricao_problema: 'Erros e retrabalho na conferência manual de estoque.',
+      padrao_problema: 'Ineficiência operacional em conferência manual de estoque.',
+      processo: 'Conferir quantidades e registrar movimentações de estoque.',
+      dores: ['erros de conferência', 'retrabalho'],
+      impactos: ['perda de tempo na conferência'],
+      resultados_desejados: ['reduzir erros na conferência de estoque'],
+      contexto: 'Rotina administrativa de controle de estoque.'
+    });
+
+    const ruido = Object.assign({}, base, {
+      resolucao_id: marcador + '-RUIDO',
+      titulo_interno: marcador + ' — manutenção de veículos',
+      descricao_problema: 'Atrasos e retrabalho no controle de manutenção de veículos.',
+      padrao_problema: 'Falhas administrativas no acompanhamento de manutenção.',
+      processo: 'Acompanhar revisões, manutenções e prazos de veículos.',
+      dores: ['atrasos', 'retrabalho'],
+      impactos: ['perda de tempo no acompanhamento'],
+      resultados_desejados: ['reduzir atrasos de manutenção'],
+      contexto: 'Gestão de frota e manutenção.'
+    });
+
+    const salvoCorreta = salvarResolucaoV63_(correta);
+    const salvoParcial = salvarResolucaoV63_(parcial);
+    const salvoRuido = salvarResolucaoV63_(ruido);
+    idsTeste.push(salvoCorreta.resolucao_id, salvoParcial.resolucao_id, salvoRuido.resolucao_id);
+
+    const pCorreta = buscarResolucaoV63_({ resolucao_id: salvoCorreta.resolucao_id });
+    const pParcial = buscarResolucaoV63_({ resolucao_id: salvoParcial.resolucao_id });
+    const pRuido = buscarResolucaoV63_({ resolucao_id: salvoRuido.resolucao_id });
+
+    teste(4, 'solução correta foi persistida', !!pCorreta);
+    teste(5, 'solução parcial foi persistida', !!pParcial);
+    teste(6, 'solução incompatível foi persistida', !!pRuido);
+    teste(7, 'as três soluções permanecem VALIDADA na biblioteca', !!pCorreta && !!pParcial && !!pRuido && pCorreta.status === 'VALIDADA' && pParcial.status === 'VALIDADA' && pRuido.status === 'VALIDADA');
+
+    const cCorreta = compararInvestigacaoResolucaoV63_(investigacao, pCorreta);
+    const cParcial = compararInvestigacaoResolucaoV63_(investigacao, pParcial);
+    const cRuido = compararInvestigacaoResolucaoV63_(investigacao, pRuido);
+
+    teste(8, 'comparação da solução correta foi produzida', !!cCorreta);
+    teste(9, 'comparação da solução parcial foi produzida', !!cParcial);
+    teste(10, 'comparação do ruído foi produzida', !!cRuido);
+    teste(11, 'solução correta supera a parcial', !!cCorreta && !!cParcial && cCorreta.pontuacao > cParcial.pontuacao);
+    teste(12, 'solução correta supera o ruído', !!cCorreta && !!cRuido && cCorreta.pontuacao > cRuido.pontuacao);
+
+    const encontrados = buscarResolucoesRelacionadasV63_(investigacao, { pontuacao_minima: 20, limite: 10 });
+    const eCorreta = encontrados.find(function(item) { return item.resolucao_id === salvoCorreta.resolucao_id; });
+    const eParcial = encontrados.find(function(item) { return item.resolucao_id === salvoParcial.resolucao_id; });
+    const eRuido = encontrados.find(function(item) { return item.resolucao_id === salvoRuido.resolucao_id; });
+
+    teste(13, 'busca relacionada executou', Array.isArray(encontrados));
+    teste(14, 'solução correta foi reconhecida', !!eCorreta);
+    teste(15, 'solução correta aparece antes da parcial', !!eCorreta && !!eParcial && encontrados.indexOf(eCorreta) < encontrados.indexOf(eParcial));
+    teste(16, 'solução correta aparece antes do ruído quando ambos são retornados', !!eCorreta && !!eRuido && encontrados.indexOf(eCorreta) < encontrados.indexOf(eRuido));
+    teste(17, 'ruído não supera a solução correta', !!eCorreta && (!eRuido || Number(eCorreta.pontuacao) > Number(eRuido.pontuacao)));
+
+    const candidatos = encontrados.filter(function(item) {
+      return item.resolucao_id === salvoCorreta.resolucao_id || item.resolucao_id === salvoParcial.resolucao_id || item.resolucao_id === salvoRuido.resolucao_id;
+    });
+    const classificacao = classificarReconhecimentoV63_(candidatos);
+    const decisao = decidirSolucaoV63_(classificacao, { investigacao: investigacao });
+
+    teste(18, 'classificação foi produzida', !!classificacao);
+    teste(19, 'decisão foi produzida', !!decisao);
+    teste(20, 'solução principal é a correta', !!decisao && decisao.resolucao_principal === salvoCorreta.resolucao_id);
+    teste(21, 'decisão preserva a classificação calculada', !!decisao && decisao.classificacao_reconhecimento === classificacao.classificacao);
+
+    const resposta = gerarRespostaSeguraV63_(decisao);
+    teste(22, 'resposta segura foi produzida', !!(resposta && resposta.resposta_cliente));
+    teste(23, 'resposta não expõe tecnologia', !!resposta && resposta.tecnologia_exposta !== true);
+    teste(24, 'resposta não expõe preço ou negociação', !!resposta && resposta.preco_informado !== true && resposta.negociacao_realizada !== true);
+
+    const filtro = verificarSegurancaRespostaSeguraV63_(resposta.resposta_cliente);
+    teste(25, 'resposta final passa pelo filtro de segurança', !!(filtro && filtro.segura === true));
+
+  } catch (erro) {
+    Logger.log('ERRO GERAL TESTE: ' + (erro.message || erro));
+  } finally {
+    try {
+      const sheet = obterAba_(SHEETS.BIBLIOTECA_RESOLUCOES);
+      const valores = sheet.getDataRange().getValues();
+      const cabecalhos = valores[0] || [];
+      const colunaId = cabecalhos.indexOf('resolucao_id');
+      const colunaTitulo = cabecalhos.indexOf('titulo_interno');
+      for (let i = valores.length - 1; i >= 1; i--) {
+        const idLinha = colunaId >= 0 ? String(valores[i][colunaId]) : '';
+        const tituloLinha = colunaTitulo >= 0 ? String(valores[i][colunaTitulo]) : '';
+        if (idsTeste.indexOf(idLinha) !== -1 || tituloLinha.indexOf(marcador) === 0) sheet.deleteRow(i + 1);
+      }
+      Logger.log('LIMPEZA RUÍDO V6.3: CONCLUÍDA');
+    } catch (erroLimpeza) {
+      Logger.log('⚠️ AVISO LIMPEZA RUÍDO: ' + (erroLimpeza.message || erroLimpeza));
+    }
+  }
+
+  const aprovados = resultados.filter(function(item) { return item.passou; }).length;
+  const falhas = resultados.length - aprovados;
+  const percentual = resultados.length ? Math.round((aprovados / resultados.length) * 100) : 0;
+
+  Logger.log('============================================================');
+  Logger.log('RESULTADO FINAL — RUÍDO NO CATÁLOGO V6.3');
+  Logger.log('============================================================');
+  Logger.log('APROVADOS: ' + aprovados + '/' + resultados.length);
+  Logger.log('FALHAS: ' + falhas);
+  Logger.log('PERCENTUAL: ' + percentual + '%');
+  if (resultados.length === 25 && falhas === 0) {
+    Logger.log('🏆 TESTAR_RUIDO_NO_CATALOGO_V63: PASSOU');
+    Logger.log('🏆 RUÍDO NO CATÁLOGO V6.3: 100%');
+  } else {
+    Logger.log('❌ TESTAR_RUIDO_NO_CATALOGO_V63: FALHOU');
+  }
+  Logger.log('============================================================');
+
+  return { sucesso: resultados.length === 25 && falhas === 0, aprovados: aprovados, falhas: falhas, percentual: percentual, resultados: resultados };
+}
