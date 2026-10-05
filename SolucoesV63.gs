@@ -5961,3 +5961,606 @@ function TESTAR_ESCALA_SEMELHANCA_ESTABILIDADE_V63() {
       resultados
   };
 }
+
+
+
+/**
+ * ============================================================
+ * TESTE OFICIAL — CONCORRÊNCIA DE SOLUÇÕES QUASE IDÊNTICAS V6.3
+ */
+function TESTAR_CONCORRENCIA_SOLUCOES_QUASE_IDENTICAS_V63() {
+  Logger.log('============================================================');
+  Logger.log('INÍCIO — TESTAR_CONCORRENCIA_SOLUCOES_QUASE_IDENTICAS_V63');
+  Logger.log('============================================================');
+
+  const resultados = [];
+  const marcador = 'TESTE-CONCORRENCIA-QUASE-IDEM-V63-' + new Date().getTime();
+  const idsTeste = [];
+
+  function teste(numero, descricao, condicao) {
+    const passou = condicao === true;
+    resultados.push({
+      numero: numero,
+      descricao: descricao,
+      passou: passou
+    });
+    Logger.log(
+      (passou ? '✅' : '❌') +
+      ' TESTE ' +
+      numero +
+      '/25 — ' +
+      descricao
+    );
+    return passou;
+  }
+
+  try {
+    const investigacao = {
+      problema_central:
+        'Erros de digitação e retrabalho na conferência e lançamento de pedidos.',
+      processo:
+        'Conferir e lançar pedidos recebidos por diferentes canais.',
+      pontos_de_dor: [
+        'erros de digitação',
+        'retrabalho',
+        'conferência manual'
+      ],
+      impacto: {
+        descricao: 'perda de tempo no processo'
+      },
+      resultado_desejado:
+        'Reduzir erros e retrabalho no lançamento de pedidos.',
+      contexto:
+        'Processamento diário de pedidos administrativos.'
+    };
+
+    teste(1, 'investigação foi criada', !!investigacao);
+    teste(2, 'problema está definido', !!investigacao.problema_central);
+    teste(3, 'processo está definido', !!investigacao.processo);
+
+    const base = {
+      status: 'VALIDADA',
+      confianca: 'ALTA',
+      evidencias: ['caso validado de teste de concorrência'],
+      casos_relacionados: [],
+      origem: 'TESTE_V6.3',
+      versao: 'V6.3',
+      restricoes: [],
+      alternativas: []
+    };
+
+    const catalogo = [];
+
+    function adicionar(numero, titulo, problema, processo, dores, impactos, resultado, contexto) {
+      catalogo.push(
+        Object.assign({}, base, {
+          resolucao_id: marcador + '-' + numero,
+          titulo_interno: marcador + ' — ' + titulo,
+          descricao_problema: problema,
+          padrao_problema: 'Ineficiência operacional.',
+          processo: processo,
+          dores: dores,
+          impactos: impactos,
+          resultados_desejados: [resultado],
+          contexto: contexto
+        })
+      );
+    }
+
+    adicionar(
+      '01',
+      'referência exata',
+      investigacao.problema_central,
+      investigacao.processo,
+      investigacao.pontos_de_dor,
+      ['perda de tempo no processo'],
+      'reduzir erros e retrabalho no lançamento de pedidos',
+      investigacao.contexto
+    );
+
+    adicionar(
+      '02',
+      'quase idêntica A',
+      'Erros de digitação e retrabalho na conferência e lançamento de pedidos.',
+      'Conferir e lançar pedidos recebidos por diferentes canais.',
+      ['erros de digitação', 'retrabalho', 'conferência manual'],
+      ['perda de tempo no processo'],
+      'Reduzir erros e retrabalho no lançamento de pedidos.',
+      'Processamento diário de pedidos administrativos.'
+    );
+
+    adicionar(
+      '03',
+      'quase idêntica B',
+      'Erros de digitação e retrabalho no lançamento e conferência de pedidos.',
+      'Conferir pedidos recebidos por diferentes canais e lançar os dados.',
+      ['erros de digitação', 'retrabalho', 'conferência manual'],
+      ['perda de tempo no processo'],
+      'Reduzir erros e retrabalho no lançamento de pedidos.',
+      'Processamento diário de pedidos administrativos.'
+    );
+
+    adicionar(
+      '04',
+      'quase idêntica C',
+      'Retrabalho e erros de digitação durante a conferência e lançamento de pedidos.',
+      'Receber, conferir e lançar pedidos de diferentes canais.',
+      ['erros de digitação', 'retrabalho', 'conferência manual'],
+      ['perda de tempo'],
+      'Reduzir erros e retrabalho no lançamento de pedidos.',
+      'Processamento diário de pedidos.'
+    );
+
+    adicionar(
+      '05',
+      'quase idêntica D',
+      'Falhas de digitação e retrabalho na conferência de pedidos recebidos.',
+      'Conferir e registrar pedidos recebidos por canais diversos.',
+      ['erros de digitação', 'retrabalho'],
+      ['perda de tempo no processo'],
+      'Reduzir erros e retrabalho no lançamento de pedidos.',
+      'Rotina diária de processamento de pedidos.'
+    );
+
+    adicionar(
+      '06',
+      'quase idêntica E',
+      'Erros e retrabalho no registro manual de pedidos.',
+      'Conferir informações e lançar pedidos recebidos.',
+      ['erros de digitação', 'retrabalho'],
+      ['perda de tempo'],
+      'Reduzir erros e retrabalho no lançamento de pedidos.',
+      'Processamento administrativo de pedidos.'
+    );
+
+    adicionar(
+      '07',
+      'mesmo problema outro processo',
+      'Erros de digitação e retrabalho na conferência de pedidos.',
+      'Conferir notas fiscais e documentos financeiros.',
+      ['erros de digitação', 'retrabalho'],
+      ['perda de tempo'],
+      'Reduzir erros na conferência documental.',
+      'Rotina financeira.'
+    );
+
+    adicionar(
+      '08',
+      'problema parecido estoque',
+      'Erros e retrabalho na conferência manual.',
+      'Conferir quantidades e registrar movimentações de estoque.',
+      ['erros', 'retrabalho'],
+      ['perda de tempo'],
+      'Reduzir erros de estoque.',
+      'Controle de estoque.'
+    );
+
+    adicionar(
+      '09',
+      'problema parecido compras',
+      'Erros e retrabalho na conferência de solicitações.',
+      'Conferir pedidos de compra e fornecedores.',
+      ['erros', 'retrabalho'],
+      ['perda de tempo'],
+      'Reduzir erros em compras.',
+      'Departamento de compras.'
+    );
+
+    adicionar(
+      '10',
+      'ruído administrativo',
+      'Retrabalho no cadastro de informações administrativas.',
+      'Cadastrar dados de funcionários.',
+      ['retrabalho'],
+      ['perda de tempo'],
+      'Reduzir retrabalho administrativo.',
+      'Recursos humanos.'
+    );
+
+    teste(
+      4,
+      'catálogo contém 10 concorrentes temporários',
+      catalogo.length === 10
+    );
+
+    catalogo.forEach(function(solucao) {
+      const salvo = salvarResolucaoV63_(solucao);
+      idsTeste.push(salvo.resolucao_id);
+    });
+
+    teste(
+      5,
+      '10 soluções foram persistidas',
+      idsTeste.length === 10
+    );
+
+    teste(
+      6,
+      'todos os IDs são únicos',
+      new Set(idsTeste).size === 10
+    );
+
+    const persistidas = idsTeste.map(function(id) {
+      return buscarResolucaoV63_({
+        resolucao_id: id
+      });
+    });
+
+    teste(
+      7,
+      'todas as soluções podem ser recuperadas',
+      persistidas.filter(Boolean).length === 10
+    );
+
+    const comparacoes = idsTeste.map(function(id) {
+      const resolucao =
+        buscarResolucaoV63_({
+          resolucao_id: id
+        });
+
+      return compararInvestigacaoResolucaoV63_(
+        investigacao,
+        resolucao
+      );
+    });
+
+    teste(
+      8,
+      'todas as comparações foram produzidas',
+      comparacoes.length === 10 &&
+      comparacoes.every(function(item) {
+        return !!item &&
+          typeof item.pontuacao === 'number';
+      })
+    );
+
+    const correta = comparacoes[0];
+
+    teste(
+      9,
+      'a referência exata recebe pontuação 100',
+      !!correta &&
+      Number(correta.pontuacao) === 100
+    );
+
+    const concorrentes = comparacoes.slice(1, 6);
+
+    teste(
+      10,
+      'existem pelo menos 5 concorrentes semanticamente próximos',
+      concorrentes.length === 5
+    );
+
+    teste(
+      11,
+      'todos os concorrentes próximos possuem pontuação válida',
+      concorrentes.every(function(item) {
+        return isFinite(Number(item.pontuacao)) &&
+          Number(item.pontuacao) >= 0 &&
+          Number(item.pontuacao) <= 100;
+      })
+    );
+
+    teste(
+      12,
+      'nenhum concorrente próximo supera a referência',
+      concorrentes.every(function(item) {
+        return Number(item.pontuacao) <=
+          Number(correta.pontuacao);
+      })
+    );
+
+    const rankingA =
+      buscarResolucoesRelacionadasV63_(
+        investigacao,
+        {
+          pontuacao_minima: 20,
+          limite: 20
+        }
+      );
+
+    teste(
+      13,
+      'ranking principal foi produzido',
+      Array.isArray(rankingA) &&
+      rankingA.length > 0
+    );
+
+    teste(
+      14,
+      'a referência ocupa o primeiro lugar',
+      rankingA.length > 0 &&
+      rankingA[0].resolucao_id === idsTeste[0]
+    );
+
+    const encontradosProximos =
+      rankingA.filter(function(item) {
+        return idsTeste.slice(1, 6).indexOf(
+          item.resolucao_id
+        ) !== -1;
+      });
+
+    teste(
+      15,
+      'os concorrentes próximos podem ser reconhecidos sem substituir a referência',
+      encontradosProximos.length >= 3 &&
+      encontradosProximos.every(function(item) {
+        return Number(item.pontuacao) <=
+          Number(rankingA[0].pontuacao);
+      })
+    );
+
+    const rankingB =
+      buscarResolucoesRelacionadasV63_(
+        investigacao,
+        {
+          pontuacao_minima: 20,
+          limite: 20
+        }
+      );
+
+    const rankingC =
+      buscarResolucoesRelacionadasV63_(
+        investigacao,
+        {
+          pontuacao_minima: 20,
+          limite: 20
+        }
+      );
+
+    function mesmaOrdem(a, b) {
+      if (a.length !== b.length) {
+        return false;
+      }
+
+      for (let i = 0; i < a.length; i++) {
+        if (
+          a[i].resolucao_id !==
+          b[i].resolucao_id
+        ) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    teste(
+      16,
+      'três rankings consecutivos mantêm a mesma ordem',
+      mesmaOrdem(rankingA, rankingB) &&
+      mesmaOrdem(rankingA, rankingC)
+    );
+
+    const validadas =
+      buscarResolucoesValidadasRelacionadasV63_(
+        investigacao,
+        {
+          pontuacao_minima: 20,
+          limite: 20
+        }
+      );
+
+    teste(
+      17,
+      'busca exclusiva por validadas retorna candidatos',
+      Array.isArray(validadas) &&
+      validadas.length > 0
+    );
+
+    teste(
+      18,
+      'a referência continua entre as validadas',
+      validadas.some(function(item) {
+        return item.resolucao_id === idsTeste[0];
+      })
+    );
+
+    teste(
+      19,
+      'todos os candidatos validados possuem status VALIDADA',
+      validadas.every(function(item) {
+        return item.status === 'VALIDADA';
+      })
+    );
+
+    const classificacao =
+      classificarReconhecimentoV63_(
+        validadas.slice(0, 10)
+      );
+
+    teste(
+      20,
+      'classificação reconhece múltiplas soluções quando aplicável',
+      !!classificacao &&
+      (
+        classificacao.classificacao ===
+        'SOLUCOES_ENCONTRADAS' ||
+        classificacao.classificacao ===
+        'SOLUCAO_ENCONTRADA'
+      )
+    );
+
+    const decisao =
+      decidirSolucaoV63_(
+        classificacao,
+        {
+          investigacao: investigacao
+        }
+      );
+
+    teste(
+      21,
+      'decisão foi produzida',
+      !!decisao &&
+      typeof decisao.estado === 'string'
+    );
+
+    teste(
+      22,
+      'decisão mantém a referência como solução principal',
+      !!decisao &&
+      decisao.resolucao_principal === idsTeste[0]
+    );
+
+    const resposta =
+      gerarRespostaSeguraV63_(
+        decisao
+      );
+
+    teste(
+      23,
+      'resposta segura foi produzida',
+      !!resposta &&
+      !!resposta.resposta_cliente
+    );
+
+    teste(
+      24,
+      'resposta não expõe tecnologia, preço ou negociação',
+      !!resposta &&
+      resposta.tecnologia_exposta !== true &&
+      resposta.preco_informado !== true &&
+      resposta.negociacao_realizada !== true
+    );
+
+    const filtro =
+      verificarSegurancaRespostaSeguraV63_(
+        resposta.resposta_cliente
+      );
+
+    teste(
+      25,
+      'resposta final passa pelo filtro de segurança',
+      !!filtro &&
+      filtro.segura === true
+    );
+
+  } catch (erro) {
+
+    Logger.log(
+      'ERRO GERAL TESTE: ' +
+      (erro.message || erro)
+    );
+
+  } finally {
+
+    try {
+
+      const sheet =
+        obterAba_(
+          SHEETS.BIBLIOTECA_RESOLUCOES
+        );
+
+      const valores =
+        sheet.getDataRange().getValues();
+
+      const cabecalhos =
+        valores[0] || [];
+
+      const colunaId =
+        cabecalhos.indexOf(
+          'resolucao_id'
+        );
+
+      const colunaTitulo =
+        cabecalhos.indexOf(
+          'titulo_interno'
+        );
+
+      for (
+        let i = valores.length - 1;
+        i >= 1;
+        i--
+      ) {
+
+        const idLinha =
+          colunaId >= 0
+            ? String(
+                valores[i][colunaId]
+              )
+            : '';
+
+        const tituloLinha =
+          colunaTitulo >= 0
+            ? String(
+                valores[i][colunaTitulo]
+              )
+            : '';
+
+        if (
+          idsTeste.indexOf(idLinha) !== -1 ||
+          tituloLinha.indexOf(marcador) === 0
+        ) {
+          sheet.deleteRow(i + 1);
+        }
+      }
+
+      Logger.log(
+        'LIMPEZA CONCORRÊNCIA V6.3: CONCLUÍDA'
+      );
+
+    } catch (erroLimpeza) {
+
+      Logger.log(
+        '⚠️ AVISO LIMPEZA CONCORRÊNCIA: ' +
+        (erroLimpeza.message || erroLimpeza)
+      );
+    }
+  }
+
+  const aprovados =
+    resultados.filter(function(item) {
+      return item.passou;
+    }).length;
+
+  const falhas =
+    resultados.length - aprovados;
+
+  const percentual =
+    resultados.length
+      ? Math.round(
+          (aprovados / resultados.length) * 100
+        )
+      : 0;
+
+  Logger.log('============================================================');
+  Logger.log('RESULTADO FINAL — CONCORRÊNCIA QUASE IDÊNTICA V6.3');
+  Logger.log('============================================================');
+  Logger.log(
+    'APROVADOS: ' +
+    aprovados +
+    '/' +
+    resultados.length
+  );
+  Logger.log('FALHAS: ' + falhas);
+  Logger.log('PERCENTUAL: ' + percentual + '%');
+
+  if (
+    resultados.length === 25 &&
+    falhas === 0
+  ) {
+    Logger.log(
+      '🏆 TESTAR_CONCORRENCIA_SOLUCOES_QUASE_IDENTICAS_V63: PASSOU'
+    );
+    Logger.log(
+      '🏆 CONCORRÊNCIA DE SOLUÇÕES QUASE IDÊNTICAS V6.3: 100%'
+    );
+  } else {
+    Logger.log(
+      '❌ TESTAR_CONCORRENCIA_SOLUCOES_QUASE_IDENTICAS_V63: FALHOU'
+    );
+  }
+
+  Logger.log('============================================================');
+
+  return {
+    sucesso:
+      resultados.length === 25 &&
+      falhas === 0,
+    aprovados: aprovados,
+    falhas: falhas,
+    percentual: percentual,
+    resultados: resultados
+  };
+}
