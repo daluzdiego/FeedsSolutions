@@ -6564,3 +6564,545 @@ function TESTAR_CONCORRENCIA_SOLUCOES_QUASE_IDENTICAS_V63() {
     resultados: resultados
   };
 }
+
+
+/**
+ * TESTAR_CATALOGO_MISTO_PRODUCAO_V63
+ * Cenário integrado de catálogo realista:
+ * - solução exata VALIDADA
+ * - concorrentes quase idênticos VALIDADA
+ * - soluções parcialmente compatíveis VALIDADA
+ * - soluções incompatíveis VALIDADA
+ * - ruído VALIDADA
+ * - hipóteses
+ * - empate semântico
+ * - catálogo ampliado
+ * - ranking, classificação, decisão e segurança
+ */
+function TESTAR_CATALOGO_MISTO_PRODUCAO_V63() {
+  Logger.log('============================================================');
+  Logger.log('INÍCIO — TESTAR_CATALOGO_MISTO_PRODUCAO_V63');
+  Logger.log('============================================================');
+
+  const resultados = [];
+  const idsTeste = [];
+  const marcador = 'TESTE CATALOGO MISTO V6.3 — ';
+
+  function teste(numero, descricao, condicao) {
+    const passou = !!condicao;
+    resultados.push({
+      numero: numero,
+      descricao: descricao,
+      passou: passou
+    });
+    Logger.log(
+      (passou ? '✅' : '❌') +
+      ' TESTE ' + numero + '/25 — ' + descricao
+    );
+  }
+
+  function adicionar(sufixo, titulo, status, problema, processo, dores, impactos, resultado, contexto) {
+    const solucao = {
+      resolucao_id: '',
+      titulo_interno: marcador + sufixo + ' — ' + titulo,
+      status: status,
+      problema: problema,
+      processo: processo,
+      pontos_de_dor: dores,
+      impactos: impactos,
+      resultado_esperado: resultado,
+      contexto: contexto,
+      evidencia: status === 'VALIDADA'
+        ? ['Teste automatizado V6.3']
+        : [],
+      prioridade: status === 'VALIDADA' ? 'ALTA' : 'MEDIA'
+    };
+    idsTeste.push(solucao);
+    return solucao;
+  }
+
+  const investigacao = {
+    problema: 'Erros de digitação e retrabalho na conferência e lançamento de pedidos.',
+    processo: 'Conferir e lançar pedidos recebidos por diferentes canais.',
+    pontos_de_dor: ['erros de digitação', 'retrabalho', 'conferência manual'],
+    impactos: ['perda de tempo no processo'],
+    objetivo: 'Reduzir erros e retrabalho no lançamento de pedidos.',
+    contexto: 'Processamento diário de pedidos administrativos.'
+  };
+
+  const catalogo = [];
+
+  try {
+    teste(1, 'investigação de referência foi criada', !!investigacao);
+    teste(2, 'problema de referência está definido', !!investigacao.problema);
+    teste(3, 'processo de referência está definido', !!investigacao.processo);
+
+    catalogo.push(adicionar(
+      '01', 'REFERÊNCIA EXATA', 'VALIDADA',
+      investigacao.problema, investigacao.processo,
+      investigacao.pontos_de_dor, investigacao.impactos,
+      investigacao.objetivo, investigacao.contexto
+    ));
+
+    catalogo.push(adicionar(
+      '02', 'concorrente quase idêntica A', 'VALIDADA',
+      'Erros de digitação e retrabalho na conferência e lançamento de pedidos.',
+      'Conferir e lançar pedidos recebidos por diferentes canais.',
+      ['erros de digitação', 'retrabalho', 'conferência manual'],
+      ['perda de tempo no processo'],
+      'Reduzir erros e retrabalho no lançamento de pedidos.',
+      'Processamento diário de pedidos administrativos.'
+    ));
+
+    catalogo.push(adicionar(
+      '03', 'concorrente quase idêntica B', 'VALIDADA',
+      'Erros de digitação e retrabalho no lançamento e conferência de pedidos.',
+      'Conferir pedidos recebidos por diferentes canais e lançar os dados.',
+      ['erros de digitação', 'retrabalho'],
+      ['perda de tempo'],
+      'Reduzir erros e retrabalho no lançamento de pedidos.',
+      'Processamento administrativo diário.'
+    ));
+
+    catalogo.push(adicionar(
+      '04', 'parcialmente compatível', 'VALIDADA',
+      'Erros e retrabalho na conferência de pedidos.',
+      'Conferir pedidos antes do lançamento.',
+      ['erros', 'retrabalho'],
+      ['perda de tempo'],
+      'Reduzir erros na conferência.',
+      'Processo administrativo.'
+    ));
+
+    catalogo.push(adicionar(
+      '05', 'mesmo problema em notas fiscais', 'VALIDADA',
+      'Erros de digitação e retrabalho na conferência de pedidos.',
+      'Conferir notas fiscais e documentos financeiros.',
+      ['erros de digitação', 'retrabalho'],
+      ['perda de tempo'],
+      'Reduzir erros na conferência documental.',
+      'Rotina financeira.'
+    ));
+
+    catalogo.push(adicionar(
+      '06', 'estoque parecido', 'VALIDADA',
+      'Erros e retrabalho na conferência manual.',
+      'Conferir quantidades e registrar movimentações de estoque.',
+      ['erros', 'retrabalho'],
+      ['perda de tempo'],
+      'Reduzir erros de estoque.',
+      'Controle de estoque.'
+    ));
+
+    catalogo.push(adicionar(
+      '07', 'compras relacionado', 'VALIDADA',
+      'Erros e retrabalho na conferência de solicitações.',
+      'Conferir pedidos de compra e fornecedores.',
+      ['erros', 'retrabalho'],
+      ['perda de tempo'],
+      'Reduzir erros em compras.',
+      'Departamento de compras.'
+    ));
+
+    catalogo.push(adicionar(
+      '08', 'ruído RH', 'VALIDADA',
+      'Retrabalho no cadastro de informações administrativas.',
+      'Cadastrar dados de funcionários.',
+      ['retrabalho'],
+      ['perda de tempo'],
+      'Reduzir retrabalho administrativo.',
+      'Recursos humanos.'
+    ));
+
+    catalogo.push(adicionar(
+      '09', 'ruído financeiro', 'VALIDADA',
+      'Atrasos na conciliação financeira.',
+      'Conferir extratos e lançamentos bancários.',
+      ['atrasos', 'conferência manual'],
+      ['perda de tempo'],
+      'Acelerar conciliação.',
+      'Financeiro.'
+    ));
+
+    catalogo.push(adicionar(
+      '10', 'hipótese quase exata', 'HIPOTESE',
+      investigacao.problema,
+      investigacao.processo,
+      investigacao.pontos_de_dor,
+      investigacao.impactos,
+      investigacao.objetivo,
+      investigacao.contexto
+    ));
+
+    catalogo.push(adicionar(
+      '11', 'hipótese alternativa', 'HIPOTESE',
+      'Erros de digitação e retrabalho em pedidos.',
+      'Registrar pedidos manualmente.',
+      ['erros', 'retrabalho'],
+      ['perda de tempo'],
+      'Reduzir erros.',
+      'Operação administrativa.'
+    ));
+
+    catalogo.push(adicionar(
+      '12', 'empate semântico A', 'VALIDADA',
+      'Erros de digitação e retrabalho na conferência e lançamento de pedidos.',
+      'Conferir e lançar pedidos recebidos.',
+      ['erros de digitação', 'retrabalho', 'conferência manual'],
+      ['perda de tempo no processo'],
+      'Reduzir erros e retrabalho.',
+      'Processamento diário de pedidos.'
+    ));
+
+    catalogo.push(adicionar(
+      '13', 'empate semântico B', 'VALIDADA',
+      'Erros de digitação e retrabalho na conferência e lançamento de pedidos.',
+      'Conferir e lançar pedidos recebidos.',
+      ['erros de digitação', 'retrabalho', 'conferência manual'],
+      ['perda de tempo no processo'],
+      'Reduzir erros e retrabalho.',
+      'Processamento diário de pedidos.'
+    ));
+
+    catalogo.push(adicionar(
+      '14', 'incompatível logística', 'VALIDADA',
+      'Atrasos na separação de mercadorias.',
+      'Separar e expedir produtos para clientes.',
+      ['atrasos', 'erros de separação'],
+      ['atraso nas entregas'],
+      'Reduzir atrasos logísticos.',
+      'Expedição.'
+    ));
+
+    catalogo.push(adicionar(
+      '15', 'incompatível atendimento', 'VALIDADA',
+      'Demora no atendimento ao cliente.',
+      'Responder chamados e mensagens.',
+      ['fila', 'demora'],
+      ['insatisfação'],
+      'Reduzir tempo de atendimento.',
+      'Suporte ao cliente.'
+    ));
+
+    for (let i = 16; i <= 35; i++) {
+      catalogo.push(adicionar(
+        String(i).padStart(2, '0'),
+        'ruído ampliado ' + i,
+        i % 5 === 0 ? 'HIPOTESE' : 'VALIDADA',
+        'Problemas administrativos diversos sem relação direta com lançamento de pedidos.',
+        'Executar rotina administrativa diferente do processo de pedidos.',
+        ['retrabalho'],
+        ['perda de tempo'],
+        'Melhorar eficiência administrativa.',
+        'Processo diferente do processo de referência.'
+      ));
+    }
+
+    teste(
+      4,
+      'catálogo misto contém exatamente 35 soluções temporárias',
+      catalogo.length === 35
+    );
+
+    const salvas = catalogo.map(function(solucao) {
+      return salvarResolucaoV63_(solucao);
+    });
+
+    teste(
+      5,
+      '35 soluções foram persistidas',
+      salvas.length === 35 &&
+      salvas.every(function(item) {
+        return !!item && !!item.resolucao_id;
+      })
+    );
+
+    salvas.forEach(function(item, index) {
+      idsTeste[index] = item.resolucao_id;
+    });
+
+    teste(
+      6,
+      'todos os 35 IDs são únicos',
+      new Set(idsTeste).size === 35
+    );
+
+    const persistidas = idsTeste.map(function(id) {
+      return buscarResolucaoV63_({ resolucao_id: id });
+    });
+
+    teste(
+      7,
+      'as 35 soluções podem ser recuperadas',
+      persistidas.filter(Boolean).length === 35
+    );
+
+    const comparacoes = persistidas.map(function(solucao) {
+      return compararInvestigacaoResolucaoV63_(investigacao, solucao);
+    });
+
+    teste(
+      8,
+      'as 35 comparações foram produzidas',
+      comparacoes.length === 35 &&
+      comparacoes.every(function(item) {
+        return !!item && typeof item.pontuacao === 'number';
+      })
+    );
+
+    const ranking = buscarResolucoesRelacionadasV63_(
+      investigacao,
+      {
+        pontuacao_minima: 20,
+        limite: 35
+      }
+    );
+
+    teste(
+      9,
+      'ranking misto foi produzido',
+      Array.isArray(ranking) && ranking.length > 0
+    );
+
+    const referenciaId = idsTeste[0];
+
+    teste(
+      10,
+      'a referência exata foi encontrada',
+      ranking.some(function(item) {
+        return item.resolucao_id === referenciaId;
+      })
+    );
+
+    teste(
+      11,
+      'a referência exata mantém pontuação 100',
+      ranking.some(function(item) {
+        return item.resolucao_id === referenciaId &&
+          Number(item.pontuacao) === 100;
+      })
+    );
+
+    teste(
+      12,
+      'a referência exata permanece em primeiro lugar',
+      ranking.length > 0 &&
+      ranking[0].resolucao_id === referenciaId
+    );
+
+    const quaseIdenticas = ranking.filter(function(item) {
+      return idsTeste.slice(1, 4).indexOf(item.resolucao_id) !== -1;
+    });
+
+    teste(
+      13,
+      'concorrentes quase idênticas aparecem sem superar a referência',
+      quaseIdenticas.length >= 2 &&
+      quaseIdenticas.every(function(item) {
+        return Number(item.pontuacao) <= 100;
+      })
+    );
+
+    const validadas = buscarResolucoesValidadasRelacionadasV63_(
+      investigacao,
+      {
+        pontuacao_minima: 20,
+        limite: 35
+      }
+    );
+
+    teste(
+      14,
+      'busca exclusiva por validadas funciona no catálogo misto',
+      Array.isArray(validadas) &&
+      validadas.length > 0
+    );
+
+    teste(
+      15,
+      'nenhuma hipótese entra na busca exclusiva por validadas',
+      validadas.every(function(item) {
+        return item.status === 'VALIDADA';
+      })
+    );
+
+    teste(
+      16,
+      'a referência está entre as soluções validadas',
+      validadas.some(function(item) {
+        return item.resolucao_id === referenciaId;
+      })
+    );
+
+    const classificacao = classificarReconhecimentoV63_(validadas);
+
+    teste(
+      17,
+      'classificação reconhece o catálogo validado',
+      !!classificacao &&
+      (
+        classificacao.classificacao === 'SOLUCAO_ENCONTRADA' ||
+        classificacao.classificacao === 'SOLUCOES_ENCONTRADAS'
+      )
+    );
+
+    teste(
+      18,
+      'classificação preserva soluções validadas encontradas',
+      !!classificacao &&
+      Array.isArray(classificacao.solucoes) &&
+      classificacao.solucoes.length > 0
+    );
+
+    const decisao = decidirSolucaoV63_(
+      classificacao,
+      { investigacao: investigacao }
+    );
+
+    teste(
+      19,
+      'decisão foi produzida sobre o catálogo misto',
+      !!decisao &&
+      typeof decisao.estado === 'string'
+    );
+
+    teste(
+      20,
+      'decisão mantém a referência como solução principal',
+      !!decisao &&
+      decisao.resolucao_principal === referenciaId
+    );
+
+    teste(
+      21,
+      'decisão informa quantidade de soluções validadas',
+      !!decisao &&
+      Number(decisao.solucoes_validadas) > 0
+    );
+
+    const resposta = gerarRespostaSeguraV63_(decisao);
+
+    teste(
+      22,
+      'resposta segura foi produzida',
+      !!resposta &&
+      !!resposta.resposta_cliente
+    );
+
+    teste(
+      23,
+      'resposta não expõe tecnologia, preço ou negociação',
+      !!resposta &&
+      resposta.tecnologia_exposta !== true &&
+      resposta.preco_informado !== true &&
+      resposta.negociacao_realizada !== true
+    );
+
+    const filtro = verificarSegurancaRespostaSeguraV63_(
+      resposta.resposta_cliente
+    );
+
+    teste(
+      24,
+      'resposta final passa pelo filtro de segurança',
+      !!filtro &&
+      filtro.segura === true
+    );
+
+    const rankings = [];
+    for (let rodada = 0; rodada < 3; rodada++) {
+      rankings.push(
+        buscarResolucoesRelacionadasV63_(
+          investigacao,
+          {
+            pontuacao_minima: 20,
+            limite: 35
+          }
+        )
+      );
+    }
+
+    function mesmaOrdem(a, b) {
+      if (a.length !== b.length) return false;
+      for (let i = 0; i < a.length; i++) {
+        if (a[i].resolucao_id !== b[i].resolucao_id) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    teste(
+      25,
+      'três rankings consecutivos mantêm a mesma ordem no catálogo misto',
+      mesmaOrdem(rankings[0], rankings[1]) &&
+      mesmaOrdem(rankings[0], rankings[2])
+    );
+
+  } catch (erro) {
+    Logger.log(
+      'ERRO GERAL TESTE: ' +
+      (erro.message || erro)
+    );
+  } finally {
+    try {
+      const sheet = obterAba_(SHEETS.BIBLIOTECA_RESOLUCOES);
+      const valores = sheet.getDataRange().getValues();
+      const cabecalhos = valores[0] || [];
+      const colunaId = cabecalhos.indexOf('resolucao_id');
+      const colunaTitulo = cabecalhos.indexOf('titulo_interno');
+
+      for (let i = valores.length - 1; i >= 1; i--) {
+        const idLinha = colunaId >= 0 ? String(valores[i][colunaId]) : '';
+        const tituloLinha = colunaTitulo >= 0 ? String(valores[i][colunaTitulo]) : '';
+
+        if (
+          idsTeste.indexOf(idLinha) !== -1 ||
+          tituloLinha.indexOf(marcador) === 0
+        ) {
+          sheet.deleteRow(i + 1);
+        }
+      }
+
+      Logger.log('LIMPEZA CATALOGO MISTO V6.3: CONCLUÍDA');
+    } catch (erroLimpeza) {
+      Logger.log(
+        '⚠️ AVISO LIMPEZA CATALOGO MISTO: ' +
+        (erroLimpeza.message || erroLimpeza)
+      );
+    }
+  }
+
+  const aprovados = resultados.filter(function(item) {
+    return item.passou;
+  }).length;
+
+  const falhas = resultados.length - aprovados;
+  const percentual = resultados.length
+    ? Math.round((aprovados / resultados.length) * 100)
+    : 0;
+
+  Logger.log('============================================================');
+  Logger.log('RESULTADO FINAL — CATÁLOGO MISTO DE PRODUÇÃO V6.3');
+  Logger.log('============================================================');
+  Logger.log('APROVADOS: ' + aprovados + '/' + resultados.length);
+  Logger.log('FALHAS: ' + falhas);
+  Logger.log('PERCENTUAL: ' + percentual + '%');
+
+  if (resultados.length === 25 && falhas === 0) {
+    Logger.log('🏆 TESTAR_CATALOGO_MISTO_PRODUCAO_V63: PASSOU');
+    Logger.log('🏆 CATÁLOGO MISTO DE PRODUÇÃO V6.3: 100%');
+  } else {
+    Logger.log('❌ TESTAR_CATALOGO_MISTO_PRODUCAO_V63: FALHOU');
+  }
+
+  Logger.log('============================================================');
+
+  return {
+    sucesso: resultados.length === 25 && falhas === 0,
+    aprovados: aprovados,
+    falhas: falhas,
+    percentual: percentual,
+    resultados: resultados
+  };
+}
