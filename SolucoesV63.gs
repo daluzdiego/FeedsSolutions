@@ -6606,13 +6606,14 @@ function TESTAR_CATALOGO_MISTO_PRODUCAO_V63() {
       resolucao_id: '',
       titulo_interno: marcador + sufixo + ' — ' + titulo,
       status: status,
-      problema: problema,
+      descricao_problema: problema,
+      padrao_problema: problema,
       processo: processo,
-      pontos_de_dor: dores,
+      dores: dores,
       impactos: impactos,
-      resultado_esperado: resultado,
+      resultados_desejados: [resultado],
       contexto: contexto,
-      evidencia: status === 'VALIDADA'
+      evidencias: status === 'VALIDADA'
         ? ['Teste automatizado V6.3']
         : [],
       prioridade: status === 'VALIDADA' ? 'ALTA' : 'MEDIA'
@@ -6950,8 +6951,8 @@ function TESTAR_CATALOGO_MISTO_PRODUCAO_V63() {
       18,
       'classificação preserva soluções validadas encontradas',
       !!classificacao &&
-      Array.isArray(classificacao.solucoes) &&
-      classificacao.solucoes.length > 0
+      Array.isArray(classificacao.resultados) &&
+      classificacao.resultados.length > 0
     );
 
     const decisao = decidirSolucaoV63_(
