@@ -6636,12 +6636,12 @@ function TESTAR_CATALOGO_MISTO_PRODUCAO_V63() {
 
   try {
     teste(1, 'investigação de referência foi criada', !!investigacao);
-    teste(2, 'problema de referência está definido', !!investigacao.problema);
+    teste(2, 'problema de referência está definido', !!investigacao.problema_central);
     teste(3, 'processo de referência está definido', !!investigacao.processo);
 
     catalogo.push(adicionar(
       '01', 'REFERÊNCIA EXATA', 'VALIDADA',
-      investigacao.problema, investigacao.processo,
+      investigacao.problema_central, investigacao.processo,
       investigacao.pontos_de_dor, investigacao.impactos,
       investigacao.objetivo, investigacao.contexto
     ));
