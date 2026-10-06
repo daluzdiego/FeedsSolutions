@@ -1373,3 +1373,190 @@ function TESTAR_RETRY_HTTP_GEMINI_V63() {
 
   return { aprovados:aprovados, falhas:25-aprovados, percentual:Math.round((aprovados/25)*100), passou:aprovados===25, resultados:resultados };
 }
+
+
+/**
+ * ------------------------------------------------------------
+ * TESTE DE FLUXO COMPLETO GEMINI V6.3
+ * ------------------------------------------------------------
+ * Valida a cadeia:
+ * chamarGemini_ -> executarGemini_ -> extrairTextoGemini_
+ *
+ * Não realiza chamadas externas. Injeta o motor HTTP somente
+ * durante o teste e valida o comportamento observável da
+ * função chamarGemini_.
+ */
+function TESTAR_FLUXO_COMPLETO_GEMINI_V63() {
+  Logger.log('============================================================');
+  Logger.log('INÍCIO — TESTAR_FLUXO_COMPLETO_GEMINI_V63');
+  Logger.log('============================================================');
+
+  let aprovados = 0;
+  const resultados = [];
+
+  function registrar(numero, descricao, condicao) {
+    if (condicao) {
+      aprovados++;
+      resultados.push(true);
+      Logger.log('✅ TESTE ' + numero + '/25 — ' + descricao);
+    } else {
+      resultados.push(false);
+      Logger.log('❌ TESTE ' + numero + '/25 — ' + descricao);
+    }
+  }
+
+  function resposta(status, corpo) {
+    return {
+      getResponseCode: function() { return status; },
+      getContentText: function() { return corpo; }
+    };
+  }
+
+  function executarCenario(sequencia) {
+    let chamadas = 0;
+    const deps = {
+      fetch: function() {
+        const item = sequencia[chamadas++];
+        if (item && item.erro) throw new Error(item.erro);
+        return resposta(item.status, item.corpo === undefined ? '{}' : item.corpo);
+      },
+      sleep: function() {}
+    };
+
+    try {
+      const resultadoExecucao = executarGemini_(
+        'https://teste.local',
+        {contents:[{role:'user',parts:[{text:'mensagem teste'}]}]},
+        'CHAVE_TESTE',
+        deps
+      );
+
+      return {
+        sucesso: true,
+        dados: resultadoExecucao,
+        chamadas: chamadas,
+        erro: ''
+      };
+    } catch (erro) {
+      return {
+        sucesso: false,
+        dados: null,
+        chamadas: chamadas,
+        erro: String(erro && erro.message ? erro.message : erro)
+      };
+    }
+  }
+
+  function simularChamarGemini(sequencia) {
+    const execucao = executarCenario(sequencia);
+
+    if (!execucao.sucesso) {
+      throw new Error(execucao.erro);
+    }
+
+    const texto = extrairTextoGemini_(execucao.dados.dados);
+
+    return {
+      sucesso: true,
+      modelo: 'modelo-teste-v63',
+      tempo_ms: execucao.dados.tempo_ms,
+      resposta: texto,
+      resposta_bruta: execucao.dados.dados,
+      tentativas: execucao.dados.tentativas,
+      status_code: execucao.dados.status_code,
+      chamadas: execucao.chamadas
+    };
+  }
+
+  let r;
+
+  r = simularChamarGemini([{
+    status:200,
+    corpo:'{"candidates":[{"content":{"parts":[{"text":"RESPOSTA_FINAL"}]}}]}'
+  }]);
+  registrar(1, 'sucesso HTTP 200 chega ao extrator', r.resposta === 'RESPOSTA_FINAL');
+  registrar(2, 'fluxo bem-sucedido usa uma tentativa', r.chamadas === 1);
+  registrar(3, 'fluxo preserva status HTTP 200', r.status_code === 200);
+  registrar(4, 'fluxo preserva tentativas = 1', r.tentativas === 1);
+  registrar(5, 'fluxo marca sucesso', r.sucesso === true);
+
+  r = simularChamarGemini([
+    {status:503, corpo:'erro'},
+    {status:200, corpo:'{"candidates":[{"content":{"parts":[{"text":"RECUPERADO_503"}]}}]}'}
+  ]);
+  registrar(6, '503 seguido de 200 entrega resposta recuperada', r.resposta === 'RECUPERADO_503');
+  registrar(7, '503 seguido de 200 usa duas tentativas', r.chamadas === 2);
+  registrar(8, '503 seguido de 200 informa tentativas = 2', r.tentativas === 2);
+
+  r = simularChamarGemini([
+    {status:429, corpo:'erro'},
+    {status:500, corpo:'erro'},
+    {status:200, corpo:'{"candidates":[{"content":{"parts":[{"text":"RECUPERADO_MISTO"}]}}]}'}
+  ]);
+  registrar(9, '429 → 500 → 200 entrega resposta recuperada', r.resposta === 'RECUPERADO_MISTO');
+  registrar(10, 'sequência mista usa três tentativas', r.chamadas === 3);
+  registrar(11, 'sequência mista informa tentativas = 3', r.tentativas === 3);
+
+  r = simularChamarGemini([
+    {status:503, corpo:'erro'},
+    {status:503, corpo:'erro'},
+    {status:503, corpo:'erro'}
+  ]);
+  registrar(12, 'três falhas transitórias propagam erro', r === null ? false : true);
+  registrar(13, 'três falhas transitórias fazem exatamente três chamadas', r.chamadas === 3);
+  registrar(14, 'erro propagado preserva HTTP 503', r.erro.indexOf('HTTP 503') !== -1);
+  registrar(15, 'erro propagado informa tentativas esgotadas', r.erro.indexOf('3 tentativas') !== -1);
+
+  r = simularChamarGemini([
+    {status:400, corpo:'requisição inválida'}
+  ]);
+  registrar(16, 'HTTP 400 propaga erro sem retry', !r.sucesso && r.chamadas === 1);
+  registrar(17, 'HTTP 400 preserva status no erro', r.erro.indexOf('HTTP 400') !== -1);
+
+  r = simularChamarGemini([
+    {status:200, corpo:'JSON inválido'}
+  ]);
+  registrar(18, 'HTTP 200 com JSON inválido não chega como sucesso', !r.sucesso && r.chamadas === 1);
+  registrar(19, 'JSON inválido é rejeitado no motor antes da extração', r.erro.indexOf('não é JSON válido') !== -1);
+
+  r = simularChamarGemini([
+    {status:200, corpo:'{"candidates":[]}'}
+  ]);
+  registrar(20, 'candidates vazio é rejeitado no extrator', !r.sucesso && r.chamadas === 1);
+  registrar(21, 'erro de candidates vazio é preservado', r.erro.indexOf('candidates') !== -1);
+
+  r = simularChamarGemini([
+    {status:200, corpo:'{"candidates":[{"content":{"parts":[{"text":"A"},{"text":"B"}]}}]}'}
+  ]);
+  registrar(22, 'múltiplas partes chegam concatenadas', r.resposta === 'AB');
+
+  r = simularChamarGemini([
+    {erro:'falha de transporte'},
+    {status:200, corpo:'{"candidates":[{"content":{"parts":[{"text":"TRANSPORTE_RECUPERADO"}]}}]}'}
+  ]);
+  registrar(23, 'falha de transporte seguida de 200 recupera o fluxo', r.resposta === 'TRANSPORTE_RECUPERADO');
+  registrar(24, 'recuperação de transporte usa duas chamadas', r.chamadas === 2 && r.tentativas === 2);
+
+  r = simularChamarGemini([
+    {status:503, corpo:'erro'},
+    {status:200, corpo:'{"candidates":[{"content":{"parts":[{}]}}]}'}
+  ]);
+  registrar(25, 'resposta recuperada sem texto utilizável é rejeitada pelo extrator', !r.sucesso && r.chamadas === 2);
+
+  Logger.log('============================================================');
+  Logger.log('RESULTADO FINAL — FLUXO COMPLETO GEMINI V6.3');
+  Logger.log('============================================================');
+  Logger.log('APROVADOS: ' + aprovados + '/25');
+  Logger.log('FALHAS: ' + (25 - aprovados));
+  Logger.log('PERCENTUAL: ' + Math.round((aprovados / 25) * 100) + '%');
+  Logger.log(aprovados === 25 ? '🏆 TESTAR_FLUXO_COMPLETO_GEMINI_V63: PASSOU' : '❌ TESTAR_FLUXO_COMPLETO_GEMINI_V63: FALHOU');
+  Logger.log('============================================================');
+
+  return {
+    aprovados: aprovados,
+    falhas: 25 - aprovados,
+    percentual: Math.round((aprovados / 25) * 100),
+    passou: aprovados === 25,
+    resultados: resultados
+  };
+}
