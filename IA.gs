@@ -1451,21 +1451,46 @@ function TESTAR_FLUXO_COMPLETO_GEMINI_V63() {
     const execucao = executarCenario(sequencia);
 
     if (!execucao.sucesso) {
-      throw new Error(execucao.erro);
+      return {
+        sucesso: false,
+        modelo: 'modelo-teste-v63',
+        tempo_ms: null,
+        resposta: '',
+        resposta_bruta: null,
+        tentativas: execucao.chamadas,
+        status_code: null,
+        chamadas: execucao.chamadas,
+        erro: execucao.erro
+      };
     }
 
-    const texto = extrairTextoGemini_(execucao.dados.dados);
+    try {
+      const texto = extrairTextoGemini_(execucao.dados.dados);
 
-    return {
-      sucesso: true,
-      modelo: 'modelo-teste-v63',
-      tempo_ms: execucao.dados.tempo_ms,
-      resposta: texto,
-      resposta_bruta: execucao.dados.dados,
-      tentativas: execucao.dados.tentativas,
-      status_code: execucao.dados.status_code,
-      chamadas: execucao.chamadas
-    };
+      return {
+        sucesso: true,
+        modelo: 'modelo-teste-v63',
+        tempo_ms: execucao.dados.tempo_ms,
+        resposta: texto,
+        resposta_bruta: execucao.dados.dados,
+        tentativas: execucao.dados.tentativas,
+        status_code: execucao.dados.status_code,
+        chamadas: execucao.chamadas,
+        erro: ''
+      };
+    } catch (erro) {
+      return {
+        sucesso: false,
+        modelo: 'modelo-teste-v63',
+        tempo_ms: execucao.dados.tempo_ms,
+        resposta: '',
+        resposta_bruta: execucao.dados.dados,
+        tentativas: execucao.dados.tentativas,
+        status_code: execucao.dados.status_code,
+        chamadas: execucao.chamadas,
+        erro: String(erro && erro.message ? erro.message : erro)
+      };
+    }
   }
 
   let r;
@@ -1502,7 +1527,7 @@ function TESTAR_FLUXO_COMPLETO_GEMINI_V63() {
     {status:503, corpo:'erro'},
     {status:503, corpo:'erro'}
   ]);
-  registrar(12, 'três falhas transitórias propagam erro', r === null ? false : true);
+  registrar(12, 'três falhas transitórias propagam erro', !r.sucesso);
   registrar(13, 'três falhas transitórias fazem exatamente três chamadas', r.chamadas === 3);
   registrar(14, 'erro propagado preserva HTTP 503', r.erro.indexOf('HTTP 503') !== -1);
   registrar(15, 'erro propagado informa tentativas esgotadas', r.erro.indexOf('3 tentativas') !== -1);
