@@ -755,8 +755,11 @@ function prepararParaReconhecimentoV63_(
     /*
      * CONTROLE DE COMPLETUDE PARA RECONHECIMENTO
      *
-     * Processo, resultado desejado e contexto são mínimos
+     * Processo e resultado desejado são os campos mínimos
      * para permitir comparação segura com a biblioteca.
+     *
+     * Contexto pode permanecer desconhecido sem bloquear
+     * o reconhecimento quando o núcleo do caso está claro.
      */
     lacunas:
       Array.isArray(interpretacao.lacunas)
