@@ -35,7 +35,7 @@
  * ============================================================
  */
 
-const INTEGRACAO_FLUXO_PRINCIPAL_V63 = {
+const INTEGRACAO_FLUXO_PRINCIPAL_V63_OFICIAL = {
 
   VERSAO:
     'V6.3',
@@ -124,7 +124,7 @@ function podeAtivarV63NoFluxoPrincipal_(
 
   if (
     triagem.classificacao !==
-    INTEGRACAO_FLUXO_PRINCIPAL_V63
+    INTEGRACAO_FLUXO_PRINCIPAL_V63_OFICIAL
       .ESTADOS_ATIVACAO
       .TRIAGEM_COMPATIVEL
   ) {
@@ -135,7 +135,7 @@ function podeAtivarV63NoFluxoPrincipal_(
         false,
 
       motivo:
-        INTEGRACAO_FLUXO_PRINCIPAL_V63
+        INTEGRACAO_FLUXO_PRINCIPAL_V63_OFICIAL
           .MOTIVOS
           .TRIAGEM_NAO_COMPATIVEL
 
@@ -146,7 +146,7 @@ function podeAtivarV63NoFluxoPrincipal_(
 
   if (
     investigacao.estado !==
-    INTEGRACAO_FLUXO_PRINCIPAL_V63
+    INTEGRACAO_FLUXO_PRINCIPAL_V63_OFICIAL
       .ESTADOS_ATIVACAO
       .INVESTIGACAO_PRONTA
   ) {
@@ -157,7 +157,7 @@ function podeAtivarV63NoFluxoPrincipal_(
         false,
 
       motivo:
-        INTEGRACAO_FLUXO_PRINCIPAL_V63
+        INTEGRACAO_FLUXO_PRINCIPAL_V63_OFICIAL
           .MOTIVOS
           .INVESTIGACAO_INCOMPLETA
 
@@ -172,7 +172,7 @@ function podeAtivarV63NoFluxoPrincipal_(
       true,
 
     motivo:
-      INTEGRACAO_FLUXO_PRINCIPAL_V63
+      INTEGRACAO_FLUXO_PRINCIPAL_V63_OFICIAL
         .MOTIVOS
         .V63_ATIVADA
 
@@ -276,7 +276,7 @@ function validarContextoIntegracaoV63_(
  * ============================================================
  */
 
-function integrarV63AoFluxoPrincipal_(
+function integrarV63AoFluxoPrincipalOficial_(
   mensagem,
   resultadoFluxoPrincipal
 ) {
@@ -369,7 +369,7 @@ function integrarV63AoFluxoPrincipal_(
         false,
 
       motivo:
-        INTEGRACAO_FLUXO_PRINCIPAL_V63
+        INTEGRACAO_FLUXO_PRINCIPAL_V63_OFICIAL
           .MOTIVOS
           .V63_INDISPONIVEL,
 
@@ -430,7 +430,7 @@ function integrarV63AoFluxoPrincipal_(
         false,
 
       motivo:
-        INTEGRACAO_FLUXO_PRINCIPAL_V63
+        INTEGRACAO_FLUXO_PRINCIPAL_V63_OFICIAL
           .MOTIVOS
           .V63_INDISPONIVEL,
 
@@ -474,7 +474,7 @@ function integrarV63AoFluxoPrincipal_(
         false,
 
       motivo:
-        INTEGRACAO_FLUXO_PRINCIPAL_V63
+        INTEGRACAO_FLUXO_PRINCIPAL_V63_OFICIAL
           .MOTIVOS
           .V63_REPROVADA,
 
@@ -525,7 +525,7 @@ function integrarV63AoFluxoPrincipal_(
         false,
 
       motivo:
-        INTEGRACAO_FLUXO_PRINCIPAL_V63
+        INTEGRACAO_FLUXO_PRINCIPAL_V63_OFICIAL
           .MOTIVOS
           .V63_REPROVADA,
 
@@ -564,7 +564,7 @@ function integrarV63AoFluxoPrincipal_(
       true,
 
     motivo:
-      INTEGRACAO_FLUXO_PRINCIPAL_V63
+      INTEGRACAO_FLUXO_PRINCIPAL_V63_OFICIAL
         .MOTIVOS
         .V63_ATIVADA,
 
@@ -1080,7 +1080,7 @@ function TESTAR_ADAPTADOR_FLUXO_PRINCIPAL_V63() {
      */
 
     resultado =
-      integrarV63AoFluxoPrincipal_(
+      integrarV63AoFluxoPrincipalOficial_(
         mensagem,
         fluxo
       );
@@ -1112,7 +1112,7 @@ function TESTAR_ADAPTADOR_FLUXO_PRINCIPAL_V63() {
       !!(
         resultado &&
         resultado.motivo ===
-        INTEGRACAO_FLUXO_PRINCIPAL_V63
+        INTEGRACAO_FLUXO_PRINCIPAL_V63_OFICIAL
           .MOTIVOS
           .V63_ATIVADA
       )
@@ -1229,7 +1229,7 @@ function TESTAR_ADAPTADOR_FLUXO_PRINCIPAL_V63() {
 
 
     const fallback =
-      integrarV63AoFluxoPrincipal_(
+      integrarV63AoFluxoPrincipalOficial_(
         mensagem,
         fluxoIncompleto
       );
@@ -1286,7 +1286,7 @@ function TESTAR_ADAPTADOR_FLUXO_PRINCIPAL_V63() {
 
 
     const bloqueioTriagem =
-      integrarV63AoFluxoPrincipal_(
+      integrarV63AoFluxoPrincipalOficial_(
         mensagem,
         fluxoIncompativel
       );
