@@ -1512,3 +1512,861 @@ function TESTAR_ADAPTADOR_FLUXO_PRINCIPAL_V63() {
   }
 
 }
+
+
+
+/**
+ * ============================================================
+ * TESTE REAL DO FLUXO PRINCIPAL + V6.3
+ * ============================================================
+ *
+ * IMPORTANTE:
+ * Este teste percorre o ponto de entrada REAL:
+ *
+ * processarMensagemDiagnostico()
+ *        ↓
+ * diagnóstico
+ *        ↓
+ * triagem
+ *        ↓
+ * investigação
+ *        ↓
+ * adaptador V6.3
+ *        ↓
+ * Ponte V6.3
+ *        ↓
+ * reconhecimento
+ *        ↓
+ * decisão
+ *        ↓
+ * resposta segura
+ *
+ * A resolução de teste é criada ANTES do processamento para
+ * provar que a V6.3 consegue reconhecê-la no fluxo real.
+ * ============================================================
+ */
+
+function TESTAR_FLUXO_PRINCIPAL_REAL_V63() {
+
+  const total = 25;
+  let aprovados = 0;
+  const falhas = [];
+
+  let inicio = null;
+  let resultado = null;
+  let resolucaoId = null;
+
+  function teste(numero, descricao, condicao, detalhe) {
+
+    if (condicao) {
+
+      aprovados++;
+
+      Logger.log(
+        '✅ TESTE ' +
+        numero +
+        '/' +
+        total +
+        ' — ' +
+        descricao +
+        (
+          detalhe
+            ? ' [' + detalhe + ']'
+            : ''
+        )
+      );
+
+    } else {
+
+      falhas.push(
+        numero +
+        ' — ' +
+        descricao
+      );
+
+      Logger.log(
+        '❌ TESTE ' +
+        numero +
+        '/' +
+        total +
+        ' — ' +
+        descricao +
+        (
+          detalhe
+            ? ' [' + detalhe + ']'
+            : ''
+        )
+      );
+
+    }
+
+  }
+
+
+  function limparResolucao_() {
+
+    if (!resolucaoId) {
+      return;
+    }
+
+    try {
+
+      const aba =
+        obterAba_(
+          SHEETS.BIBLIOTECA_RESOLUCOES
+        );
+
+      const dados =
+        aba
+          .getDataRange()
+          .getValues();
+
+      if (dados.length <= 1) {
+        return;
+      }
+
+      const cabecalhos =
+        dados[0];
+
+      const idx =
+        cabecalhos.indexOf(
+          'resolucao_id'
+        );
+
+      if (idx === -1) {
+        return;
+      }
+
+      for (
+        let i = dados.length - 1;
+        i >= 1;
+        i--
+      ) {
+
+        if (
+          String(
+            dados[i][idx] || ''
+          ) ===
+          String(
+            resolucaoId
+          )
+        ) {
+
+          aba.deleteRow(
+            i + 1
+          );
+
+        }
+
+      }
+
+      SpreadsheetApp.flush();
+
+    } catch (erro) {
+
+      Logger.log(
+        '⚠️ Limpeza resolução V6.3: ' +
+        (
+          erro && erro.message
+            ? erro.message
+            : erro
+        )
+      );
+
+    }
+
+  }
+
+
+  function limparInvestigacao_() {
+
+    try {
+
+      if (
+        !inicio ||
+        !inicio.diagnostico_id
+      ) {
+
+        return;
+
+      }
+
+      const aba =
+        obterAba_(
+          SHEETS.INVESTIGACOES
+        );
+
+      const dados =
+        aba
+          .getDataRange()
+          .getValues();
+
+      if (dados.length <= 1) {
+        return;
+      }
+
+      const cabecalhos =
+        dados[0];
+
+      const idxId =
+        cabecalhos.indexOf(
+          'investigacao_id'
+        );
+
+      const idxDiagnostico =
+        cabecalhos.indexOf(
+          'diagnostico_id'
+        );
+
+      for (
+        let i = dados.length - 1;
+        i >= 1;
+        i--
+      ) {
+
+        const id =
+          idxId !== -1
+            ? String(
+                dados[i][idxId] || ''
+              )
+            : '';
+
+        const diagnosticoId =
+          idxDiagnostico !== -1
+            ? String(
+                dados[i][idxDiagnostico] || ''
+              )
+            : '';
+
+        if (
+          (
+            resultado &&
+            resultado.investigacao &&
+            id ===
+            String(
+              resultado.investigacao
+                .investigacao_id || ''
+            )
+          ) ||
+          diagnosticoId ===
+          String(
+            inicio.diagnostico_id
+          )
+        ) {
+
+          aba.deleteRow(
+            i + 1
+          );
+
+        }
+
+      }
+
+      SpreadsheetApp.flush();
+
+    } catch (erro) {
+
+      Logger.log(
+        '⚠️ Limpeza investigação V6.3: ' +
+        (
+          erro && erro.message
+            ? erro.message
+            : erro
+        )
+      );
+
+    }
+
+  }
+
+
+  try {
+
+    Logger.log('');
+    Logger.log(
+      '============================================================'
+    );
+
+    Logger.log(
+      'TESTAR_FLUXO_PRINCIPAL_REAL_V63'
+    );
+
+    Logger.log(
+      '============================================================'
+    );
+
+
+    /*
+     * ----------------------------------------------------------
+     * 1. CRIA DIAGNÓSTICO REAL
+     * ----------------------------------------------------------
+     */
+
+    inicio =
+      iniciarDiagnostico({
+
+        nome:
+          'Empresa Teste Fluxo Real V63',
+
+        nome_empresa:
+          'Empresa Teste Fluxo Real V63',
+
+        segmento:
+          'Distribuidora',
+
+        porte:
+          'PEQUENA',
+
+        nome_contato:
+          'Teste Fluxo Real V63',
+
+        email:
+          'teste-fluxo-real-v63@mvp.local',
+
+        cidade:
+          'Teste'
+
+      });
+
+
+    teste(
+      1,
+      'diagnóstico inicial criado',
+      !!(
+        inicio &&
+        inicio.sucesso === true &&
+        inicio.empresa_id &&
+        inicio.conversa_id &&
+        inicio.diagnostico_id
+      )
+    );
+
+
+    const mensagem =
+      'Conferimos e lançamos pedidos manualmente. ' +
+      'Isso gera erros de digitação e retrabalho todos os dias. ' +
+      'Perdemos cerca de 3 horas por dia. ' +
+      'Queremos reduzir erros e retrabalho mantendo a qualidade.';
+
+
+    /*
+     * ----------------------------------------------------------
+     * 2. PREPARA RESOLUÇÃO VALIDADA ANTES DO FLUXO
+     * ----------------------------------------------------------
+     */
+
+    const interpretacao =
+      interpretarMensagemSemanticaV63_(
+        mensagem
+      );
+
+
+    teste(
+      2,
+      'interpretação semântica de referência foi produzida',
+      !!interpretacao
+    );
+
+
+    resolucaoId =
+      'RES-FLUXO-REAL-V63-' +
+      Date.now();
+
+
+    const retornoResolucao =
+      salvarResolucaoV63_({
+
+        resolucao_id:
+          resolucaoId,
+
+        titulo_interno:
+          'Resolução validada — fluxo principal real V6.3',
+
+        descricao_problema:
+          interpretacao.problema,
+
+        padrao_problema:
+          interpretacao.padrao_problema,
+
+        processo:
+          interpretacao.processo,
+
+        dores:
+          interpretacao.dores,
+
+        impactos:
+          interpretacao.impactos,
+
+        resultados_desejados:
+          [
+            interpretacao
+              .resultado_desejado
+          ],
+
+        contexto:
+          interpretacao.contexto,
+
+        restricoes:
+          [],
+
+        abordagem_interna:
+          'Informação interna',
+
+        descricao_solucao_interna:
+          'Informação interna',
+
+        alternativas:
+          [],
+
+        status:
+          'VALIDADA',
+
+        confianca:
+          'ALTA',
+
+        evidencias:
+          [
+            'Teste de fluxo principal real V6.3'
+          ],
+
+        casos_relacionados:
+          [],
+
+        origem:
+          'CASO_VALIDADO',
+
+        versao:
+          'V6.3'
+
+      });
+
+
+    teste(
+      3,
+      'resolução validada foi persistida antes do fluxo',
+      !!(
+        retornoResolucao &&
+        retornoResolucao.resolucao_id
+      )
+    );
+
+
+    /*
+     * ----------------------------------------------------------
+     * 3. EXECUTA O PONTO DE ENTRADA REAL
+     * ----------------------------------------------------------
+     */
+
+    resultado =
+      processarMensagemDiagnostico({
+
+        empresa_id:
+          inicio.empresa_id,
+
+        conversa_id:
+          inicio.conversa_id,
+
+        mensagem:
+          mensagem
+
+      });
+
+
+    teste(
+      4,
+      'processarMensagemDiagnostico executou com sucesso',
+      !!(
+        resultado &&
+        resultado.sucesso === true
+      )
+    );
+
+
+    teste(
+      5,
+      'resposta principal foi produzida',
+      !!(
+        resultado &&
+        resultado.resposta
+      )
+    );
+
+
+    teste(
+      6,
+      'diagnóstico foi retornado',
+      !!(
+        resultado &&
+        resultado.diagnostico
+      )
+    );
+
+
+    teste(
+      7,
+      'triagem foi retornada',
+      !!(
+        resultado &&
+        resultado.triagem
+      )
+    );
+
+
+    teste(
+      8,
+      'triagem classificou como COMPATIVEL',
+      !!(
+        resultado &&
+        resultado.triagem &&
+        resultado.triagem.classificacao ===
+        'COMPATIVEL'
+      )
+    );
+
+
+    teste(
+      9,
+      'investigação foi retornada',
+      !!(
+        resultado &&
+        resultado.investigacao
+      )
+    );
+
+
+    teste(
+      10,
+      'investigação possui ID',
+      !!(
+        resultado &&
+        resultado.investigacao &&
+        resultado.investigacao.investigacao_id
+      )
+    );
+
+
+    teste(
+      11,
+      'investigação ficou PRONTA_PARA_SOLUCAO',
+      !!(
+        resultado &&
+        resultado.investigacao &&
+        resultado.investigacao.estado ===
+        'PRONTA_PARA_SOLUCAO'
+      )
+    );
+
+
+    /*
+     * ----------------------------------------------------------
+     * 4. V6.3 REAL DENTRO DO FLUXO
+     * ----------------------------------------------------------
+     */
+
+    const integracao =
+      resultado
+        ? resultado.integracao_v63
+        : null;
+
+
+    teste(
+      12,
+      'resultado da integração V6.3 foi retornado',
+      !!integracao
+    );
+
+
+    teste(
+      13,
+      'V6.3 foi realmente ativada pelo fluxo principal',
+      !!(
+        integracao &&
+        integracao.ativada === true
+      )
+    );
+
+
+    teste(
+      14,
+      'motivo confirma V63_ATIVADA',
+      !!(
+        integracao &&
+        integracao.motivo ===
+        'V63_ATIVADA'
+      )
+    );
+
+
+    teste(
+      15,
+      'V6.3 não usou fallback legado',
+      !!(
+        integracao &&
+        integracao.fallback === false
+      )
+    );
+
+
+    teste(
+      16,
+      'resultado interno da Ponte V6.3 foi produzido',
+      !!(
+        integracao &&
+        integracao.resultado_v63 &&
+        integracao.resultado_v63.sucesso === true
+      )
+    );
+
+
+    teste(
+      17,
+      'V6.3 reconheceu a resolução previamente validada',
+      !!(
+        integracao &&
+        integracao.resultado_v63 &&
+        Array.isArray(
+          integracao
+            .resultado_v63
+            .resultados_reconhecimento
+        ) &&
+        integracao
+          .resultado_v63
+          .resultados_reconhecimento
+          .some(
+            function(item) {
+
+              return (
+                item &&
+                String(
+                  item.resolucao_id || ''
+                ) ===
+                String(
+                  resolucaoId
+                )
+              );
+
+            }
+          )
+      )
+    );
+
+
+    teste(
+      18,
+      'decisão V6.3 foi produzida',
+      !!(
+        integracao &&
+        integracao.resultado_v63 &&
+        integracao.resultado_v63.decisao
+      )
+    );
+
+
+    teste(
+      19,
+      'decisão selecionou solução validada',
+      !!(
+        integracao &&
+        integracao.resultado_v63 &&
+        integracao.resultado_v63.decisao &&
+        integracao.resultado_v63.decisao.estado ===
+        'SOLUCAO_VALIDADA'
+      )
+    );
+
+
+    teste(
+      20,
+      'resposta V6.3 foi produzida',
+      !!(
+        integracao &&
+        integracao.resposta_cliente
+      )
+    );
+
+
+    teste(
+      21,
+      'resposta oficial retornada ao ponto de entrada',
+      !!(
+        resultado &&
+        resultado.resposta &&
+        integracao &&
+        integracao.resposta_cliente ===
+        resultado.resposta
+      )
+    );
+
+
+    teste(
+      22,
+      'filtro de segurança da V6.3 aprovou a resposta',
+      !!(
+        integracao &&
+        integracao.resultado_v63 &&
+        integracao.resultado_v63.seguranca &&
+        integracao.resultado_v63.seguranca.segura ===
+        true
+      )
+    );
+
+
+    /*
+     * ----------------------------------------------------------
+     * 5. IDENTIDADE / CONTEXTO
+     * ----------------------------------------------------------
+     */
+
+    teste(
+      23,
+      'contexto V6.3 preservou os IDs do fluxo principal',
+      !!(
+        integracao &&
+        integracao.contexto &&
+        integracao.contexto.empresa_id ===
+        inicio.empresa_id &&
+        integracao.contexto.conversa_id ===
+        inicio.conversa_id &&
+        integracao.contexto.diagnostico_id ===
+        inicio.diagnostico_id &&
+        integracao.contexto.investigacao_id ===
+        resultado.investigacao.investigacao_id
+      )
+    );
+
+
+    teste(
+      24,
+      'resposta segura não expõe tecnologia ou informação comercial',
+      !!(
+        integracao &&
+        integracao.resultado_v63 &&
+        integracao.resultado_v63.resposta &&
+        integracao.resultado_v63.resposta.tecnologia_exposta ===
+        false &&
+        integracao.resultado_v63.resposta.informacao_comercial_exposta ===
+        false
+      )
+    );
+
+
+    teste(
+      25,
+      'fluxo principal entrega a V6.3 como resposta oficial',
+      !!(
+        resultado &&
+        resultado.integracao_v63 &&
+        resultado.integracao_v63.ativada === true &&
+        resultado.integracao_v63.fallback === false &&
+        resultado.resposta ===
+        resultado.integracao_v63.resposta_cliente
+      )
+    );
+
+
+  } catch (erro) {
+
+    Logger.log('');
+    Logger.log(
+      '❌ ERRO FATAL NO TESTE DO FLUXO PRINCIPAL REAL V6.3'
+    );
+
+    Logger.log(
+      erro &&
+      erro.stack
+        ? erro.stack
+        : erro
+    );
+
+    falhas.push(
+      'ERRO FATAL — ' +
+      (
+        erro && erro.message
+          ? erro.message
+          : erro
+      )
+    );
+
+  } finally {
+
+    limparResolucao_();
+    limparInvestigacao_();
+
+    Logger.log('');
+    Logger.log(
+      '============================================================'
+    );
+
+    Logger.log(
+      'RESULTADO — TESTAR_FLUXO_PRINCIPAL_REAL_V63'
+    );
+
+    Logger.log(
+      '============================================================'
+    );
+
+    Logger.log(
+      'APROVADOS: ' +
+      aprovados +
+      '/' +
+      total
+    );
+
+    Logger.log(
+      'FALHAS: ' +
+      falhas.length
+    );
+
+    Logger.log(
+      'PERCENTUAL: ' +
+      Math.round(
+        (
+          aprovados /
+          total
+        ) * 100
+      ) +
+      '%'
+    );
+
+    if (
+      aprovados === total &&
+      falhas.length === 0
+    ) {
+
+      Logger.log('');
+      Logger.log(
+        '🏆 TESTAR_FLUXO_PRINCIPAL_REAL_V63: PASSOU'
+      );
+
+      Logger.log(
+        '🏆 FLUXO PRINCIPAL REAL + V6.3: 100%'
+      );
+
+    } else {
+
+      Logger.log('');
+      Logger.log(
+        '❌ TESTAR_FLUXO_PRINCIPAL_REAL_V63: FALHOU'
+      );
+
+      falhas.forEach(
+        function(falha) {
+
+          Logger.log(
+            '   ' +
+            falha
+          );
+
+        }
+      );
+
+    }
+
+    Logger.log('');
+    Logger.log(
+      '============================================================'
+    );
+
+  }
+
+}
