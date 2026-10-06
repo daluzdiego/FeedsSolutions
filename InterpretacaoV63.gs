@@ -750,7 +750,34 @@ function prepararParaReconhecimentoV63_(
       interpretacao.restricoes,
 
     padrao_problema:
-      interpretacao.padrao_problema
+      interpretacao.padrao_problema,
+
+    /*
+     * CONTROLE DE COMPLETUDE PARA RECONHECIMENTO
+     *
+     * Processo, resultado desejado e contexto são mínimos
+     * para permitir comparação segura com a biblioteca.
+     */
+    lacunas:
+      Array.isArray(interpretacao.lacunas)
+        ? interpretacao.lacunas.slice()
+        : [],
+
+    status_interpretacao:
+      interpretacao.status
+        ? JSON.parse(JSON.stringify(interpretacao.status))
+        : {},
+
+    reconhecimento_habilitado:
+      (
+        interpretacao.status &&
+        interpretacao.status.processo !== 'DESCONHECIDO' &&
+        interpretacao.status.resultado_desejado !== 'DESCONHECIDO' &&
+        interpretacao.status.contexto !== 'DESCONHECIDO' &&
+        String(interpretacao.processo || '').trim() !== '' &&
+        String(interpretacao.resultado_desejado || '').trim() !== '' &&
+        String(interpretacao.contexto || '').trim() !== ''
+      )
 
   };
 
