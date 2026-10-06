@@ -509,26 +509,30 @@ function calcularSimilaridadeTextoV63_(
       tokensB
     );
 
-  const uniao =
-    Array.from(
-      new Set(
-        tokensA.concat(
-          tokensB
-        )
-      )
-    ).length;
+  if (intersecao === 0) {
+    return 0;
+  }
 
-  if (
-    uniao === 0
-  ) {
+  /*
+   * Mede cobertura sem penalizar excessivamente palavras
+   * adicionais de uma paráfrase.
+   *
+   * Usa a melhor cobertura entre os dois lados:
+   * interseção / menor conjunto.
+   *
+   * Isso permite reconhecer uma solução curta contida em
+   * uma investigação mais descritiva.
+   */
+  const tamanhoA = tokensA.length;
+  const tamanhoB = tokensB.length;
+  const menor = Math.min(tamanhoA, tamanhoB);
+
+  if (menor === 0) {
     return 0;
   }
 
   return Math.round(
-    (
-      intersecao /
-      uniao
-    ) * 100
+    (intersecao / menor) * 100
   );
 
 }
