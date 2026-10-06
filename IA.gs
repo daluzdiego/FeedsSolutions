@@ -1216,8 +1216,8 @@ function TESTAR_ROBUSTEZ_GEMINI_V63() {
     const base = jsonBase();
     extrairJsonInterpretacaoIAV63_(base.slice(0, base.length - 3));
   }));
-  registrar(18, 'JSON com estrutura de array é rejeitado pelo contrato', deveFalhar(function() { extrairJsonInterpretacaoIAV63_('[{"processo":"teste"}]'); }));
-  registrar(19, 'JSON vazio é rejeitado pelo contrato', deveFalhar(function() { extrairJsonInterpretacaoIAV63_('{}'); }));
+  registrar(18, 'JSON com estrutura de array é rejeitado pelo contrato', deveFalhar(function() { validarDiagnosticoIA_(extrairJsonInterpretacaoIAV63_('[{"processo":"teste"}]')); }));
+  registrar(19, 'JSON vazio é rejeitado pelo contrato', deveFalhar(function() { validarDiagnosticoIA_(extrairJsonInterpretacaoIAV63_('{}')); }));
   registrar(20, 'JSON válido preserva todos os campos principais', (function() {
     try {
       const dados = extrairJsonInterpretacaoIAV63_(jsonBase());
@@ -1225,13 +1225,13 @@ function TESTAR_ROBUSTEZ_GEMINI_V63() {
     } catch (erro) { return false; }
   })());
   registrar(21, 'campo ausente não é aceito silenciosamente', deveFalhar(function() {
-    const dados = JSON.parse(jsonBase()); delete dados.processo; extrairJsonInterpretacaoIAV63_(JSON.stringify(dados));
+    const dados = JSON.parse(jsonBase()); delete dados.processo; validarDiagnosticoIA_(extrairJsonInterpretacaoIAV63_(JSON.stringify(dados)));
   }));
   registrar(22, 'campo com tipo inválido não é aceito silenciosamente', deveFalhar(function() {
-    const dados = JSON.parse(jsonBase()); dados.impacto = 123; extrairJsonInterpretacaoIAV63_(JSON.stringify(dados));
+    const dados = JSON.parse(jsonBase()); dados.impacto = 123; validarDiagnosticoIA_(extrairJsonInterpretacaoIAV63_(JSON.stringify(dados)));
   }));
   registrar(23, 'campo nulo não é aceito silenciosamente', deveFalhar(function() {
-    const dados = JSON.parse(jsonBase()); dados.objetivo = null; extrairJsonInterpretacaoIAV63_(JSON.stringify(dados));
+    const dados = JSON.parse(jsonBase()); dados.objetivo = null; validarDiagnosticoIA_(extrairJsonInterpretacaoIAV63_(JSON.stringify(dados)));
   }));
   registrar(24, 'resposta válida permanece determinística em duas execuções', (function() {
     try { const a = extrairJsonInterpretacaoIAV63_(jsonBase()); const b = extrairJsonInterpretacaoIAV63_(jsonBase()); return JSON.stringify(a) === JSON.stringify(b); } catch (erro) { return false; }
