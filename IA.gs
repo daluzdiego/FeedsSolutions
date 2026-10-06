@@ -1131,3 +1131,123 @@ function construirUrlGemini_(model) {
   );
 
 }
+
+
+/**
+ * ------------------------------------------------------------
+ * TESTE DE ROBUSTEZ DO CONTRATO GEMINI V6.3
+ * ------------------------------------------------------------
+ * Testa as funções puras de interpretação da resposta do Gemini
+ * sem realizar chamadas externas, consumo de quota ou depender
+ * da disponibilidade do serviço.
+ */
+function TESTAR_ROBUSTEZ_GEMINI_V63() {
+  Logger.log('============================================================');
+  Logger.log('INÍCIO — TESTAR_ROBUSTEZ_GEMINI_V63');
+  Logger.log('============================================================');
+
+  const resultados = [];
+  let aprovados = 0;
+
+  function registrar(numero, descricao, condicao) {
+    if (condicao) {
+      aprovados++;
+      resultados.push(true);
+      Logger.log('✅ TESTE ' + numero + '/25 — ' + descricao);
+    } else {
+      resultados.push(false);
+      Logger.log('❌ TESTE ' + numero + '/25 — ' + descricao);
+    }
+  }
+
+  function deveFalhar(fn) {
+    try { fn(); return false; } catch (erro) { return !!erro; }
+  }
+
+  function deveRetornar(fn, esperado) {
+    try { return fn() === esperado; } catch (erro) { return false; }
+  }
+
+  function jsonBase() {
+    return JSON.stringify({
+      processo: 'lançamento manual de pedidos',
+      dor_principal: 'erros e retrabalho',
+      frequencia: 'diária',
+      impacto: 'perda de tempo',
+      objetivo: 'reduzir erros',
+      informacao_faltante: '',
+      proxima_pergunta: ''
+    });
+  }
+
+  registrar(1, 'candidates ausente é rejeitado', deveFalhar(function() { extrairTextoGemini_({}); }));
+  registrar(2, 'candidates vazio é rejeitado', deveFalhar(function() { extrairTextoGemini_({ candidates: [] }); }));
+  registrar(3, 'content ausente é rejeitado', deveFalhar(function() { extrairTextoGemini_({ candidates: [{}] }); }));
+  registrar(4, 'parts ausente é rejeitado', deveFalhar(function() { extrairTextoGemini_({ candidates: [{ content: {} }] }); }));
+  registrar(5, 'parts vazio é rejeitado', deveFalhar(function() { extrairTextoGemini_({ candidates: [{ content: { parts: [] } }] }); }));
+  registrar(6, 'MAX_TOKENS é rejeitado', deveFalhar(function() {
+    extrairTextoGemini_({ candidates: [{ finishReason: 'MAX_TOKENS', content: { parts: [{ text: jsonBase() }] } }] });
+  }));
+  registrar(7, 'texto de uma única parte é extraído', deveRetornar(function() {
+    return extrairTextoGemini_({ candidates: [{ content: { parts: [{ text: 'RESPOSTA_OK' }] } }] });
+  }, 'RESPOSTA_OK'));
+  registrar(8, 'texto de múltiplas partes é concatenado', deveRetornar(function() {
+    return extrairTextoGemini_({ candidates: [{ content: { parts: [{ text: 'PARTE_A' }, { text: 'PARTE_B' }] } }] });
+  }, 'PARTE_APARTE_B'));
+  registrar(9, 'parte sem texto não quebra a extração', deveRetornar(function() {
+    return extrairTextoGemini_({ candidates: [{ content: { parts: [{}, { text: 'OK' }] } }] });
+  }, 'OK'));
+  registrar(10, 'JSON puro de interpretação é aceito', deveRetornar(function() {
+    return extrairJsonInterpretacaoIAV63_(jsonBase()).processo;
+  }, 'lançamento manual de pedidos'));
+  registrar(11, 'JSON envolvido em bloco markdown é aceito', deveRetornar(function() {
+    return extrairJsonInterpretacaoIAV63_('```json\n' + jsonBase() + '\n```').dor_principal;
+  }, 'erros e retrabalho'));
+  registrar(12, 'JSON com espaços externos é aceito', deveRetornar(function() {
+    return extrairJsonInterpretacaoIAV63_('  ' + jsonBase() + '  ').objetivo;
+  }, 'reduzir erros'));
+  registrar(13, 'JSON com texto ao redor é recuperado', deveRetornar(function() {
+    return extrairJsonInterpretacaoIAV63_('Resultado:\n' + jsonBase() + '\nFim.').frequencia;
+  }, 'diária'));
+  registrar(14, 'JSON inválido é rejeitado', deveFalhar(function() { extrairJsonInterpretacaoIAV63_('{ processo: invalido }'); }));
+  registrar(15, 'resposta vazia é rejeitada', deveFalhar(function() { extrairJsonInterpretacaoIAV63_(''); }));
+  registrar(16, 'resposta somente com markdown é rejeitada', deveFalhar(function() { extrairJsonInterpretacaoIAV63_('```json```'); }));
+  registrar(17, 'JSON truncado é rejeitado', deveFalhar(function() {
+    const base = jsonBase();
+    extrairJsonInterpretacaoIAV63_(base.slice(0, base.length - 3));
+  }));
+  registrar(18, 'JSON com estrutura de array é rejeitado pelo contrato', deveFalhar(function() { extrairJsonInterpretacaoIAV63_('[{"processo":"teste"}]'); }));
+  registrar(19, 'JSON vazio é rejeitado pelo contrato', deveFalhar(function() { extrairJsonInterpretacaoIAV63_('{}'); }));
+  registrar(20, 'JSON válido preserva todos os campos principais', (function() {
+    try {
+      const dados = extrairJsonInterpretacaoIAV63_(jsonBase());
+      return dados.processo === 'lançamento manual de pedidos' && dados.dor_principal === 'erros e retrabalho' && dados.frequencia === 'diária' && dados.impacto === 'perda de tempo' && dados.objetivo === 'reduzir erros';
+    } catch (erro) { return false; }
+  })());
+  registrar(21, 'campo ausente não é aceito silenciosamente', deveFalhar(function() {
+    const dados = JSON.parse(jsonBase()); delete dados.processo; extrairJsonInterpretacaoIAV63_(JSON.stringify(dados));
+  }));
+  registrar(22, 'campo com tipo inválido não é aceito silenciosamente', deveFalhar(function() {
+    const dados = JSON.parse(jsonBase()); dados.impacto = 123; extrairJsonInterpretacaoIAV63_(JSON.stringify(dados));
+  }));
+  registrar(23, 'campo nulo não é aceito silenciosamente', deveFalhar(function() {
+    const dados = JSON.parse(jsonBase()); dados.objetivo = null; extrairJsonInterpretacaoIAV63_(JSON.stringify(dados));
+  }));
+  registrar(24, 'resposta válida permanece determinística em duas execuções', (function() {
+    try { const a = extrairJsonInterpretacaoIAV63_(jsonBase()); const b = extrairJsonInterpretacaoIAV63_(jsonBase()); return JSON.stringify(a) === JSON.stringify(b); } catch (erro) { return false; }
+  })());
+  registrar(25, 'resposta válida continua compatível com o contrato de diagnóstico', (function() {
+    try { const dados = extrairJsonInterpretacaoIAV63_(jsonBase()); validarDiagnosticoIA_(dados); return true; } catch (erro) { return false; }
+  })());
+
+  Logger.log('============================================================');
+  Logger.log('RESULTADO FINAL — ROBUSTEZ GEMINI V6.3');
+  Logger.log('============================================================');
+  Logger.log('APROVADOS: ' + aprovados + '/25');
+  Logger.log('FALHAS: ' + (25 - aprovados));
+  Logger.log('PERCENTUAL: ' + Math.round((aprovados / 25) * 100) + '%');
+  Logger.log(aprovados === 25 ? '🏆 TESTAR_ROBUSTEZ_GEMINI_V63: PASSOU' : '❌ TESTAR_ROBUSTEZ_GEMINI_V63: FALHOU');
+  Logger.log('============================================================');
+
+  return { aprovados: aprovados, falhas: 25 - aprovados, percentual: Math.round((aprovados / 25) * 100), passou: aprovados === 25, resultados: resultados };
+}
