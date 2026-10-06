@@ -1774,10 +1774,10 @@ function TESTAR_GUARDA_IMPACTO_SEMANTICO_V63() {
       esperado: 'CONFIRMADO'
     },
     {
-      nome: 'número sozinho',
+      nome: 'volume numérico não é impacto',
       mensagem: 'Processamos 120 pedidos por dia.',
       status: 'CONFIRMADO',
-      esperado: 'CONFIRMADO'
+      esperado: 'INFERIDO'
     },
     {
       nome: 'status já inferido permanece inferido',
