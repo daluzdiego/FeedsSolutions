@@ -1055,17 +1055,30 @@ function extrairTextoGemini_(dados) {
   }
 
 
-  return candidate.content.parts
+  const textoExtraido =
+    candidate.content.parts
 
-    .map(
-      function(part) {
+      .map(
+        function(part) {
 
-        return part.text || '';
+          return part.text || '';
 
-      }
-    )
+        }
+      )
 
-    .join('');
+      .join('');
+
+
+  if (!textoExtraido.trim()) {
+
+    throw new Error(
+      'Gemini retornou conteúdo sem texto utilizável.'
+    );
+
+  }
+
+
+  return textoExtraido;
 
 }
 
