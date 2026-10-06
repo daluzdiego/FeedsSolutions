@@ -685,11 +685,13 @@ function normalizarImpactoSemanticoV63_(
       .toLowerCase();
 
   /*
-   * Evidência quantitativa objetiva.
-   * Exemplos: 3 horas, 20 pedidos, R$ 500, 2 dias.
+   * Evidência quantitativa só conta quando o número está
+   * associado a uma consequência mensurável ou financeira.
+   * "120 pedidos por dia" é volume, não impacto.
    */
-  const possuiNumero =
-    /\\d/.test(texto);
+  const possuiNumeroDeImpacto =
+    /\\d+[^.?!]{0,40}(hora|horas|minuto|minutos|dia|dias|semana|semanas|mês|meses|r\\$|reais|prejuízo|prejuizo|custo|custos|perda|perdas|atraso|atrasos|gasto|gastos|paralisação|paralisacao|interrupção|interrupcao)/.test(texto) ||
+    /(hora|horas|minuto|minutos|dia|dias|semana|semanas|mês|meses|r\\$|reais)[^.?!]{0,40}\\d+/.test(texto);
 
   /*
    * Consequências explicitamente relatadas.
@@ -730,7 +732,7 @@ function normalizarImpactoSemanticoV63_(
     );
 
   if (
-    !possuiNumero &&
+    !possuiNumeroDeImpacto &&
     !possuiImpactoExplicito
   ) {
     dados.status.impactos =
