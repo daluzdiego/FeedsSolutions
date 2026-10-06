@@ -979,8 +979,7 @@ function podeReconhecerInvestigacaoV63_(
   const status = investigacao.status_interpretacao || {};
   const camposMinimos = [
     'processo',
-    'resultado_desejado',
-    'contexto'
+    'resultado_desejado'
   ];
 
   for (let i = 0; i < camposMinimos.length; i++) {
@@ -7541,17 +7540,17 @@ function TESTAR_BLOQUEIO_RECONHECIMENTO_INCOMPLETO_V63() {
     return podeReconhecerInvestigacaoV63_(copia) === false;
   });
 
-  testar(4, 'Lacuna de contexto bloqueia reconhecimento', function() {
+  testar(4, 'Lacuna de contexto isolada não bloqueia reconhecimento', function() {
     const copia = JSON.parse(JSON.stringify(investigacaoIncompleta));
     copia.reconhecimento_habilitado = true;
     copia.status_interpretacao.processo = 'CONFIRMADO';
     copia.status_interpretacao.resultado_desejado = 'CONFIRMADO';
-    copia.status_interpretacao.contexto = 'CONFIRMADO';
+    copia.status_interpretacao.contexto = 'DESCONHECIDO';
     copia.processo = 'processo administrativo';
-    copia.resultado_desejado = 'reduzir problemas';
-    copia.contexto = 'empresa';
+    copia.resultado_desejado = 'reduzir erros e retrabalho';
+    copia.contexto = '';
     copia.lacunas = ['contexto'];
-    return podeReconhecerInvestigacaoV63_(copia) === false;
+    return podeReconhecerInvestigacaoV63_(copia) === true;
   });
 
   testar(5, 'Investigação completa pode ser reconhecida', function() {
