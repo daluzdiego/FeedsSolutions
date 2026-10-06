@@ -773,10 +773,8 @@ function prepararParaReconhecimentoV63_(
         interpretacao.status &&
         interpretacao.status.processo !== 'DESCONHECIDO' &&
         interpretacao.status.resultado_desejado !== 'DESCONHECIDO' &&
-        interpretacao.status.contexto !== 'DESCONHECIDO' &&
         String(interpretacao.processo || '').trim() !== '' &&
-        String(interpretacao.resultado_desejado || '').trim() !== '' &&
-        String(interpretacao.contexto || '').trim() !== ''
+        String(interpretacao.resultado_desejado || '').trim() !== ''
       )
 
   };
