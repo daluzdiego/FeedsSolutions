@@ -411,28 +411,65 @@ function salvarFeedback_(dados) {
     dados.feedback_id ||
     gerarId_(ID_PREFIXOS.FEEDBACK);
 
-  const linha = [
+  /*
+   * V6.3 — gravação por nome de coluna.
+   *
+   * A estrutura FEEDBACK evoluiu de 5 para 9 campos.
+   * Nunca devemos depender de uma ordem fixa de colunas.
+   * Isso evita que resolucao_id, resultado e evidência caiam
+   * nas colunas erradas quando a planilha antiga é migrada.
+   */
+  if (
+    typeof garantirEstruturaFeedbackV63_ === 'function'
+  ) {
+    garantirEstruturaFeedbackV63_();
+  }
 
-    feedbackId,
+  const ultimaColuna =
+    Math.max(sheet.getLastColumn(), 1);
 
-    dados.diagnostico_id || '',
+  const cabecalhos =
+    sheet
+      .getRange(
+        1,
+        1,
+        1,
+        ultimaColuna
+      )
+      .getValues()[0]
+      .map(function(valor) {
+        return String(valor || '').trim();
+      });
 
-    dados.resposta || '',
+  const valoresPorCampo = {
+    feedback_id: feedbackId,
+    diagnostico_id: dados.diagnostico_id || '',
+    resolucao_id: dados.resolucao_id || '',
+    resposta: dados.resposta || '',
+    resultado: dados.resultado || '',
+    comentario: dados.comentario || '',
+    evidencia: dados.evidencia || '',
+    acao_aprendizado: dados.acao_aprendizado || '',
+    timestamp: dados.timestamp || new Date()
+  };
 
-    dados.comentario || '',
-
-    dados.timestamp || new Date()
-
-  ];
+  const linha =
+    cabecalhos.map(function(cabecalho) {
+      return Object.prototype.hasOwnProperty.call(
+        valoresPorCampo,
+        cabecalho
+      )
+        ? valoresPorCampo[cabecalho]
+        : '';
+    });
 
   sheet.appendRow(linha);
 
+  SpreadsheetApp.flush();
+
   return {
-
     feedback_id: feedbackId,
-
     sucesso: true
-
   };
 }
 
