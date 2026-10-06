@@ -676,7 +676,7 @@ const investigacaoV622 =
   try {
 
     integracaoV63 =
-      integrarV63AoFluxoPrincipal_(
+      integrarV63AoFluxoPrincipalOficial_(
         mensagem,
         resultadoFluxoParaV63
       );
