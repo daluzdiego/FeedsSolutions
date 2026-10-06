@@ -722,6 +722,16 @@ function executarGemini_(
    * ==========================================================
    */
 
+  const dependenciasTeste = arguments[3] || null;
+
+  const fetchGemini = dependenciasTeste && typeof dependenciasTeste.fetch === 'function'
+    ? dependenciasTeste.fetch
+    : function(urlFetch, optionsFetch) { return UrlFetchApp.fetch(urlFetch, optionsFetch); };
+
+  const sleepGemini = dependenciasTeste && typeof dependenciasTeste.sleep === 'function'
+    ? dependenciasTeste.sleep
+    : function(ms) { Utilities.sleep(ms); };
+
   const MAX_TENTATIVAS = 3;
 
   const ESPERAS_MS = [
@@ -772,7 +782,7 @@ function executarGemini_(
       ESPERAS_MS[tentativa - 1] > 0
     ) {
 
-      Utilities.sleep(
+      sleepGemini(
         ESPERAS_MS[tentativa - 1]
       );
 
@@ -797,7 +807,7 @@ function executarGemini_(
     try {
 
       response =
-        UrlFetchApp.fetch(
+        fetchGemini(
           url,
           options
         );
@@ -1250,4 +1260,116 @@ function TESTAR_ROBUSTEZ_GEMINI_V63() {
   Logger.log('============================================================');
 
   return { aprovados: aprovados, falhas: 25 - aprovados, percentual: Math.round((aprovados / 25) * 100), passou: aprovados === 25, resultados: resultados };
+}
+
+
+/**
+ * ------------------------------------------------------------
+ * TESTE DETERMINÍSTICO DO RETRY HTTP GEMINI V6.3
+ * ------------------------------------------------------------
+ * Não chama a internet, não consome quota e não aguarda sleeps reais.
+ * Injeta respostas HTTP simuladas somente durante este teste.
+ */
+function TESTAR_RETRY_HTTP_GEMINI_V63() {
+  Logger.log('============================================================');
+  Logger.log('INÍCIO — TESTAR_RETRY_HTTP_GEMINI_V63');
+  Logger.log('============================================================');
+
+  let aprovados = 0;
+  const resultados = [];
+
+  function registrar(numero, descricao, condicao) {
+    if (condicao) {
+      aprovados++;
+      resultados.push(true);
+      Logger.log('✅ TESTE ' + numero + '/25 — ' + descricao);
+    } else {
+      resultados.push(false);
+      Logger.log('❌ TESTE ' + numero + '/25 — ' + descricao);
+    }
+  }
+
+  function resposta(status, corpo) {
+    return {
+      getResponseCode: function() { return status; },
+      getContentText: function() { return corpo; }
+    };
+  }
+
+  function executarSequencia(sequencia) {
+    let chamadas = 0;
+    const esperas = [];
+    const deps = {
+      fetch: function() {
+        const item = sequencia[chamadas++];
+        if (item && item.erro) throw new Error(item.erro);
+        return resposta(item.status, item.corpo === undefined ? '{}' : item.corpo);
+      },
+      sleep: function(ms) { esperas.push(ms); }
+    };
+    try {
+      const valor = executarGemini_('https://teste.local', {teste:true}, 'CHAVE_TESTE', deps);
+      return { sucesso:true, valor:valor, chamadas:chamadas, esperas:esperas, erro:'' };
+    } catch (erro) {
+      return { sucesso:false, valor:null, chamadas:chamadas, esperas:esperas, erro:String(erro && erro.message ? erro.message : erro) };
+    }
+  }
+
+  let r;
+
+  r = executarSequencia([{status:200, corpo:'{"ok":true}'}]);
+  registrar(1, 'HTTP 200 retorna sucesso', r.sucesso === true);
+  registrar(2, 'HTTP 200 usa uma única tentativa', r.chamadas === 1);
+  registrar(3, 'HTTP 200 informa tentativas = 1', r.valor && r.valor.tentativas === 1);
+  registrar(4, 'HTTP 200 preserva status_code', r.valor && r.valor.status_code === 200);
+  registrar(5, 'HTTP 200 não executa espera', r.esperas.length === 0);
+
+  [429,500,502,503,504].forEach(function(status, indice) {
+    r = executarSequencia([
+      {status:status, corpo:'erro transitório'},
+      {status:200, corpo:'{"recuperado":true}'}
+    ]);
+    registrar(6 + indice, 'HTTP ' + status + ' realiza retry e recupera', r.sucesso && r.chamadas === 2 && r.valor.tentativas === 2);
+  });
+
+  r = executarSequencia([{status:503},{status:200, corpo:'{"ok":true}'}]);
+  registrar(11, 'primeiro retry aguarda 1500 ms', r.esperas.length === 1 && r.esperas[0] === 1500);
+
+  r = executarSequencia([{status:503},{status:503},{status:200, corpo:'{"ok":true}'}]);
+  registrar(12, 'dois erros transitórios chegam à terceira tentativa', r.sucesso && r.chamadas === 3 && r.valor.tentativas === 3);
+  registrar(13, 'esperas do segundo e terceiro ciclos são 1500 e 3000 ms', r.esperas.length === 2 && r.esperas[0] === 1500 && r.esperas[1] === 3000);
+
+  r = executarSequencia([{status:503},{status:503},{status:503}]);
+  registrar(14, 'três HTTP 503 esgotam as tentativas', !r.sucesso && r.chamadas === 3);
+  registrar(15, 'erro final informa três tentativas', !r.sucesso && r.erro.indexOf('Foram realizadas 3 tentativas') !== -1);
+  registrar(16, 'erro final preserva HTTP 503', !r.sucesso && r.erro.indexOf('HTTP 503') !== -1);
+
+  [400,401,403,404].forEach(function(status, indice) {
+    r = executarSequencia([{status:status, corpo:'erro permanente'}]);
+    registrar(17 + indice, 'HTTP ' + status + ' falha sem retry', !r.sucesso && r.chamadas === 1 && r.esperas.length === 0);
+  });
+
+  r = executarSequencia([{erro:'falha de rede'},{status:200, corpo:'{"ok":true}'}]);
+  registrar(21, 'erro de transporte realiza retry e recupera', r.sucesso && r.chamadas === 2 && r.valor.tentativas === 2);
+
+  r = executarSequencia([{erro:'rede 1'},{erro:'rede 2'},{erro:'rede 3'}]);
+  registrar(22, 'três erros de transporte esgotam exatamente três tentativas', !r.sucesso && r.chamadas === 3);
+  registrar(23, 'erro de transporte final informa três tentativas', !r.sucesso && r.erro.indexOf('após 3 tentativas') !== -1);
+
+  r = executarSequencia([{status:200, corpo:'não é json'}]);
+  registrar(24, 'HTTP 200 com JSON inválido é rejeitado sem retry', !r.sucesso && r.chamadas === 1 && r.erro.indexOf('não é JSON válido') !== -1);
+
+  r = executarSequencia([{status:429},{status:500},{status:200, corpo:'{"fim":"ok"}'}]);
+  registrar(25, 'sequência de erros transitórios diferentes recupera na terceira tentativa', r.sucesso && r.chamadas === 3 && r.valor && r.valor.dados.fim === 'ok');
+
+  Logger.log('============================================================');
+  Logger.log('RESULTADO FINAL — RETRY HTTP GEMINI V6.3');
+  Logger.log('============================================================');
+  Logger.log('APROVADOS: ' + aprovados + '/25');
+  Logger.log('FALHAS: ' + (25 - aprovados));
+  Logger.log('PERCENTUAL: ' + Math.round((aprovados / 25) * 100) + '%');
+  Logger.log(aprovados === 25 ? '🏆 TESTAR_RETRY_HTTP_GEMINI_V63: PASSOU' : '❌ TESTAR_RETRY_HTTP_GEMINI_V63: FALHOU');
+  Logger.log('============================================================');
+
+  return { aprovados:aprovados, falhas:25-aprovados, percentual:Math.round((aprovados/25)*100), passou:aprovados===25, resultados:resultados };
 }
