@@ -404,6 +404,79 @@ function calcularIntersecaoReconhecimentoV63_(
  * 0 a 100
  * ------------------------------------------------------------
  */
+function normalizarTokenSemanticoReconhecimentoV63_(token) {
+
+  const mapa = {
+    digitacao: 'digitacao',
+    redigitacao: 'digitacao',
+    digitar: 'digitacao',
+    digitando: 'digitacao',
+    digite: 'digitacao',
+    redigitar: 'digitacao',
+
+    retrabalho: 'retrabalho',
+    refazer: 'retrabalho',
+    refazendo: 'retrabalho',
+    repeticao: 'retrabalho',
+    repetir: 'retrabalho',
+
+    tempo: 'tempo',
+    gasto: 'tempo',
+    perda: 'tempo',
+    perder: 'tempo',
+    perde: 'tempo',
+
+    lancamento: 'lancamento',
+    lancar: 'lancamento',
+    lanca: 'lancamento',
+    lancado: 'lancamento',
+    lancados: 'lancamento',
+    registrar: 'lancamento',
+    registro: 'lancamento',
+
+    conferencia: 'conferencia',
+    conferir: 'conferencia',
+    conferido: 'conferencia',
+    conferidos: 'conferencia',
+    verificacao: 'conferencia',
+    verificar: 'conferencia',
+
+    pedido: 'pedido',
+    pedidos: 'pedido',
+    solicitacao: 'pedido',
+    solicitacoes: 'pedido',
+
+    erro: 'erro',
+    erros: 'erro',
+    falha: 'erro',
+    falhas: 'erro',
+
+    manual: 'manual',
+    manualmente: 'manual',
+
+    canal: 'canal',
+    canais: 'canal'
+  };
+
+  return mapa[token] || token;
+}
+
+
+/**
+ * ------------------------------------------------------------
+ * SIMILARIDADE DE TEXTO
+ * ------------------------------------------------------------
+ *
+ * Mantém Jaccard determinístico, mas normaliza variantes
+ * morfológicas e equivalências semânticas controladas.
+ *
+ * Cada token vira no máximo um conceito, evitando inflar
+ * artificialmente a união da comparação.
+ *
+ * Resultado:
+ * 0 a 100
+ * ------------------------------------------------------------
+ */
 function calcularSimilaridadeTextoV63_(
   valorA,
   valorB
@@ -412,11 +485,15 @@ function calcularSimilaridadeTextoV63_(
   const tokensA =
     tokenizarReconhecimentoV63_(
       valorA
+    ).map(
+      normalizarTokenSemanticoReconhecimentoV63_
     );
 
   const tokensB =
     tokenizarReconhecimentoV63_(
       valorB
+    ).map(
+      normalizarTokenSemanticoReconhecimentoV63_
     );
 
   if (
