@@ -672,10 +672,6 @@ function normalizarImpactoSemanticoV63_(
       .trim()
       .toUpperCase();
 
-  /*
-   * Se o Gemini já não marcou como CONFIRMADO,
-   * não alteramos nada.
-   */
   if (
     statusImpacto !== 'CONFIRMADO'
   ) {
@@ -689,77 +685,56 @@ function normalizarImpactoSemanticoV63_(
       .toLowerCase();
 
   /*
-   * Números são uma evidência objetiva comum.
+   * Evidência quantitativa objetiva.
+   * Exemplos: 3 horas, 20 pedidos, R$ 500, 2 dias.
    */
   const possuiNumero =
-    /\d/.test(texto);
+    /\\d/.test(texto);
 
   /*
-   * Termos que normalmente indicam evidência objetiva
-   * de impacto operacional.
+   * Consequências explicitamente relatadas.
+   * Não incluímos termos como "erro", "pedido", "retrabalho"
+   * ou "volume" isoladamente, pois eles podem ser dores/processo,
+   * e não necessariamente impactos.
    */
-  const termosObjetivos =
-    [
-      'hora',
-      'horas',
-      'minuto',
-      'minutos',
-      'dia',
-      'dias',
-      'semana',
-      'semanas',
-      'mês',
-      'meses',
-      'r$',
-      'reais',
-      'prejuízo',
-      'prejuizo',
-      'custo',
-      'custos',
-      'perda',
-      'perdas',
-      'atraso',
-      'atrasos',
-      'erro',
-      'erros',
-      'retrabalho',
-      'pedido',
-      'pedidos',
-      'volume',
-      'quantidade',
-      'cancelamento',
-      'cancelamentos',
-      'paralisação',
-      'paralisacao',
-      'interrupção',
-      'interrupcao'
-    ];
+  const termosDeImpactoExplicito = [
+    'perdemos',
+    'perdeu',
+    'perder',
+    'perda',
+    'prejuízo',
+    'prejuizo',
+    'custo',
+    'custos',
+    'gasto',
+    'gastos',
+    'gasta',
+    'atraso',
+    'atrasos',
+    'paralisação',
+    'paralisacao',
+    'interrupção',
+    'interrupcao',
+    'horas por',
+    'minutos por',
+    'dias por',
+    'semanas por',
+    'meses por'
+  ];
 
-  const possuiEvidencia =
-    possuiNumero ||
-    termosObjetivos.some(
+  const possuiImpactoExplicito =
+    termosDeImpactoExplicito.some(
       function(termo) {
-
-        return (
-          texto.indexOf(
-            termo
-          ) !== -1
-        );
-
+        return texto.indexOf(termo) !== -1;
       }
     );
 
-  /*
-   * Se não existe evidência objetiva suficiente,
-   * o impacto não pode permanecer CONFIRMADO.
-   */
   if (
-    !possuiEvidencia
+    !possuiNumero &&
+    !possuiImpactoExplicito
   ) {
-
     dados.status.impactos =
       'INFERIDO';
-
   }
 
   return dados;
@@ -1732,4 +1707,147 @@ function TESTAR_IA_SEMANTICA_REAL_V63() {
       '❌ EXISTEM FALHAS FUNCIONAIS A INVESTIGAR.'
     );
   }
+}
+
+
+/**
+ * ============================================================
+ * TESTE DE GUARDA DE IMPACTO SEMÂNTICO V6.3
+ * ============================================================
+ *
+ * Garante que uma dor/processo não seja promovido
+ * deterministicamente a impacto CONFIRMADO apenas
+ * por conter palavras como "erro" ou "retrabalho".
+ * ============================================================
+ */
+function TESTAR_GUARDA_IMPACTO_SEMANTICO_V63() {
+
+  const casos = [
+    {
+      nome: 'erro de digitação sem consequência mensurável',
+      mensagem: 'Temos muitos erros de digitação nos pedidos.',
+      status: 'CONFIRMADO',
+      esperado: 'INFERIDO'
+    },
+    {
+      nome: 'retrabalho sem consequência mensurável',
+      mensagem: 'O processo gera muito retrabalho.',
+      status: 'CONFIRMADO',
+      esperado: 'INFERIDO'
+    },
+    {
+      nome: 'pedidos sem consequência mensurável',
+      mensagem: 'Recebemos muitos pedidos diariamente.',
+      status: 'CONFIRMADO',
+      esperado: 'INFERIDO'
+    },
+    {
+      nome: 'perda de tempo explícita',
+      mensagem: 'Perdemos tempo todos os dias com esse processo.',
+      status: 'CONFIRMADO',
+      esperado: 'CONFIRMADO'
+    },
+    {
+      nome: 'perda de 3 horas',
+      mensagem: 'Perdemos 3 horas por dia com isso.',
+      status: 'CONFIRMADO',
+      esperado: 'CONFIRMADO'
+    },
+    {
+      nome: 'prejuízo explícito',
+      mensagem: 'Esse problema gera prejuízo para a empresa.',
+      status: 'CONFIRMADO',
+      esperado: 'CONFIRMADO'
+    },
+    {
+      nome: 'atraso explícito',
+      mensagem: 'Os pedidos sofrem atraso por causa do processo.',
+      status: 'CONFIRMADO',
+      esperado: 'CONFIRMADO'
+    },
+    {
+      nome: 'custo explícito',
+      mensagem: 'O processo gera custo adicional para a empresa.',
+      status: 'CONFIRMADO',
+      esperado: 'CONFIRMADO'
+    },
+    {
+      nome: 'número sozinho',
+      mensagem: 'Processamos 120 pedidos por dia.',
+      status: 'CONFIRMADO',
+      esperado: 'CONFIRMADO'
+    },
+    {
+      nome: 'status já inferido permanece inferido',
+      mensagem: 'Temos muitos erros no processo.',
+      status: 'INFERIDO',
+      esperado: 'INFERIDO'
+    },
+    {
+      nome: 'status desconhecido permanece desconhecido',
+      mensagem: 'Temos muitos erros no processo.',
+      status: 'DESCONHECIDO',
+      esperado: 'DESCONHECIDO'
+    },
+    {
+      nome: 'mensagem vazia não promove impacto',
+      mensagem: '',
+      status: 'CONFIRMADO',
+      esperado: 'INFERIDO'
+    }
+  ];
+
+  let aprovados = 0;
+
+  casos.forEach(function(caso, indice) {
+
+    const dados = {
+      impactos: ['impacto'],
+      status: {
+        impactos: caso.status
+      }
+    };
+
+    normalizarImpactoSemanticoV63_(
+      dados,
+      caso.mensagem
+    );
+
+    const passou =
+      dados.status.impactos === caso.esperado;
+
+    if (passou) {
+      aprovados++;
+    }
+
+    Logger.log(
+      (passou ? '✅' : '❌') +
+      ' TESTE ' + (indice + 1) +
+      ' — ' + caso.nome +
+      ' — obtido=' + dados.status.impactos +
+      ' — esperado=' + caso.esperado
+    );
+  });
+
+  const percentual =
+    Math.round((aprovados / casos.length) * 100);
+
+  Logger.log('============================================================');
+  Logger.log('TESTAR_GUARDA_IMPACTO_SEMANTICO_V63');
+  Logger.log('APROVADOS: ' + aprovados + '/' + casos.length);
+  Logger.log('FALHAS: ' + (casos.length - aprovados));
+  Logger.log('PERCENTUAL: ' + percentual + '%');
+
+  if (aprovados === casos.length) {
+    Logger.log('🏆 TESTAR_GUARDA_IMPACTO_SEMANTICO_V63: PASSOU');
+  } else {
+    Logger.log('❌ TESTAR_GUARDA_IMPACTO_SEMANTICO_V63: FALHOU');
+  }
+
+  return {
+    sucesso: aprovados === casos.length,
+    aprovados: aprovados,
+    falhas: casos.length - aprovados,
+    percentual: percentual
+  };
 }
