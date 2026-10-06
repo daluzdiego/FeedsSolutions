@@ -956,6 +956,66 @@ function prioridadeStatusResolucaoV63_(
  * BUSCAR RESOLUÇÕES RELACIONADAS
  * ------------------------------------------------------------
  */
+function podeReconhecerInvestigacaoV63_(
+  investigacao
+) {
+
+  if (!investigacao || typeof investigacao !== 'object') {
+    return false;
+  }
+
+  /*
+   * Se a camada semântica explicitamente bloqueou o
+   * reconhecimento, o motor determinístico deve respeitar.
+   */
+  if (investigacao.reconhecimento_habilitado === false) {
+    return false;
+  }
+
+  /*
+   * Quando o contrato de completude está disponível, os três
+   * campos mínimos devem existir e não podem estar DESCONHECIDOS.
+   */
+  const status = investigacao.status_interpretacao || {};
+  const camposMinimos = [
+    'processo',
+    'resultado_desejado',
+    'contexto'
+  ];
+
+  for (let i = 0; i < camposMinimos.length; i++) {
+    const campo = camposMinimos[i];
+    if (status[campo] === 'DESCONHECIDO') {
+      return false;
+    }
+  }
+
+  const lacunas = Array.isArray(investigacao.lacunas)
+    ? investigacao.lacunas
+    : [];
+
+  for (let i = 0; i < camposMinimos.length; i++) {
+    if (lacunas.indexOf(camposMinimos[i]) !== -1) {
+      return false;
+    }
+  }
+
+  for (let i = 0; i < camposMinimos.length; i++) {
+    const campo = camposMinimos[i];
+    if (String(investigacao[campo] || '').trim() === '') {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+
+/**
+ * ------------------------------------------------------------
+ * BUSCAR RESOLUÇÕES RELACIONADAS
+ * ------------------------------------------------------------
+ */
 function buscarResolucoesRelacionadasV63_(
   investigacao,
   opcoes
@@ -966,6 +1026,15 @@ function buscarResolucoesRelacionadasV63_(
 
   opcoes =
     opcoes || {};
+
+  /*
+   * NÃO reconhecer solução quando faltam dados mínimos.
+   * Isso impede que coincidências lexicais em um problema
+   * genérico produzam uma solução validada indevidamente.
+   */
+  if (!podeReconhecerInvestigacaoV63_(investigacao)) {
+    return [];
+  }
 
   const todas =
     listarResolucoesV63_();
@@ -7405,4 +7474,116 @@ function TESTAR_INVESTIGACAO_REAL_PARAFRASE_V63() {
   Logger.log(falhas === 0 && resultados.length === 25 ? '🏆 TESTAR_INVESTIGACAO_REAL_PARAFRASE_V63: PASSOU' : '❌ TESTAR_INVESTIGACAO_REAL_PARAFRASE_V63: FALHOU');
   Logger.log('============================================================');
   return { sucesso: resultados.length === 25 && falhas === 0, aprovados: aprovados, falhas: falhas, percentual: percentual, resultados: resultados };
+}
+
+
+/**
+ * ============================================================
+ * TESTE ADVERSARIAL — INFORMAÇÃO INCOMPLETA NÃO GERA SOLUÇÃO
+ * ============================================================
+ */
+function TESTAR_BLOQUEIO_RECONHECIMENTO_INCOMPLETO_V63() {
+
+  const resultados = [];
+
+  function testar(numero, descricao, funcao) {
+    try {
+      const passou = funcao() === true;
+      resultados.push({ numero: numero, descricao: descricao, passou: passou, erro: passou ? '' : 'Resultado inesperado' });
+    } catch (erro) {
+      resultados.push({ numero: numero, descricao: descricao, passou: false, erro: erro && erro.message ? erro.message : String(erro) });
+    }
+  }
+
+  const investigacaoIncompleta = {
+    problema_central: 'O sistema está dando problema e atrapalhando a equipe.',
+    processo: '',
+    pontos_de_dor: ['o sistema está dando problema'],
+    impacto: ['está atrapalhando a equipe'],
+    resultado_desejado: '',
+    contexto: '',
+    restricoes: [],
+    padrao_problema: 'instabilidade ou falha no sistema',
+    lacunas: ['processo', 'resultado_desejado', 'contexto', 'restricoes'],
+    status_interpretacao: {
+      problema: 'CONFIRMADO',
+      processo: 'DESCONHECIDO',
+      dores: 'CONFIRMADO',
+      impactos: 'INFERIDO',
+      resultado_desejado: 'DESCONHECIDO',
+      contexto: 'DESCONHECIDO',
+      restricoes: 'DESCONHECIDO',
+      padrao_problema: 'INFERIDO'
+    },
+    reconhecimento_habilitado: false
+  };
+
+  testar(1, 'Investigação incompleta é identificada como não reconhecível', function() {
+    return podeReconhecerInvestigacaoV63_(investigacaoIncompleta) === false;
+  });
+
+  testar(2, 'Processo desconhecido bloqueia reconhecimento', function() {
+    const copia = JSON.parse(JSON.stringify(investigacaoIncompleta));
+    copia.reconhecimento_habilitado = true;
+    copia.status_interpretacao.processo = 'DESCONHECIDO';
+    copia.processo = 'processo genérico';
+    return podeReconhecerInvestigacaoV63_(copia) === false;
+  });
+
+  testar(3, 'Resultado desejado ausente bloqueia reconhecimento', function() {
+    const copia = JSON.parse(JSON.stringify(investigacaoIncompleta));
+    copia.reconhecimento_habilitado = true;
+    copia.status_interpretacao.processo = 'CONFIRMADO';
+    copia.status_interpretacao.resultado_desejado = 'CONFIRMADO';
+    copia.status_interpretacao.contexto = 'CONFIRMADO';
+    copia.processo = 'processo administrativo';
+    copia.contexto = 'empresa';
+    return podeReconhecerInvestigacaoV63_(copia) === false;
+  });
+
+  testar(4, 'Lacuna de contexto bloqueia reconhecimento', function() {
+    const copia = JSON.parse(JSON.stringify(investigacaoIncompleta));
+    copia.reconhecimento_habilitado = true;
+    copia.status_interpretacao.processo = 'CONFIRMADO';
+    copia.status_interpretacao.resultado_desejado = 'CONFIRMADO';
+    copia.status_interpretacao.contexto = 'CONFIRMADO';
+    copia.processo = 'processo administrativo';
+    copia.resultado_desejado = 'reduzir problemas';
+    copia.contexto = 'empresa';
+    copia.lacunas = ['contexto'];
+    return podeReconhecerInvestigacaoV63_(copia) === false;
+  });
+
+  testar(5, 'Investigação completa pode ser reconhecida', function() {
+    const completa = JSON.parse(JSON.stringify(investigacaoIncompleta));
+    completa.reconhecimento_habilitado = true;
+    completa.processo = 'conferir e lançar pedidos';
+    completa.resultado_desejado = 'reduzir erros e retrabalho';
+    completa.contexto = 'processo administrativo';
+    completa.lacunas = [];
+    completa.status_interpretacao.processo = 'CONFIRMADO';
+    completa.status_interpretacao.resultado_desejado = 'CONFIRMADO';
+    completa.status_interpretacao.contexto = 'CONFIRMADO';
+    return podeReconhecerInvestigacaoV63_(completa) === true;
+  });
+
+  testar(6, 'Busca retorna zero resultados para informação incompleta', function() {
+    return buscarResolucoesRelacionadasV63_(investigacaoIncompleta, { pontuacao_minima: 0 }).length === 0;
+  });
+
+  const aprovados = resultados.filter(function(item) { return item.passou; }).length;
+  const falhas = resultados.length - aprovados;
+  const percentual = resultados.length ? Math.round((aprovados / resultados.length) * 100) : 0;
+
+  Logger.log('============================================================');
+  Logger.log('TESTAR_BLOQUEIO_RECONHECIMENTO_INCOMPLETO_V63');
+  Logger.log('APROVADOS: ' + aprovados + '/' + resultados.length);
+  Logger.log('FALHAS: ' + falhas);
+  Logger.log('PERCENTUAL: ' + percentual + '%');
+  resultados.forEach(function(item) {
+    Logger.log((item.passou ? '✅' : '❌') + ' TESTE ' + item.numero + ' — ' + item.descricao + (item.erro ? ' — ' + item.erro : ''));
+  });
+  Logger.log(aprovados === resultados.length ? '🏆 TESTAR_BLOQUEIO_RECONHECIMENTO_INCOMPLETO_V63: PASSOU' : '❌ TESTAR_BLOQUEIO_RECONHECIMENTO_INCOMPLETO_V63: FALHOU');
+
+  return { sucesso: falhas === 0, aprovados: aprovados, falhas: falhas, percentual: percentual, resultados: resultados };
 }
