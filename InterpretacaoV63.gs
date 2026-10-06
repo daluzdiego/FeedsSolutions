@@ -850,6 +850,368 @@ function verificarSegurancaInterpretacaoV63_(
 
 /**
  * ============================================================
+ * TESTE ADVERSARIAL — RESISTÊNCIA DA INTERPRETAÇÃO V6.3
+ * ============================================================
+ *
+ * Garante que uma saída ruim, incompleta ou tecnicamente
+ * contaminada da IA não consiga atravessar o contrato
+ * semântico e habilitar reconhecimento indevido.
+ */
+function TESTAR_RESISTENCIA_INTERPRETACAO_V63() {
+
+  const resultados = [];
+
+  function testar(numero, descricao, funcao) {
+    try {
+      const passou = funcao() === true;
+      resultados.push({
+        numero: numero,
+        descricao: descricao,
+        passou: passou,
+        erro: passou ? '' : 'Resultado inesperado'
+      });
+    } catch (erro) {
+      resultados.push({
+        numero: numero,
+        descricao: descricao,
+        passou: false,
+        erro: erro && erro.message ? erro.message : String(erro)
+      });
+    }
+  }
+
+  testar(1, 'Status inválido é normalizado para DESCONHECIDO', function() {
+    const item = criarInterpretacaoSemanticaV63_({
+      problema: 'Problema real',
+      processo: '',
+      dores: [],
+      impactos: [],
+      resultado_desejado: '',
+      contexto: '',
+      restricoes: [],
+      padrao_problema: '',
+      status: {
+        problema: 'INVENTADO',
+        processo: 'QUALQUER_COISA',
+        dores: 'CONFIRMADO',
+        impactos: 'CONFIRMADO',
+        resultado_desejado: 'DESCONHECIDO',
+        contexto: 'DESCONHECIDO',
+        restricoes: 'DESCONHECIDO',
+        padrao_problema: 'INFERIDO'
+      }
+    });
+    return item.status.problema === 'DESCONHECIDO' &&
+      item.status.processo === 'DESCONHECIDO';
+  });
+
+  testar(2, 'Campo obrigatório ausente é rejeitado', function() {
+    const item = criarInterpretacaoSemanticaV63_({
+      problema: 'Problema',
+      processo: 'Processo',
+      dores: [],
+      impactos: [],
+      resultado_desejado: 'Resultado',
+      contexto: '',
+      restricoes: [],
+      padrao_problema: '',
+      status: {
+        problema: 'CONFIRMADO',
+        processo: 'CONFIRMADO',
+        dores: 'DESCONHECIDO',
+        impactos: 'DESCONHECIDO',
+        resultado_desejado: 'CONFIRMADO',
+        contexto: 'DESCONHECIDO',
+        restricoes: 'DESCONHECIDO',
+        padrao_problema: 'DESCONHECIDO'
+      }
+    });
+    delete item.processo;
+    return validarInterpretacaoSemanticaV63_(item) === false;
+  });
+
+  testar(3, 'CONFIRMADO sem conteúdo é rejeitado', function() {
+    const item = criarInterpretacaoSemanticaV63_({
+      problema: '',
+      processo: 'Processo',
+      dores: [],
+      impactos: [],
+      resultado_desejado: 'Resultado',
+      contexto: '',
+      restricoes: [],
+      padrao_problema: '',
+      status: {
+        problema: 'CONFIRMADO',
+        processo: 'CONFIRMADO',
+        dores: 'DESCONHECIDO',
+        impactos: 'DESCONHECIDO',
+        resultado_desejado: 'CONFIRMADO',
+        contexto: 'DESCONHECIDO',
+        restricoes: 'DESCONHECIDO',
+        padrao_problema: 'DESCONHECIDO'
+      }
+    });
+    return validarInterpretacaoSemanticaV63_(item) === false;
+  });
+
+  testar(4, 'INFERIDO sem conteúdo é rejeitado', function() {
+    const item = criarInterpretacaoSemanticaV63_({
+      problema: 'Problema',
+      processo: '',
+      dores: [],
+      impactos: [],
+      resultado_desejado: 'Resultado',
+      contexto: '',
+      restricoes: [],
+      padrao_problema: '',
+      status: {
+        problema: 'CONFIRMADO',
+        processo: 'INFERIDO',
+        dores: 'DESCONHECIDO',
+        impactos: 'DESCONHECIDO',
+        resultado_desejado: 'CONFIRMADO',
+        contexto: 'DESCONHECIDO',
+        restricoes: 'DESCONHECIDO',
+        padrao_problema: 'DESCONHECIDO'
+      }
+    });
+    return validarInterpretacaoSemanticaV63_(item) === false;
+  });
+
+  testar(5, 'DESCONHECIDO pode permanecer sem conteúdo', function() {
+    const item = criarInterpretacaoSemanticaV63_({
+      problema: 'Problema',
+      processo: '',
+      dores: [],
+      impactos: [],
+      resultado_desejado: 'Resultado',
+      contexto: '',
+      restricoes: [],
+      padrao_problema: '',
+      status: {
+        problema: 'CONFIRMADO',
+        processo: 'DESCONHECIDO',
+        dores: 'DESCONHECIDO',
+        impactos: 'DESCONHECIDO',
+        resultado_desejado: 'CONFIRMADO',
+        contexto: 'DESCONHECIDO',
+        restricoes: 'DESCONHECIDO',
+        padrao_problema: 'DESCONHECIDO'
+      }
+    });
+    return validarInterpretacaoSemanticaV63_(item) === true;
+  });
+
+  testar(6, 'Arrays contaminados com vazios são limpos', function() {
+    const item = criarInterpretacaoSemanticaV63_({
+      problema: 'Problema',
+      processo: 'Processo',
+      dores: ['erro', '', '  ', null],
+      impactos: ['perda de tempo', '', null],
+      resultado_desejado: 'Resultado',
+      contexto: '',
+      restricoes: ['', 'manter qualidade', '  '],
+      padrao_problema: '',
+      status: {
+        problema: 'CONFIRMADO',
+        processo: 'CONFIRMADO',
+        dores: 'CONFIRMADO',
+        impactos: 'CONFIRMADO',
+        resultado_desejado: 'CONFIRMADO',
+        contexto: 'DESCONHECIDO',
+        restricoes: 'CONFIRMADO',
+        padrao_problema: 'DESCONHECIDO'
+      }
+    });
+    return item.dores.indexOf('') === -1 &&
+      item.impactos.indexOf('') === -1 &&
+      item.restricoes.indexOf('') === -1;
+  });
+
+  testar(7, 'Versão inválida é rejeitada', function() {
+    const item = criarInterpretacaoSemanticaV63_({
+      problema: 'Problema',
+      processo: 'Processo',
+      dores: ['dor'],
+      impactos: ['impacto'],
+      resultado_desejado: 'Resultado',
+      contexto: 'Contexto',
+      restricoes: [],
+      padrao_problema: 'Padrão',
+      status: {
+        problema: 'CONFIRMADO',
+        processo: 'CONFIRMADO',
+        dores: 'CONFIRMADO',
+        impactos: 'CONFIRMADO',
+        resultado_desejado: 'CONFIRMADO',
+        contexto: 'CONFIRMADO',
+        restricoes: 'DESCONHECIDO',
+        padrao_problema: 'INFERIDO'
+      }
+    });
+    item.versao = 'V999';
+    return validarInterpretacaoSemanticaV63_(item) === false;
+  });
+
+  testar(8, 'Contaminação técnica é rejeitada pelo filtro de segurança', function() {
+    const item = criarInterpretacaoSemanticaV63_({
+      problema: 'Use a API interna para resolver o problema.',
+      processo: 'Processo administrativo',
+      dores: ['erro'],
+      impactos: ['perda de tempo'],
+      resultado_desejado: 'Reduzir erros',
+      contexto: 'Empresa',
+      restricoes: [],
+      padrao_problema: 'Processo manual',
+      status: {
+        problema: 'CONFIRMADO',
+        processo: 'CONFIRMADO',
+        dores: 'CONFIRMADO',
+        impactos: 'CONFIRMADO',
+        resultado_desejado: 'CONFIRMADO',
+        contexto: 'CONFIRMADO',
+        restricoes: 'DESCONHECIDO',
+        padrao_problema: 'INFERIDO'
+      }
+    });
+    return verificarSegurancaInterpretacaoV63_(item) === false;
+  });
+
+  testar(9, 'Interpretação semanticamente correta permanece válida', function() {
+    const item = criarInterpretacaoSemanticaV63_({
+      problema: 'Erros de digitação e retrabalho',
+      processo: 'Conferir e lançar pedidos manualmente',
+      dores: ['erros de digitação', 'retrabalho'],
+      impactos: ['perda de 3 horas por dia'],
+      resultado_desejado: 'Reduzir erros e retrabalho',
+      contexto: 'Processo administrativo',
+      restricoes: [],
+      padrao_problema: 'Ineficiência operacional',
+      status: {
+        problema: 'CONFIRMADO',
+        processo: 'CONFIRMADO',
+        dores: 'CONFIRMADO',
+        impactos: 'CONFIRMADO',
+        resultado_desejado: 'CONFIRMADO',
+        contexto: 'CONFIRMADO',
+        restricoes: 'DESCONHECIDO',
+        padrao_problema: 'INFERIDO'
+      }
+    });
+    return validarInterpretacaoSemanticaV63_(item) === true;
+  });
+
+  testar(10, 'Processo desconhecido impede habilitação para reconhecimento', function() {
+    const item = criarInterpretacaoSemanticaV63_({
+      problema: 'Sistema com problema',
+      processo: '',
+      dores: ['instabilidade'],
+      impactos: ['atrapalha a equipe'],
+      resultado_desejado: 'Melhorar operação',
+      contexto: '',
+      restricoes: [],
+      padrao_problema: '',
+      status: {
+        problema: 'CONFIRMADO',
+        processo: 'DESCONHECIDO',
+        dores: 'CONFIRMADO',
+        impactos: 'INFERIDO',
+        resultado_desejado: 'CONFIRMADO',
+        contexto: 'DESCONHECIDO',
+        restricoes: 'DESCONHECIDO',
+        padrao_problema: 'DESCONHECIDO'
+      }
+    });
+    const entrada = prepararParaReconhecimentoV63_(item);
+    return entrada.reconhecimento_habilitado === false;
+  });
+
+  testar(11, 'Contexto desconhecido não impede reconhecimento quando núcleo está completo', function() {
+    const item = criarInterpretacaoSemanticaV63_({
+      problema: 'Erros de digitação e retrabalho',
+      processo: 'Conferir e lançar pedidos manualmente',
+      dores: ['erros de digitação'],
+      impactos: ['perda de 3 horas por dia'],
+      resultado_desejado: 'Reduzir erros e retrabalho',
+      contexto: '',
+      restricoes: [],
+      padrao_problema: 'Processo manual',
+      status: {
+        problema: 'CONFIRMADO',
+        processo: 'CONFIRMADO',
+        dores: 'CONFIRMADO',
+        impactos: 'CONFIRMADO',
+        resultado_desejado: 'CONFIRMADO',
+        contexto: 'DESCONHECIDO',
+        restricoes: 'DESCONHECIDO',
+        padrao_problema: 'INFERIDO'
+      }
+    });
+    const entrada = prepararParaReconhecimentoV63_(item);
+    return entrada.reconhecimento_habilitado === true &&
+      entrada.status_interpretacao.contexto === 'DESCONHECIDO';
+  });
+
+  testar(12, 'Campos vazios ou desconhecidos entram nas lacunas', function() {
+    const item = criarInterpretacaoSemanticaV63_({
+      problema: 'Problema',
+      processo: '',
+      dores: [],
+      impactos: [],
+      resultado_desejado: '',
+      contexto: '',
+      restricoes: [],
+      padrao_problema: '',
+      status: {
+        problema: 'CONFIRMADO',
+        processo: 'DESCONHECIDO',
+        dores: 'DESCONHECIDO',
+        impactos: 'DESCONHECIDO',
+        resultado_desejado: 'DESCONHECIDO',
+        contexto: 'DESCONHECIDO',
+        restricoes: 'DESCONHECIDO',
+        padrao_problema: 'DESCONHECIDO'
+      }
+    });
+    return item.lacunas.indexOf('processo') !== -1 &&
+      item.lacunas.indexOf('resultado_desejado') !== -1 &&
+      item.lacunas.indexOf('contexto') !== -1;
+  });
+
+  const aprovados = resultados.filter(function(item) { return item.passou; }).length;
+  const falhas = resultados.length - aprovados;
+  const percentual = resultados.length ? Math.round((aprovados / resultados.length) * 100) : 0;
+
+  Logger.log('============================================================');
+  Logger.log('TESTAR_RESISTENCIA_INTERPRETACAO_V63');
+  Logger.log('APROVADOS: ' + aprovados + '/' + resultados.length);
+  Logger.log('FALHAS: ' + falhas);
+  Logger.log('PERCENTUAL: ' + percentual + '%');
+  resultados.forEach(function(item) {
+    Logger.log(
+      (item.passou ? '✅' : '❌') +
+      ' TESTE ' + item.numero +
+      ' — ' + item.descricao +
+      (item.erro ? ' — ' + item.erro : '')
+    );
+  });
+  Logger.log(
+    falhas === 0 && resultados.length === 12
+      ? '🏆 TESTAR_RESISTENCIA_INTERPRETACAO_V63: PASSOU'
+      : '❌ TESTAR_RESISTENCIA_INTERPRETACAO_V63: FALHOU'
+  );
+
+  return {
+    sucesso: falhas === 0 && resultados.length === 12,
+    aprovados: aprovados,
+    falhas: falhas,
+    percentual: percentual,
+    resultados: resultados
+  };
+}
+
+/**
+ * ============================================================
  * TESTE OFICIAL
  * INTERPRETAÇÃO SEMÂNTICA V6.3
  * ============================================================
