@@ -210,8 +210,8 @@ Exemplos de evidência concreta:
 - prejuízo;
 - perda;
 - atraso;
-- volume;
-- frequência mensurável;
+- volume ou frequência somente quando também estiverem ligados a uma consequência explícita;
+- volume ou frequência isolados NÃO são impacto;
 - retrabalho quantificado;
 - paralisação explicitamente informada;
 - interrupção explicitamente informada.
@@ -1722,6 +1722,183 @@ function TESTAR_IA_SEMANTICA_REAL_V63() {
  * por conter palavras como "erro" ou "retrabalho".
  * ============================================================
  */
+/**
+ * ============================================================
+ * TESTE ADVERSARIAL — INFORMAÇÃO INCOMPLETA V6.3
+ * ============================================================
+ */
+function TESTAR_INFORMACAO_INCOMPLETA_SEMANTICA_V63() {
+
+  const mensagem =
+    'Meu sistema está dando problema e isso está atrapalhando a equipe.';
+
+  let interpretacao = null;
+  let erro = null;
+
+  try {
+    interpretacao =
+      interpretarMensagemSemanticaV63_(mensagem);
+  } catch (e) {
+    erro = e;
+  }
+
+  let aprovados = 0;
+  const total = 12;
+
+  function teste(numero, descricao, condicao) {
+    if (condicao) {
+      aprovados++;
+      Logger.log('✅ TESTE ' + numero + ' — ' + descricao);
+    } else {
+      Logger.log('❌ TESTE ' + numero + ' — ' + descricao);
+    }
+  }
+
+  teste(1, 'interpretação foi produzida', !!interpretacao && !erro);
+
+  teste(
+    2,
+    'problema foi identificado',
+    !!(
+      interpretacao &&
+      interpretacao.problema &&
+      interpretacao.status &&
+      interpretacao.status.problema !== 'DESCONHECIDO'
+    )
+  );
+
+  teste(
+    3,
+    'processo não foi inventado',
+    !!(
+      interpretacao &&
+      !String(interpretacao.processo || '').trim() &&
+      interpretacao.status.processo === 'DESCONHECIDO'
+    )
+  );
+
+  teste(
+    4,
+    'resultado desejado não foi inventado',
+    !!(
+      interpretacao &&
+      !String(interpretacao.resultado_desejado || '').trim() &&
+      interpretacao.status.resultado_desejado === 'DESCONHECIDO'
+    )
+  );
+
+  teste(
+    5,
+    'contexto não foi inventado',
+    !!(
+      interpretacao &&
+      !String(interpretacao.contexto || '').trim() &&
+      interpretacao.status.contexto === 'DESCONHECIDO'
+    )
+  );
+
+  teste(
+    6,
+    'restrições não foram inventadas',
+    !!(
+      interpretacao &&
+      Array.isArray(interpretacao.restricoes) &&
+      interpretacao.restricoes.length === 0 &&
+      interpretacao.status.restricoes === 'DESCONHECIDO'
+    )
+  );
+
+  teste(
+    7,
+    'impacto não foi promovido a confirmado',
+    !!(
+      interpretacao &&
+      interpretacao.status.impactos !== 'CONFIRMADO'
+    )
+  );
+
+  teste(
+    8,
+    'impacto vago permanece inferido ou desconhecido',
+    !!(
+      interpretacao &&
+      (
+        interpretacao.status.impactos === 'INFERIDO' ||
+        interpretacao.status.impactos === 'DESCONHECIDO'
+      )
+    )
+  );
+
+  teste(
+    9,
+    'lacunas contém processo',
+    !!(
+      interpretacao &&
+      Array.isArray(interpretacao.lacunas) &&
+      interpretacao.lacunas.indexOf('processo') !== -1
+    )
+  );
+
+  teste(
+    10,
+    'lacunas contém resultado desejado',
+    !!(
+      interpretacao &&
+      Array.isArray(interpretacao.lacunas) &&
+      interpretacao.lacunas.indexOf('resultado_desejado') !== -1
+    )
+  );
+
+  teste(
+    11,
+    'lacunas contém contexto',
+    !!(
+      interpretacao &&
+      Array.isArray(interpretacao.lacunas) &&
+      interpretacao.lacunas.indexOf('contexto') !== -1
+    )
+  );
+
+  teste(
+    12,
+    'lacunas contém restrições',
+    !!(
+      interpretacao &&
+      Array.isArray(interpretacao.lacunas) &&
+      interpretacao.lacunas.indexOf('restricoes') !== -1
+    )
+  );
+
+  Logger.log('============================================================');
+  Logger.log('TESTAR_INFORMACAO_INCOMPLETA_SEMANTICA_V63');
+  Logger.log('APROVADOS: ' + aprovados + '/' + total);
+  Logger.log('FALHAS: ' + (total - aprovados));
+  Logger.log(
+    'PERCENTUAL: ' +
+    Math.round((aprovados / total) * 100) +
+    '%'
+  );
+
+  if (aprovados === total) {
+    Logger.log(
+      '🏆 TESTAR_INFORMACAO_INCOMPLETA_SEMANTICA_V63: PASSOU'
+    );
+  } else {
+    Logger.log(
+      '❌ TESTAR_INFORMACAO_INCOMPLETA_SEMANTICA_V63: FALHOU'
+    );
+  }
+
+  return {
+    sucesso: aprovados === total,
+    aprovados: aprovados,
+    falhas: total - aprovados,
+    percentual: Math.round((aprovados / total) * 100),
+    interpretacao: interpretacao,
+    erro: erro ? String(erro.message || erro) : null
+  };
+}
+
 function TESTAR_GUARDA_IMPACTO_SEMANTICO_V63() {
 
   const casos = [
