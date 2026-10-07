@@ -511,6 +511,13 @@ function obterTestesAceitacaoFinalV63_() {
         : null
     },
     {
+      etapa: 'Aprendizado — reconhecimento',
+      nome: 'TESTAR_APRENDIZADO_RECONHECIMENTO_V63',
+      fn: typeof TESTAR_APRENDIZADO_RECONHECIMENTO_V63 === 'function'
+        ? TESTAR_APRENDIZADO_RECONHECIMENTO_V63
+        : null
+    },
+    {
       etapa: 'Aprendizado — fluxo',
       nome: 'TESTAR_INTEGRACAO_APRENDIZADO_FLUXO_V63',
       fn: typeof TESTAR_INTEGRACAO_APRENDIZADO_FLUXO_V63 === 'function'
