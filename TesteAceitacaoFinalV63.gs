@@ -206,7 +206,7 @@ function TESTAR_ACEITACAO_FINAL_V63_CONTINUAR() {
     );
   } else {
     Logger.log(
-      '🏆 TODOS OS 46 TESTES DA SUÍTE FORAM PERCORRIDOS.'
+      '🏆 TODOS OS TESTES DA SUÍTE FORAM PERCORRIDOS.'
     );
     Logger.log(
       '⚠️ A aprovação final continua dependendo dos PASSOU/FALHOU internos de cada teste.'
@@ -559,7 +559,7 @@ function obterTestesAceitacaoFinalV63_() {
         ? TESTAR_FLUXO_PRINCIPAL_REAL_V63
         : null
     }
-  ];;
+  ];
 }
 
 function TESTAR_ACEITACAO_FINAL_V63() {
