@@ -951,6 +951,92 @@ function interpretarMensagemSemanticaV63_(
 
   /*
    * ----------------------------------------------------------
+   * 4.2 — NORMALIZAÇÃO FINAL DE STATUS
+   * ----------------------------------------------------------
+   *
+   * O Gemini pode retornar um campo vazio com status
+   * CONFIRMADO ou INFERIDO. Isso viola o contrato semântico:
+   * status não pode afirmar conhecimento onde não existe valor.
+   *
+   * A correção é determinística e não inventa informação:
+   * campo vazio → DESCONHECIDO + lacuna.
+   * ----------------------------------------------------------
+   */
+
+  if (
+    interpretacao &&
+    typeof interpretacao === 'object'
+  ) {
+
+    if (
+      !interpretacao.status ||
+      typeof interpretacao.status !== 'object'
+    ) {
+      interpretacao.status = {};
+    }
+
+    if (!Array.isArray(interpretacao.lacunas)) {
+      interpretacao.lacunas = [];
+    }
+
+    const camposStatus = [
+      'problema',
+      'processo',
+      'dores',
+      'impactos',
+      'resultado_desejado',
+      'contexto',
+      'restricoes',
+      'padrao_problema'
+    ];
+
+    camposStatus.forEach(function(campo) {
+
+      const valor = interpretacao[campo];
+
+      const vazio =
+        Array.isArray(valor)
+          ? valor.length === 0
+          : !String(valor || '').trim();
+
+      const statusAtual =
+        String(
+          interpretacao.status[campo] || ''
+        )
+          .trim()
+          .toUpperCase();
+
+      if (vazio) {
+
+        interpretacao.status[campo] =
+          'DESCONHECIDO';
+
+        if (
+          interpretacao.lacunas.indexOf(campo) === -1
+        ) {
+          interpretacao.lacunas.push(campo);
+        }
+
+      } else if (
+        statusAtual === 'DESCONHECIDO' &&
+        interpretacao.lacunas.indexOf(campo) === -1
+      ) {
+
+        interpretacao.lacunas.push(campo);
+      }
+
+    });
+
+    interpretacao.lacunas =
+      normalizarArrayInterpretacaoV63_(
+        interpretacao.lacunas
+      );
+
+  }
+
+
+  /*
+   * ----------------------------------------------------------
    * 5. VALIDAÇÃO
    * ----------------------------------------------------------
    */
