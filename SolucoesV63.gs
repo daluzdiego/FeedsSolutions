@@ -821,7 +821,7 @@ function compararInvestigacaoResolucaoV63_(
     );
 
 
-  const pontuacao =
+  const pontuacaoBase =
     Math.round(
 
       (
@@ -856,6 +856,25 @@ function compararInvestigacaoResolucaoV63_(
 
     );
 
+  /*
+   * O aprendizado entra apenas como ajuste secundário e limitado.
+   * Ele NÃO altera status, confiança ou validação da resolução.
+   */
+  const aprendizado =
+    obterSinalAprendizadoResolucaoV63_(
+      resolucao.resolucao_id
+    );
+
+  const pontuacao =
+    Math.max(
+      0,
+      Math.min(
+        100,
+        pontuacaoBase +
+        aprendizado.modificador
+      )
+    );
+
 
   return {
 
@@ -875,13 +894,13 @@ function compararInvestigacaoResolucaoV63_(
       resolucao.origem,
 
     pontuacao:
-      Math.max(
-        0,
-        Math.min(
-          100,
-          pontuacao
-        )
-      ),
+      pontuacao,
+
+    pontuacao_base:
+      pontuacaoBase,
+
+    aprendizado:
+      aprendizado,
 
     dimensoes: {
 
