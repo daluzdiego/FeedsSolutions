@@ -747,6 +747,68 @@ const investigacaoV622 =
 
   /*
    * ==========================================================
+   * V6.3 — FECHAMENTO OPERACIONAL DO APRENDIZADO
+   * ==========================================================
+   *
+   * Só fecha quando o chamador enviar explicitamente
+   * dados.resultado_real_v63 com POSITIVO, PARCIAL ou NEGATIVO.
+   * ==========================================================
+   */
+
+  let fechamentoAprendizadoV63 = null;
+
+  if (
+    dados.resultado_real_v63 &&
+    typeof dados.resultado_real_v63 === 'object'
+  ) {
+
+    try {
+
+      const fluxoParaAprendizadoV63 =
+        Object.assign(
+          {},
+          resultadoFluxoParaV63,
+          {
+            integracao_v63:
+              integracaoV63
+          }
+        );
+
+      fechamentoAprendizadoV63 =
+        registrarResultadoRealV63_(
+          fluxoParaAprendizadoV63,
+          dados.resultado_real_v63
+        );
+
+    } catch (erroAprendizadoV63) {
+
+      Logger.log(
+        '⚠️ ERRO NÃO FATAL NO FECHAMENTO DE APRENDIZADO V6.3: ' +
+        (
+          erroAprendizadoV63 &&
+          erroAprendizadoV63.message
+            ? erroAprendizadoV63.message
+            : erroAprendizadoV63
+        )
+      );
+
+      fechamentoAprendizadoV63 = {
+        sucesso: false,
+        versao: 'V6.3',
+        erro:
+          erroAprendizadoV63 &&
+          erroAprendizadoV63.message
+            ? erroAprendizadoV63.message
+            : String(erroAprendizadoV63)
+      };
+
+    }
+
+  }
+
+
+  /*
+   * ==========================================================
    * SALVAR RESPOSTA DO SISTEMA
    * ==========================================================
    */
@@ -976,7 +1038,16 @@ const investigacaoV622 =
    */
 
   integracao_v63:
-    integracaoV63
+    integracaoV63,
+
+  /*
+   * ----------------------------------------------------------
+   * V6.3 — FECHAMENTO DO APRENDIZADO
+   * ----------------------------------------------------------
+   */
+
+  fechamento_aprendizado_v63:
+    fechamentoAprendizadoV63
 
 };
 
