@@ -4487,12 +4487,12 @@ function TESTAR_RECONHECIMENTO_POR_PARAFRASE_V63() {
 
   try {
     const investigacao={
-      problema_central:'A equipe perde horas corrigindo registros porque as solicitações recebidas por diferentes canais precisam ser digitadas manualmente.',
-      processo:'Conferência e registro manual de solicitações que chegam por diferentes canais.',
-      pontos_de_dor:['erros de registro','retrabalho','atrasos'],
+      problema_central:'A equipe do projeto Atlas Delta 47 perde horas corrigindo registros porque as solicitações do Atlas Delta 47 precisam ser digitadas manualmente.',
+      processo:'Conferência e registro manual das solicitações de manutenção do projeto Atlas Delta 47.',
+      pontos_de_dor:['erros de registro no Atlas Delta 47','retrabalho','atrasos no Atlas Delta 47'],
       impacto:{descricao:'perda de tempo da equipe'},
-      resultado_desejado:'Diminuir erros e tempo gasto com correções.',
-      contexto:'Rotina administrativa com solicitações recebidas por múltiplos canais.'
+      resultado_desejado:'Diminuir erros e tempo gasto com correções no Atlas Delta 47.',
+      contexto:'Rotina operacional exclusiva do projeto Atlas Delta 47.'
     };
 
     teste(1,'investigação por paráfrase foi criada',!!investigacao);
@@ -4501,16 +4501,16 @@ function TESTAR_RECONHECIMENTO_POR_PARAFRASE_V63() {
 
     const solucao={
       titulo_interno:marcador,
-      descricao_problema:'Erros de digitação e retrabalho na conferência e lançamento de pedidos.',
-      padrao_problema:'Ineficiência operacional em lançamento manual de pedidos.',
-      processo:'Conferir e lançar pedidos recebidos por diferentes canais.',
-      dores:['erros de digitação','retrabalho','atrasos'],
+      descricao_problema:'Erros de digitação e retrabalho na conferência e lançamento das ordens de manutenção do Atlas Delta 47.',
+      padrao_problema:'Ineficiência operacional no lançamento manual de ordens de manutenção do Atlas Delta 47.',
+      processo:'Conferir e lançar ordens de manutenção do Atlas Delta 47.',
+      dores:['erros de digitação no Atlas Delta 47','retrabalho','atrasos no Atlas Delta 47'],
       impactos:['perda de tempo no processo'],
-      resultados_desejados:['reduzir erros e retrabalho no lançamento de pedidos'],
-      contexto:'Processamento diário de pedidos.',
+      resultados_desejados:['reduzir erros e retrabalho no lançamento das ordens do Atlas Delta 47'],
+      contexto:'Processamento diário das ordens de manutenção do Atlas Delta 47.',
       restricoes:[],
-      abordagem_interna:'Abordagem validada para conferência e lançamento de pedidos.',
-      descricao_solucao_interna:'Solução validada para reduzir erros e retrabalho em pedidos.',
+      abordagem_interna:'Abordagem validada para conferência e lançamento das ordens do Atlas Delta 47.',
+      descricao_solucao_interna:'Solução validada para reduzir erros e retrabalho nas ordens do Atlas Delta 47.',
       alternativas:[],
       status:'HIPOTESE',
       confianca:'ALTA',
