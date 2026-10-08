@@ -162,6 +162,36 @@ function TESTAR_INTEGRACAO_APRENDIZADO_FLUXO_V63() {
           'SOLUCAO_VALIDADA'
       ));
 
+    if (!(
+      fluxo &&
+      fluxo.integracao_v63 &&
+      fluxo.integracao_v63.resultado_v63 &&
+      fluxo.integracao_v63.resultado_v63.decisao &&
+      fluxo.integracao_v63.resultado_v63.decisao.estado === 'SOLUCAO_VALIDADA'
+    )) {
+      const diagnosticoReconhecimento =
+        fluxo && fluxo.integracao_v63 && fluxo.integracao_v63.resultado_v63
+          ? fluxo.integracao_v63.resultado_v63
+          : null;
+      Logger.log('🔎 DIAGNÓSTICO RECONHECIMENTO — classificação: ' +
+        (diagnosticoReconhecimento && diagnosticoReconhecimento.reconhecimento
+          ? diagnosticoReconhecimento.reconhecimento.classificacao
+          : 'N/A'));
+      const candidatos = diagnosticoReconhecimento &&
+        Array.isArray(diagnosticoReconhecimento.resultados_reconhecimento)
+          ? diagnosticoReconhecimento.resultados_reconhecimento
+          : [];
+      candidatos.forEach(function(item, index) {
+        Logger.log('🔎 CANDIDATO ' + (index + 1) +
+          ' — id=' + String(item.resolucao_id || '') +
+          ' status=' + String(item.status || '') +
+          ' base=' + String(item.pontuacao_base) +
+          ' final=' + String(item.pontuacao) +
+          ' aprendizado=' + String(item.aprendizado && item.aprendizado.modificador));
+      });
+      Logger.log('🔎 TOTAL CANDIDATOS: ' + candidatos.length);
+    }
+
     const feedback = registrarFeedbackFluxoPrincipalV63_(
       fluxo,
       {
