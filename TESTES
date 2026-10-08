@@ -463,3 +463,176 @@
 
 
 
+15:38:39	Notificação	Execução iniciada
+15:38:42	Informação	============================================================
+15:38:42	Informação	FEEDS SOLUTIONS — ACEITAÇÃO FINAL V6.3 / LOTE
+15:38:42	Informação	============================================================
+15:38:42	Informação	CONTINUANDO EM: 47/47
+15:38:42	Informação	------------------------------------------------------------
+15:38:42	Informação	SUÍTE 47/47 — Fluxo principal — real
+15:38:42	Informação	TESTAR_FLUXO_PRINCIPAL_REAL_V63
+15:38:42	Informação	
+15:38:42	Informação	============================================================
+15:38:42	Informação	TESTAR_FLUXO_PRINCIPAL_REAL_V63
+15:38:42	Informação	============================================================
+15:38:45	Informação	✅ TESTE 1/25 — diagnóstico inicial criado
+15:38:45	Informação	GEMINI - TENTATIVA 1/3
+15:38:46	Informação	HTTP STATUS: 503
+15:38:46	Informação	TEMPO: 292 ms
+15:38:46	Informação	RESPOSTA GEMINI: {
+  "error": {
+    "code": 503,
+    "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+    "status": "UNAVAILABLE"
+  }
+}
+15:38:46	Informação	GEMINI - ERRO TRANSITÓRIO HTTP 503. Nova tentativa será realizada.
+15:38:47	Informação	GEMINI - TENTATIVA 2/3
+15:38:58	Informação	HTTP STATUS: 200
+15:38:58	Informação	TEMPO: 10823 ms
+15:38:58	Informação	RESPOSTA GEMINI: {
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "{\n  \"problema\": \"Erros de digitação e retrabalho decorrentes do lançamento manual de ordens de manutenção do projeto Atlas Delta 47.\",\n  \"processo\": \"Conferência e lançamento manual de ordens de manutenção do projeto Atlas Delta 47.\",\n  \"dores\": [\n    \"Erros de digitação\",\n    \"Retrabalho\"\n  ],\n  \"impactos\": [\n    \"Perda de cerca de 3 horas por dia na operação\",\n    \"Ocorrência diária de erros e retrabalho\"\n  ],\n  \"resultado_desejado\": \"Reduzir erros e retrabalho no Atlas Delta 47 mantendo a qualidade da manutenção.\",\n  \"contexto\": \"Operação de lançamento e conferência de ordens de manutenção específica do projeto Atlas Delta 47.\",\n  \"restricoes\": [\n    \"Manter a qualidade da manutenção\"\n  ],\n  \"padrao_problema\": \"Ineficiência operacional e perda de tempo diária causadas por processos manuais sujeitos a falhas humanas.\",\n  \"lacunas\": [],\n  \"status\": {\n    \"problema\": \"CONFIRMADO\",\n    \"processo\": \"CONFIRMADO\",\n    \"dores\": \"CONFIRMADO\",\n    \"impactos\": \"CONFIRMADO\",\n    \"resultado_desejado\": \"CONFIRMADO\",\n    \"contexto\": \"CONFIRMADO\",\n    \"restricoes\": \"CONFIRMADO\",\n    \"padrao_problema\": \"INFERIDO\"\n  }\n}",
+            "thoughtSignature": "EmAKXgFpFH0T9BTac1LwFutGZe0njbpAGPj22PLj4Xrf0NRXbRX0gJntbuYfC7Cc4Jn1InK5MHTJ7vowX0iTbQuD1klkfCn+3K3ctZQw+Q9OindzuvAyolOzzYCfHqdWsOQ="
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 1607,
+    "candidatesTokenCount": 354,
+    "totalTokenCount": 1961,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 1607
+      }
+    ],
+    "serviceTier": "standard"
+  },
+  "modelVersion": "gemini-3.5-flash-lite",
+  "responseId": "N-PHaqLzKrnoz7IP_NuesAw"
+}
+15:38:58	Informação	✅ TESTE 2/25 — interpretação semântica de referência foi produzida
+15:38:59	Informação	✅ TESTE 3/25 — resolução validada foi persistida antes do fluxo
+15:39:06	Informação	GEMINI - TENTATIVA 1/3
+15:39:19	Informação	HTTP STATUS: 200
+15:39:19	Informação	TEMPO: 13178 ms
+15:39:19	Informação	RESPOSTA GEMINI: {
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "{\n  \"processo\": \"Conferência e lançamento de ordens de manutenção do projeto Atlas Delta 47\",\n  \"dor_principal\": \"Erros de digitação e retrabalho\",\n  \"frequencia\": \"Diária\",\n  \"impacto\": \"Perda de cerca de 3 horas por dia\",\n  \"objetivo\": \"Reduzir erros e retrabalho no Atlas Delta 47 mantendo a qualidade da manutenção\",\n  \"informacao_faltante\": \"Volume de ordens de manutenção processadas\",\n  \"proxima_pergunta\": \"Quantas ordens de manutenção vocês processam por dia?\"\n}",
+            "thoughtSignature": "EmAKXgFpFH0TNBW6GzYIuZlO7fzPOP15lhbg+e1LtiksuZJpVR53xFqKt1T7FuqW/gd5ZdWoa+9MURRYpwwx3Bl5ctwYcp4XioKpFag1MR4khLbhRGl4ysleCw+UxlaD9Ks="
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 1321,
+    "candidatesTokenCount": 144,
+    "totalTokenCount": 1465,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 1321
+      }
+    ],
+    "serviceTier": "standard"
+  },
+  "modelVersion": "gemini-3.5-flash-lite",
+  "responseId": "SuPHatWDFrSJ6dkPkKf2qAs"
+}
+15:39:20	Informação	NOVA DOR REGISTRADA: Erros de digitação e retrabalho
+15:39:22	Informação	NOVA MEDIDA REGISTRADA: TEMPO | 3 horas por dia
+15:39:29	Informação	GEMINI - TENTATIVA 1/3
+15:40:02	Informação	HTTP STATUS: 200
+15:40:02	Informação	TEMPO: 33250 ms
+15:40:02	Informação	RESPOSTA GEMINI: {
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "{\n  \"problema\": \"Erros de digitação e retrabalho decorrentes do lançamento manual de ordens de manutenção do projeto Atlas Delta 47.\",\n  \"processo\": \"Conferência e lançamento manual de ordens de manutenção do projeto Atlas Delta 47.\",\n  \"dores\": [\n    \"Erros de digitação\",\n    \"Retrabalho\"\n  ],\n  \"impactos\": [\n    \"Perda de cerca de 3 horas por dia na operação\",\n    \"Ocorrência de erros de digitação e retrrabalho todos os dias\"\n  ],\n  \"resultado_desejado\": \"Reduzir erros e retrabalho no projeto Atlas Delta 47 mantendo a qualidade da manutenção.\",\n  \"contexto\": \"Operação envolvendo o projeto Atlas Delta 47, com processo de lançamento manual de ordens de manutenção.\",\n  \"restricoes\": [\n    \"Manter a qualidade da manutenção\"\n  ],\n  \"padrao_problema\": \"Ineficiência operacional e perda de tempo diária causadas por processos manuais sujeitos a erros humanos.\",\n  \"lacunas\": [\n    \"contexto\"\n  ],\n  \"status\": {\n    \"problema\": \"CONFIRMADO\",\n    \"processo\": \"CONFIRMADO\",\n    \"dores\": \"CONFIRMADO\",\n    \"impactos\": \"CONFIRMADO\",\n    \"resultado_desejado\": \"CONFIRMADO\",\n    \"contexto\": \"INFERIDO\",\n    \"restricoes\": \"CONFIRMADO\",\n    \"padrao_problema\": \"INFERIDO\"\n  }\n}",
+            "thoughtSignature": "EmAKXgFpFH0ThShmmHvzRKgYgLzu3ALdZe2LlADlHWY0g8pnEuImqPCre2E29xjOCa4NdgbaKOHuTKaA9YaHL3PsurNtTcu9LcUBr2ox9x6EmuQC7jD2HSSQxOgdfAR7SHo="
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 1607,
+    "candidatesTokenCount": 368,
+    "totalTokenCount": 1975,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 1607
+      }
+    ],
+    "serviceTier": "standard"
+  },
+  "modelVersion": "gemini-3.5-flash-lite",
+  "responseId": "YePHatSUFbPgqtsPy4OmoAY"
+}
+15:40:06	Informação	✅ TESTE 4/25 — processarMensagemDiagnostico executou com sucesso
+15:40:06	Informação	✅ TESTE 5/25 — resposta principal foi produzida
+15:40:06	Informação	✅ TESTE 6/25 — diagnóstico foi retornado
+15:40:06	Informação	✅ TESTE 7/25 — triagem foi retornada
+15:40:06	Informação	✅ TESTE 8/25 — triagem classificou como COMPATIVEL
+15:40:06	Informação	✅ TESTE 9/25 — investigação foi retornada
+15:40:06	Informação	✅ TESTE 10/25 — investigação possui ID
+15:40:06	Informação	✅ TESTE 11/25 — investigação ficou PRONTA_PARA_SOLUCAO
+15:40:06	Informação	✅ TESTE 12/25 — resultado da integração V6.3 foi retornado
+15:40:06	Informação	✅ TESTE 13/25 — V6.3 foi realmente ativada pelo fluxo principal
+15:40:06	Informação	✅ TESTE 14/25 — motivo confirma V63_ATIVADA
+15:40:06	Informação	✅ TESTE 15/25 — V6.3 não usou fallback legado
+15:40:06	Informação	✅ TESTE 16/25 — resultado interno da Ponte V6.3 foi produzido
+15:40:06	Informação	✅ TESTE 17/25 — V6.3 reconheceu a resolução previamente validada
+15:40:06	Informação	✅ TESTE 18/25 — decisão V6.3 foi produzida
+15:40:06	Informação	✅ TESTE 19/25 — decisão selecionou solução validada
+15:40:06	Informação	✅ TESTE 20/25 — resposta V6.3 foi produzida
+15:40:06	Informação	✅ TESTE 21/25 — resposta oficial retornada ao ponto de entrada
+15:40:06	Informação	✅ TESTE 22/25 — filtro de segurança da V6.3 aprovou a resposta
+15:40:06	Informação	✅ TESTE 23/25 — contexto V6.3 preservou os IDs do fluxo principal
+15:40:06	Informação	✅ TESTE 24/25 — resposta segura não expõe tecnologia ou informação comercial
+15:40:06	Informação	✅ TESTE 25/25 — fluxo principal entrega a V6.3 como resposta oficial
+15:40:07	Informação	
+15:40:07	Informação	============================================================
+15:40:07	Informação	RESULTADO — TESTAR_FLUXO_PRINCIPAL_REAL_V63
+15:40:07	Informação	============================================================
+15:40:07	Informação	APROVADOS: 25/25
+15:40:07	Informação	FALHAS: 0
+15:40:07	Informação	PERCENTUAL: 100%
+15:40:07	Informação	
+15:40:07	Informação	🏆 TESTAR_FLUXO_PRINCIPAL_REAL_V63: PASSOU
+15:40:07	Informação	🏆 FLUXO PRINCIPAL REAL + V6.3: 100%
+15:40:07	Informação	
+15:40:07	Informação	============================================================
+15:40:07	Informação	✅ EXECUTADO SEM EXCEÇÃO: TESTAR_FLUXO_PRINCIPAL_REAL_V63
+15:40:07	Informação	============================================================
+15:40:07	Informação	🏁 LOTE FINALIZADO — SUÍTE COMPLETA CONCLUÍDA
+15:40:07	Informação	POSIÇÃO ATUAL: 47/47
+15:40:07	Informação	EXECUTADOS SEM EXCEÇÃO NESTE LOTE: 1
+15:40:07	Informação	FALHAS/AUSÊNCIAS NESTE LOTE: 0
+15:40:07	Informação	🏆 TODOS OS TESTES DA SUÍTE FORAM PERCORRIDOS.
+15:40:07	Informação	⚠️ A aprovação final continua dependendo dos PASSOU/FALHOU internos de cada teste.
+15:40:06	Notificação	Execução concluída
