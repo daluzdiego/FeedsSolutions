@@ -685,7 +685,7 @@ function TESTAR_ADAPTADOR_FLUXO_PRINCIPAL_V63() {
         resolucaoId,
 
       titulo_interno:
-        'Resolução temporária — adaptador V6.3',
+        'Resolução validada — Atlas Delta 47 — fluxo principal V6.3',
 
       descricao_problema:
         interpretacao.problema,
@@ -1846,10 +1846,10 @@ function TESTAR_FLUXO_PRINCIPAL_REAL_V63() {
 
 
     const mensagem =
-      'Conferimos e lançamos pedidos manualmente. ' +
-      'Isso gera erros de digitação e retrabalho todos os dias. ' +
-      'Perdemos cerca de 3 horas por dia. ' +
-      'Queremos reduzir erros e retrabalho mantendo a qualidade.';
+      'Conferimos e lançamos ordens de manutenção do projeto Atlas Delta 47 manualmente. ' +
+      'Esse processo exclusivo do Atlas Delta 47 gera erros de digitação e retrabalho todos os dias. ' +
+      'Perdemos cerca de 3 horas por dia nessa operação. ' +
+      'Queremos reduzir erros e retrabalho no Atlas Delta 47 mantendo a qualidade da manutenção.';
 
 
     /*
