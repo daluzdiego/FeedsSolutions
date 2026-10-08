@@ -448,10 +448,10 @@ function TESTAR_RESULTADO_REAL_FLUXO_PRINCIPAL_V63() {
       !!(inicio && inicio.sucesso === true && diagnosticoId));
 
     const mensagem =
-      'Conferimos e lançamos pedidos manualmente. ' +
-      'Isso gera erros de digitação e retrabalho todos os dias. ' +
-      'Perdemos cerca de 3 horas por dia. ' +
-      'Queremos reduzir erros e retrabalho mantendo a qualidade.';
+      'Conferimos e lançamos ordens de manutenção do projeto Atlas Delta 47 manualmente. ' +
+      'Esse processo exclusivo do Atlas Delta 47 gera erros de digitação e retrabalho todos os dias. ' +
+      'Perdemos cerca de 3 horas por dia nessa operação. ' +
+      'Queremos reduzir erros e retrabalho no Atlas Delta 47 mantendo a qualidade da manutenção.';
 
     const interpretacao = interpretarMensagemSemanticaV63_(mensagem);
 
@@ -461,17 +461,28 @@ function TESTAR_RESULTADO_REAL_FLUXO_PRINCIPAL_V63() {
 
     const criada = salvarResolucaoV63_({
       resolucao_id: resolucaoId,
-      titulo_interno: 'Resolução E2E resultado real V6.3',
-      descricao_problema: interpretacao.problema,
-      padrao_problema: interpretacao.padrao_problema,
-      processo: interpretacao.processo,
-      dores: interpretacao.dores,
-      impactos: interpretacao.impactos,
-      resultados_desejados: [interpretacao.resultado_desejado],
-      contexto: interpretacao.contexto,
+      titulo_interno: 'Resolução E2E — Atlas Delta 47 — resultado real V6.3',
+      descricao_problema:
+        'Erros de digitação e retrabalho na conferência e lançamento manual das ordens de manutenção do projeto Atlas Delta 47.',
+      padrao_problema:
+        'Processo manual repetitivo exclusivo do projeto Atlas Delta 47.',
+      processo:
+        'Conferir e lançar ordens de manutenção do projeto Atlas Delta 47.',
+      dores: [
+        'Erros de digitação',
+        'Retrabalho'
+      ],
+      impactos: [
+        'Perda de cerca de 3 horas por dia'
+      ],
+      resultados_desejados: [
+        'Reduzir erros e retrabalho no Atlas Delta 47 mantendo a qualidade da manutenção.'
+      ],
+      contexto:
+        'Projeto Atlas Delta 47.',
       restricoes: [],
-      abordagem_interna: 'Padronização.',
-      descricao_solucao_interna: 'Procedimento padronizado.',
+      abordagem_interna: 'Padronização do processo exclusivo do Atlas Delta 47.',
+      descricao_solucao_interna: 'Procedimento padronizado de conferência e lançamento das ordens de manutenção do Atlas Delta 47.',
       alternativas: [],
       status: 'VALIDADA',
       confianca: 'ALTA',
