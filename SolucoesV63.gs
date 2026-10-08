@@ -1091,7 +1091,7 @@ function buscarResolucoesRelacionadasV63_(
         );
 
       if (
-        comparacao.pontuacao <
+        comparacao.pontuacao_base <
         pontuacaoMinima
       ) {
         return;
