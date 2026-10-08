@@ -101,10 +101,10 @@ function TESTAR_INTEGRACAO_APRENDIZADO_FLUXO_V63() {
       !!(inicio && inicio.sucesso === true && inicio.diagnostico_id));
 
     const mensagem =
-      'Conferimos e lançamos ordens de manutenção de empilhadeiras manualmente. ' +
-      'Isso gera erros de digitação e retrabalho todos os dias. ' +
-      'Perdemos cerca de 3 horas por dia. ' +
-      'Queremos reduzir erros e retrabalho mantendo a qualidade da manutenção.';
+      'Conferimos e lançamos ordens de manutenção do projeto Atlas Delta 47 manualmente. ' +
+      'Esse processo exclusivo do Atlas Delta 47 gera erros de digitação e retrabalho todos os dias. ' +
+      'Perdemos cerca de 3 horas por dia nessa operação. ' +
+      'Queremos reduzir erros e retrabalho no Atlas Delta 47 mantendo a qualidade da manutenção.';
 
     const interpretacao =
       interpretarMensagemSemanticaV63_(mensagem);
