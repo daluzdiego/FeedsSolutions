@@ -287,6 +287,13 @@ function obterTestesAceitacaoFinalV63_() {
         : null
     },
     {
+      etapa: 'Robustez operacional V6.3',
+      nome: 'TESTAR_ROBUSTEZ_OPERACIONAL_V63',
+      fn: typeof TESTAR_ROBUSTEZ_OPERACIONAL_V63 === 'function'
+        ? TESTAR_ROBUSTEZ_OPERACIONAL_V63
+        : null
+    },
+    {
       etapa: 'Soluções — reconhecimento',
       nome: 'TESTAR_RECONHECIMENTO_SOLUCOES_V63',
       fn: typeof TESTAR_RECONHECIMENTO_SOLUCOES_V63 === 'function'
