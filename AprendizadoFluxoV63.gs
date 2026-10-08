@@ -116,7 +116,7 @@ function TESTAR_INTEGRACAO_APRENDIZADO_FLUXO_V63() {
 
     const criada = salvarResolucaoV63_({
       resolucao_id: resolucaoId,
-      titulo_interno: 'Resolução validada — ordens de manutenção de empilhadeiras — aprendizado fluxo V6.3',
+      titulo_interno: 'Resolução validada — Atlas Delta 47 — aprendizado fluxo V6.3',
       descricao_problema: interpretacao.problema,
       padrao_problema: interpretacao.padrao_problema,
       processo: interpretacao.processo,
@@ -151,41 +151,6 @@ function TESTAR_INTEGRACAO_APRENDIZADO_FLUXO_V63() {
     teste(5, 'V6.3 foi ativada',
       !!(fluxo && fluxo.integracao_v63 &&
          fluxo.integracao_v63.ativada === true));
-
-    try {
-      const rv =
-        fluxo &&
-        fluxo.integracao_v63 &&
-        fluxo.integracao_v63.resultado_v63
-          ? fluxo.integracao_v63.resultado_v63
-          : null;
-
-      const candidatos =
-        rv && Array.isArray(rv.resultados_reconhecimento)
-          ? rv.resultados_reconhecimento
-          : [];
-
-      Logger.log('🔎 DIAGNÓSTICO TESTE 6 — classificação: ' +
-        String(rv && rv.reconhecimento
-          ? rv.reconhecimento.classificacao
-          : ''));
-
-      candidatos.forEach(function(item, index) {
-        Logger.log(
-          '🔎 CANDIDATO ' + (index + 1) +
-          ' | id=' + String(item && item.resolucao_id || '') +
-          ' | status=' + String(item && item.status || '') +
-          ' | base=' + String(item && item.pontuacao_base || '') +
-          ' | final=' + String(item && item.pontuacao || '') +
-          ' | titulo=' + String(item && item.titulo_interno || '')
-        );
-      });
-
-      Logger.log('🔎 TOTAL CANDIDATOS: ' + candidatos.length);
-    } catch (diagnosticoErro) {
-      Logger.log('⚠️ Falha na instrumentação do teste: ' +
-        (diagnosticoErro.message || diagnosticoErro));
-    }
 
     teste(6, 'decisão reconheceu solução validada',
       !!(
