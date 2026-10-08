@@ -221,8 +221,11 @@ function construirContextoIntegracaoV63_(
       investigacao.investigacao_id ||
       '',
 
+    // No fluxo oficial, reconhecimento deve exigir aderência forte.
+    // O motor continua podendo listar relações abaixo deste corte,
+    // mas elas não podem disputar uma solução validada no fluxo real.
     pontuacao_minima:
-      20
+      85
 
   };
 
