@@ -101,10 +101,10 @@ function TESTAR_INTEGRACAO_APRENDIZADO_FLUXO_V63() {
       !!(inicio && inicio.sucesso === true && inicio.diagnostico_id));
 
     const mensagem =
-      'Conferimos e lançamos pedidos manualmente. ' +
+      'Conferimos e lançamos ordens de manutenção de empilhadeiras manualmente. ' +
       'Isso gera erros de digitação e retrabalho todos os dias. ' +
       'Perdemos cerca de 3 horas por dia. ' +
-      'Queremos reduzir erros e retrabalho mantendo a qualidade.';
+      'Queremos reduzir erros e retrabalho mantendo a qualidade da manutenção.';
 
     const interpretacao =
       interpretarMensagemSemanticaV63_(mensagem);
@@ -116,7 +116,7 @@ function TESTAR_INTEGRACAO_APRENDIZADO_FLUXO_V63() {
 
     const criada = salvarResolucaoV63_({
       resolucao_id: resolucaoId,
-      titulo_interno: 'Resolução validada — aprendizado fluxo V6.3',
+      titulo_interno: 'Resolução validada — ordens de manutenção de empilhadeiras — aprendizado fluxo V6.3',
       descricao_problema: interpretacao.problema,
       padrao_problema: interpretacao.padrao_problema,
       processo: interpretacao.processo,
