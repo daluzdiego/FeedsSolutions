@@ -182,10 +182,63 @@ function fecharCicloAprendizadoV63_(dados) {
       gerarId_('FEEDBACK-V63')
     ).trim();
 
+  /*
+   * ----------------------------------------------------------
+   * LOCK RESILIENTE
+   * ----------------------------------------------------------
+   * O LockService pode retornar erro transitório de servidor
+   * em vez de um simples timeout. Não usamos waitLock() em uma
+   * única chamada: tentamos adquirir o lock em pequenas janelas
+   * e repetimos falhas transitórias.
+   * ----------------------------------------------------------
+   */
   const lock =
     LockService.getScriptLock();
 
-  lock.waitLock(30000);
+  let lockAdquirido = false;
+  let ultimoErroLock = null;
+
+  for (let tentativa = 1; tentativa <= 3; tentativa++) {
+
+    try {
+
+      lockAdquirido =
+        lock.tryLock(5000);
+
+      if (lockAdquirido) {
+        break;
+      }
+
+    } catch (erroLock) {
+
+      ultimoErroLock = erroLock;
+
+      Logger.log(
+        '⚠️ LockService — tentativa ' +
+        tentativa +
+        '/3: ' +
+        (erroLock && erroLock.message
+          ? erroLock.message
+          : erroLock)
+      );
+
+      if (tentativa < 3) {
+        Utilities.sleep(500);
+      }
+    }
+  }
+
+  if (!lockAdquirido) {
+
+    throw new Error(
+      'Não foi possível adquirir o lock do fechamento V6.3 após 3 tentativas.' +
+      (
+        ultimoErroLock && ultimoErroLock.message
+          ? ' Último erro: ' + ultimoErroLock.message
+          : ''
+      )
+    );
+  }
 
   try {
 
@@ -263,7 +316,10 @@ function fecharCicloAprendizadoV63_(dados) {
   } finally {
 
     SpreadsheetApp.flush();
-    lock.releaseLock();
+
+    if (lockAdquirido) {
+      lock.releaseLock();
+    }
 
   }
 }
