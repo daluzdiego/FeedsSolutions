@@ -1330,10 +1330,14 @@ function TESTAR_IA_SEMANTICA_REAL_V63() {
 
     teste(
       8,
-      'Contexto foi estruturado',
+      'Contexto não foi inventado quando a mensagem não o sustenta',
       !!(
         interpretacao1 &&
-        interpretacao1.contexto
+        !String(interpretacao1.contexto || '').trim() &&
+        interpretacao1.status &&
+        interpretacao1.status.contexto === 'DESCONHECIDO' &&
+        Array.isArray(interpretacao1.lacunas) &&
+        interpretacao1.lacunas.indexOf('contexto') !== -1
       )
     );
 
