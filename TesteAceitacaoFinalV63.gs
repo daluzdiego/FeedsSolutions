@@ -565,7 +565,8 @@ function obterTestesAceitacaoFinalV63_() {
       fn: typeof TESTAR_ROBUSTEZ_OPERACIONAL_V63 === 'function'
         ? TESTAR_ROBUSTEZ_OPERACIONAL_V63
         : null
-    },  ];
+    }
+  ];
 }
 
 function TESTAR_ACEITACAO_FINAL_V63() {
