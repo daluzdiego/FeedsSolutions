@@ -234,7 +234,9 @@ function TESTAR_ROBUSTEZ_OPERACIONAL_V63() {
     function() {
       return {
         sucesso: true,
-        resposta: 'Resposta interna V6.3',
+        resposta: {
+          resposta_cliente: 'Resposta interna V6.3'
+        },
         decisao: {
           estado: 'SOLUCAO_VALIDADA'
         }
