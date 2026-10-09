@@ -4,6 +4,8 @@
 
 **Versão:** V6.3  
 **Estado:** 🟢 ESTÁVEL / ACEITA  
+**Conclusão global do produto:** **72%**  
+**Maturidade do núcleo V6.3:** **~95%**  
 **Data:** 2026-10-09
 
 A V6.3 concluiu desenvolvimento e aceitação. A cadeia integrada inclui interpretação semântica, investigação, reconhecimento, decisão, resposta segura, aprendizado, resultado real e integração ao fluxo principal.
