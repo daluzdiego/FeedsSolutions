@@ -2037,7 +2037,37 @@ function ajustarContinuidadeDiagnostico_(
   }
 
   // ----------------------------------------------------------
-  // 2. ERROS / RETRABALHO / ATRASOS
+  // ----------------------------------------------------------
+  // 2. FREQUÊNCIA / PERIODICIDADE
+  // ----------------------------------------------------------
+  //
+  // Reconhece deterministicamente respostas à pergunta
+  // "Com que frequência..." para impedir repetição infinita.
+  // Respostas negativas também são respostas válidas.
+  // ----------------------------------------------------------
+  if (
+    /frequencia|frequência|periodicidade|com que frequencia|com que frequência/
+      .test(perguntaNorm)
+  ) {
+
+    const respondeuFrequencia =
+      /\b(diari(?:a|amente)|semanal(?:mente)?|mensal(?:mente)?|quinzenal(?:mente)?|ocasional(?:mente)?|eventualmente|todo dia|todos os dias|toda semana|todas as semanas|todo mes|todo mês|por dia|por semana|por mes|por mês|ao dia|ao mes|ao mês|\d+\s*(?:x|vezes)\s*(?:ao|por)\s*(?:dia|semana|mes|mês)|\d+\s+(?:post|posts|postagem|postagens)\s+(?:por|na)\s+(?:dia|semana|mes|mês))\b/i
+        .test(mensagem);
+
+    const respostaFrequenciaNegativa =
+      /\b(?:nao|não)\b/i.test(mensagem) &&
+      /\b(?:post(?:ar|ando|amos)?|public(?:ar|ando|amos)?|frequencia|frequência|vezes)\b/i.test(mensagem);
+
+    if (
+      respondeuFrequencia ||
+      respostaFrequenciaNegativa
+    ) {
+      respondeuDeterministicamente = true;
+    }
+  }
+
+  // ----------------------------------------------------------
+  // 3. ERROS / RETRABALHO / ATRASOS
   // ----------------------------------------------------------
   if (
     /erro|erros|atraso|atrasos|retrabalho|revisao|revisão|conferencia|conferência/
@@ -2125,6 +2155,16 @@ function ajustarContinuidadeDiagnostico_(
         resultado.proxima_pergunta =
           'Esse processo costuma gerar erros, retrabalho ou atrasos?';
 
+      } else if (
+        /frequencia|frequência|periodicidade|com que frequencia|com que frequência/
+          .test(perguntaNorm)
+      ) {
+
+        resultado.informacao_faltante =
+          'erros, retrabalho ou atrasos gerados pelo processo';
+
+        resultado.proxima_pergunta =
+          'Esse processo costuma gerar erros, retrabalho ou atrasos?';
       } else if (
         /erro|erros|atraso|atrasos|retrabalho|revisao|revisão|conferencia|conferência/
           .test(perguntaNorm)
@@ -6519,6 +6559,72 @@ function testarContinuidadeDiagnosticoV5() {
     );
   }
 
+  // ----------------------------------------------------------
+  // CASO 2 — RESPOSTA À PERGUNTA DE FREQUÊNCIA
+  // ----------------------------------------------------------
+  const respostaFrequencia =
+    ajustarContinuidadeDiagnostico_(
+      {
+        processo: 'captação de clientes pelas redes sociais',
+        dor_principal: 'dificuldade para captar clientes',
+        frequencia: '',
+        impacto: '',
+        volume: '',
+        objetivo: '',
+        informacao_faltante: 'frequência de publicação',
+        proxima_pergunta: 'Com que frequência vocês tentam captar clientes pelas redes sociais?',
+        respondeu_pergunta_pendente: false
+      },
+      'Com que frequência vocês tentam captar clientes pelas redes sociais?',
+      'com 1 post por semana'
+    );
+
+  if (respostaFrequencia.respondeu_pergunta_pendente !== true) {
+    erros.push(
+      'Resposta de frequência não foi reconhecida como resposta à pergunta pendente.'
+    );
+  }
+
+  if (
+    normalizarTextoDiagnostico_(respostaFrequencia.proxima_pergunta || '') ===
+    normalizarTextoDiagnostico_('Com que frequência vocês tentam captar clientes pelas redes sociais?')
+  ) {
+    erros.push(
+      'Pergunta de frequência foi repetida depois de respondida.'
+    );
+  }
+
+  const respostaFrequenciaNegativa =
+    ajustarContinuidadeDiagnostico_(
+      {
+        processo: 'captação de clientes pelas redes sociais',
+        dor_principal: 'dificuldade para captar clientes',
+        frequencia: '',
+        impacto: '',
+        volume: '',
+        objetivo: '',
+        informacao_faltante: 'frequência de publicação',
+        proxima_pergunta: 'Com que frequência vocês tentam captar clientes pelas redes sociais?',
+        respondeu_pergunta_pendente: false
+      },
+      'Com que frequência vocês tentam captar clientes pelas redes sociais?',
+      'não estamos postando'
+    );
+
+  if (respostaFrequenciaNegativa.respondeu_pergunta_pendente !== true) {
+    erros.push(
+      'Resposta negativa de frequência não foi reconhecida como resposta válida.'
+    );
+  }
+
+  if (
+    normalizarTextoDiagnostico_(respostaFrequenciaNegativa.proxima_pergunta || '') ===
+    normalizarTextoDiagnostico_('Com que frequência vocês tentam captar clientes pelas redes sociais?')
+  ) {
+    erros.push(
+      'Pergunta de frequência foi repetida após resposta negativa.'
+    );
+  }
   // ----------------------------------------------------------
   // CASO 2 — RESPOSTA À PERGUNTA DE VOLUME
   // ----------------------------------------------------------
