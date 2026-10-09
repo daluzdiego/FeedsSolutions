@@ -1049,7 +1049,7 @@ const investigacaoV622 =
   fechamento_aprendizado_v63:
     fechamentoAprendizadoV63
 
-};
+});
 
 }
 
