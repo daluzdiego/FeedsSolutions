@@ -2027,18 +2027,38 @@ function ajustarContinuidadeDiagnostico_(
   // ----------------------------------------------------------
   if (/quantos|quantidade|volume/.test(perguntaNorm)) {
 
+    /*
+     * Respostas de volume podem ser contextuais:
+     * "5", "5, mas nenhum converte em compra",
+     * "5 clientes" ou "aproximadamente 5".
+     *
+     * A pergunta já fornece a unidade. Portanto, exigir que
+     * o usuário repita "clientes", "vendas" etc. é artificial
+     * e causa repetição indevida da pergunta.
+     */
     const respondeuVolume =
-      /\b\d+(?:[.,]\d+)?\s+(?:pedidos?|vendas?|clientes?|ordens?|orcamentos?|orçamentos?|atendimentos?)\b/i
-        .test(mensagem);
+      /\b\d+(?:[.,]\d+)?\b/i.test(mensagem) ||
+      /\b(?:nenhum|nenhuma|zero)\b/i.test(mensagem);
 
     if (respondeuVolume) {
       respondeuDeterministicamente = true;
+
+      // Preserva evidência mínima se a IA não consolidar volume.
+      if (!String(resultado.volume || '').trim()) {
+        const volumeEncontrado =
+          mensagemOriginal.match(/\b\d+(?:[.,]\d+)?\b/);
+
+        if (volumeEncontrado) {
+          resultado.volume = volumeEncontrado[0];
+        } else if (/\b(?:nenhum|nenhuma|zero)\b/i.test(mensagem)) {
+          resultado.volume = '0';
+        }
+      }
     }
   }
 
   // ----------------------------------------------------------
   // ----------------------------------------------------------
-  // 2. FREQUÊNCIA / PERIODICIDADE
   // ----------------------------------------------------------
   //
   // Reconhece deterministicamente respostas à pergunta
