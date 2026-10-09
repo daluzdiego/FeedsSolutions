@@ -2197,10 +2197,14 @@ function ajustarContinuidadeDiagnostico_(
         resultado.informacao_faltante || ''
       );
 
+    const dimensaoPerguntaAtual = classificarDimensaoPerguntaDiagnostico_(perguntaNorm);
+    const dimensaoProximaPergunta = classificarDimensaoPerguntaDiagnostico_(proximaNorm);
+    const mesmaDimensao = dimensaoPerguntaAtual !== 'OUTRA' && dimensaoPerguntaAtual === dimensaoProximaPergunta;
     const respostaIAValida =
       !!proximaNorm &&
       proximaNorm !== perguntaNorm &&
-      infoNorm !== perguntaNorm;
+      infoNorm !== perguntaNorm &&
+      !mesmaDimensao;
 
     if (!respostaIAValida) {
 
@@ -2276,6 +2280,17 @@ function ajustarContinuidadeDiagnostico_(
 
   return resultado;
 
+}
+
+
+function classificarDimensaoPerguntaDiagnostico_(perguntaNormalizada) {
+  const p = normalizarTextoDiagnostico_(perguntaNormalizada || '');
+  if (/frequencia|periodicidade|quantas vezes/.test(p)) return 'FREQUENCIA';
+  if (/impacto|consequencia|efeito|afeta|prejuizo|perda/.test(p)) return 'IMPACTO';
+  if (/quantos|quantidade|volume|numero de clientes|numero de pedidos|quantas vendas/.test(p)) return 'VOLUME';
+  if (/erro|retrabalho|atraso|revisao|conferencia/.test(p)) return 'ERROS';
+  if (/objetivo|o que voce gostaria|o que voces gostariam|melhorar ou alcancar|resultado deseja/.test(p)) return 'OBJETIVO';
+  return 'OUTRA';
 }
 
 
