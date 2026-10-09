@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Neuro Solutions</title>
+<style>
+:root{--bg:#f4f7fb;--card:#fff;--text:#172033;--muted:#687386;--primary:#2457d6;--border:#e3e8f1;--ok:#16845b}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text)}
+.wrap{max-width:980px;margin:0 auto;padding:28px 18px}.brand{font-weight:800;font-size:22px}.hero{padding:48px 0 28px}.hero h1{font-size:38px;line-height:1.1;margin:10px 0}.hero p{color:var(--muted);font-size:17px;max-width:680px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:24px;box-shadow:0 8px 30px rgba(30,50,90,.06)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field{display:flex;flex-direction:column;gap:7px}.field.full{grid-column:1/-1}label{font-size:13px;font-weight:700}input,textarea{width:100%;border:1px solid #d6dce7;border-radius:11px;padding:12px;font:inherit;outline:none}input:focus,textarea:focus{border-color:var(--primary)}textarea{min-height:110px;resize:vertical}button{border:0;border-radius:11px;padding:12px 18px;background:var(--primary);color:#fff;font-weight:700;cursor:pointer}button:disabled{opacity:.55;cursor:wait}.actions{margin-top:16px;display:flex;justify-content:flex-end}.hidden{display:none}.chat{margin-top:18px}.messages{height:420px;overflow:auto;border:1px solid var(--border);border-radius:14px;padding:14px;background:#f9fbfe}.msg{max-width:82%;padding:12px 14px;border-radius:14px;margin:8px 0;white-space:pre-wrap}.user{margin-left:auto;background:#dfe9ff}.bot{background:#fff;border:1px solid var(--border)}.status{font-size:12px;color:var(--muted);margin:10px 0}.chatbar{display:grid;grid-template-columns:1fr auto;gap:10px;margin-top:10px}.success{color:var(--ok);font-weight:700}.error{color:#b42318;font-weight:700}@media(max-width:700px){.grid{grid-template-columns:1fr}.field.full{grid-column:auto}.hero h1{font-size:31px}.chatbar{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">Neuro Solutions</div>
+  <section class="hero">
+    <div class="card">
+      <div id="intro">
+        <div class="hero">
+          <h1>Vamos entender onde sua empresa pode melhorar.</h1>
+          <p>Conte o que está acontecendo. O sistema conduz uma investigação estruturada para entender o processo, a dor, o impacto e o resultado desejado.</p>
+        </div>
+        <div class="grid">
+          <div class="field"><label>Empresa *</label><input id="empresa" placeholder="Nome da empresa"></div>
+          <div class="field"><label>Seu nome</label><input id="contato" placeholder="Nome do contato"></div>
+          <div class="field"><label>WhatsApp</label><input id="whatsapp" placeholder="(00) 00000-0000"></div>
+          <div class="field"><label>E-mail</label><input id="email" type="email" placeholder="voce@empresa.com"></div>
+          <div class="field"><label>Segmento</label><input id="segmento" placeholder="Ex.: comércio, escola, indústria"></div>
+          <div class="field"><label>Cidade</label><input id="cidade" placeholder="Cidade"></div>
+          <div class="field full"><label>O que está acontecendo? *</label><textarea id="mensagemInicial" placeholder="Ex.: estamos gastando muito tempo conferindo pedidos e ainda acontecem erros."></textarea></div>
+        </div>
+        <div class="actions"><button id="start" onclick="iniciar()">Começar diagnóstico</button></div>
+        <div id="feedback" class="status"></div>
+      </div>
+      <div id="chat" class="chat hidden">
+        <div class="status"><span class="success">Diagnóstico iniciado.</span> Continue respondendo às perguntas.</div>
+        <div id="messages" class="messages"></div>
+        <div class="chatbar">
+          <textarea id="entrada" rows="2" placeholder="Digite sua resposta..." onkeydown="atalho(event)"></textarea>
+          <button id="send" onclick="enviar()">Enviar</button>
+        </div>
+        <div id="chatStatus" class="status"></div>
+      </div>
+    </div>
+  </section>
+</div>
+<script>
+let sessao={empresa_id:null,conversa_id:null,diagnostico_id:null};
+function $(id){return document.getElementById(id)}
+function setFeedback(msg,erro){$('feedback').textContent=msg||'';$('feedback').className=erro?'status error':'status'}
+function addMsg(texto,tipo){const d=document.createElement('div');d.className='msg '+tipo;d.textContent=texto||'';$('messages').appendChild(d);$('messages').scrollTop=$('messages').scrollHeight}
+function iniciar(){
+  const nome=$('empresa').value.trim(), mensagem=$('mensagemInicial').value.trim();
+  if(!nome||!mensagem){setFeedback('Informe a empresa e descreva o problema.',true);return}
+  $('start').disabled=true;setFeedback('Iniciando diagnóstico...');
+  google.script.run.withSuccessHandler(r=>{
+    if(!r||!r.sucesso){$('start').disabled=false;setFeedback('Não foi possível iniciar o diagnóstico.',true);return}
+    sessao.empresa_id=r.empresa_id;sessao.conversa_id=r.conversa_id;sessao.diagnostico_id=r.diagnostico_id;
+    $('intro').classList.add('hidden');$('chat').classList.remove('hidden');
+    addMsg(mensagem,'user');processar(mensagem);
+  }).withFailureHandler(e=>{$('start').disabled=false;setFeedback(e&&e.message?e.message:'Erro ao iniciar.',true)})
+  .iniciarDiagnostico({nome:nome,nome_empresa:nome,nome_contato:$('contato').value.trim(),whatsapp:$('whatsapp').value.trim(),email:$('email').value.trim(),segmento:$('segmento').value.trim(),cidade:$('cidade').value.trim()});
+}
+function processar(mensagem){
+  $('send').disabled=true;$('chatStatus').textContent='Analisando...';
+  google.script.run.withSuccessHandler(r=>{
+    $('send').disabled=false;$('chatStatus').textContent='';
+    if(!r||!r.sucesso){$('chatStatus').textContent='Não foi possível processar a mensagem.';return}
+    addMsg(r.resposta||'Obrigado. Vamos continuar.','bot');
+  }).withFailureHandler(e=>{$('send').disabled=false;$('chatStatus').textContent=e&&e.message?e.message:'Erro ao processar.'})
+  .processarMensagemDiagnostico({empresa_id:sessao.empresa_id,conversa_id:sessao.conversa_id,mensagem:mensagem});
+}
+function enviar(){const v=$('entrada').value.trim();if(!v)return;$('entrada').value='';addMsg(v,'user');processar(v)}
+function atalho(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();enviar()}}
+</script>
+</body>
+</html>
