@@ -2067,7 +2067,38 @@ function ajustarContinuidadeDiagnostico_(
   }
 
   // ----------------------------------------------------------
-  // 3. ERROS / RETRABALHO / ATRASOS
+  // 3. IMPACTO / CONSEQUÊNCIA
+  // ----------------------------------------------------------
+  //
+  // Uma pergunta de impacto pode receber uma resposta livre.
+  // Exemplos válidos:
+  // - não tenho clientes entrando na loja
+  // - perdemos vendas
+  // - estamos deixando dinheiro na mesa
+  // - isso atrasa as entregas
+  // - não sei medir o impacto
+  //
+  // O importante aqui é reconhecer que o empresário respondeu
+  // à dimensão perguntada. A IA continuará responsável por
+  // extrair e consolidar o conteúdo sem inventar fatos.
+  // ----------------------------------------------------------
+  if (
+    /impacto|consequencia|consequência|efeito|resultado no seu negocio|resultado no seu negócio/
+      .test(perguntaNorm)
+  ) {
+
+    const respostaImpacto =
+      mensagem.length >= 2;
+
+    if (respostaImpacto) {
+      respondeuDeterministicamente = true;
+    }
+  }
+
+  // ----------------------------------------------------------
+  // 4. ERROS / RETRABALHO / ATRASOS
+  // ----------------------------------------------------------
+
   // ----------------------------------------------------------
   if (
     /erro|erros|atraso|atrasos|retrabalho|revisao|revisão|conferencia|conferência/
@@ -2157,6 +2188,16 @@ function ajustarContinuidadeDiagnostico_(
 
       } else if (
         /frequencia|frequência|periodicidade|com que frequencia|com que frequência/
+          .test(perguntaNorm)
+      ) {
+
+        resultado.informacao_faltante =
+          'erros, retrabalho ou atrasos gerados pelo processo';
+
+        resultado.proxima_pergunta =
+          'Esse processo costuma gerar erros, retrabalho ou atrasos?';
+      } else if (
+        /impacto|consequencia|consequência|efeito|resultado no seu negocio|resultado no seu negócio/
           .test(perguntaNorm)
       ) {
 
@@ -6623,6 +6664,40 @@ function testarContinuidadeDiagnosticoV5() {
   ) {
     erros.push(
       'Pergunta de frequência foi repetida após resposta negativa.'
+    );
+  }
+  // ----------------------------------------------------------
+  // CASO 2 — RESPOSTA À PERGUNTA DE IMPACTO
+  // ----------------------------------------------------------
+  const respostaImpacto =
+    ajustarContinuidadeDiagnostico_(
+      {
+        processo: 'captação de clientes pelas redes sociais',
+        dor_principal: 'dificuldade para captar clientes',
+        frequencia: 'Semanal',
+        impacto: '',
+        volume: '',
+        objetivo: '',
+        informacao_faltante: 'impacto no negócio',
+        proxima_pergunta: 'Qual o impacto disso no seu negócio?',
+        respondeu_pergunta_pendente: false
+      },
+      'Qual o impacto disso no seu negócio?',
+      'não tenho clientes entrando na minha loja'
+    );
+
+  if (respostaImpacto.respondeu_pergunta_pendente !== true) {
+    erros.push(
+      'Resposta de impacto não foi reconhecida como resposta à pergunta pendente.'
+    );
+  }
+
+  if (
+    normalizarTextoDiagnostico_(respostaImpacto.proxima_pergunta || '') ===
+    normalizarTextoDiagnostico_('Qual o impacto disso no seu negócio?')
+  ) {
+    erros.push(
+      'Pergunta de impacto foi repetida depois de respondida.'
     );
   }
   // ----------------------------------------------------------
