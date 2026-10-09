@@ -908,7 +908,7 @@ const investigacaoV622 =
    * ==========================================================
    */
 
-  return {
+  return serializarRetornoClienteDiagnosticoV63_({
 
     sucesso:
       true,
@@ -50544,4 +50544,55 @@ function TESTAR_CONTRATO_V562_V58() {
 
     throw erro;
   }
+}
+
+
+/**
+ * ============================================================
+ * SERIALIZA RETORNO DO DIAGNÓSTICO PARA GOOGLE.SCRIPT.RUN
+ * ============================================================
+ *
+ * O HTML Service não aceita objetos Date em valores retornados
+ * para o cliente. O fluxo interno trabalha normalmente com Date,
+ * mas o contrato da interface precisa ser JSON-safe.
+ * ============================================================
+ */
+function serializarRetornoClienteDiagnosticoV63_(valor) {
+
+  if (valor === null || valor === undefined) {
+    return valor;
+  }
+
+  if (Object.prototype.toString.call(valor) === '[object Date]') {
+    return valor.toISOString();
+  }
+
+  if (Array.isArray(valor)) {
+    return valor.map(function(item) {
+      return serializarRetornoClienteDiagnosticoV63_(item);
+    });
+  }
+
+  if (typeof valor === 'object') {
+    const resultado = {};
+
+    Object.keys(valor).forEach(function(chave) {
+      const item = valor[chave];
+
+      if (item === undefined || typeof item === 'function') {
+        return;
+      }
+
+      resultado[chave] =
+        serializarRetornoClienteDiagnosticoV63_(item);
+    });
+
+    return resultado;
+  }
+
+  if (typeof valor === 'number' && !isFinite(valor)) {
+    return null;
+  }
+
+  return valor;
 }
