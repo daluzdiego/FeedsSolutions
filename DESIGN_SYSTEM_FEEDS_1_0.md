@@ -3,76 +3,140 @@
 **Produto:** FEEDS — Tecnologia e Soluções  
 **Versão:** UX/UI 1.0  
 **Data:** 2026-10-09  
-**Status:** ESPECIFICAÇÃO BASE — aprovada para implementação
+**Status:** ESPECIFICAÇÃO BASE — 5 TELAS-MÃE DEFINIDAS
 
----
+## Princípio
 
-## 1. PRINCÍPIO DO PRODUTO
+O FEEDS não deve parecer formulário, chatbot genérico ou painel administrativo tradicional.
 
-O FEEDS não deve parecer um formulário, um chatbot genérico ou um painel administrativo tradicional.
+A experiência deve transmitir inteligência, confiança, tecnologia, clareza, transformação, sofisticação sem excesso e proximidade.
 
-A experiência deve transmitir:
-- inteligência;
-- confiança;
-- tecnologia;
-- clareza;
-- transformação;
-- sofisticação sem excesso;
-- proximidade.
-
-Mensagem central da marca:
+Mensagem central:
 
 > **TRANSFORMAMOS PROBLEMAS EM SOLUÇÕES.**
 
-A interface deve conduzir o usuário por uma jornada simples:
+## Regra de ouro
 
-**Problema → Entendimento → Descoberta → Solução → Oportunidade**
+> **Uma tela, uma decisão.**
 
-O cliente não precisa conhecer conceitos internos como IA, triagem, investigação, reconhecimento ou aprendizado. Esses conceitos pertencem ao motor e à área administrativa.
+O motor pode ser complexo por trás; a experiência deve permanecer simples na frente.
 
----
+## Jornada pública
 
-## 2. DOIS MUNDOS DE EXPERIÊNCIA
+**01 Landing → 02 Identificação → 03 Problema → 04 Conversa Inteligente → 05 Diagnóstico**
 
-### 2.1 Experiência do cliente
+### Tela 01 — Landing
 
-Objetivo: reduzir fricção e conduzir o cliente.
+Objetivo: gerar o primeiro clique.
 
-Jornada:
-1. Landing
-2. Início do diagnóstico
-3. Conversa inteligente
-4. Diagnóstico
-5. Oportunidade
-6. Solução
-7. Próximo passo comercial
+- Logo central em destaque.
+- Headline: **TRANSFORMAMOS PROBLEMAS EM SOLUÇÕES.**
+- Frase curta.
+- CTA: **COMEÇAR AGORA →**
+- Desktop e mobile tratados como experiências responsivas equivalentes.
+- Não duplicar a logo no topo e no centro.
+- Não sobrecarregar a primeira tela.
 
-### 2.2 Experiência interna
+### Tela 02 — Identificação
 
-Objetivo: transformar os dados produzidos pelo motor em visão operacional.
+Objetivo: saber com quem estamos falando sem criar sensação de cadastro.
 
-Áreas:
-- Visão geral
-- Empresas
-- Conversas
-- Diagnósticos
-- Investigações
-- Oportunidades
-- Soluções
-- Leads
-- Pipeline
-- Aprendizado
-- Métricas
-- Configurações
-- Saúde do sistema
+Perguntas:
 
----
+> **Como podemos chamar você?**
 
-## 3. IDENTIDADE VISUAL
+> **Qual é o nome da sua empresa?**
 
-A identidade deve partir da logo FEEDS fornecida pelo projeto.
+Somente nome + empresa nesta etapa.
 
-### 3.1 Paleta oficial
+CTA:
+
+**CONTINUAR →**
+
+A partir daqui o sistema pode personalizar a experiência com o nome da pessoa e da empresa.
+
+### Tela 03 — Problema
+
+Objetivo: capturar o problema inicial com mínima fricção.
+
+Mensagem:
+
+> **Olá, {nome}.**
+
+> **Qual problema está acontecendo na sua empresa?**
+
+Apoio:
+
+> Descreva com suas palavras o que está acontecendo. Você não precisa saber exatamente qual é a solução. Nós vamos ajudar a descobrir.
+
+Campo grande + CTA **CONTINUAR →**.
+
+### Tela 04 — Conversa Inteligente
+
+Objetivo: investigar e compreender.
+
+A conversa não deve parecer WhatsApp.
+
+Elementos:
+
+- progresso da jornada;
+- mensagem do FEEDS;
+- resposta do usuário;
+- indicador de processamento;
+- resumo progressivo;
+- campo de resposta;
+- CTA de continuidade.
+
+Indicador conceitual:
+
+**Processo → Problema → Impacto → Objetivo**
+
+O resumo nunca deve inventar informação.
+
+### Tela 05 — Diagnóstico
+
+Objetivo: mostrar que encontramos algo importante e conduzir a uma única próxima decisão.
+
+A tela deve ser propositalmente limpa.
+
+Estrutura:
+
+> **DIAGNÓSTICO CONCLUÍDO**
+
+> **Encontramos uma oportunidade, {nome}.**
+
+Card principal:
+
+**OPORTUNIDADE IDENTIFICADA**
+
+- título da oportunidade/solução quando houver evidência;
+- uma explicação curta;
+- aderência quando disponível.
+
+CTA principal:
+
+**CONHECER A SOLUÇÃO →**
+
+Ação secundária discreta:
+
+**Voltar ao diagnóstico**
+
+Não colocar nesta tela:
+
+- PDF;
+- proposta;
+- pipeline;
+- vários indicadores;
+- múltiplos próximos passos;
+- explicação técnica extensa;
+- vários cards;
+- timeline comercial.
+
+Esses elementos pertencem às etapas seguintes.
+
+## Identidade visual
+
+Paleta:
 
 | Uso | Hex |
 |---|---|
@@ -85,359 +149,102 @@ A identidade deve partir da logo FEEDS fornecida pelo projeto.
 | Branco principal | #F8FAFC |
 | Branco secundário | #E2E8F0 |
 | Texto secundário | #94A3B8 |
-| Bordas escuras | #1E293B |
+| Bordas | #1E293B |
 
-### 3.2 Regra de uso
+Fundos preferenciais: #020617, #0F172A e #111C2E.
 
-O fundo escuro é estrutural.
+Gradientes e brilhos são atmosfera, não conteúdo.
 
-Azul, ciano e teal são usados para orientar e comunicar estados.
-
-Laranja deve ser usado com parcimônia para prioridade, oportunidade ou atenção.
-
-Não transformar a interface em um painel neon.
-
----
-
-## 4. FUNDOS
-
-Preferência:
-- #020617 para áreas hero e telas de destaque;
-- #0F172A para superfícies principais;
-- #111C2E para cards e áreas elevadas;
-- #1E293B para bordas.
-
-Gradientes podem existir, mas somente como atmosfera.
-
-Brilhos azul/ciano devem ser discretos e localizados.
-
----
-
-## 5. TIPOGRAFIA
+## Tipografia
 
 Família recomendada: **Inter**.
 
 Fallback: Arial, sans-serif.
 
-Hierarquia:
-- H1: forte, grande, curto;
-- H2: destaque de seção;
-- H3: títulos de cards;
-- corpo: confortável para leitura;
-- texto auxiliar: menor e em cinza azulado;
-- números de indicadores: grandes e fortes.
+Hierarquia forte, limpa e com pouco uso de caixa alta.
 
-Nunca usar excesso de caixa alta.
+## Componentes
 
----
-
-## 6. LOGO
-
-### Público / abertura
-Usar a marca completa: FEEDS / TECNOLOGIA E SOLUÇÕES.
-
-### Sistema desktop
-Preferência: símbolo + FEEDS.
-
-### Sistema mobile
-Preferência: símbolo.
-
-A logo não deve competir visualmente com o conteúdo.
-
----
-
-## 7. PRINCÍPIOS DE COMPONENTES
-
-Todos os componentes devem seguir:
 - bordas arredondadas;
 - contraste elevado;
-- hierarquia clara;
 - pouco ruído;
-- estados visuais explícitos;
-- toque confortável no celular;
+- estados explícitos;
+- toque confortável;
 - animações rápidas e discretas.
 
-Raio padrão: pequeno 8px; padrão 12px; destaque 16px; hero 20–24px.
+Raios: 8px, 12px, 16px e 20–24px para hero.
 
----
+## Responsividade
 
-## 8. BOTÕES
+A interface não é um desktop comprimido.
 
-### Primário
-Azul #2563EB. Uso: continuar, começar diagnóstico, enviar, avançar.
+Desktop: mais informação simultânea e áreas laterais.  
+Tablet: duas colunas quando houver espaço.  
+Mobile: uma coluna, cards, áreas expansíveis e ações acessíveis.
 
-### Inteligência
-Ciano #06B6D4. Uso: processamento e ações relacionadas à inteligência.
+## Navegação pública
 
-### Sucesso
-Teal #14B8A6. Uso: concluído, solução encontrada, validação.
+A jornada deve permitir retorno sem perder contexto enquanto a sessão estiver ativa.
 
-### Atenção
-Laranja #F97316. Uso: oportunidade, prioridade, atenção.
+## Microinterações
 
-Exemplos de texto:
-- COMEÇAR DIAGNÓSTICO
-- CONTINUAR
-- ENVIAR
-- VER SOLUÇÃO
-- ABRIR OPORTUNIDADE
+Usar brilho ciano/azul e transições discretas para:
 
----
+- avanço de etapa;
+- processamento;
+- conclusão;
+- descoberta de oportunidade.
 
-## 9. INPUTS
+Evitar partículas excessivas e animações longas.
 
-Fundo: #0B1220.  
-Borda: #1E293B.  
-Foco: #2563EB ou #06B6D4.  
-Placeholder: #64748B.
+## Acessibilidade
 
-No mobile: largura total, altura confortável, teclado sem esconder o campo ativo e ações principais acessíveis.
+- contraste suficiente;
+- foco visível;
+- áreas de toque adequadas;
+- labels claros;
+- erros compreensíveis;
+- teclado;
+- não depender apenas de cor;
+- leitura confortável no celular.
 
----
+## Performance
 
-## 10. LANDING PAGE
+- CSS enxuto;
+- JavaScript enxuto;
+- poucas chamadas Apps Script;
+- carregamento progressivo;
+- feedback imediato;
+- animações de baixo custo.
 
-A primeira impressão deve ser premium e simples.
+## Regra arquitetural
 
-Estrutura: logo, mensagem principal, explicação curta, CTA e indicação visual da jornada.
+A UI não altera o núcleo V6.3.
 
-Mensagem principal:
-> **TRANSFORMAMOS PROBLEMAS EM SOLUÇÕES.**
+**UI → funções públicas → fluxo oficial → V6.3**
 
-Subtexto:
-> Conte o que está acontecendo na sua empresa. O FEEDS ajuda a entender o problema, identificar oportunidades e encontrar caminhos de solução.
+A interface consome contratos estáveis.
 
-CTA: **COMEÇAR DIAGNÓSTICO →**
+## Critério de aceite das 5 telas-mãe
 
-Não pedir cadastro completo antes de gerar valor.
-
----
-
-## 11. INÍCIO DO DIAGNÓSTICO
-
-Primeiro perguntar:
-> **Qual problema está acontecendo na sua empresa?**
-
-Campo grande.
-
-Mensagem auxiliar:
-> Você não precisa saber exatamente qual é a solução. Nós vamos ajudar a descobrir.
-
-CTA: **CONTINUAR →**
-
-Dados complementares podem ser coletados progressivamente quando fizer sentido.
-
----
-
-## 12. CONVERSA INTELIGENTE
-
-Esta é a principal experiência do produto.
-
-Não usar aparência de WhatsApp. A conversa deve parecer uma investigação guiada.
-
-Elementos: mensagem do FEEDS; resposta do usuário; indicador de progresso; resumo do que já foi entendido; campo de resposta; CTA de envio.
-
-Indicador: **ENTENDENDO SUA OPERAÇÃO**.
-
-Exemplo: **● Processo   ● Problema   ◐ Impacto   ○ Objetivo**.
-
-Evitar 'Pergunta 3 de 10'.
-
----
-
-## 13. RESUMO PROGRESSIVO
-
-Desktop pode exibir: **O QUE JÁ ENTENDEMOS** — Processo, Dor, Impacto, Frequência, Objetivo.
-
-No mobile: '▸ O que já entendemos'.
-
-O resumo aparece progressivamente e nunca deve inventar informação.
-
----
-
-## 14. DIAGNÓSTICO
-
-A conclusão deve apresentar um **Mapa do Problema**.
-
-Estrutura: problema; processo; dor principal; impacto; frequência; objetivo; oportunidade.
-
-Evitar linguagem técnica do motor.
-
----
-
-## 15. SOLUÇÃO
-
-Quando houver solução reconhecida, apresentar: solução; descrição curta; aderência; motivos do reconhecimento; benefícios esperados; próximo passo.
-
-Exemplo: **ADERÊNCIA 94%**.
-
-A aderência deve ser explicada, não apenas exibida.
-
-Quando houver múltiplas soluções, a UX deve refletir o estado real do motor e não escolher arbitrariamente uma delas.
-
----
-
-## 16. OPORTUNIDADE
-
-A oportunidade é a ponte entre inteligência e comercial.
-
-Informações: empresa; problema; impacto; prioridade; solução relacionada; status.
-
-Jornada visual: **Diagnóstico → Oportunidade → Solução → Proposta → Negociação → Cliente**.
-
----
-
-## 17. TIMELINE
-
-Cada empresa deve possuir uma timeline inteligente.
-
-Exemplo: Diagnóstico iniciado; Problema identificado; Investigação concluída; Oportunidade encontrada; Solução reconhecida; Contato comercial; Proposta; Negociação; Cliente.
-
-Desktop: timeline horizontal ou vertical conforme contexto. Mobile: timeline vertical.
-
----
-
-## 18. DASHBOARD
-
-O dashboard administrativo deve responder: **O que está acontecendo no negócio?**
-
-Priorizar: diagnósticos; oportunidades; soluções; propostas; clientes; conversão; atividade recente; alertas.
-
-Evitar excesso de métricas técnicas.
-
----
-
-## 19. EMPRESAS
-
-Desktop: tabela inteligente, busca, filtros e indicadores.
-
-Mobile: cards, resumo e ação principal.
-
-Cada empresa deve permitir acesso à sua jornada completa.
-
----
-
-## 20. NAVEGAÇÃO
-
-### Desktop
-Visão geral; Empresas; Conversas; Diagnósticos; Investigações; Soluções; Oportunidades; Leads; Pipeline; Aprendizado; Métricas; Configurações.
-
-### Mobile
-Bottom navigation com quatro áreas: Início; Inteligência; Comercial; Menu.
-
-O restante fica no menu expansível.
-
----
-
-## 21. RESPONSIVIDADE
-
-A interface não deve ser simplesmente um desktop comprimido.
-
-Desktop: informação simultânea e áreas laterais.
-
-Tablet: duas colunas quando houver espaço.
-
-Mobile: uma coluna, cards, accordions e navegação inferior.
-
-Breakpoints devem ser definidos por necessidade do conteúdo, não por dispositivo específico.
-
----
-
-## 22. MICROINTERAÇÕES
-
-Animações devem reforçar entendimento.
-
-Exemplos: processamento com brilho ciano discreto; etapa concluída com check; avanço da investigação; surgimento progressivo de informações; solução reconhecida com destaque sutil.
-
-Evitar animações longas, efeitos constantes, partículas excessivas e elementos que prejudiquem desempenho no celular.
-
----
-
-## 23. ACESSIBILIDADE
-
-Obrigatório: contraste suficiente; foco visível; áreas de toque adequadas; labels claros; mensagens de erro compreensíveis; navegação por teclado; não depender apenas de cor para comunicar estado; texto legível em telas pequenas.
-
----
-
-## 24. PERFORMANCE
-
-Principalmente porque muitos acessos serão móveis: CSS enxuto; JavaScript enxuto; evitar bibliotecas pesadas sem necessidade; animações com baixo custo; carregamento progressivo; feedback imediato; evitar múltiplas chamadas desnecessárias ao Apps Script.
-
----
-
-## 25. REGRA ARQUITETURAL
-
-A camada visual não deve alterar o núcleo V6.3.
-
-Fluxo: **UI → funções públicas → fluxo oficial → motor V6.3**.
-
-Não fazer a UI manipular diretamente estruturas internas do motor.
-
-A interface deve consumir contratos estáveis.
-
----
-
-## 26. QUATRO TELAS-MÃE
-
-A implementação visual será iniciada nesta ordem:
-
-### Tela 01 — Landing
-Primeira impressão e início.
-
-### Tela 02 — Início do diagnóstico
-Capturar o problema com mínima fricção.
-
-### Tela 03 — Conversa inteligente
-Conduzir a investigação.
-
-### Tela 04 — Diagnóstico + solução
-Transformar entendimento em percepção de valor.
-
-Essas quatro telas definem o padrão visual das demais.
-
----
-
-## 27. ORDEM DE IMPLEMENTAÇÃO
-
-### Fase A — Design System
-Cores; tipografia; componentes; navegação; estados; responsividade.
-
-### Fase B — Experiência pública
-Landing; diagnóstico; conversa; resultado.
-
-### Fase C — Área interna
-Dashboard; empresas; diagnósticos; oportunidades; soluções.
-
-### Fase D — Comercial
-Leads; pipeline; propostas; follow-up.
-
-### Fase E — Inteligência operacional
-Aprendizado; métricas; alertas; saúde do sistema.
-
----
-
-## 28. CRITÉRIO DE ACEITE UX 1.0
-
-- [ ] aparência consistente com a marca FEEDS;
+- [ ] identidade FEEDS consistente;
 - [ ] desktop validado;
 - [ ] mobile validado;
-- [ ] landing funcional;
-- [ ] início do diagnóstico funcional;
+- [ ] Landing funcional;
+- [ ] identificação funcional;
+- [ ] problema funcional;
 - [ ] conversa funcional;
-- [ ] diagnóstico apresentado corretamente;
-- [ ] solução apresentada corretamente;
-- [ ] estados do motor respeitados;
+- [ ] diagnóstico funcional;
+- [ ] nome e empresa usados de forma personalizada;
 - [ ] nenhuma informação inventada pela UI;
-- [ ] chamadas Apps Script funcionando;
+- [ ] estados reais do motor respeitados;
 - [ ] tratamento de erro;
 - [ ] estados de processamento;
 - [ ] acessibilidade básica;
 - [ ] E2E público validado.
 
----
+## DNA para as próximas telas
 
-## 29. REGRA DE OURO
+As futuras telas de Dashboard, Empresas, Diagnósticos, Oportunidades, Leads, Pipeline, Soluções, Aprendizado e Métricas devem herdar o mesmo DNA visual e comportamental das cinco telas-mãe.
 
-> **O usuário deve perceber simplicidade na frente enquanto o sistema trabalha com inteligência por trás.**
-
-FEEDS deve parecer simples de usar e sofisticado de operar.
+**FEEDS deve parecer simples de usar e sofisticado de operar.**
