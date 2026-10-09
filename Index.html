@@ -310,6 +310,10 @@
     if(confirm('Voltar ao início? O diagnóstico atual permanecerá nesta sessão.')) showScreen(1);
   }
   function setError(id,msg){if($(id))$(id).textContent=msg||''}
+  function obterMensagemErroCliente(erro,fallback){
+    if(!erro)return fallback;
+    return String(erro.message||erro.details||erro.description||erro.error||erro)||fallback;
+  }
 
   function continueIdentity(){
     const nome=$('contato').value.trim();
@@ -361,7 +365,7 @@
       .withFailureHandler(function(e){
         btn.disabled=false;
         btn.textContent='CONTINUAR →';
-        setError('problemError',e&&e.message?e.message:'Não foi possível iniciar o diagnóstico.');
+        setError('problemError',obterMensagemErroCliente(e,'Não foi possível iniciar o diagnóstico.'));
       })
       .iniciarDiagnostico({
         nome:state.empresa,
@@ -413,7 +417,7 @@
       .withFailureHandler(function(e){
         $('sendBtn').disabled=false;
         $('typing').classList.remove('active');
-        setError('chatError',e&&e.message?e.message:'Ocorreu um erro ao processar sua resposta.');
+        setError('chatError',obterMensagemErroCliente(e,'Ocorreu um erro ao processar sua resposta.'));
       })
       .processarMensagemDiagnostico({
         empresa_id:state.empresa_id,
