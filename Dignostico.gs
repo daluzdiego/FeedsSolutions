@@ -6727,6 +6727,46 @@ function testarContinuidadeDiagnosticoV5() {
     );
   }
   // ----------------------------------------------------------
+  // CASO 3 — RESPOSTA CONTEXTUAL DE VOLUME
+  // ----------------------------------------------------------
+  const respostaVolumeContextual =
+    ajustarContinuidadeDiagnostico_(
+      {
+        processo: 'postagem no Facebook',
+        dor_principal: 'não consigo captar clientes',
+        frequencia: '1 vez por semana',
+        impacto: 'nenhum converte em compra',
+        volume: '',
+        objetivo: '',
+        informacao_faltante: 'volume de clientes atraídos',
+        proxima_pergunta: 'Quantos clientes você consegue atrair com essa postagem por semana?',
+        respondeu_pergunta_pendente: false
+      },
+      'Quantos clientes você consegue atrair com essa postagem por semana?',
+      '5, mas nenhum converte em compra'
+    );
+
+  if (respostaVolumeContextual.respondeu_pergunta_pendente !== true) {
+    erros.push(
+      'Resposta contextual de volume não foi reconhecida.'
+    );
+  }
+
+  if (
+    normalizarTextoDiagnostico_(respostaVolumeContextual.proxima_pergunta || '') ===
+    normalizarTextoDiagnostico_('Quantos clientes você consegue atrair com essa postagem por semana?')
+  ) {
+    erros.push(
+      'Pergunta de volume foi repetida depois de uma resposta numérica válida.'
+    );
+  }
+
+  if (String(respostaVolumeContextual.volume || '').trim() !== '5') {
+    erros.push(
+      'Volume 5 não foi preservado quando a IA não o consolidou.'
+    );
+  }
+  // ----------------------------------------------------------
   // CASO 2 — RESPOSTA À PERGUNTA DE VOLUME
   // ----------------------------------------------------------
   const segunda =
