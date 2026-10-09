@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Neuro Solutions — Administração</title>
+<style>
+body{margin:0;background:#f4f7fb;color:#172033;font-family:Inter,Arial,sans-serif}
+.wrap{max-width:1100px;margin:auto;padding:28px 18px}.card{background:#fff;border:1px solid #e3e8f1;border-radius:16px;padding:22px;box-shadow:0 8px 30px rgba(30,50,90,.06)}
+h1{margin-top:0}.field{display:flex;flex-direction:column;gap:7px;margin:12px 0}label{font-weight:700;font-size:13px}
+input{padding:12px;border:1px solid #d6dce7;border-radius:10px;font:inherit}
+button{padding:11px 16px;border:0;border-radius:10px;background:#2457d6;color:#fff;font-weight:700;cursor:pointer}
+.error{color:#b42318;margin-top:10px}.hidden{display:none}.top{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:18px 0}
+.metric{padding:18px;border:1px solid #e3e8f1;border-radius:14px;background:#fafcff}.metric b{display:block;font-size:28px}.muted{color:#687386;font-size:13px}
+table{width:100%;border-collapse:collapse;margin-top:18px}th,td{text-align:left;padding:9px;border-bottom:1px solid #e9edf4;font-size:13px}
+@media(max-width:700px){.cards{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div id="login" class="card" style="max-width:420px;margin:70px auto">
+<h1>Administração</h1><div class="muted">Acesso restrito.</div>
+<div class="field"><label>E-mail</label><input id="email" type="email"></div>
+<div class="field"><label>Senha</label><input id="senha" type="password"></div>
+<button onclick="login()">Entrar</button><div id="erro" class="error"></div>
+</div>
+<div id="painel" class="hidden">
+<div class="top"><div><h1>Neuro Solutions</h1><div class="muted" id="versao"></div></div><button onclick="sair()">Sair</button></div>
+<div class="cards">
+<div class="metric"><span class="muted">Eventos registrados</span><b id="eventos">0</b></div>
+<div class="metric"><span class="muted">Conversas</span><b id="conversas">0</b></div>
+<div class="metric"><span class="muted">Empresas</span><b id="empresas">0</b></div>
+</div>
+<div class="card"><h2>Atividade recente</h2><table><thead><tr><th>Evento</th><th>Data</th><th>Empresa</th><th>Valor</th></tr></thead><tbody id="tabela"></tbody></table></div>
+</div>
+</div>
+<script>
+let token='';
+function login(){
+google.script.run.withSuccessHandler(r=>{
+if(!r||!r.sucesso){document.getElementById('erro').textContent=r&&r.mensagem?r.mensagem:'Login inválido.';return}
+token=r.token;document.getElementById('login').classList.add('hidden');document.getElementById('painel').classList.remove('hidden');carregar();
+}).withFailureHandler(e=>document.getElementById('erro').textContent=e&&e.message?e.message:'Erro no login.')
+.loginAdmin(document.getElementById('email').value.trim(),document.getElementById('senha').value);
+}
+function carregar(){
+google.script.run.withSuccessHandler(r=>document.getElementById('versao').textContent=(r.sistema||'Sistema')+' · '+(r.versao||'')).withFailureHandler(()=>{}).verificarSistema();
+google.script.run.withSuccessHandler(r=>{
+r=r||[];document.getElementById('eventos').textContent=r.length;
+document.getElementById('conversas').textContent=new Set(r.map(x=>x.conversa_id).filter(Boolean)).size;
+document.getElementById('empresas').textContent=new Set(r.map(x=>x.empresa_id).filter(Boolean)).size;
+document.getElementById('tabela').innerHTML=r.slice(-30).reverse().map(x=>'<tr><td>'+esc(x.evento)+'</td><td>'+esc(x.timestamp)+'</td><td>'+esc(x.empresa_id)+'</td><td>'+esc(x.valor)+'</td></tr>').join('');
+}).withFailureHandler(e=>{document.getElementById('erro').textContent=e&&e.message?e.message:'Sessão inválida.'}).listarMetricasAdmin(token);
+}
+function sair(){google.script.run.withSuccessHandler(()=>location.reload()).logoutAdmin(token)}
+function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+</script>
+</body>
+</html>
