@@ -2092,6 +2092,12 @@ function ajustarContinuidadeDiagnostico_(
 
     if (respostaImpacto) {
       respondeuDeterministicamente = true;
+
+      // Se a IA não extrair o impacto, preservamos a resposta
+      // literal do empresário como evidência, sem inventar.
+      if (!String(resultado.impacto || '').trim()) {
+        resultado.impacto = mensagemOriginal;
+      }
     }
   }
 
