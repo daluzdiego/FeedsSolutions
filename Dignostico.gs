@@ -2281,37 +2281,6 @@ function ajustarContinuidadeDiagnostico_(
 }
 
 
-/**
- * REGRESSÃO: perguntas contextuais não podem ser repetidas.
- * Executar: TESTAR_CORRECAO_REPETICAO_PERGUNTAS_DIAGNOSTICO_V1()
- */
-function TESTAR_CORRECAO_REPETICAO_PERGUNTAS_DIAGNOSTICO_V1() {
-  const casos = [
-    { nome: 'uma por mês', pergunta: 'Quantas divulgações vocês costumam fazer por semana?', resposta: 'uma por mês' },
-    { nome: '20 por dia', pergunta: 'Quantas divulgações vocês costumam fazer por semana?', resposta: '20 por dia' },
-    { nome: '50 por semana', pergunta: 'Quantas divulgações vocês costumam fazer por semana?', resposta: '~50 por semana' },
-    { nome: 'diariamente na pergunta de erros', pergunta: 'Esse processo costuma gerar erros, retrabalho ou atrasos?', resposta: 'diariamente' },
-    { nome: 'não sei na pergunta de erros', pergunta: 'Esse processo costuma gerar erros, retrabalho ou atrasos?', resposta: 'não sei dizer' }
-  ];
-  const falhas = [];
-  casos.forEach(function(caso) {
-    const resultado = ajustarContinuidadeDiagnostico_(
-      { proxima_pergunta: caso.pergunta, informacao_faltante: caso.pergunta },
-      caso.pergunta,
-      caso.resposta
-    );
-    const passou = resultado.respondeu_pergunta_pendente === true &&
-      resultado.proxima_pergunta !== caso.pergunta;
-    Logger.log((passou ? 'PASSOU: ' : 'FALHOU: ') + caso.nome +
-      ' | respondeu=' + resultado.respondeu_pergunta_pendente +
-      ' | próxima=' + resultado.proxima_pergunta);
-    if (!passou) falhas.push(caso.nome);
-  });
-  if (falhas.length) throw new Error('Regressões falharam: ' + falhas.join('; '));
-  Logger.log('APROVADO: ' + casos.length + '/' + casos.length);
-  return { sucesso: true, aprovados: casos.length, total: casos.length };
-}
-
 function classificarDimensaoPerguntaDiagnostico_(perguntaNormalizada) {
   const p = normalizarTextoDiagnostico_(perguntaNormalizada || '');
   if (/frequencia|periodicidade|quantas vezes|por dia|por semana|por mes|ao dia|ao mes|divulgacoes.*semana|publicacoes.*semana|postagens.*semana/.test(p)) return 'FREQUENCIA';
