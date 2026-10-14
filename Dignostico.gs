@@ -2025,9 +2025,9 @@ function ajustarContinuidadeDiagnostico_(
   // ----------------------------------------------------------
   // 1. VOLUME / QUANTIDADE
   // ----------------------------------------------------------
-  if (/quantos|quantidade|volume/.test(perguntaNorm)) {
+  if (/quant[oa]s|quantidade|volume|numero de/.test(perguntaNorm)) {
 
-    /*
+    /*    /*
      * Respostas de volume podem ser contextuais:
      * "5", "5, mas nenhum converte em compra",
      * "5 clientes" ou "aproximadamente 5".
@@ -2038,7 +2038,7 @@ function ajustarContinuidadeDiagnostico_(
      */
     const respondeuVolume =
       /\b\d+(?:[.,]\d+)?\b/i.test(mensagem) ||
-      /\b(?:nenhum|nenhuma|zero)\b/i.test(mensagem);
+      /\b(?:nenhum|nenhuma|zero|um|uma|dois|duas|tres|quatro|cinco|seis|sete|oito|nove|dez|alguns|algumas)\b/i.test(mensagem);
 
     if (respondeuVolume) {
       respondeuDeterministicamente = true;
@@ -2066,12 +2066,12 @@ function ajustarContinuidadeDiagnostico_(
   // Respostas negativas também são respostas válidas.
   // ----------------------------------------------------------
   if (
-    /frequencia|frequência|periodicidade|com que frequencia|com que frequência/
+    /frequencia|frequência|periodicidade|com que frequencia|com que frequência|quantas vezes|por dia|por semana|por mes|por mês|ao dia|ao mes|ao mês/
       .test(perguntaNorm)
   ) {
 
     const respondeuFrequencia =
-      /\b(diari(?:a|amente)|semanal(?:mente)?|mensal(?:mente)?|quinzenal(?:mente)?|ocasional(?:mente)?|eventualmente|todo dia|todos os dias|toda semana|todas as semanas|todo mes|todo mês|por dia|por semana|por mes|por mês|ao dia|ao mes|ao mês|\d+\s*(?:x|vezes)\s*(?:ao|por)\s*(?:dia|semana|mes|mês)|\d+\s+(?:post|posts|postagem|postagens)\s+(?:por|na)\s+(?:dia|semana|mes|mês))\b/i
+      /\b(diari(?:a|amente)|semanal(?:mente)?|mensal(?:mente)?|quinzenal(?:mente)?|ocasional(?:mente)?|eventualmente|todo dia|todos os dias|toda semana|todas as semanas|todo mes|todo mês|por dia|por semana|por mes|por mês|ao dia|ao mes|ao mês|\d+\s*(?:x|vezes)\s*(?:ao|por)\s*(?:dia|semana|mes|mês)|\d+\s+(?:post|posts|postagem|postagens)\s+(?:por|na)\s+(?:dia|semana|mes|mês)|(?:um|uma|dois|duas|tres|quatro|cinco|seis|sete|oito|nove|dez)\s+(?:vez(?:es)?\s+)?(?:por|ao|na|no)\s+(?:dia|semana|mes|mês))\b/i
         .test(mensagem);
 
     const respostaFrequenciaNegativa =
@@ -2131,9 +2131,7 @@ function ajustarContinuidadeDiagnostico_(
       .test(perguntaNorm)
   ) {
 
-    const respondeuProblema =
-      /\b(erro|erros|atraso|atrasos|retrabalho|revisao|revisão|conferencia|conferência|sim|nao|não|sem|nunca)\b/i
-        .test(mensagem);
+    const respondeuProblema = mensagem.length >= 2;
 
     if (respondeuProblema) {
       respondeuDeterministicamente = true;
@@ -2283,9 +2281,40 @@ function ajustarContinuidadeDiagnostico_(
 }
 
 
+/**
+ * REGRESSÃO: perguntas contextuais não podem ser repetidas.
+ * Executar: TESTAR_CORRECAO_REPETICAO_PERGUNTAS_DIAGNOSTICO_V1()
+ */
+function TESTAR_CORRECAO_REPETICAO_PERGUNTAS_DIAGNOSTICO_V1() {
+  const casos = [
+    { nome: 'uma por mês', pergunta: 'Quantas divulgações vocês costumam fazer por semana?', resposta: 'uma por mês' },
+    { nome: '20 por dia', pergunta: 'Quantas divulgações vocês costumam fazer por semana?', resposta: '20 por dia' },
+    { nome: '50 por semana', pergunta: 'Quantas divulgações vocês costumam fazer por semana?', resposta: '~50 por semana' },
+    { nome: 'diariamente na pergunta de erros', pergunta: 'Esse processo costuma gerar erros, retrabalho ou atrasos?', resposta: 'diariamente' },
+    { nome: 'não sei na pergunta de erros', pergunta: 'Esse processo costuma gerar erros, retrabalho ou atrasos?', resposta: 'não sei dizer' }
+  ];
+  const falhas = [];
+  casos.forEach(function(caso) {
+    const resultado = ajustarContinuidadeDiagnostico_(
+      { proxima_pergunta: caso.pergunta, informacao_faltante: caso.pergunta },
+      caso.pergunta,
+      caso.resposta
+    );
+    const passou = resultado.respondeu_pergunta_pendente === true &&
+      resultado.proxima_pergunta !== caso.pergunta;
+    Logger.log((passou ? 'PASSOU: ' : 'FALHOU: ') + caso.nome +
+      ' | respondeu=' + resultado.respondeu_pergunta_pendente +
+      ' | próxima=' + resultado.proxima_pergunta);
+    if (!passou) falhas.push(caso.nome);
+  });
+  if (falhas.length) throw new Error('Regressões falharam: ' + falhas.join('; '));
+  Logger.log('APROVADO: ' + casos.length + '/' + casos.length);
+  return { sucesso: true, aprovados: casos.length, total: casos.length };
+}
+
 function classificarDimensaoPerguntaDiagnostico_(perguntaNormalizada) {
   const p = normalizarTextoDiagnostico_(perguntaNormalizada || '');
-  if (/frequencia|periodicidade|quantas vezes/.test(p)) return 'FREQUENCIA';
+  if (/frequencia|periodicidade|quantas vezes|por dia|por semana|por mes|ao dia|ao mes|divulgacoes.*semana|publicacoes.*semana|postagens.*semana/.test(p)) return 'FREQUENCIA';
   if (/impacto|consequencia|efeito|afeta|prejuizo|perda/.test(p)) return 'IMPACTO';
   if (/quantos|quantidade|volume|numero de clientes|numero de pedidos|quantas vendas/.test(p)) return 'VOLUME';
   if (/erro|retrabalho|atraso|revisao|conferencia/.test(p)) return 'ERROS';
