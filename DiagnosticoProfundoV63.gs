@@ -196,6 +196,15 @@ function FEEDS_PROFUNDO_V63_montarCasos_() {
 function FEEDS_PROFUNDO_V63_casosDeterministicos_() {
   return [
     {
+      tipo: 'deterministico', grupo: 'DIAGNÓSTICO DO TESTADOR', nome: 'Deduplicação reconhece os formatos reais de log sem filtrar assertivas distintas',
+      fn: function(ctx) {
+        FEEDS_PROFUNDO_V63_assert_(ctx, 'reconhece teste numerado como 1/25', FEEDS_PROFUNDO_V63_ehLinhaTesteDuplicada_('✅ TESTE 1/25 — catálogo foi persistido'), 'formato=TESTE 1/25');
+        FEEDS_PROFUNDO_V63_assert_(ctx, 'reconhece teste numerado sem total', FEEDS_PROFUNDO_V63_ehLinhaTesteDuplicada_('❌ TESTE 8 — contexto foi inventado'), 'formato=TESTE 8');
+        FEEDS_PROFUNDO_V63_assert_(ctx, 'não filtra log de assertiva independente', !FEEDS_PROFUNDO_V63_ehLinhaTesteDuplicada_('✅ ASSERTIVA PASSOU: contexto desconhecido'), 'formato=ASSERTIVA PASSOU');
+        FEEDS_PROFUNDO_V63_assert_(ctx, 'não filtra resumo do caso', !FEEDS_PROFUNDO_V63_ehLinhaTesteDuplicada_('RESULTADO DO CASO: PASSOU | assertivas=25'), 'formato=RESULTADO DO CASO');
+      }
+    },
+    {
       tipo: 'deterministico', grupo: 'CONTRATO', nome: 'Funções críticas do diagnóstico estão disponíveis',
       fn: function(ctx) {
         [
@@ -441,6 +450,11 @@ function FEEDS_PROFUNDO_V63_assert_(ctx, nome, condicao, detalhe) {
   });
 }
 
+function FEEDS_PROFUNDO_V63_ehLinhaTesteDuplicada_(linha) {
+  return /^(?:✅|❌)\s*TESTE\s+\d+(?:\s*\/\s*\d+)?\s*[—-]/i
+    .test(String(linha || '').trim());
+}
+
 function FEEDS_PROFUNDO_V63_executarLegado_(caso) {
   if (typeof caso.fn !== 'function') {
     return {
@@ -497,7 +511,7 @@ function FEEDS_PROFUNDO_V63_executarLegado_(caso) {
 
   if (resultadosRetorno.length) {
     evidenciasAssertivas = linhasAssertivas.filter(function(linha) {
-      return !/^(?:✅|❌)\s*TESTE\s+\d+(?:\s*\/\s*\d+)?\s*[—-]/i.test(linha.trim());
+      return !FEEDS_PROFUNDO_V63_ehLinhaTesteDuplicada_(linha);
     });
     resultadosRetorno.forEach(function(item, indice) {
       var passou = item && item.passou === true && !item.erro;
