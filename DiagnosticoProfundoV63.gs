@@ -497,7 +497,7 @@ function FEEDS_PROFUNDO_V63_executarLegado_(caso) {
 
   if (resultadosRetorno.length) {
     evidenciasAssertivas = linhasAssertivas.filter(function(linha) {
-      return !/^(?:✅|❌)\s*TESTE\s+\d+\s*[—-]/i.test(linha.trim());
+      return !/^(?:✅|❌)\s*TESTE\s+\d+(?:\s*\/\s*\d+)?\s*[—-]/i.test(linha.trim());
     });
     resultadosRetorno.forEach(function(item, indice) {
       var passou = item && item.passou === true && !item.erro;
@@ -526,13 +526,18 @@ function FEEDS_PROFUNDO_V63_executarLegado_(caso) {
 
   // Lê também os resumos numéricos. Isso detecta, por exemplo,
   // 24/25 mesmo se o teste não lançar exceção nem imprimir ❌.
-  var resumoNumerico = null;
+  var resumosNumericos = [];
   capturados.forEach(function(linha) {
     var m = linha.match(/APROVADOS?:\s*(\d+)\s*\/\s*(\d+)/i);
     if (m) {
-      resumoNumerico = { aprovados: Number(m[1]), total: Number(m[2]) };
+      resumosNumericos.push({ aprovados: Number(m[1]), total: Number(m[2]), linha: linha });
     }
   });
+  // Considera o último resumo do teste principal para classificação,
+  // mas não descarta as falhas explícitas capturadas em qualquer etapa.
+  var resumoNumerico = resumosNumericos.length
+    ? resumosNumericos[resumosNumericos.length - 1]
+    : null;
   if (resumoNumerico && resumoNumerico.aprovados < resumoNumerico.total) {
     falhasInternas = Math.max(falhasInternas, resumoNumerico.total - resumoNumerico.aprovados);
   }
