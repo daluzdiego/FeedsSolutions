@@ -490,7 +490,7 @@ function FEEDS_PROFUNDO_V63_executarLegado_(caso) {
   // 24/25 mesmo se o teste não lançar exceção nem imprimir ❌.
   var resumoNumerico = null;
   capturados.forEach(function(linha) {
-    var m = linha.match(/APROVADOS?:\\s*(\\d+)\\s*\\/\\s*(\\d+)/i);
+    var m = linha.match(/APROVADOS?:\s*(\d+)\s*\/\s*(\d+)/i);
     if (m) {
       resumoNumerico = { aprovados: Number(m[1]), total: Number(m[2]) };
     }
