@@ -497,7 +497,7 @@ function FEEDS_PROFUNDO_V63_executarLegado_(caso) {
 
   if (resultadosRetorno.length) {
     evidenciasAssertivas = linhasAssertivas.filter(function(linha) {
-      return !/^(?:✅|❌)\\s*TESTE\\s+\\d+\\s*[—-]/i.test(linha.trim());
+      return !/^(?:✅|❌)\s*TESTE\s+\d+\s*[—-]/i.test(linha.trim());
     });
     resultadosRetorno.forEach(function(item, indice) {
       var passou = item && item.passou === true && !item.erro;
@@ -553,8 +553,9 @@ function FEEDS_PROFUNDO_V63_executarLegado_(caso) {
 
   var detalhe = [
     'captura_logger=' + capturaAtiva,
-    'linhas_diagnosticas=' + linhasAssertivas.length,
-    'assertivas_estimadas=' + assertivas,
+    'linhas_diagnosticas_originais=' + linhasAssertivas.length,
+    'linhas_diagnosticas_contadas=' + evidenciasAssertivas.length,
+    'assertivas_contadas_sem_duplicacao=' + assertivas,
     'falhas_internas_detectadas=' + falhasInternas,
     'retorno=' + FEEDS_PROFUNDO_V63_resumirRetorno_(retorno),
     erroExecucao ? 'exceção=' + FEEDS_PROFUNDO_V63_textoErro_(erroExecucao) : ''
@@ -568,6 +569,18 @@ function FEEDS_PROFUNDO_V63_executarLegado_(caso) {
       detalhe: linha.slice(0, 1500)
     };
   });
+
+  // Registra um alerta se o teste informou mais aprovados do que o
+  // número de assertivas únicas contadas pelo adaptador.
+  if (resumoNumerico && resumoNumerico.aprovados > assertivas && !falhasInternas) {
+    linhas.push({
+      status: 'ALERTA_METRICA',
+      nome: caso.nome,
+      detalhe: 'Resumo do teste informa ' + resumoNumerico.aprovados +
+        ' aprovados; o capturador contou ' + assertivas +
+        ' evidências únicas. Não converter essa diferença em falha funcional.'
+    });
+  }
 
   if (erroExecucao) {
     linhas.push({ status: 'FALHOU', nome: caso.nome, detalhe: FEEDS_PROFUNDO_V63_textoErro_(erroExecucao) });
