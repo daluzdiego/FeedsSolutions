@@ -2027,7 +2027,7 @@ function ajustarContinuidadeDiagnostico_(
   // ----------------------------------------------------------
   if (/quant[oa]s|quantidade|volume|numero de/.test(perguntaNorm)) {
 
-    /*    /*
+    /*
      * Respostas de volume podem ser contextuais:
      * "5", "5, mas nenhum converte em compra",
      * "5 clientes" ou "aproximadamente 5".
