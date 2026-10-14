@@ -486,12 +486,28 @@ function FEEDS_PROFUNDO_V63_executarLegado_(caso) {
     (retorno && typeof retorno === 'object' &&
       (retorno.sucesso === true || retorno.success === true || retorno.aprovado === true));
 
+  // Lê também os resumos numéricos. Isso detecta, por exemplo,
+  // 24/25 mesmo se o teste não lançar exceção nem imprimir ❌.
+  var resumoNumerico = null;
+  capturados.forEach(function(linha) {
+    var m = linha.match(/APROVADOS?:\\s*(\\d+)\\s*\\/\\s*(\\d+)/i);
+    if (m) {
+      resumoNumerico = { aprovados: Number(m[1]), total: Number(m[2]) };
+    }
+  });
+  if (resumoNumerico && resumoNumerico.aprovados < resumoNumerico.total) {
+    falhasInternas = Math.max(falhasInternas, resumoNumerico.total - resumoNumerico.aprovados);
+  }
+
   var status;
   if (erroExecucao || retornoFalha || falhasInternas > 0) {
     status = 'FALHOU';
   } else if (retornoSucesso) {
     status = 'PASSOU_COM_RETORNO_EXPLICITO';
-  } else if (linhasAssertivas.length && !falhasInternas) {
+  } else if (resumoNumerico && resumoNumerico.total > 0 &&
+      resumoNumerico.aprovados === resumoNumerico.total) {
+    status = 'PASSOU_POR_RESUMO_NUMERICO';
+  } else if (assertivas > 0 && linhasAssertivas.length && !falhasInternas) {
     status = 'PASSOU_PELAS_ASSERTIVAS_CAPTURADAS';
   } else {
     status = 'EXECUTOU_SEM_EXCECAO_NAO_VERIFICADO';
