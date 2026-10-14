@@ -67,7 +67,7 @@ function TESTAR_DIAGNOSTICO_PROFUNDO_V63_RESETAR() {
   Logger.log('============================================================');
   Logger.log('FEEDS SOLUTIONS — DIAGNÓSTICO PROFUNDO V6.3');
   Logger.log('RESET CONCLUÍDO. RUN_ID=' + runId);
-  Logger.log('Relatório: ' + (aba ? FEEDS_PROFUNDO_V63_ABA_ : 'Logger de execução (planilha ativa indisponível)'));
+  Logger.log('Relatório: ' + (aba ? nomeAba : 'Logger de execução (planilha ativa indisponível)'));
   Logger.log('Próximo passo: execute TESTAR_DIAGNOSTICO_PROFUNDO_V63_CONTINUAR().');
   Logger.log('============================================================');
   return { sucesso: true, run_id: runId, proximo: 'TESTAR_DIAGNOSTICO_PROFUNDO_V63_CONTINUAR' };
