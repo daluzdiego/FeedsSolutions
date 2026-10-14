@@ -488,29 +488,31 @@ function FEEDS_PROFUNDO_V63_executarLegado_(caso) {
     return /ASSERTIVA|TESTE\s+\d+|PASSOU\s*[-:]|FALHOU|APROVADOS?:\s*\d+\s*\/\s*\d+|FALHAS(?: FUNCIONAIS)?:\s*\d+|PERCENTUAL:|RESULTADO FINAL|TESTAR_[A-Z0-9_]+:\s*(?:PASSOU|FALHOU)|REGRESSÕES FALHARAM/i.test(linha);
   });
 
-  // Alguns testes antigos devolvem resultados estruturados com
-  // resultados[].passou/erro, mas podem registrar somente um resumo.
-  // Transformamos o objeto em evidências explícitas para o relatório.
+  // Retornos estruturados são a fonte preferencial de assertivas
+  // quando os objetos incluem resultados[]; nesse caso não somamos
+  // novamente as mesmas verificações impressas no Logger.
   var resultadosRetorno = retorno && typeof retorno === 'object' &&
     Array.isArray(retorno.resultados) ? retorno.resultados : [];
-  resultadosRetorno.forEach(function(item, indice) {
-    var passou = item && item.passou === true && !item.erro;
-    var falhou = !passou;
-    capturados.push(
-      (passou ? '✅ ASSERTIVA RETORNO: ' : '❌ ASSERTIVA RETORNO: ') +
-      'teste=' + (item && (item.numero || indice + 1)) +
-      ' | descrição=' + String(item && item.descricao || '') +
-      ' | erro=' + String(item && item.erro || '')
-    );
-  });
-  // Recalcula após agregar assertivas estruturadas do retorno.
-  linhasAssertivas = capturados.filter(function(linha) {
-    return /ASSERTIVA|TESTE\s+\d+|PASSOU\s*[-:]|FALHOU|APROVADOS?:\s*\d+\s*\/\s*\d+|FALHAS(?: FUNCIONAIS)?:\s*\d+|PERCENTUAL:|RESULTADO FINAL|TESTAR_[A-Z0-9_]+:\s*(?:PASSOU|FALHOU)|REGRESSÕES FALHARAM/i.test(linha);
-  });
+  var evidenciasAssertivas = linhasAssertivas.slice();
+
+  if (resultadosRetorno.length) {
+    evidenciasAssertivas = linhasAssertivas.filter(function(linha) {
+      return !/^(?:✅|❌)\\s*TESTE\\s+\\d+\\s*[—-]/i.test(linha.trim());
+    });
+    resultadosRetorno.forEach(function(item, indice) {
+      var passou = item && item.passou === true && !item.erro;
+      evidenciasAssertivas.push(
+        (passou ? '✅ ASSERTIVA RETORNO: ' : '❌ ASSERTIVA RETORNO: ') +
+        'teste=' + (item && (item.numero || indice + 1)) +
+        ' | descrição=' + String(item && item.descricao || '') +
+        ' | erro=' + String(item && item.erro || '')
+      );
+    });
+  }
 
   var assertivas = 0;
   var falhasInternas = 0;
-  linhasAssertivas.forEach(function(linha) {
+  evidenciasAssertivas.forEach(function(linha) {
     if (/(?:✅|PASSOU\s*[-:])/i.test(linha) && /TESTE|ASSERTIVA|PASSOU\s*[-:]/i.test(linha)) assertivas++;
     if (/(?:❌\s*TESTE|ASSERTIVA FALHOU|TESTAR_[A-Z0-9_]+:\s*FALHOU|FALHAS(?: FUNCIONAIS)?:\s*[1-9]\d*|FALHOU\s*[-:])/i.test(linha)) falhasInternas++;
   });
@@ -543,7 +545,7 @@ function FEEDS_PROFUNDO_V63_executarLegado_(caso) {
   } else if (resumoNumerico && resumoNumerico.total > 0 &&
       resumoNumerico.aprovados === resumoNumerico.total) {
     status = 'PASSOU_POR_RESUMO_NUMERICO';
-  } else if (assertivas > 0 && linhasAssertivas.length && !falhasInternas) {
+  } else if (assertivas > 0 && evidenciasAssertivas.length && !falhasInternas) {
     status = 'PASSOU_PELAS_ASSERTIVAS_CAPTURADAS';
   } else {
     status = 'EXECUTOU_SEM_EXCECAO_NAO_VERIFICADO';
@@ -558,7 +560,7 @@ function FEEDS_PROFUNDO_V63_executarLegado_(caso) {
     erroExecucao ? 'exceção=' + FEEDS_PROFUNDO_V63_textoErro_(erroExecucao) : ''
   ].filter(Boolean).join('; ');
 
-  var linhas = linhasAssertivas.slice(-80).map(function(linha) {
+  var linhas = evidenciasAssertivas.slice(-120).map(function(linha) {
     var falha = /❌|FALHOU|FALHAS(?: FUNCIONAIS)?:\s*[1-9]\d*/i.test(linha);
     return {
       status: falha ? 'FALHOU' : 'LOG_INTERNO',
