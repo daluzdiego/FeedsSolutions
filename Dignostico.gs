@@ -2283,7 +2283,7 @@ function ajustarContinuidadeDiagnostico_(
 
 function classificarDimensaoPerguntaDiagnostico_(perguntaNormalizada) {
   const p = normalizarTextoDiagnostico_(perguntaNormalizada || '');
-  if (/frequencia|periodicidade|quantas vezes|por dia|por semana|por mes|ao dia|ao mes|divulgacoes.*semana|publicacoes.*semana|postagens.*semana/.test(p)) return 'FREQUENCIA';
+  if (/frequencia|periodicidade|quantas vezes|por dia|por semana|por mes|ao dia|ao mes|diariamente|diaria|semanalmente|semanal|mensalmente|mensal|todo dia|todos os dias|toda semana|todas as semanas|divulgacoes.*semana|publicacoes.*semana|postagens.*semana|publica(?:r|m|ndo|cao|coes|ções)|posta(?:r|m|ndo|gem|gens)|vezes por/.test(p)) return 'FREQUENCIA';
   if (/impacto|consequencia|efeito|afeta|prejuizo|perda/.test(p)) return 'IMPACTO';
   if (/quantos|quantidade|volume|numero de clientes|numero de pedidos|quantas vendas/.test(p)) return 'VOLUME';
   if (/erro|retrabalho|atraso|revisao|conferencia/.test(p)) return 'ERROS';
