@@ -683,17 +683,21 @@ function FEEDS_PROFUNDO_V63_emitirResumo_(total, runId) {
   Logger.log('TEMPO ACUMULADO DOS CASOS=' + tempoTotal + 'ms');
   Logger.log('============================================================');
 
-  var conclusao = falhas > 0 || falhasAssertivas > 0
-    ? 'REPROVADO — existem falhas registradas'
-    : (naoVerificados > 0
-      ? 'INCONCLUSIVO — há testes legados sem aprovação verificável'
-      : 'APROVADO NOS CASOS EXECUTADOS — ainda exige validação manual em conversa real');
+  var rodadaCompleta = resultados.length === total;
+  var conclusao = !rodadaCompleta
+    ? 'INCOMPLETO — ainda há casos que não foram executados'
+    : (falhas > 0 || falhasAssertivas > 0
+      ? 'REPROVADO — existem falhas registradas'
+      : (naoVerificados > 0
+        ? 'INCONCLUSIVO — há testes legados sem aprovação verificável'
+        : 'APROVADO NOS CASOS EXECUTADOS — ainda exige validação manual em conversa real'));
 
   Logger.log('CONCLUSÃO HONESTA: ' + conclusao);
-  Logger.log('Relatório detalhado, quando disponível: aba ' + FEEDS_PROFUNDO_V63_ABA_);
+  Logger.log('Relatório detalhado, quando disponível: aba ' +
+    (props.getProperty(FEEDS_PROFUNDO_V63_PREFIXO_ + 'REPORT_SHEET') || FEEDS_PROFUNDO_V63_ABA_));
 
   var resumo = {
-    concluido: true,
+    concluido: rodadaCompleta,
     run_id: runId,
     casos: resultados.length,
     total: total,
