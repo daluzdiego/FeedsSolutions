@@ -215,7 +215,10 @@ function FEEDS_PROFUNDO_V63_casosDeterministicos_() {
           'Quantas divulgações vocês costumam fazer por semana?',
           'Com que frequência isso acontece?',
           'Quantas vezes por mês vocês fazem isso?',
-          'Vocês publicam diariamente?'
+          'Vocês publicam diariamente?',
+          'Vocês postam todos os dias?',
+          'Publicam uma vez por semana?',
+          'Isso é feito mensalmente?'
         ].forEach(function(pergunta) {
           var dim = classificarDimensaoPerguntaDiagnostico_(pergunta);
           FEEDS_PROFUNDO_V63_assert_(ctx, 'classifica como FREQUENCIA: ' + pergunta, dim === 'FREQUENCIA', 'obtido=' + dim);
@@ -229,7 +232,9 @@ function FEEDS_PROFUNDO_V63_casosDeterministicos_() {
           ['Quantos pedidos vocês processam?', 'VOLUME'],
           ['Qual o impacto disso no negócio?', 'IMPACTO'],
           ['Esse processo gera retrabalho ou atrasos?', 'ERROS'],
-          ['O que você gostaria de melhorar ou alcançar?', 'OBJETIVO']
+          ['O que você gostaria de melhorar ou alcançar?', 'OBJETIVO'],
+          ['Qual o resultado desejado?', 'OBJETIVO'],
+          ['Quantas vezes por semana isso ocorre?', 'FREQUENCIA']
         ];
         casos.forEach(function(c) {
           var obtido = classificarDimensaoPerguntaDiagnostico_(c[0]);
