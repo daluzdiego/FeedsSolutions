@@ -474,7 +474,27 @@ function FEEDS_PROFUNDO_V63_executarLegado_(caso) {
   }
 
   var linhasAssertivas = capturados.filter(function(linha) {
-    return /ASSERTIVA|TESTE\s+\d+|PASSOU\s*[-:]|FALHOU|APROVADOS?:\s*\d+\s*\/\s*\d+|FALHAS(?: FUNCIONAIS)?:\s*\d+|PERCENTUAL:|RESULTADO FINAL|TESTAR_[A-Z0-9_]+:\s*(?:PASSOU|FALHOU)|REGRESSÕES FALHARAM/i.test(linha);
+    return /ASSERTIVA|TESTE\\s+\\d+|PASSOU\\s*[-:]|FALHOU|APROVADOS?:\\s*\\d+\\s*\\/\\s*\\d+|FALHAS(?: FUNCIONAIS)?:\\s*\\d+|PERCENTUAL:|RESULTADO FINAL|TESTAR_[A-Z0-9_]+:\\s*(?:PASSOU|FALHOU)|REGRESSÕES FALHARAM/i.test(linha);
+  });
+
+  // Alguns testes antigos devolvem resultados estruturados com
+  // resultados[].passou/erro, mas podem registrar somente um resumo.
+  // Transformamos o objeto em evidências explícitas para o relatório.
+  var resultadosRetorno = retorno && typeof retorno === 'object' &&
+    Array.isArray(retorno.resultados) ? retorno.resultados : [];
+  resultadosRetorno.forEach(function(item, indice) {
+    var passou = item && item.passou === true && !item.erro;
+    var falhou = !passou;
+    capturados.push(
+      (passou ? '✅ ASSERTIVA RETORNO: ' : '❌ ASSERTIVA RETORNO: ') +
+      'teste=' + (item && (item.numero || indice + 1)) +
+      ' | descrição=' + String(item && item.descricao || '') +
+      ' | erro=' + String(item && item.erro || '')
+    );
+  });
+  // Recalcula após agregar assertivas estruturadas do retorno.
+  linhasAssertivas = capturados.filter(function(linha) {
+    return /ASSERTIVA|TESTE\\s+\\d+|PASSOU\\s*[-:]|FALHOU|APROVADOS?:\\s*\\d+\\s*\\/\\s*\\d+|FALHAS(?: FUNCIONAIS)?:\\s*\\d+|PERCENTUAL:|RESULTADO FINAL|TESTAR_[A-Z0-9_]+:\\s*(?:PASSOU|FALHOU)|REGRESSÕES FALHARAM/i.test(linha);
   });
 
   var assertivas = 0;
