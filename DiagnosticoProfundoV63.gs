@@ -38,17 +38,28 @@ function TESTAR_DIAGNOSTICO_PROFUNDO_V63_RESETAR() {
     }
   });
 
-  var aba = FEEDS_PROFUNDO_V63_obterAbaRelatorio_(true);
-  if (aba) {
-    aba.clearContents();
-    aba.getRange(1, 1, 1, 9).setValues([[
-      'timestamp', 'run_id', 'índice', 'grupo', 'caso', 'status',
-      'duração_ms', 'detalhe', 'origem'
-    ]]);
-    aba.setFrozenRows(1);
-  }
-
+  // Cada rodada recebe um relatório novo. Não apaga histórico anterior.
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
   var runId = Utilities.getUuid();
+  var nomeAba = FEEDS_PROFUNDO_V63_ABA_ + '_' + runId.slice(0, 8);
+  var aba = null;
+  try {
+    if (ss) {
+      aba = ss.getSheetByName(nomeAba) || ss.insertSheet(nomeAba);
+      aba.clearContents();
+      aba.getRange(1, 1, 1, 9).setValues([[
+        'timestamp', 'run_id', 'índice', 'grupo', 'caso', 'status',
+        'duração_ms', 'detalhe', 'origem'
+      ]]);
+      aba.setFrozenRows(1);
+      props.setProperty(FEEDS_PROFUNDO_V63_PREFIXO_ + 'REPORT_SHEET', nomeAba);
+    } else {
+      props.deleteProperty(FEEDS_PROFUNDO_V63_PREFIXO_ + 'REPORT_SHEET');
+    }
+  } catch (erroAba) {
+    Logger.log('AVISO: não foi possível criar aba exclusiva: ' + FEEDS_PROFUNDO_V63_textoErro_(erroAba));
+    props.deleteProperty(FEEDS_PROFUNDO_V63_PREFIXO_ + 'REPORT_SHEET');
+  }
   props.setProperty(FEEDS_PROFUNDO_V63_PREFIXO_ + 'RUN_ID', runId);
   props.setProperty(FEEDS_PROFUNDO_V63_PREFIXO_ + 'CURSOR', '0');
   props.setProperty(FEEDS_PROFUNDO_V63_PREFIXO_ + 'INICIO', new Date().toISOString());
@@ -624,8 +635,10 @@ function FEEDS_PROFUNDO_V63_obterAbaRelatorio_(criar) {
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     if (!ss) return null;
-    var aba = ss.getSheetByName(FEEDS_PROFUNDO_V63_ABA_);
-    if (!aba && criar) aba = ss.insertSheet(FEEDS_PROFUNDO_V63_ABA_);
+    var props = PropertiesService.getScriptProperties();
+    var nomeAba = props.getProperty(FEEDS_PROFUNDO_V63_PREFIXO_ + 'REPORT_SHEET') || FEEDS_PROFUNDO_V63_ABA_;
+    var aba = ss.getSheetByName(nomeAba);
+    if (!aba && criar) aba = ss.insertSheet(nomeAba);
     if (aba && criar && aba.getLastRow() === 0) {
       aba.getRange(1, 1, 1, 9).setValues([[
         'timestamp', 'run_id', 'índice', 'grupo', 'caso', 'status',
