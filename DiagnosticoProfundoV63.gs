@@ -485,7 +485,7 @@ function FEEDS_PROFUNDO_V63_executarLegado_(caso) {
   }
 
   var linhasAssertivas = capturados.filter(function(linha) {
-    return /ASSERTIVA|TESTE\\s+\\d+|PASSOU\\s*[-:]|FALHOU|APROVADOS?:\\s*\\d+\\s*\\/\\s*\\d+|FALHAS(?: FUNCIONAIS)?:\\s*\\d+|PERCENTUAL:|RESULTADO FINAL|TESTAR_[A-Z0-9_]+:\\s*(?:PASSOU|FALHOU)|REGRESSÕES FALHARAM/i.test(linha);
+    return /ASSERTIVA|TESTE\s+\d+|PASSOU\s*[-:]|FALHOU|APROVADOS?:\s*\d+\s*\/\s*\d+|FALHAS(?: FUNCIONAIS)?:\s*\d+|PERCENTUAL:|RESULTADO FINAL|TESTAR_[A-Z0-9_]+:\s*(?:PASSOU|FALHOU)|REGRESSÕES FALHARAM/i.test(linha);
   });
 
   // Alguns testes antigos devolvem resultados estruturados com
@@ -505,7 +505,7 @@ function FEEDS_PROFUNDO_V63_executarLegado_(caso) {
   });
   // Recalcula após agregar assertivas estruturadas do retorno.
   linhasAssertivas = capturados.filter(function(linha) {
-    return /ASSERTIVA|TESTE\\s+\\d+|PASSOU\\s*[-:]|FALHOU|APROVADOS?:\\s*\\d+\\s*\\/\\s*\\d+|FALHAS(?: FUNCIONAIS)?:\\s*\\d+|PERCENTUAL:|RESULTADO FINAL|TESTAR_[A-Z0-9_]+:\\s*(?:PASSOU|FALHOU)|REGRESSÕES FALHARAM/i.test(linha);
+    return /ASSERTIVA|TESTE\s+\d+|PASSOU\s*[-:]|FALHOU|APROVADOS?:\s*\d+\s*\/\s*\d+|FALHAS(?: FUNCIONAIS)?:\s*\d+|PERCENTUAL:|RESULTADO FINAL|TESTAR_[A-Z0-9_]+:\s*(?:PASSOU|FALHOU)|REGRESSÕES FALHARAM/i.test(linha);
   });
 
   var assertivas = 0;
