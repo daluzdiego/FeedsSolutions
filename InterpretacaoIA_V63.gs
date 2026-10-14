@@ -95,6 +95,15 @@ REGRA FUNDAMENTAL
 Se uma informação não estiver presente na mensagem e não puder
 ser inferida com segurança, marque o campo como DESCONHECIDO.
 
+IMPORTANTE — LIMITE DO CONTEXTO:
+A única fonte factual é a mensagem abaixo. Não assuma setor,
+porte, equipe, localização, tipo de empresa, clientes, canal de
+venda ou contexto operacional que não estejam expressos nela.
+Um processo pode sugerir um contexto provável, mas isso NÃO
+autoriza preencher "contexto" como fato. Quando o contexto da
+empresa não for explicitamente informado, use string vazia,
+status.contexto="DESCONHECIDO" e inclua "contexto" em "lacunas".
+
 Nunca transforme uma hipótese em fato.
 
 Nunca invente:
@@ -262,7 +271,12 @@ e:
 contexto:
 
 Descreva o contexto empresarial relevante somente quando
-houver informação suficiente.
+houver informação explicitamente presente na mensagem.
+
+Não deduza "contexto" apenas pelo tipo de tarefa descrita.
+Por exemplo, mencionar pedidos recebidos pelo WhatsApp e
+lançados em planilha NÃO revela, por si só, o setor da empresa,
+seu porte, localização ou estrutura da equipe.
 
 Caso contrário:
 
@@ -271,6 +285,8 @@ Caso contrário:
 e:
 
 "status.contexto": "DESCONHECIDO"
+
+Além disso, inclua "contexto" em "lacunas".
 
 ------------------------------------------------------------
 
