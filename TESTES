@@ -1,247 +1,246 @@
-13:52:19	Notificação	Execução iniciada
-13:52:26	Informação	============================================================
-13:52:26	Informação	FEEDS SOLUTIONS — DIAGNÓSTICO PROFUNDO V6.3
-13:52:26	Informação	RESET CONCLUÍDO. RUN_ID=ae06348d-5516-4965-9ae7-e01c4971161a
-13:52:26	Informação	Relatório: RELATORIO_TESTE_PROFUNDO_V63_ae06348d
-13:52:26	Informação	Próximo passo: execute TESTAR_DIAGNOSTICO_PROFUNDO_V63_CONTINUAR().
-13:52:26	Informação	============================================================
-13:52:25	Notificação	Execução concluída
+14:46:39	Notificação	Execução iniciada
+14:46:48	Informação	============================================================
+14:46:48	Informação	FEEDS SOLUTIONS — DIAGNÓSTICO PROFUNDO V6.3
+14:46:48	Informação	RESET CONCLUÍDO. RUN_ID=80b66528-af67-4025-99d2-f5fec0970936
+14:46:48	Informação	Relatório: RELATORIO_TESTE_PROFUNDO_V63_80b66528
+14:46:48	Informação	Próximo passo: execute TESTAR_DIAGNOSTICO_PROFUNDO_V63_CONTINUAR().
+14:46:48	Informação	============================================================
+14:46:48	Notificação	Execução concluída
 
-
-13:52:48	Notificação	Execução iniciada
-13:52:50	Informação	============================================================
-13:52:50	Informação	DIAGNÓSTICO PROFUNDO V6.3 — LOTE
-13:52:50	Informação	RUN_ID=ae06348d-5516-4965-9ae7-e01c4971161a | CURSOR=0/68
-13:52:50	Informação	Limite conservador do lote: 210000 ms
-13:52:50	Informação	============================================================
-13:52:50	Informação	------------------------------------------------------------
-13:52:50	Informação	CASO 1/68 | CONTRATO | Funções críticas do diagnóstico estão disponíveis
-13:52:50	Informação	✅ ASSERTIVA PASSOU: normalizarTextoDiagnostico_ existe | detalhe=typeof=function
-13:52:50	Informação	✅ ASSERTIVA PASSOU: normalizarAnaliseDiagnostico_ existe | detalhe=typeof=function
-13:52:50	Informação	✅ ASSERTIVA PASSOU: ajustarContinuidadeDiagnostico_ existe | detalhe=typeof=function
-13:52:50	Informação	✅ ASSERTIVA PASSOU: classificarDimensaoPerguntaDiagnostico_ existe | detalhe=typeof=function
-13:52:50	Informação	✅ ASSERTIVA PASSOU: atualizarDiagnosticoComAnalise_ existe | detalhe=typeof=function
-13:52:50	Informação	✅ ASSERTIVA PASSOU: extrairEtapasProcessoDiagnostico_ existe | detalhe=typeof=function
-13:52:50	Informação	✅ ASSERTIVA PASSOU: acumularEtapaProcessoDiagnostico_ existe | detalhe=typeof=function
-13:52:50	Informação	✅ ASSERTIVA PASSOU: obterTestesAceitacaoFinalV63_ existe | detalhe=typeof=function
-13:52:50	Informação	RESULTADO DO CASO: PASSOU | duração=8ms | assertivas=8 | falhas=0
-13:52:50	Informação	DETALHE: assertivas=8; falhas=0
-13:52:52	Informação	------------------------------------------------------------
-13:52:52	Informação	CASO 2/68 | NORMALIZAÇÃO | Acentos, caixa e espaços são normalizados
-13:52:52	Informação	✅ ASSERTIVA PASSOU: remove acentos e converte para minúsculas | detalhe=obtido=acao diaria
-13:52:52	Informação	RESULTADO DO CASO: PASSOU | duração=4ms | assertivas=1 | falhas=0
-13:52:52	Informação	DETALHE: assertivas=1; falhas=0
-13:52:52	Informação	------------------------------------------------------------
-13:52:52	Informação	CASO 3/68 | CLASSIFICAÇÃO | Perguntas de frequência em linguagem natural
-13:52:52	Informação	✅ ASSERTIVA PASSOU: classifica como FREQUENCIA: Quantas divulgações vocês costumam fazer por semana? | detalhe=obtido=FREQUENCIA
-13:52:52	Informação	✅ ASSERTIVA PASSOU: classifica como FREQUENCIA: Com que frequência isso acontece? | detalhe=obtido=FREQUENCIA
-13:52:52	Informação	✅ ASSERTIVA PASSOU: classifica como FREQUENCIA: Quantas vezes por mês vocês fazem isso? | detalhe=obtido=FREQUENCIA
-13:52:52	Informação	✅ ASSERTIVA PASSOU: classifica como FREQUENCIA: Vocês publicam diariamente? | detalhe=obtido=FREQUENCIA
-13:52:52	Informação	✅ ASSERTIVA PASSOU: classifica como FREQUENCIA: Vocês postam todos os dias? | detalhe=obtido=FREQUENCIA
-13:52:52	Informação	✅ ASSERTIVA PASSOU: classifica como FREQUENCIA: Publicam uma vez por semana? | detalhe=obtido=FREQUENCIA
-13:52:52	Informação	✅ ASSERTIVA PASSOU: classifica como FREQUENCIA: Isso é feito mensalmente? | detalhe=obtido=FREQUENCIA
-13:52:52	Informação	RESULTADO DO CASO: PASSOU | duração=11ms | assertivas=7 | falhas=0
-13:52:52	Informação	DETALHE: assertivas=7; falhas=0
-13:52:53	Informação	------------------------------------------------------------
-13:52:53	Informação	CASO 4/68 | CLASSIFICAÇÃO | Perguntas de volume, impacto, erros e objetivo
-13:52:53	Informação	✅ ASSERTIVA PASSOU: VOLUME | Quantos pedidos vocês processam? | detalhe=obtido=VOLUME
-13:52:53	Informação	✅ ASSERTIVA PASSOU: IMPACTO | Qual o impacto disso no negócio? | detalhe=obtido=IMPACTO
-13:52:53	Informação	✅ ASSERTIVA PASSOU: ERROS | Esse processo gera retrabalho ou atrasos? | detalhe=obtido=ERROS
-13:52:53	Informação	✅ ASSERTIVA PASSOU: OBJETIVO | O que você gostaria de melhorar ou alcançar? | detalhe=obtido=OBJETIVO
-13:52:53	Informação	✅ ASSERTIVA PASSOU: OBJETIVO | Qual o resultado desejado? | detalhe=obtido=OBJETIVO
-13:52:53	Informação	✅ ASSERTIVA PASSOU: FREQUENCIA | Quantas vezes por semana isso ocorre? | detalhe=obtido=FREQUENCIA
-13:52:53	Informação	RESULTADO DO CASO: PASSOU | duração=8ms | assertivas=6 | falhas=0
-13:52:53	Informação	DETALHE: assertivas=6; falhas=0
-13:52:54	Informação	------------------------------------------------------------
-13:52:54	Informação	CASO 5/68 | CONTINUIDADE | Não inventa resposta quando não há pergunta pendente
-13:52:54	Informação	✅ ASSERTIVA PASSOU: sem pergunta pendente não marca resposta pendente | detalhe={"proxima_pergunta":"Pergunta original?","respondeu_pergunta_pendente":false}
-13:52:54	Informação	RESULTADO DO CASO: PASSOU | duração=4ms | assertivas=1 | falhas=0
-13:52:54	Informação	DETALHE: assertivas=1; falhas=0
-13:52:55	Informação	------------------------------------------------------------
-13:52:55	Informação	CASO 6/68 | CONTINUIDADE | Resposta numérica avança da pergunta de volume
-13:52:55	Informação	✅ ASSERTIVA PASSOU: reconhece o número como resposta | detalhe={"proxima_pergunta":"Existe algum outro impacto importante desse processo?","informacao_faltante":"outro impacto relevante do processo","volume":"20","respondeu_pergunta_pendente":true}
-13:52:55	Informação	✅ ASSERTIVA PASSOU: não repete a pergunta de volume | detalhe=próxima=Existe algum outro impacto importante desse processo?
-13:52:55	Informação	✅ ASSERTIVA PASSOU: preserva o número como evidência de volume | detalhe=volume=20
-13:52:55	Informação	RESULTADO DO CASO: PASSOU | duração=9ms | assertivas=3 | falhas=0
-13:52:55	Informação	DETALHE: assertivas=3; falhas=0
-13:52:56	Informação	------------------------------------------------------------
-13:52:56	Informação	CASO 7/68 | CONTINUIDADE | Variações de frequência avançam sem repetir a pergunta
-13:52:56	Informação	✅ ASSERTIVA PASSOU: resposta "uma por mês" é reconhecida | detalhe=obtido={"proxima_pergunta":"Existe algum outro impacto importante desse processo?","informacao_faltante":"outro impacto relevante do processo","respondeu_pergunta_pendente":true}
-13:52:56	Informação	✅ ASSERTIVA PASSOU: resposta "uma por mês" avança | detalhe=próxima=Existe algum outro impacto importante desse processo?
-13:52:56	Informação	✅ ASSERTIVA PASSOU: resposta "20 por dia" é reconhecida | detalhe=obtido={"proxima_pergunta":"Existe algum outro impacto importante desse processo?","informacao_faltante":"outro impacto relevante do processo","volume":"20","respondeu_pergunta_pendente":true}
-13:52:56	Informação	✅ ASSERTIVA PASSOU: resposta "20 por dia" avança | detalhe=próxima=Existe algum outro impacto importante desse processo?
-13:52:56	Informação	✅ ASSERTIVA PASSOU: resposta "~50 por semana" é reconhecida | detalhe=obtido={"proxima_pergunta":"Existe algum outro impacto importante desse processo?","informacao_faltante":"outro impacto relevante do processo","volume":"50","respondeu_pergunta_pendente":true}
-13:52:56	Informação	✅ ASSERTIVA PASSOU: resposta "~50 por semana" avança | detalhe=próxima=Existe algum outro impacto importante desse processo?
-13:52:56	Informação	✅ ASSERTIVA PASSOU: resposta "diariamente" é reconhecida | detalhe=obtido={"proxima_pergunta":"Existe algum outro impacto importante desse processo?","informacao_faltante":"outro impacto relevante do processo","respondeu_pergunta_pendente":true}
-13:52:56	Informação	✅ ASSERTIVA PASSOU: resposta "diariamente" avança | detalhe=próxima=Existe algum outro impacto importante desse processo?
-13:52:56	Informação	✅ ASSERTIVA PASSOU: resposta "eventualmente" é reconhecida | detalhe=obtido={"proxima_pergunta":"Existe algum outro impacto importante desse processo?","informacao_faltante":"outro impacto relevante do processo","respondeu_pergunta_pendente":true}
-13:52:56	Informação	✅ ASSERTIVA PASSOU: resposta "eventualmente" avança | detalhe=próxima=Existe algum outro impacto importante desse processo?
-13:52:56	Informação	RESULTADO DO CASO: PASSOU | duração=11ms | assertivas=10 | falhas=0
-13:52:56	Informação	DETALHE: assertivas=10; falhas=0
-13:52:56	Informação	------------------------------------------------------------
-13:52:56	Informação	CASO 8/68 | CONTINUIDADE | Resposta curta contextual à pergunta de erros não entra em loop
-13:52:56	Informação	✅ ASSERTIVA PASSOU: resposta "diariamente" é reconhecida | detalhe={"proxima_pergunta":"O que você gostaria de melhorar ou alcançar nesse processo?","informacao_faltante":"objetivo do empresário para melhorar o processo","respondeu_pergunta_pendente":true}
-13:52:56	Informação	✅ ASSERTIVA PASSOU: resposta "diariamente" não repete pergunta | detalhe=próxima=O que você gostaria de melhorar ou alcançar nesse processo?
-13:52:56	Informação	✅ ASSERTIVA PASSOU: resposta "não sei dizer" é reconhecida | detalhe={"proxima_pergunta":"O que você gostaria de melhorar ou alcançar nesse processo?","informacao_faltante":"objetivo do empresário para melhorar o processo","respondeu_pergunta_pendente":true}
-13:52:56	Informação	✅ ASSERTIVA PASSOU: resposta "não sei dizer" não repete pergunta | detalhe=próxima=O que você gostaria de melhorar ou alcançar nesse processo?
-13:52:56	Informação	✅ ASSERTIVA PASSOU: resposta "sim" é reconhecida | detalhe={"proxima_pergunta":"O que você gostaria de melhorar ou alcançar nesse processo?","informacao_faltante":"objetivo do empresário para melhorar o processo","respondeu_pergunta_pendente":true}
-13:52:56	Informação	✅ ASSERTIVA PASSOU: resposta "sim" não repete pergunta | detalhe=próxima=O que você gostaria de melhorar ou alcançar nesse processo?
-13:52:56	Informação	✅ ASSERTIVA PASSOU: resposta "não" é reconhecida | detalhe={"proxima_pergunta":"O que você gostaria de melhorar ou alcançar nesse processo?","informacao_faltante":"objetivo do empresário para melhorar o processo","respondeu_pergunta_pendente":true}
-13:52:56	Informação	✅ ASSERTIVA PASSOU: resposta "não" não repete pergunta | detalhe=próxima=O que você gostaria de melhorar ou alcançar nesse processo?
-13:52:56	Informação	RESULTADO DO CASO: PASSOU | duração=18ms | assertivas=8 | falhas=0
-13:52:56	Informação	DETALHE: assertivas=8; falhas=0
-13:52:57	Informação	------------------------------------------------------------
-13:52:57	Informação	CASO 9/68 | CONTINUIDADE | Mensagem vazia não é tratada como resposta válida
-13:52:57	Informação	✅ ASSERTIVA PASSOU: mensagem vazia não marca pergunta respondida | detalhe={"proxima_pergunta":"Esse processo costuma gerar erros, retrabalho ou atrasos?","informacao_faltante":"Esse processo costuma gerar erros, retrabalho ou atrasos?","respondeu_pergunta_pendente":false}
-13:52:57	Informação	RESULTADO DO CASO: PASSOU | duração=4ms | assertivas=1 | falhas=0
-13:52:57	Informação	DETALHE: assertivas=1; falhas=0
-13:52:57	Informação	------------------------------------------------------------
-13:52:57	Informação	CASO 10/68 | CONTINUIDADE | Resposta livre de impacto é preservada literalmente
-13:52:57	Informação	✅ ASSERTIVA PASSOU: reconhece a resposta de impacto | detalhe={"proxima_pergunta":"Esse processo costuma gerar erros, retrabalho ou atrasos?","informacao_faltante":"erros, retrabalho ou atrasos gerados pelo processo","impacto":"Perdemos vendas quando os pedidos atrasam.","respondeu_pergunta_pendente":true}
-13:52:57	Informação	✅ ASSERTIVA PASSOU: preserva o texto original como evidência | detalhe=impacto=Perdemos vendas quando os pedidos atrasam.
-13:52:57	Informação	✅ ASSERTIVA PASSOU: avança para outra pergunta | detalhe=próxima=Esse processo costuma gerar erros, retrabalho ou atrasos?
-13:52:57	Informação	RESULTADO DO CASO: PASSOU | duração=6ms | assertivas=3 | falhas=0
-13:52:57	Informação	DETALHE: assertivas=3; falhas=0
-13:52:58	Informação	------------------------------------------------------------
-13:52:58	Informação	CASO 11/68 | NORMALIZAÇÃO SEMÂNTICA | Extrai processo, volume, frequência, impacto e dor de uma resposta
-13:52:58	Informação	✅ ASSERTIVA PASSOU: identifica processo | detalhe=processo=Colocação manual de pedidos em planilha
-13:52:58	Informação	✅ ASSERTIVA PASSOU: identifica volume | detalhe=volume=100 pedidos por dia
-13:52:58	Informação	✅ ASSERTIVA PASSOU: identifica frequência diária | detalhe=frequência=Diária
-13:52:58	Informação	✅ ASSERTIVA PASSOU: identifica impacto temporal | detalhe=impacto=2 horas por dia
-13:52:58	Informação	✅ ASSERTIVA PASSOU: identifica dor de digitação | detalhe=dor=Erros de digitação
-13:52:58	Informação	RESULTADO DO CASO: PASSOU | duração=10ms | assertivas=5 | falhas=0
-13:52:58	Informação	DETALHE: assertivas=5; falhas=0
-13:52:59	Informação	------------------------------------------------------------
-13:52:59	Informação	CASO 12/68 | INTEGRIDADE DOS DADOS | Volume não é confundido com impacto
-13:52:59	Informação	✅ ASSERTIVA PASSOU: mantém volume como volume | detalhe=volume=100 pedidos por dia
-13:52:59	Informação	✅ ASSERTIVA PASSOU: não mantém volume no campo impacto | detalhe=impacto=
-13:52:59	Informação	RESULTADO DO CASO: PASSOU | duração=6ms | assertivas=2 | falhas=0
-13:52:59	Informação	DETALHE: assertivas=2; falhas=0
-13:52:59	Informação	------------------------------------------------------------
-13:52:59	Informação	CASO 13/68 | INTEGRIDADE DOS DADOS | Volume já confirmado é preservado quando a nova mensagem não o substitui
-13:52:59	Informação	✅ ASSERTIVA PASSOU: preserva volume anterior | detalhe=volume=80 pedidos por dia
-13:52:59	Informação	RESULTADO DO CASO: PASSOU | duração=4ms | assertivas=1 | falhas=0
-13:53:00	Informação	DETALHE: assertivas=1; falhas=0
-13:53:00	Informação	------------------------------------------------------------
-13:53:00	Informação	CASO 14/68 | INTEGRIDADE DOS DADOS | Objetivo placeholder não é salvo como objetivo real
-13:53:00	Informação	✅ ASSERTIVA PASSOU: remove pergunta/placeholder do campo objetivo | detalhe=objetivo=
-13:53:00	Informação	RESULTADO DO CASO: PASSOU | duração=6ms | assertivas=1 | falhas=0
-13:53:00	Informação	DETALHE: assertivas=1; falhas=0
-13:53:01	Informação	------------------------------------------------------------
-13:53:01	Informação	CASO 15/68 | PROCESSO | Etapas do processo são divididas e ordenadas
-13:53:01	Informação	✅ ASSERTIVA PASSOU: extrai três etapas | detalhe=etapas=["Receber pedidos","Conferir pedidos","Lançar na planilha"]
-13:53:01	Informação	✅ ASSERTIVA PASSOU: preserva a ordem das etapas | detalhe=etapas=["Receber pedidos","Conferir pedidos","Lançar na planilha"]
-13:53:01	Informação	RESULTADO DO CASO: PASSOU | duração=6ms | assertivas=2 | falhas=0
-13:53:01	Informação	DETALHE: assertivas=2; falhas=0
-13:53:01	Informação	------------------------------------------------------------
-13:53:01	Informação	CASO 16/68 | PROCESSO | Acumulação adiciona nova etapa sem apagar a anterior
-13:53:01	Informação	✅ ASSERTIVA PASSOU: preserva primeira etapa | detalhe={"processo_nome":"Receber pedidos","processo_resumo":"Receber pedidos → Conferir pedidos"}
-13:53:01	Informação	✅ ASSERTIVA PASSOU: inclui nova etapa no resumo | detalhe={"processo_nome":"Receber pedidos","processo_resumo":"Receber pedidos → Conferir pedidos"}
-13:53:01	Informação	RESULTADO DO CASO: PASSOU | duração=7ms | assertivas=2 | falhas=0
-13:53:01	Informação	DETALHE: assertivas=2; falhas=0
-13:53:02	Informação	------------------------------------------------------------
-13:53:02	Informação	CASO 17/68 | PROCESSO | Acumulação não duplica uma etapa idêntica
-13:53:02	Informação	✅ ASSERTIVA PASSOU: mantém exatamente duas etapas únicas | detalhe={"processo_nome":"Receber pedidos","processo_resumo":"Receber pedidos → Conferir pedidos"}
-13:53:02	Informação	RESULTADO DO CASO: PASSOU | duração=8ms | assertivas=1 | falhas=0
-13:53:02	Informação	DETALHE: assertivas=1; falhas=0
-13:53:02	Informação	------------------------------------------------------------
-13:53:02	Informação	CASO 18/68 | ATUALIZAÇÃO | Atualização não sobrescreve objetivo já confirmado
-13:53:02	Informação	✅ ASSERTIVA PASSOU: preserva objetivo existente | detalhe=objetivo=Reduzir erros de digitação
-13:53:02	Informação	✅ ASSERTIVA PASSOU: preserva primeira etapa do processo | detalhe=processo_nome=Receber pedidos
-13:53:02	Informação	✅ ASSERTIVA PASSOU: registra volume da análise | detalhe=volume=100 pedidos por dia
-13:53:02	Informação	RESULTADO DO CASO: PASSOU | duração=7ms | assertivas=3 | falhas=0
-13:53:02	Informação	DETALHE: assertivas=3; falhas=0
-13:53:03	Informação	------------------------------------------------------------
-13:53:03	Informação	CASO 19/68 | REGRESSÃO | Teste de regressão da repetição de perguntas: 5 cenários
-13:53:03	Informação	PASSOU: uma por mês | respondeu=true | próxima=Existe algum outro impacto importante desse processo?
-13:53:03	Informação	PASSOU: 20 por dia | respondeu=true | próxima=Existe algum outro impacto importante desse processo?
-13:53:03	Informação	PASSOU: 50 por semana | respondeu=true | próxima=Existe algum outro impacto importante desse processo?
-13:53:03	Informação	PASSOU: diariamente na pergunta de erros | respondeu=true | próxima=O que você gostaria de melhorar ou alcançar nesse processo?
-13:53:03	Informação	PASSOU: não sei na pergunta de erros | respondeu=true | próxima=O que você gostaria de melhorar ou alcançar nesse processo?
-13:53:03	Informação	APROVADO: 5/5
-13:53:03	Informação	✅ ASSERTIVA PASSOU: regressão retorna sucesso | detalhe={"sucesso":true,"aprovados":5,"total":5}
-13:53:03	Informação	✅ ASSERTIVA PASSOU: regressão cobre cinco casos | detalhe={"sucesso":true,"aprovados":5,"total":5}
-13:53:03	Informação	RESULTADO DO CASO: PASSOU | duração=11ms | assertivas=2 | falhas=0
-13:53:03	Informação	DETALHE: assertivas=2; falhas=0
-13:53:03	Informação	------------------------------------------------------------
-13:53:03	Informação	CASO 20/68 | INVENTÁRIO | Todas as funções listadas na aceitação estão disponíveis
-13:53:03	Informação	✅ ASSERTIVA PASSOU: a lista de aceitação não está vazia | detalhe=total=48
-13:53:03	Informação	✅ ASSERTIVA PASSOU: nenhuma função de teste está ausente | detalhe=ausentes=[]
-13:53:03	Informação	RESULTADO DO CASO: PASSOU | duração=4ms | assertivas=2 | falhas=0
-13:53:03	Informação	DETALHE: assertivas=2; falhas=0
-13:53:04	Informação	------------------------------------------------------------
-13:53:04	Informação	CASO 21/68 | SUÍTE EXISTENTE 01 | TESTAR_RESISTENCIA_INTERPRETACAO_V63
-13:53:04	Informação	============================================================
-13:53:04	Informação	TESTAR_RESISTENCIA_INTERPRETACAO_V63
-13:53:04	Informação	APROVADOS: 12/12
-13:53:04	Informação	FALHAS: 0
-13:53:04	Informação	PERCENTUAL: 100%
-13:53:04	Informação	✅ TESTE 1 — Status inválido é normalizado para DESCONHECIDO
-13:53:04	Informação	✅ TESTE 2 — Campo obrigatório ausente é rejeitado
-13:53:04	Informação	✅ TESTE 3 — CONFIRMADO sem conteúdo é rejeitado
-13:53:04	Informação	✅ TESTE 4 — INFERIDO sem conteúdo é rejeitado
-13:53:04	Informação	✅ TESTE 5 — DESCONHECIDO pode permanecer sem conteúdo
-13:53:04	Informação	✅ TESTE 6 — Arrays contaminados com vazios são limpos
-13:53:04	Informação	✅ TESTE 7 — Versão inválida é rejeitada
-13:53:04	Informação	✅ TESTE 8 — Contaminação técnica é rejeitada pelo filtro de segurança
-13:53:04	Informação	✅ TESTE 9 — Interpretação semanticamente correta permanece válida
-13:53:04	Informação	✅ TESTE 10 — Processo desconhecido impede habilitação para reconhecimento
-13:53:04	Informação	✅ TESTE 11 — Contexto desconhecido não impede reconhecimento quando núcleo está completo
-13:53:04	Informação	✅ TESTE 12 — Campos vazios ou desconhecidos entram nas lacunas
-13:53:04	Informação	🏆 TESTAR_RESISTENCIA_INTERPRETACAO_V63: PASSOU
-13:53:04	Informação	RESULTADO DO CASO: PASSOU_COM_RETORNO_EXPLICITO | duração=37ms | assertivas=24 | falhas=0
-13:53:04	Informação	DETALHE: captura_logger=true; linhas_diagnosticas=28; assertivas_estimadas=24; falhas_internas_detectadas=0; retorno={"sucesso":true,"aprovados":12,"falhas":0,"percentual":100,"resultados":[{"numero":1,"descricao":"Status inválido é normalizado para DESCONHECIDO","passou":true,"erro":""},{"numero":2,"descricao":"Campo obrigatório ausente é rejeitado","passou":true,"erro":""},{"numero":3,"descricao":"CONFIRMADO sem conteúdo é rejeitado","passou":true,"erro":""},{"numero":4,"descricao":"INFERIDO sem conteúdo é rejeitado","passou":true,"erro":""},{"numero":5,"descricao":"DESCONHECIDO pode permanecer sem conteúdo"
-13:53:05	Informação	------------------------------------------------------------
-13:53:05	Informação	CASO 22/68 | SUÍTE EXISTENTE 02 | TESTAR_INTERPRETACAO_SEMANTICA_V63
-13:53:05	Informação	============================================================
-13:53:05	Informação	TESTAR_INTERPRETACAO_SEMANTICA_V63
-13:53:05	Informação	APROVADOS: 25/25
-13:53:05	Informação	FALHAS: 0
-13:53:05	Informação	PERCENTUAL: 100%
-13:53:05	Informação	✅ TESTE 1 — Contrato V6.3 disponível
-13:53:05	Informação	✅ TESTE 2 — Interpretação possui versão
-13:53:05	Informação	✅ TESTE 3 — Problema foi estruturado
-13:53:05	Informação	✅ TESTE 4 — Processo foi estruturado
-13:53:05	Informação	✅ TESTE 5 — Dores foram estruturadas
-13:53:05	Informação	✅ TESTE 6 — Impactos foram estruturados
-13:53:05	Informação	✅ TESTE 7 — Resultado desejado foi estruturado
-13:53:05	Informação	✅ TESTE 8 — Contexto foi estruturado
-13:53:05	Informação	✅ TESTE 9 — Restrições foram estruturadas
-13:53:05	Informação	✅ TESTE 10 — Padrão do problema foi estruturado
-13:53:05	Informação	✅ TESTE 11 — Status CONFIRMADO é preservado
-13:53:05	Informação	✅ TESTE 12 — Status INFERIDO é preservado
-13:53:05	Informação	✅ TESTE 13 — Interpretação completa é válida
-13:53:05	Informação	✅ TESTE 14 — Interpretação pode ser preparada para reconhecimento
-13:53:05	Informação	✅ TESTE 15 — Interpretação vazia não é considerada conteúdo
-13:53:05	Informação	✅ TESTE 16 — Array vazio não é considerado conteúdo
-13:53:05	Informação	✅ TESTE 17 — Array preenchido é considerado conteúdo
-13:53:05	Informação	✅ TESTE 18 — Campo ausente invalida interpretação
-13:53:05	Informação	✅ TESTE 19 — Status inválido vira DESCONHECIDO
-13:53:05	Informação	✅ TESTE 20 — Interpretação não expõe tecnologia
-13:53:05	Informação	✅ TESTE 21 — Interpretação é determinística
-13:53:05	Informação	✅ TESTE 22 — Normalização de texto remove espaços externos
-13:53:05	Informação	✅ TESTE 23 — Arrays removem valores vazios
-13:53:05	Informação	✅ TESTE 24 — Versão incorreta invalida interpretação
-13:53:05	Informação	✅ TESTE 25 — Segurança rejeita conteúdo técnico
-13:53:05	Informação	🏆 TESTAR_INTERPRETACAO_SEMANTICA_V63: PASSOU
-13:53:05	Informação	🏆 INTERPRETAÇÃO SEMÂNTICA V6.3: 100%
-13:53:05	Informação	RESULTADO DO CASO: PASSOU_COM_RETORNO_EXPLICITO | duração=29ms | assertivas=50 | falhas=0
-13:53:05	Informação	DETALHE: captura_logger=true; linhas_diagnosticas=54; assertivas_estimadas=50; falhas_internas_detectadas=0; retorno={"sucesso":true,"aprovados":25,"falhas":0,"percentual":100,"resultados":[{"numero":1,"descricao":"Contrato V6.3 disponível","passou":true,"erro":""},{"numero":2,"descricao":"Interpretação possui versão","passou":true,"erro":""},{"numero":3,"descricao":"Problema foi estruturado","passou":true,"erro":""},{"numero":4,"descricao":"Processo foi estruturado","passou":true,"erro":""},{"numero":5,"descricao":"Dores foram estruturadas","passou":true,"erro":""},{"numero":6,"descricao":"Impactos foram estr
-13:53:05	Informação	------------------------------------------------------------
-13:53:05	Informação	CASO 23/68 | SUÍTE EXISTENTE 03 | TESTAR_IA_SEMANTICA_REAL_V63
-13:53:05	Informação	============================================================
-13:53:05	Informação	TESTAR_IA_SEMANTICA_REAL_V63
-13:53:06	Informação	GEMINI - TENTATIVA 1/3
-13:53:07	Informação	HTTP STATUS: 200
-13:53:07	Informação	TEMPO: 1502 ms
-13:53:07	Informação	RESPOSTA GEMINI: {
+14:48:36	Notificação	Execução iniciada
+14:48:38	Informação	============================================================
+14:48:38	Informação	DIAGNÓSTICO PROFUNDO V6.3 — LOTE
+14:48:38	Informação	RUN_ID=80b66528-af67-4025-99d2-f5fec0970936 | CURSOR=0/68
+14:48:38	Informação	Limite conservador do lote: 210000 ms
+14:48:38	Informação	============================================================
+14:48:38	Informação	------------------------------------------------------------
+14:48:38	Informação	CASO 1/68 | CONTRATO | Funções críticas do diagnóstico estão disponíveis
+14:48:38	Informação	✅ ASSERTIVA PASSOU: normalizarTextoDiagnostico_ existe | detalhe=typeof=function
+14:48:38	Informação	✅ ASSERTIVA PASSOU: normalizarAnaliseDiagnostico_ existe | detalhe=typeof=function
+14:48:38	Informação	✅ ASSERTIVA PASSOU: ajustarContinuidadeDiagnostico_ existe | detalhe=typeof=function
+14:48:38	Informação	✅ ASSERTIVA PASSOU: classificarDimensaoPerguntaDiagnostico_ existe | detalhe=typeof=function
+14:48:38	Informação	✅ ASSERTIVA PASSOU: atualizarDiagnosticoComAnalise_ existe | detalhe=typeof=function
+14:48:38	Informação	✅ ASSERTIVA PASSOU: extrairEtapasProcessoDiagnostico_ existe | detalhe=typeof=function
+14:48:38	Informação	✅ ASSERTIVA PASSOU: acumularEtapaProcessoDiagnostico_ existe | detalhe=typeof=function
+14:48:38	Informação	✅ ASSERTIVA PASSOU: obterTestesAceitacaoFinalV63_ existe | detalhe=typeof=function
+14:48:38	Informação	RESULTADO DO CASO: PASSOU | duração=11ms | assertivas=8 | falhas=0
+14:48:38	Informação	DETALHE: assertivas=8; falhas=0
+14:48:39	Informação	------------------------------------------------------------
+14:48:39	Informação	CASO 2/68 | NORMALIZAÇÃO | Acentos, caixa e espaços são normalizados
+14:48:39	Informação	✅ ASSERTIVA PASSOU: remove acentos e converte para minúsculas | detalhe=obtido=acao diaria
+14:48:39	Informação	RESULTADO DO CASO: PASSOU | duração=5ms | assertivas=1 | falhas=0
+14:48:39	Informação	DETALHE: assertivas=1; falhas=0
+14:48:39	Informação	------------------------------------------------------------
+14:48:39	Informação	CASO 3/68 | CLASSIFICAÇÃO | Perguntas de frequência em linguagem natural
+14:48:39	Informação	✅ ASSERTIVA PASSOU: classifica como FREQUENCIA: Quantas divulgações vocês costumam fazer por semana? | detalhe=obtido=FREQUENCIA
+14:48:39	Informação	✅ ASSERTIVA PASSOU: classifica como FREQUENCIA: Com que frequência isso acontece? | detalhe=obtido=FREQUENCIA
+14:48:39	Informação	✅ ASSERTIVA PASSOU: classifica como FREQUENCIA: Quantas vezes por mês vocês fazem isso? | detalhe=obtido=FREQUENCIA
+14:48:39	Informação	✅ ASSERTIVA PASSOU: classifica como FREQUENCIA: Vocês publicam diariamente? | detalhe=obtido=FREQUENCIA
+14:48:39	Informação	✅ ASSERTIVA PASSOU: classifica como FREQUENCIA: Vocês postam todos os dias? | detalhe=obtido=FREQUENCIA
+14:48:39	Informação	✅ ASSERTIVA PASSOU: classifica como FREQUENCIA: Publicam uma vez por semana? | detalhe=obtido=FREQUENCIA
+14:48:39	Informação	✅ ASSERTIVA PASSOU: classifica como FREQUENCIA: Isso é feito mensalmente? | detalhe=obtido=FREQUENCIA
+14:48:39	Informação	RESULTADO DO CASO: PASSOU | duração=9ms | assertivas=7 | falhas=0
+14:48:39	Informação	DETALHE: assertivas=7; falhas=0
+14:48:40	Informação	------------------------------------------------------------
+14:48:40	Informação	CASO 4/68 | CLASSIFICAÇÃO | Perguntas de volume, impacto, erros e objetivo
+14:48:40	Informação	✅ ASSERTIVA PASSOU: VOLUME | Quantos pedidos vocês processam? | detalhe=obtido=VOLUME
+14:48:40	Informação	✅ ASSERTIVA PASSOU: IMPACTO | Qual o impacto disso no negócio? | detalhe=obtido=IMPACTO
+14:48:40	Informação	✅ ASSERTIVA PASSOU: ERROS | Esse processo gera retrabalho ou atrasos? | detalhe=obtido=ERROS
+14:48:40	Informação	✅ ASSERTIVA PASSOU: OBJETIVO | O que você gostaria de melhorar ou alcançar? | detalhe=obtido=OBJETIVO
+14:48:40	Informação	✅ ASSERTIVA PASSOU: OBJETIVO | Qual o resultado desejado? | detalhe=obtido=OBJETIVO
+14:48:40	Informação	✅ ASSERTIVA PASSOU: FREQUENCIA | Quantas vezes por semana isso ocorre? | detalhe=obtido=FREQUENCIA
+14:48:40	Informação	RESULTADO DO CASO: PASSOU | duração=11ms | assertivas=6 | falhas=0
+14:48:40	Informação	DETALHE: assertivas=6; falhas=0
+14:48:40	Informação	------------------------------------------------------------
+14:48:40	Informação	CASO 5/68 | CONTINUIDADE | Não inventa resposta quando não há pergunta pendente
+14:48:40	Informação	✅ ASSERTIVA PASSOU: sem pergunta pendente não marca resposta pendente | detalhe={"proxima_pergunta":"Pergunta original?","respondeu_pergunta_pendente":false}
+14:48:40	Informação	RESULTADO DO CASO: PASSOU | duração=5ms | assertivas=1 | falhas=0
+14:48:40	Informação	DETALHE: assertivas=1; falhas=0
+14:48:40	Informação	------------------------------------------------------------
+14:48:40	Informação	CASO 6/68 | CONTINUIDADE | Resposta numérica avança da pergunta de volume
+14:48:40	Informação	✅ ASSERTIVA PASSOU: reconhece o número como resposta | detalhe={"proxima_pergunta":"Existe algum outro impacto importante desse processo?","informacao_faltante":"outro impacto relevante do processo","volume":"20","respondeu_pergunta_pendente":true}
+14:48:40	Informação	✅ ASSERTIVA PASSOU: não repete a pergunta de volume | detalhe=próxima=Existe algum outro impacto importante desse processo?
+14:48:40	Informação	✅ ASSERTIVA PASSOU: preserva o número como evidência de volume | detalhe=volume=20
+14:48:40	Informação	RESULTADO DO CASO: PASSOU | duração=6ms | assertivas=3 | falhas=0
+14:48:40	Informação	DETALHE: assertivas=3; falhas=0
+14:48:41	Informação	------------------------------------------------------------
+14:48:41	Informação	CASO 7/68 | CONTINUIDADE | Variações de frequência avançam sem repetir a pergunta
+14:48:41	Informação	✅ ASSERTIVA PASSOU: resposta "uma por mês" é reconhecida | detalhe=obtido={"proxima_pergunta":"Existe algum outro impacto importante desse processo?","informacao_faltante":"outro impacto relevante do processo","respondeu_pergunta_pendente":true}
+14:48:41	Informação	✅ ASSERTIVA PASSOU: resposta "uma por mês" avança | detalhe=próxima=Existe algum outro impacto importante desse processo?
+14:48:41	Informação	✅ ASSERTIVA PASSOU: resposta "20 por dia" é reconhecida | detalhe=obtido={"proxima_pergunta":"Existe algum outro impacto importante desse processo?","informacao_faltante":"outro impacto relevante do processo","volume":"20","respondeu_pergunta_pendente":true}
+14:48:41	Informação	✅ ASSERTIVA PASSOU: resposta "20 por dia" avança | detalhe=próxima=Existe algum outro impacto importante desse processo?
+14:48:41	Informação	✅ ASSERTIVA PASSOU: resposta "~50 por semana" é reconhecida | detalhe=obtido={"proxima_pergunta":"Existe algum outro impacto importante desse processo?","informacao_faltante":"outro impacto relevante do processo","volume":"50","respondeu_pergunta_pendente":true}
+14:48:41	Informação	✅ ASSERTIVA PASSOU: resposta "~50 por semana" avança | detalhe=próxima=Existe algum outro impacto importante desse processo?
+14:48:41	Informação	✅ ASSERTIVA PASSOU: resposta "diariamente" é reconhecida | detalhe=obtido={"proxima_pergunta":"Existe algum outro impacto importante desse processo?","informacao_faltante":"outro impacto relevante do processo","respondeu_pergunta_pendente":true}
+14:48:41	Informação	✅ ASSERTIVA PASSOU: resposta "diariamente" avança | detalhe=próxima=Existe algum outro impacto importante desse processo?
+14:48:41	Informação	✅ ASSERTIVA PASSOU: resposta "eventualmente" é reconhecida | detalhe=obtido={"proxima_pergunta":"Existe algum outro impacto importante desse processo?","informacao_faltante":"outro impacto relevante do processo","respondeu_pergunta_pendente":true}
+14:48:41	Informação	✅ ASSERTIVA PASSOU: resposta "eventualmente" avança | detalhe=próxima=Existe algum outro impacto importante desse processo?
+14:48:41	Informação	RESULTADO DO CASO: PASSOU | duração=11ms | assertivas=10 | falhas=0
+14:48:41	Informação	DETALHE: assertivas=10; falhas=0
+14:48:41	Informação	------------------------------------------------------------
+14:48:41	Informação	CASO 8/68 | CONTINUIDADE | Resposta curta contextual à pergunta de erros não entra em loop
+14:48:41	Informação	✅ ASSERTIVA PASSOU: resposta "diariamente" é reconhecida | detalhe={"proxima_pergunta":"O que você gostaria de melhorar ou alcançar nesse processo?","informacao_faltante":"objetivo do empresário para melhorar o processo","respondeu_pergunta_pendente":true}
+14:48:41	Informação	✅ ASSERTIVA PASSOU: resposta "diariamente" não repete pergunta | detalhe=próxima=O que você gostaria de melhorar ou alcançar nesse processo?
+14:48:41	Informação	✅ ASSERTIVA PASSOU: resposta "não sei dizer" é reconhecida | detalhe={"proxima_pergunta":"O que você gostaria de melhorar ou alcançar nesse processo?","informacao_faltante":"objetivo do empresário para melhorar o processo","respondeu_pergunta_pendente":true}
+14:48:41	Informação	✅ ASSERTIVA PASSOU: resposta "não sei dizer" não repete pergunta | detalhe=próxima=O que você gostaria de melhorar ou alcançar nesse processo?
+14:48:41	Informação	✅ ASSERTIVA PASSOU: resposta "sim" é reconhecida | detalhe={"proxima_pergunta":"O que você gostaria de melhorar ou alcançar nesse processo?","informacao_faltante":"objetivo do empresário para melhorar o processo","respondeu_pergunta_pendente":true}
+14:48:41	Informação	✅ ASSERTIVA PASSOU: resposta "sim" não repete pergunta | detalhe=próxima=O que você gostaria de melhorar ou alcançar nesse processo?
+14:48:41	Informação	✅ ASSERTIVA PASSOU: resposta "não" é reconhecida | detalhe={"proxima_pergunta":"O que você gostaria de melhorar ou alcançar nesse processo?","informacao_faltante":"objetivo do empresário para melhorar o processo","respondeu_pergunta_pendente":true}
+14:48:41	Informação	✅ ASSERTIVA PASSOU: resposta "não" não repete pergunta | detalhe=próxima=O que você gostaria de melhorar ou alcançar nesse processo?
+14:48:41	Informação	RESULTADO DO CASO: PASSOU | duração=10ms | assertivas=8 | falhas=0
+14:48:41	Informação	DETALHE: assertivas=8; falhas=0
+14:48:42	Informação	------------------------------------------------------------
+14:48:42	Informação	CASO 9/68 | CONTINUIDADE | Mensagem vazia não é tratada como resposta válida
+14:48:42	Informação	✅ ASSERTIVA PASSOU: mensagem vazia não marca pergunta respondida | detalhe={"proxima_pergunta":"Esse processo costuma gerar erros, retrabalho ou atrasos?","informacao_faltante":"Esse processo costuma gerar erros, retrabalho ou atrasos?","respondeu_pergunta_pendente":false}
+14:48:42	Informação	RESULTADO DO CASO: PASSOU | duração=3ms | assertivas=1 | falhas=0
+14:48:42	Informação	DETALHE: assertivas=1; falhas=0
+14:48:42	Informação	------------------------------------------------------------
+14:48:42	Informação	CASO 10/68 | CONTINUIDADE | Resposta livre de impacto é preservada literalmente
+14:48:42	Informação	✅ ASSERTIVA PASSOU: reconhece a resposta de impacto | detalhe={"proxima_pergunta":"Esse processo costuma gerar erros, retrabalho ou atrasos?","informacao_faltante":"erros, retrabalho ou atrasos gerados pelo processo","impacto":"Perdemos vendas quando os pedidos atrasam.","respondeu_pergunta_pendente":true}
+14:48:42	Informação	✅ ASSERTIVA PASSOU: preserva o texto original como evidência | detalhe=impacto=Perdemos vendas quando os pedidos atrasam.
+14:48:42	Informação	✅ ASSERTIVA PASSOU: avança para outra pergunta | detalhe=próxima=Esse processo costuma gerar erros, retrabalho ou atrasos?
+14:48:42	Informação	RESULTADO DO CASO: PASSOU | duração=6ms | assertivas=3 | falhas=0
+14:48:42	Informação	DETALHE: assertivas=3; falhas=0
+14:48:44	Informação	------------------------------------------------------------
+14:48:44	Informação	CASO 11/68 | NORMALIZAÇÃO SEMÂNTICA | Extrai processo, volume, frequência, impacto e dor de uma resposta
+14:48:44	Informação	✅ ASSERTIVA PASSOU: identifica processo | detalhe=processo=Colocação manual de pedidos em planilha
+14:48:44	Informação	✅ ASSERTIVA PASSOU: identifica volume | detalhe=volume=100 pedidos por dia
+14:48:44	Informação	✅ ASSERTIVA PASSOU: identifica frequência diária | detalhe=frequência=Diária
+14:48:44	Informação	✅ ASSERTIVA PASSOU: identifica impacto temporal | detalhe=impacto=2 horas por dia
+14:48:44	Informação	✅ ASSERTIVA PASSOU: identifica dor de digitação | detalhe=dor=Erros de digitação
+14:48:44	Informação	RESULTADO DO CASO: PASSOU | duração=9ms | assertivas=5 | falhas=0
+14:48:44	Informação	DETALHE: assertivas=5; falhas=0
+14:48:44	Informação	------------------------------------------------------------
+14:48:44	Informação	CASO 12/68 | INTEGRIDADE DOS DADOS | Volume não é confundido com impacto
+14:48:44	Informação	✅ ASSERTIVA PASSOU: mantém volume como volume | detalhe=volume=100 pedidos por dia
+14:48:44	Informação	✅ ASSERTIVA PASSOU: não mantém volume no campo impacto | detalhe=impacto=
+14:48:44	Informação	RESULTADO DO CASO: PASSOU | duração=4ms | assertivas=2 | falhas=0
+14:48:44	Informação	DETALHE: assertivas=2; falhas=0
+14:48:45	Informação	------------------------------------------------------------
+14:48:45	Informação	CASO 13/68 | INTEGRIDADE DOS DADOS | Volume já confirmado é preservado quando a nova mensagem não o substitui
+14:48:45	Informação	✅ ASSERTIVA PASSOU: preserva volume anterior | detalhe=volume=80 pedidos por dia
+14:48:45	Informação	RESULTADO DO CASO: PASSOU | duração=4ms | assertivas=1 | falhas=0
+14:48:45	Informação	DETALHE: assertivas=1; falhas=0
+14:48:45	Informação	------------------------------------------------------------
+14:48:45	Informação	CASO 14/68 | INTEGRIDADE DOS DADOS | Objetivo placeholder não é salvo como objetivo real
+14:48:45	Informação	✅ ASSERTIVA PASSOU: remove pergunta/placeholder do campo objetivo | detalhe=objetivo=
+14:48:45	Informação	RESULTADO DO CASO: PASSOU | duração=6ms | assertivas=1 | falhas=0
+14:48:45	Informação	DETALHE: assertivas=1; falhas=0
+14:48:45	Informação	------------------------------------------------------------
+14:48:45	Informação	CASO 15/68 | PROCESSO | Etapas do processo são divididas e ordenadas
+14:48:45	Informação	✅ ASSERTIVA PASSOU: extrai três etapas | detalhe=etapas=["Receber pedidos","Conferir pedidos","Lançar na planilha"]
+14:48:45	Informação	✅ ASSERTIVA PASSOU: preserva a ordem das etapas | detalhe=etapas=["Receber pedidos","Conferir pedidos","Lançar na planilha"]
+14:48:45	Informação	RESULTADO DO CASO: PASSOU | duração=5ms | assertivas=2 | falhas=0
+14:48:45	Informação	DETALHE: assertivas=2; falhas=0
+14:48:46	Informação	------------------------------------------------------------
+14:48:46	Informação	CASO 16/68 | PROCESSO | Acumulação adiciona nova etapa sem apagar a anterior
+14:48:46	Informação	✅ ASSERTIVA PASSOU: preserva primeira etapa | detalhe={"processo_nome":"Receber pedidos","processo_resumo":"Receber pedidos → Conferir pedidos"}
+14:48:46	Informação	✅ ASSERTIVA PASSOU: inclui nova etapa no resumo | detalhe={"processo_nome":"Receber pedidos","processo_resumo":"Receber pedidos → Conferir pedidos"}
+14:48:46	Informação	RESULTADO DO CASO: PASSOU | duração=6ms | assertivas=2 | falhas=0
+14:48:46	Informação	DETALHE: assertivas=2; falhas=0
+14:48:46	Informação	------------------------------------------------------------
+14:48:46	Informação	CASO 17/68 | PROCESSO | Acumulação não duplica uma etapa idêntica
+14:48:46	Informação	✅ ASSERTIVA PASSOU: mantém exatamente duas etapas únicas | detalhe={"processo_nome":"Receber pedidos","processo_resumo":"Receber pedidos → Conferir pedidos"}
+14:48:46	Informação	RESULTADO DO CASO: PASSOU | duração=3ms | assertivas=1 | falhas=0
+14:48:46	Informação	DETALHE: assertivas=1; falhas=0
+14:48:47	Informação	------------------------------------------------------------
+14:48:47	Informação	CASO 18/68 | ATUALIZAÇÃO | Atualização não sobrescreve objetivo já confirmado
+14:48:47	Informação	✅ ASSERTIVA PASSOU: preserva objetivo existente | detalhe=objetivo=Reduzir erros de digitação
+14:48:47	Informação	✅ ASSERTIVA PASSOU: preserva primeira etapa do processo | detalhe=processo_nome=Receber pedidos
+14:48:47	Informação	✅ ASSERTIVA PASSOU: registra volume da análise | detalhe=volume=100 pedidos por dia
+14:48:47	Informação	RESULTADO DO CASO: PASSOU | duração=6ms | assertivas=3 | falhas=0
+14:48:47	Informação	DETALHE: assertivas=3; falhas=0
+14:48:47	Informação	------------------------------------------------------------
+14:48:47	Informação	CASO 19/68 | REGRESSÃO | Teste de regressão da repetição de perguntas: 5 cenários
+14:48:47	Informação	PASSOU: uma por mês | respondeu=true | próxima=Existe algum outro impacto importante desse processo?
+14:48:47	Informação	PASSOU: 20 por dia | respondeu=true | próxima=Existe algum outro impacto importante desse processo?
+14:48:47	Informação	PASSOU: 50 por semana | respondeu=true | próxima=Existe algum outro impacto importante desse processo?
+14:48:47	Informação	PASSOU: diariamente na pergunta de erros | respondeu=true | próxima=O que você gostaria de melhorar ou alcançar nesse processo?
+14:48:47	Informação	PASSOU: não sei na pergunta de erros | respondeu=true | próxima=O que você gostaria de melhorar ou alcançar nesse processo?
+14:48:47	Informação	APROVADO: 5/5
+14:48:47	Informação	✅ ASSERTIVA PASSOU: regressão retorna sucesso | detalhe={"sucesso":true,"aprovados":5,"total":5}
+14:48:47	Informação	✅ ASSERTIVA PASSOU: regressão cobre cinco casos | detalhe={"sucesso":true,"aprovados":5,"total":5}
+14:48:47	Informação	RESULTADO DO CASO: PASSOU | duração=22ms | assertivas=2 | falhas=0
+14:48:47	Informação	DETALHE: assertivas=2; falhas=0
+14:48:48	Informação	------------------------------------------------------------
+14:48:48	Informação	CASO 20/68 | INVENTÁRIO | Todas as funções listadas na aceitação estão disponíveis
+14:48:48	Informação	✅ ASSERTIVA PASSOU: a lista de aceitação não está vazia | detalhe=total=48
+14:48:48	Informação	✅ ASSERTIVA PASSOU: nenhuma função de teste está ausente | detalhe=ausentes=[]
+14:48:48	Informação	RESULTADO DO CASO: PASSOU | duração=6ms | assertivas=2 | falhas=0
+14:48:48	Informação	DETALHE: assertivas=2; falhas=0
+14:48:49	Informação	------------------------------------------------------------
+14:48:49	Informação	CASO 21/68 | SUÍTE EXISTENTE 01 | TESTAR_RESISTENCIA_INTERPRETACAO_V63
+14:48:49	Informação	============================================================
+14:48:49	Informação	TESTAR_RESISTENCIA_INTERPRETACAO_V63
+14:48:49	Informação	APROVADOS: 12/12
+14:48:49	Informação	FALHAS: 0
+14:48:49	Informação	PERCENTUAL: 100%
+14:48:49	Informação	✅ TESTE 1 — Status inválido é normalizado para DESCONHECIDO
+14:48:49	Informação	✅ TESTE 2 — Campo obrigatório ausente é rejeitado
+14:48:49	Informação	✅ TESTE 3 — CONFIRMADO sem conteúdo é rejeitado
+14:48:49	Informação	✅ TESTE 4 — INFERIDO sem conteúdo é rejeitado
+14:48:49	Informação	✅ TESTE 5 — DESCONHECIDO pode permanecer sem conteúdo
+14:48:49	Informação	✅ TESTE 6 — Arrays contaminados com vazios são limpos
+14:48:49	Informação	✅ TESTE 7 — Versão inválida é rejeitada
+14:48:49	Informação	✅ TESTE 8 — Contaminação técnica é rejeitada pelo filtro de segurança
+14:48:49	Informação	✅ TESTE 9 — Interpretação semanticamente correta permanece válida
+14:48:49	Informação	✅ TESTE 10 — Processo desconhecido impede habilitação para reconhecimento
+14:48:49	Informação	✅ TESTE 11 — Contexto desconhecido não impede reconhecimento quando núcleo está completo
+14:48:49	Informação	✅ TESTE 12 — Campos vazios ou desconhecidos entram nas lacunas
+14:48:49	Informação	🏆 TESTAR_RESISTENCIA_INTERPRETACAO_V63: PASSOU
+14:48:49	Informação	RESULTADO DO CASO: PASSOU_COM_RETORNO_EXPLICITO | duração=20ms | assertivas=24 | falhas=0
+14:48:49	Informação	DETALHE: captura_logger=true; linhas_diagnosticas=28; assertivas_estimadas=24; falhas_internas_detectadas=0; retorno={"sucesso":true,"aprovados":12,"falhas":0,"percentual":100,"resultados":[{"numero":1,"descricao":"Status inválido é normalizado para DESCONHECIDO","passou":true,"erro":""},{"numero":2,"descricao":"Campo obrigatório ausente é rejeitado","passou":true,"erro":""},{"numero":3,"descricao":"CONFIRMADO sem conteúdo é rejeitado","passou":true,"erro":""},{"numero":4,"descricao":"INFERIDO sem conteúdo é rejeitado","passou":true,"erro":""},{"numero":5,"descricao":"DESCONHECIDO pode permanecer sem conteúdo"
+14:48:49	Informação	------------------------------------------------------------
+14:48:49	Informação	CASO 22/68 | SUÍTE EXISTENTE 02 | TESTAR_INTERPRETACAO_SEMANTICA_V63
+14:48:49	Informação	============================================================
+14:48:49	Informação	TESTAR_INTERPRETACAO_SEMANTICA_V63
+14:48:49	Informação	APROVADOS: 25/25
+14:48:49	Informação	FALHAS: 0
+14:48:49	Informação	PERCENTUAL: 100%
+14:48:49	Informação	✅ TESTE 1 — Contrato V6.3 disponível
+14:48:49	Informação	✅ TESTE 2 — Interpretação possui versão
+14:48:49	Informação	✅ TESTE 3 — Problema foi estruturado
+14:48:49	Informação	✅ TESTE 4 — Processo foi estruturado
+14:48:49	Informação	✅ TESTE 5 — Dores foram estruturadas
+14:48:49	Informação	✅ TESTE 6 — Impactos foram estruturados
+14:48:49	Informação	✅ TESTE 7 — Resultado desejado foi estruturado
+14:48:49	Informação	✅ TESTE 8 — Contexto foi estruturado
+14:48:49	Informação	✅ TESTE 9 — Restrições foram estruturadas
+14:48:49	Informação	✅ TESTE 10 — Padrão do problema foi estruturado
+14:48:49	Informação	✅ TESTE 11 — Status CONFIRMADO é preservado
+14:48:49	Informação	✅ TESTE 12 — Status INFERIDO é preservado
+14:48:49	Informação	✅ TESTE 13 — Interpretação completa é válida
+14:48:49	Informação	✅ TESTE 14 — Interpretação pode ser preparada para reconhecimento
+14:48:49	Informação	✅ TESTE 15 — Interpretação vazia não é considerada conteúdo
+14:48:49	Informação	✅ TESTE 16 — Array vazio não é considerado conteúdo
+14:48:49	Informação	✅ TESTE 17 — Array preenchido é considerado conteúdo
+14:48:49	Informação	✅ TESTE 18 — Campo ausente invalida interpretação
+14:48:49	Informação	✅ TESTE 19 — Status inválido vira DESCONHECIDO
+14:48:49	Informação	✅ TESTE 20 — Interpretação não expõe tecnologia
+14:48:49	Informação	✅ TESTE 21 — Interpretação é determinística
+14:48:49	Informação	✅ TESTE 22 — Normalização de texto remove espaços externos
+14:48:49	Informação	✅ TESTE 23 — Arrays removem valores vazios
+14:48:49	Informação	✅ TESTE 24 — Versão incorreta invalida interpretação
+14:48:49	Informação	✅ TESTE 25 — Segurança rejeita conteúdo técnico
+14:48:49	Informação	🏆 TESTAR_INTERPRETACAO_SEMANTICA_V63: PASSOU
+14:48:49	Informação	🏆 INTERPRETAÇÃO SEMÂNTICA V6.3: 100%
+14:48:49	Informação	RESULTADO DO CASO: PASSOU_COM_RETORNO_EXPLICITO | duração=32ms | assertivas=50 | falhas=0
+14:48:49	Informação	DETALHE: captura_logger=true; linhas_diagnosticas=54; assertivas_estimadas=50; falhas_internas_detectadas=0; retorno={"sucesso":true,"aprovados":25,"falhas":0,"percentual":100,"resultados":[{"numero":1,"descricao":"Contrato V6.3 disponível","passou":true,"erro":""},{"numero":2,"descricao":"Interpretação possui versão","passou":true,"erro":""},{"numero":3,"descricao":"Problema foi estruturado","passou":true,"erro":""},{"numero":4,"descricao":"Processo foi estruturado","passou":true,"erro":""},{"numero":5,"descricao":"Dores foram estruturadas","passou":true,"erro":""},{"numero":6,"descricao":"Impactos foram estr
+14:48:50	Informação	------------------------------------------------------------
+14:48:50	Informação	CASO 23/68 | SUÍTE EXISTENTE 03 | TESTAR_IA_SEMANTICA_REAL_V63
+14:48:50	Informação	============================================================
+14:48:50	Informação	TESTAR_IA_SEMANTICA_REAL_V63
+14:48:50	Informação	GEMINI - TENTATIVA 1/3
+14:48:51	Informação	HTTP STATUS: 200
+14:48:51	Informação	TEMPO: 1297 ms
+14:48:51	Informação	RESPOSTA GEMINI: {
   "candidates": [
     {
       "content": {
         "parts": [
           {
-            "text": "{\n  \"problema\": \"A equipe recebe pedidos pelo WhatsApp e os digita manualmente em uma planilha, o que gera erros frequentes e necessidade de correção.\",\n  \"processo\": \"A equipe recebe os pedidos pelo WhatsApp e depois digita tudo manualmente em uma planilha.\",\n  \"dores\": [\n    \"Erros na digitação manual dos pedidos\",\n    \"Necessidade de retornar para corrigir os erros\"\n  ],\n  \"impactos\": [\n    \"Erros nos pedidos devido ao volume\",\n    \"Retrabalho para corrigir os erros\"\n  ],\n  \"resultado_desejado\": \"Reduzir os erros e o retrabalho.\",\n  \"contexto\": \"\",\n  \"restricoes\": [],\n  \"padrao_problema\": \"Ineficiência operacional decorrente de processo manual de entrada de dados sujeito a erros e retrabalho.\",\n  \"lacunas\": [\n    \"contexto\",\n    \"restricoes\"\n  ],\n  \"status\": {\n    \"problema\": \"CONFIRMADO\",\n    \"processo\": \"CONFIRMADO\",\n    \"dores\": \"CONFIRMADO\",\n    \"impactos\": \"INFERIDO\",\n    \"resultado_desejado\": \"CONFIRMADO\",\n    \"contexto\": \"DESCONHECIDO\",\n    \"restricoes\": \"DESCONHECIDO\",\n    \"padrao_problema\": \"INFERIDO\"\n  }\n}",
-            "thoughtSignature": "EmAKXgFpFH0TsYfM7kGIMnx7jsqa/sDlL8XTg5tD3o/aOCC/JQH5ZDcmMDAoj++XD1vupZj5V6zhGLuiaFUaJQxmbhvWeBBQ2RYqK9FPO52LD7lP+5osExStw9VMsZacpRw="
+            "text": "{\n  \"problema\": \"Erros e retrabalho decorrentes da digitação manual de pedidos recebidos via WhatsApp em uma planilha.\",\n  \"processo\": \"A equipe recebe os pedidos pelo WhatsApp e depois digita tudo manualmente em uma planilha.\",\n  \"dores\": [\n    \"Erros na digitação dos pedidos devido ao alto volume\",\n    \"Necessidade de retornar para corrigir os erros\"\n  ],\n  \"impactos\": [\n    \"Ocorrência de erros nos pedidos\",\n    \"Necessidade de retrabalho para correção\"\n  ],\n  \"resultado_desejado\": \"Reduzir os erros e o retrabalho.\",\n  \"contexto\": \"\",\n  \"restricoes\": [],\n  \"padrao_problema\": \"Ineficiência operacional causada por processo manual de entrada de dados sujeito a erros humanos e consequente retrabalho.\",\n  \"lacunas\": [\n    \"contexto\",\n    \"restricoes\"\n  ],\n  \"status\": {\n    \"problema\": \"CONFIRMADO\",\n    \"processo\": \"CONFIRMADO\",\n    \"dores\": \"CONFIRMADO\",\n    \"impactos\": \"INFERIDO\",\n    \"resultado_desejado\": \"CONFIRMADO\",\n    \"contexto\": \"DESCONHECIDO\",\n    \"restricoes\": \"DESCONHECIDO\",\n    \"padrao_problema\": \"INFERIDO\"\n  }\n}",
+            "thoughtSignature": "EmAKXgFpFH0TC/FkGtO+fCcijr15jIoR96W1N4v0A3VPbi/KxRNPB5M6UfrT9D53yRDycIvXFZol2uDg5x4PPxCa+4r0KCNDs673IU6+32yWlh1J8PaQQUfG9oKTdSgkoRI="
           }
         ],
         "role": "model"
@@ -252,8 +251,8 @@
   ],
   "usageMetadata": {
     "promptTokenCount": 1779,
-    "candidatesTokenCount": 324,
-    "totalTokenCount": 2103,
+    "candidatesTokenCount": 326,
+    "totalTokenCount": 2105,
     "promptTokensDetails": [
       {
         "modality": "TEXT",
@@ -263,39 +262,39 @@
     "serviceTier": "standard"
   },
   "modelVersion": "gemini-3.5-flash-lite",
-  "responseId": "crPPapzvEM2v_PUPmf_U2Qo"
+  "responseId": "gsDPaoSwK5ehz7IPhvW50AI"
 }
-13:53:07	Informação	✅ TESTE 1 — IA retornou interpretação
-13:53:07	Informação	✅ TESTE 2 — Interpretação possui versão
-13:53:07	Informação	✅ TESTE 3 — Problema foi identificado
-13:53:07	Informação	✅ TESTE 4 — Processo foi identificado
-13:53:07	Informação	✅ TESTE 5 — Dores foram estruturadas
-13:53:07	Informação	✅ TESTE 6 — Impactos foram estruturados
-13:53:07	Informação	✅ TESTE 7 — Resultado desejado foi identificado
-13:53:07	Informação	✅ TESTE 8 — Contexto não foi inventado quando a mensagem não o sustenta
-13:53:07	Informação	✅ TESTE 9 — Restrições foram estruturadas
-13:53:07	Informação	✅ TESTE 10 — Padrão do problema foi identificado
-13:53:07	Informação	✅ TESTE 11 — Status possui estrutura
-13:53:07	Informação	✅ TESTE 12 — Problema possui status válido
-13:53:07	Informação	✅ TESTE 13 — Processo possui status válido
-13:53:07	Informação	✅ TESTE 14 — Interpretação real é válida
-13:53:07	Informação	✅ TESTE 15 — Interpretação pode ser preparada para reconhecimento
-13:53:07	Informação	✅ TESTE 16 — Interpretação real passa no filtro de segurança
-13:53:07	Informação	✅ TESTE 17 — A interpretação não cria tecnologia
-13:53:07	Informação	✅ TESTE 18 — Interpretação possui estrutura objeto
-13:53:07	Informação	✅ TESTE 19 — Dores são array
-13:53:07	Informação	✅ TESTE 20 — Impactos são array
-13:53:07	Informação	GEMINI - TENTATIVA 1/3
-13:53:09	Informação	HTTP STATUS: 200
-13:53:09	Informação	TEMPO: 1483 ms
-13:53:09	Informação	RESPOSTA GEMINI: {
+14:48:51	Informação	✅ TESTE 1 — IA retornou interpretação
+14:48:51	Informação	✅ TESTE 2 — Interpretação possui versão
+14:48:51	Informação	✅ TESTE 3 — Problema foi identificado
+14:48:51	Informação	✅ TESTE 4 — Processo foi identificado
+14:48:51	Informação	✅ TESTE 5 — Dores foram estruturadas
+14:48:51	Informação	✅ TESTE 6 — Impactos foram estruturados
+14:48:51	Informação	✅ TESTE 7 — Resultado desejado foi identificado
+14:48:51	Informação	✅ TESTE 8 — Contexto não foi inventado quando a mensagem não o sustenta
+14:48:51	Informação	✅ TESTE 9 — Restrições foram estruturadas
+14:48:51	Informação	✅ TESTE 10 — Padrão do problema foi identificado
+14:48:51	Informação	✅ TESTE 11 — Status possui estrutura
+14:48:51	Informação	✅ TESTE 12 — Problema possui status válido
+14:48:51	Informação	✅ TESTE 13 — Processo possui status válido
+14:48:51	Informação	✅ TESTE 14 — Interpretação real é válida
+14:48:51	Informação	✅ TESTE 15 — Interpretação pode ser preparada para reconhecimento
+14:48:51	Informação	✅ TESTE 16 — Interpretação real passa no filtro de segurança
+14:48:51	Informação	✅ TESTE 17 — A interpretação não cria tecnologia
+14:48:51	Informação	✅ TESTE 18 — Interpretação possui estrutura objeto
+14:48:51	Informação	✅ TESTE 19 — Dores são array
+14:48:51	Informação	✅ TESTE 20 — Impactos são array
+14:48:51	Informação	GEMINI - TENTATIVA 1/3
+14:48:53	Informação	HTTP STATUS: 200
+14:48:53	Informação	TEMPO: 1560 ms
+14:48:53	Informação	RESPOSTA GEMINI: {
   "candidates": [
     {
       "content": {
         "parts": [
           {
-            "text": "```json\n{\n  \"problema\": \"Erros de digitação no lançamento manual de solicitações realizados pelos colaboradores, gerando retrabalho.\",\n  \"processo\": \"Os colaboradores fazem o lançamento manual das solicitações.\",\n  \"dores\": [\n    \"Erros de digitação\",\n    \"Retrabalho decorrente de erros\"\n  ],\n  \"impactos\": [\n    \"Necessidade de refazer o trabalho\"\n  ],\n  \"resultado_desejado\": \"Diminuir o retrabalho.\",\n  \"contexto\": \"\",\n  \"restricoes\": [],\n  \"padrao_problema\": \"Ineficiência operacional decorrente de processos manuais sujeitos a falhas humanas e retrabalho.\",\n  \"lacunas\": [\n    \"contexto\",\n    \"restricoes\"\n  ],\n  \"status\": {\n    \"problema\": \"CONFIRMADO\",\n    \"processo\": \"CONFIRMADO\",\n    \"dores\": \"CONFIRMADO\",\n    \"impactos\": \"INFERIDO\",\n    \"resultado_desejado\": \"CONFIRMADO\",\n    \"contexto\": \"DESCONHECIDO\",\n    \"restricoes\": \"DESCONHECIDO\",\n    \"padrao_problema\": \"INFERIDO\"\n  }\n}\n```",
-            "thoughtSignature": "EmAKXgFpFH0TerH1z3w0RcdWJdrfDAMowJi6J0FL2u2kMLnfix1z9Nbfg21v8p4HY7h4VFiEB+hKjTKHaPiPULg5L+nqaqIJ2Jqvy2peLjgFU9gN3VWUT8eL2eQDJMROf8Y="
+            "text": "{\n  \"problema\": \"Ocorrência de erros de digitação durante o lançamento manual de solicitações, gerando a necessidade de refazer o trabalho.\",\n  \"processo\": \"Os colaboradores realizam o lançamento manual das solicitações.\",\n  \"dores\": [\n    \"Erros frequentes de digitação no lançamento das solicitações\",\n    \"Necessidade de refazer o trabalho\"\n  ],\n  \"impactos\": [\n    \"Retrabalho devido aos erros de digitação\"\n  ],\n  \"resultado_desejado\": \"Diminuir o retrabalho.\",\n  \"contexto\": \"\",\n  \"restricoes\": [],\n  \"padrao_problema\": \"Ineficiência operacional decorrente de processos manuais sujeitos a erros humanos e retrabalho.\",\n  \"lacunas\": [\n    \"contexto\",\n    \"restricoes\"\n  ],\n  \"status\": {\n    \"problema\": \"CONFIRMADO\",\n    \"processo\": \"CONFIRMADO\",\n    \"dores\": \"CONFIRMADO\",\n    \"impactos\": \"INFERIDO\",\n    \"resultado_desejado\": \"CONFIRMADO\",\n    \"contexto\": \"DESCONHECIDO\",\n    \"restricoes\": \"DESCONHECIDO\",\n    \"padrao_problema\": \"INFERIDO\"\n  }\n}",
+            "thoughtSignature": "EmAKXgFpFH0TwiDIN8zdTQygqEPY95rxJvxLGaLKEDE0zaub1H8ZMkbjG6Mhp7YKGJ2EXSDXNWFNH2O3M+2Y9tmOyZQD4C5bE7cA4AAo3RPBIqqR1ln5ZuZnv2L7pxo5sJc="
           }
         ],
         "role": "model"
@@ -306,8 +305,8 @@
   ],
   "usageMetadata": {
     "promptTokenCount": 1763,
-    "candidatesTokenCount": 299,
-    "totalTokenCount": 2062,
+    "candidatesTokenCount": 308,
+    "totalTokenCount": 2071,
     "promptTokensDetails": [
       {
         "modality": "TEXT",
@@ -317,21 +316,21 @@
     "serviceTier": "standard"
   },
   "modelVersion": "gemini-3.5-flash-lite",
-  "responseId": "c7PPar7BNpLpqtsPrOqGoA4"
+  "responseId": "hMDPatWjA7LTz7IP_eHDGA"
 }
-13:53:09	Informação	✅ TESTE 21 — Paráfrase também gera interpretação
-13:53:09	Informação	✅ TESTE 22 — Paráfrase mantém padrão semântico
-13:53:09	Informação	GEMINI - TENTATIVA 1/3
-13:53:10	Informação	HTTP STATUS: 200
-13:53:10	Informação	TEMPO: 1648 ms
-13:53:10	Informação	RESPOSTA GEMINI: {
+14:48:53	Informação	✅ TESTE 21 — Paráfrase também gera interpretação
+14:48:53	Informação	✅ TESTE 22 — Paráfrase mantém padrão semântico
+14:48:53	Informação	GEMINI - TENTATIVA 1/3
+14:48:54	Informação	HTTP STATUS: 200
+14:48:54	Informação	TEMPO: 1238 ms
+14:48:54	Informação	RESPOSTA GEMINI: {
   "candidates": [
     {
       "content": {
         "parts": [
           {
-            "text": "{\n  \"problema\": \"Perda de prazos das revisões devido ao controle inadequado da manutenção dos veículos.\",\n  \"processo\": \"\",\n  \"dores\": [\n    \"Perda de prazos das revisões dos veículos\",\n    \"Falta de controle adequado sobre a manutenção dos veículos\"\n  ],\n  \"impactos\": [\n    \"Perda dos prazos das revisões\"\n  ],\n  \"resultado_desejado\": \"\",\n  \"contexto\": \"\",\n  \"restricoes\": [],\n  \"padrao_problema\": \"Falha no acompanhamento e controle de prazos e manutenções de frota.\",\n  \"lacunas\": [\n    \"processo\",\n    \"resultado_desejado\",\n    \"contexto\",\n    \"restricoes\"\n  ],\n  \"status\": {\n    \"problema\": \"CONFIRMADO\",\n    \"processo\": \"DESCONHECIDO\",\n    \"dores\": \"CONFIRMADO\",\n    \"impactos\": \"CONFIRMADO\",\n    \"resultado_desejado\": \"DESCONHECIDO\",\n    \"contexto\": \"DESCONHECIDO\",\n    \"restricoes\": \"DESCONHECIDO\",\n    \"padrao_problema\": \"INFERIDO\"\n  }\n}",
-            "thoughtSignature": "EmAKXgFpFH0T5djdrURCgqXbKNRaYMXS/rTG+SaygjdQQ1ycGEDsYloNDt9HNvns7qDi2d6XdUGydpyP0wpaRA8SBrVwlXn248LOdV9wSJIQ/roKiQARbukESo5+zKU2j9o="
+            "text": "{\n  \"problema\": \"Perda de prazos das revisões devido à necessidade de um melhor controle da manutenção dos veículos da empresa.\",\n  \"processo\": \"\",\n  \"dores\": [\n    \"Perda de prazos das revisões dos veículos\",\n    \"Falta de controle adequado sobre a manutenção\"\n  ],\n  \"impactos\": [\n    \"Perda dos prazos das revisões\"\n  ],\n  \"resultado_desejado\": \"Controlar melhor a manutenção dos veículos da empresa para evitar a perda dos prazos das revisões\",\n  \"contexto\": \"\",\n  \"restricoes\": [],\n  \"padrao_problema\": \"Falha de controle operacional em processos de manutenção e acompanhamento de prazos.\",\n  \"lacunas\": [\n    \"processo\",\n    \"contexto\",\n    \"restricoes\"\n  ],\n  \"status\": {\n    \"problema\": \"CONFIRMADO\",\n    \"processo\": \"DESCONHECIDO\",\n    \"dores\": \"CONFIRMADO\",\n    \"impactos\": \"CONFIRMADO\",\n    \"resultado_desejado\": \"CONFIRMADO\",\n    \"contexto\": \"DESCONHECIDO\",\n    \"restricoes\": \"DESCONHECIDO\",\n    \"padrao_problema\": \"INFERIDO\"\n  }\n}",
+            "thoughtSignature": "EmAKXgFpFH0TtrNhjJWJgDYtuG3K3sMokC2Vr6LbU5JiilI2Vi2sniAH0Lf/xuzraVvLoL4ibMnRxWt9zv/l0hQkVVFl9e4/VGoyZnKtMmgTErL4qUAvet/m936tK55Us6o="
           }
         ],
         "role": "model"
@@ -342,8 +341,8 @@
   ],
   "usageMetadata": {
     "promptTokenCount": 1751,
-    "candidatesTokenCount": 298,
-    "totalTokenCount": 2049,
+    "candidatesTokenCount": 307,
+    "totalTokenCount": 2058,
     "promptTokensDetails": [
       {
         "modality": "TEXT",
@@ -353,34 +352,34 @@
     "serviceTier": "standard"
   },
   "modelVersion": "gemini-3.5-flash-lite",
-  "responseId": "dbPPapKVG9ek_PUPoIyniQU"
+  "responseId": "hcDPau3rK8T-qtsPjJPnsQs"
 }
-13:53:10	Informação	✅ TESTE 23 — Problema diferente também é interpretado
-13:53:10	Informação	✅ TESTE 24 — Problema diferente possui padrão próprio
-13:53:10	Informação	✅ TESTE 25 — Problema diferente não é confundido com pedidos
-13:53:10	Informação	============================================================
-13:53:10	Informação	APROVADOS: 25/25
-13:53:10	Informação	FALHAS FUNCIONAIS: 0
-13:53:10	Informação	BLOQUEADOS POR GEMINI: 0
-13:53:10	Informação	PERCENTUAL FUNCIONAL: 100%
-13:53:10	Informação	TESTES TOTAIS: 25/25
-13:53:10	Informação	🏆 TESTAR_IA_SEMANTICA_REAL_V63: PASSOU
-13:53:10	Informação	🏆 IA SEMÂNTICA REAL V6.3: 100%
-13:53:10	Informação	RESULTADO DO CASO: PASSOU_POR_RESUMO_NUMERICO | duração=4954ms | assertivas=25 | falhas=0
-13:53:10	Informação	DETALHE: captura_logger=true; linhas_diagnosticas=28; assertivas_estimadas=25; falhas_internas_detectadas=0; retorno=undefined
-13:53:12	Informação	------------------------------------------------------------
-13:53:12	Informação	CASO 24/68 | SUÍTE EXISTENTE 04 | TESTAR_INFORMACAO_INCOMPLETA_SEMANTICA_V63
-13:53:12	Informação	GEMINI - TENTATIVA 1/3
-13:53:13	Informação	HTTP STATUS: 200
-13:53:13	Informação	TEMPO: 1295 ms
-13:53:13	Informação	RESPOSTA GEMINI: {
+14:48:54	Informação	✅ TESTE 23 — Problema diferente também é interpretado
+14:48:54	Informação	✅ TESTE 24 — Problema diferente possui padrão próprio
+14:48:54	Informação	✅ TESTE 25 — Problema diferente não é confundido com pedidos
+14:48:54	Informação	============================================================
+14:48:54	Informação	APROVADOS: 25/25
+14:48:54	Informação	FALHAS FUNCIONAIS: 0
+14:48:54	Informação	BLOQUEADOS POR GEMINI: 0
+14:48:54	Informação	PERCENTUAL FUNCIONAL: 100%
+14:48:54	Informação	TESTES TOTAIS: 25/25
+14:48:54	Informação	🏆 TESTAR_IA_SEMANTICA_REAL_V63: PASSOU
+14:48:54	Informação	🏆 IA SEMÂNTICA REAL V6.3: 100%
+14:48:54	Informação	RESULTADO DO CASO: PASSOU_POR_RESUMO_NUMERICO | duração=4355ms | assertivas=25 | falhas=0
+14:48:54	Informação	DETALHE: captura_logger=true; linhas_diagnosticas=28; assertivas_estimadas=25; falhas_internas_detectadas=0; retorno=undefined
+14:48:55	Informação	------------------------------------------------------------
+14:48:55	Informação	CASO 24/68 | SUÍTE EXISTENTE 04 | TESTAR_INFORMACAO_INCOMPLETA_SEMANTICA_V63
+14:48:55	Informação	GEMINI - TENTATIVA 1/3
+14:48:56	Informação	HTTP STATUS: 200
+14:48:56	Informação	TEMPO: 1393 ms
+14:48:56	Informação	RESPOSTA GEMINI: {
   "candidates": [
     {
       "content": {
         "parts": [
           {
-            "text": "{\n  \"problema\": \"O sistema está apresentando falhas.\",\n  \"processo\": \"\",\n  \"dores\": [\n    \"Sistema apresentando problema\",\n    \"Atrapalhando a equipe\"\n  ],\n  \"impactos\": [\n    \"A equipe está sendo atrapalhada pelo problema no sistema.\"\n  ],\n  \"resultado_desejado\": \"\",\n  \"contexto\": \"\",\n  \"restricoes\": [],\n  \"padrao_problema\": \"Falha em sistema operacional gerando impacto na equipe.\",\n  \"lacunas\": [\n    \"processo\",\n    \"impactos\",\n    \"resultado_desejado\",\n    \"contexto\",\n    \"restricoes\"\n  ],\n  \"status\": {\n    \"problema\": \"CONFIRMADO\",\n    \"processo\": \"DESCONHECIDO\",\n    \"dores\": \"CONFIRMADO\",\n    \"impactos\": \"INFERIDO\",\n    \"resultado_desejado\": \"DESCONHECIDO\",\n    \"contexto\": \"DESCONHECIDO\",\n    \"restricoes\": \"DESCONHECIDO\",\n    \"padrao_problema\": \"INFERIDO\"\n  }\n}",
-            "thoughtSignature": "EmAKXgFpFH0TZM0Vf1IA9tfezObJpzQz3CjkT+5EZMn4D96lhGVKMcgUKNiVPs8ZN2RjfmoQvt2U6NzC7WByiSLIzjodQHraZNe5sSZLv63hHh/5l1VquyPL+ePo61kcus8="
+            "text": "{\n  \"problema\": \"O sistema está apresentando problemas.\",\n  \"processo\": \"\",\n  \"dores\": [\n    \"O sistema está dando problema\",\n    \"A equipe está sendo atrapalhada\"\n  ],\n  \"impactos\": [\n    \"A equipe está sendo atrapalhada\"\n  ],\n  \"resultado_desejado\": \"\",\n  \"contexto\": \"\",\n  \"restricoes\": [],\n  \"padrao_problema\": \"Falha em sistema que afeta a operação da equipe.\",\n  \"lacunas\": [\n    \"processo\",\n    \"resultado_desejado\",\n    \"contexto\",\n    \"restricoes\"\n  ],\n  \"status\": {\n    \"problema\": \"CONFIRMADO\",\n    \"processo\": \"DESCONHECIDO\",\n    \"dores\": \"CONFIRMADO\",\n    \"impactos\": \"INFERIDO\",\n    \"resultado_desejado\": \"DESCONHECIDO\",\n    \"contexto\": \"DESCONHECIDO\",\n    \"restricoes\": \"DESCONHECIDO\",\n    \"padrao_problema\": \"INFERIDO\"\n  }\n}",
+            "thoughtSignature": "EmAKXgFpFH0TbakqYlWqKSU+MwYq7juNrmvq4KVO20hMUr+92WC1CZmKTCWHceSfq5bu/ohnME5y88bwVRxrBIG/viXewGvXhI+wdyMD1xkiAUBe+xNEBDxtjP3RUWkJMMs="
           }
         ],
         "role": "model"
@@ -391,8 +390,8 @@
   ],
   "usageMetadata": {
     "promptTokenCount": 1744,
-    "candidatesTokenCount": 280,
-    "totalTokenCount": 2024,
+    "candidatesTokenCount": 272,
+    "totalTokenCount": 2016,
     "promptTokensDetails": [
       {
         "modality": "TEXT",
@@ -402,820 +401,820 @@
     "serviceTier": "standard"
   },
   "modelVersion": "gemini-3.5-flash-lite",
-  "responseId": "eLPPaoLYGpW-mtkPubnl2Q8"
+  "responseId": "h8DPapXoGsL7qtsP6dTU8Q8"
 }
-13:53:13	Informação	✅ TESTE 1 — interpretação foi produzida
-13:53:13	Informação	✅ TESTE 2 — problema foi identificado
-13:53:13	Informação	✅ TESTE 3 — processo não foi inventado
-13:53:13	Informação	✅ TESTE 4 — resultado desejado não foi inventado
-13:53:13	Informação	✅ TESTE 5 — contexto não foi inventado
-13:53:13	Informação	✅ TESTE 6 — restrições não foram inventadas
-13:53:13	Informação	✅ TESTE 7 — impacto não foi promovido a confirmado
-13:53:13	Informação	✅ TESTE 8 — impacto vago permanece inferido ou desconhecido
-13:53:13	Informação	✅ TESTE 9 — lacunas contém processo
-13:53:13	Informação	✅ TESTE 10 — lacunas contém resultado desejado
-13:53:13	Informação	✅ TESTE 11 — lacunas contém contexto
-13:53:13	Informação	✅ TESTE 12 — lacunas contém restrições
-13:53:13	Informação	============================================================
-13:53:13	Informação	TESTAR_INFORMACAO_INCOMPLETA_SEMANTICA_V63
-13:53:13	Informação	APROVADOS: 12/12
-13:53:13	Informação	FALHAS: 0
-13:53:13	Informação	PERCENTUAL: 100%
-13:53:13	Informação	🏆 TESTAR_INFORMACAO_INCOMPLETA_SEMANTICA_V63: PASSOU
-13:53:13	Informação	RESULTADO DO CASO: PASSOU_COM_RETORNO_EXPLICITO | duração=1395ms | assertivas=12 | falhas=0
-13:53:13	Informação	DETALHE: captura_logger=true; linhas_diagnosticas=16; assertivas_estimadas=12; falhas_internas_detectadas=0; retorno={"sucesso":true,"aprovados":12,"falhas":0,"percentual":100,"interpretacao":{"versao":"V6.3","problema":"O sistema está apresentando falhas.","processo":"","dores":["Sistema apresentando problema","Atrapalhando a equipe"],"impactos":["A equipe está sendo atrapalhada pelo problema no sistema."],"resultado_desejado":"","contexto":"","restricoes":[],"padrao_problema":"Falha em sistema operacional gerando impacto na equipe.","status":{"problema":"CONFIRMADO","processo":"DESCONHECIDO","dores":"CONFIRM
-13:53:14	Informação	------------------------------------------------------------
-13:53:14	Informação	CASO 25/68 | SUÍTE EXISTENTE 05 | TESTAR_GUARDA_IMPACTO_SEMANTICO_V63
-13:53:14	Informação	✅ TESTE 1 — erro de digitação sem consequência mensurável — obtido=INFERIDO — esperado=INFERIDO
-13:53:14	Informação	✅ TESTE 2 — retrabalho sem consequência mensurável — obtido=INFERIDO — esperado=INFERIDO
-13:53:14	Informação	✅ TESTE 3 — pedidos sem consequência mensurável — obtido=INFERIDO — esperado=INFERIDO
-13:53:14	Informação	✅ TESTE 4 — perda de tempo explícita — obtido=CONFIRMADO — esperado=CONFIRMADO
-13:53:14	Informação	✅ TESTE 5 — perda de 3 horas — obtido=CONFIRMADO — esperado=CONFIRMADO
-13:53:14	Informação	✅ TESTE 6 — prejuízo explícito — obtido=CONFIRMADO — esperado=CONFIRMADO
-13:53:14	Informação	✅ TESTE 7 — atraso explícito — obtido=CONFIRMADO — esperado=CONFIRMADO
-13:53:14	Informação	✅ TESTE 8 — custo explícito — obtido=CONFIRMADO — esperado=CONFIRMADO
-13:53:14	Informação	✅ TESTE 9 — volume numérico não é impacto — obtido=INFERIDO — esperado=INFERIDO
-13:53:14	Informação	✅ TESTE 10 — status já inferido permanece inferido — obtido=INFERIDO — esperado=INFERIDO
-13:53:14	Informação	✅ TESTE 11 — status desconhecido permanece desconhecido — obtido=DESCONHECIDO — esperado=DESCONHECIDO
-13:53:14	Informação	✅ TESTE 12 — mensagem vazia não promove impacto — obtido=INFERIDO — esperado=INFERIDO
-13:53:14	Informação	============================================================
-13:53:14	Informação	TESTAR_GUARDA_IMPACTO_SEMANTICO_V63
-13:53:14	Informação	APROVADOS: 12/12
-13:53:14	Informação	FALHAS: 0
-13:53:14	Informação	PERCENTUAL: 100%
-13:53:14	Informação	🏆 TESTAR_GUARDA_IMPACTO_SEMANTICO_V63: PASSOU
-13:53:14	Informação	RESULTADO DO CASO: PASSOU_COM_RETORNO_EXPLICITO | duração=25ms | assertivas=12 | falhas=0
-13:53:14	Informação	DETALHE: captura_logger=true; linhas_diagnosticas=16; assertivas_estimadas=12; falhas_internas_detectadas=0; retorno={"sucesso":true,"aprovados":12,"falhas":0,"percentual":100}
-13:53:14	Informação	------------------------------------------------------------
-13:53:14	Informação	CASO 26/68 | SUÍTE EXISTENTE 06 | TESTAR_ROBUSTEZ_GEMINI_V63
-13:53:14	Informação	============================================================
-13:53:14	Informação	INÍCIO — TESTAR_ROBUSTEZ_GEMINI_V63
-13:53:14	Informação	============================================================
-13:53:14	Informação	✅ TESTE 1/25 — candidates ausente é rejeitado
-13:53:14	Informação	✅ TESTE 2/25 — candidates vazio é rejeitado
-13:53:14	Informação	✅ TESTE 3/25 — content ausente é rejeitado
-13:53:14	Informação	✅ TESTE 4/25 — parts ausente é rejeitado
-13:53:14	Informação	✅ TESTE 5/25 — parts vazio é rejeitado
-13:53:14	Informação	✅ TESTE 6/25 — MAX_TOKENS é rejeitado
-13:53:14	Informação	✅ TESTE 7/25 — texto de uma única parte é extraído
-13:53:14	Informação	✅ TESTE 8/25 — texto de múltiplas partes é concatenado
-13:53:14	Informação	✅ TESTE 9/25 — parte sem texto não quebra a extração
-13:53:14	Informação	✅ TESTE 10/25 — JSON puro de interpretação é aceito
-13:53:14	Informação	✅ TESTE 11/25 — JSON envolvido em bloco markdown é aceito
-13:53:14	Informação	✅ TESTE 12/25 — JSON com espaços externos é aceito
-13:53:14	Informação	✅ TESTE 13/25 — JSON com texto ao redor é recuperado
-13:53:14	Informação	✅ TESTE 14/25 — JSON inválido é rejeitado
-13:53:14	Informação	✅ TESTE 15/25 — resposta vazia é rejeitada
-13:53:14	Informação	✅ TESTE 16/25 — resposta somente com markdown é rejeitada
-13:53:14	Informação	✅ TESTE 17/25 — JSON truncado é rejeitado
-13:53:14	Informação	✅ TESTE 18/25 — JSON com estrutura de array é rejeitado pelo contrato
-13:53:14	Informação	✅ TESTE 19/25 — JSON vazio é rejeitado pelo contrato
-13:53:14	Informação	✅ TESTE 20/25 — JSON válido preserva todos os campos principais
-13:53:14	Informação	✅ TESTE 21/25 — campo ausente não é aceito silenciosamente
-13:53:14	Informação	✅ TESTE 22/25 — campo com tipo inválido não é aceito silenciosamente
-13:53:14	Informação	✅ TESTE 23/25 — campo nulo não é aceito silenciosamente
-13:53:14	Informação	✅ TESTE 24/25 — resposta válida permanece determinística em duas execuções
-13:53:14	Informação	✅ TESTE 25/25 — resposta válida continua compatível com o contrato de diagnóstico
-13:53:14	Informação	============================================================
-13:53:14	Informação	RESULTADO FINAL — ROBUSTEZ GEMINI V6.3
-13:53:14	Informação	============================================================
-13:53:14	Informação	APROVADOS: 25/25
-13:53:14	Informação	FALHAS: 0
-13:53:14	Informação	PERCENTUAL: 100%
-13:53:14	Informação	🏆 TESTAR_ROBUSTEZ_GEMINI_V63: PASSOU
-13:53:14	Informação	============================================================
-13:53:14	Informação	RESULTADO DO CASO: PASSOU_POR_RESUMO_NUMERICO | duração=40ms | assertivas=25 | falhas=0
-13:53:14	Informação	DETALHE: captura_logger=true; linhas_diagnosticas=55; assertivas_estimadas=25; falhas_internas_detectadas=0; retorno={"aprovados":25,"falhas":0,"percentual":100,"passou":true,"resultados":[true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true]}
-13:53:15	Informação	------------------------------------------------------------
-13:53:15	Informação	CASO 27/68 | SUÍTE EXISTENTE 07 | TESTAR_RETRY_HTTP_GEMINI_V63
-13:53:15	Informação	============================================================
-13:53:15	Informação	INÍCIO — TESTAR_RETRY_HTTP_GEMINI_V63
-13:53:15	Informação	============================================================
-13:53:15	Informação	GEMINI - TENTATIVA 1/3
-13:53:15	Informação	HTTP STATUS: 200
-13:53:15	Informação	TEMPO: 0 ms
-13:53:15	Informação	RESPOSTA GEMINI: {"ok":true}
-13:53:15	Informação	✅ TESTE 1/25 — HTTP 200 retorna sucesso
-13:53:15	Informação	✅ TESTE 2/25 — HTTP 200 usa uma única tentativa
-13:53:15	Informação	✅ TESTE 3/25 — HTTP 200 informa tentativas = 1
-13:53:15	Informação	✅ TESTE 4/25 — HTTP 200 preserva status_code
-13:53:15	Informação	✅ TESTE 5/25 — HTTP 200 não executa espera
-13:53:15	Informação	GEMINI - TENTATIVA 1/3
-13:53:15	Informação	HTTP STATUS: 429
-13:53:15	Informação	TEMPO: 0 ms
-13:53:15	Informação	RESPOSTA GEMINI: erro transitório
-13:53:15	Informação	GEMINI - ERRO TRANSITÓRIO HTTP 429. Nova tentativa será realizada.
-13:53:15	Informação	GEMINI - TENTATIVA 2/3
-13:53:15	Informação	HTTP STATUS: 200
-13:53:15	Informação	TEMPO: 0 ms
-13:53:15	Informação	RESPOSTA GEMINI: {"recuperado":true}
-13:53:15	Informação	✅ TESTE 6/25 — HTTP 429 realiza retry e recupera
-13:53:15	Informação	GEMINI - TENTATIVA 1/3
-13:53:15	Informação	HTTP STATUS: 500
-13:53:15	Informação	TEMPO: 0 ms
-13:53:15	Informação	RESPOSTA GEMINI: erro transitório
-13:53:15	Informação	GEMINI - ERRO TRANSITÓRIO HTTP 500. Nova tentativa será realizada.
-13:53:15	Informação	GEMINI - TENTATIVA 2/3
-13:53:15	Informação	HTTP STATUS: 200
-13:53:15	Informação	TEMPO: 0 ms
-13:53:15	Informação	RESPOSTA GEMINI: {"recuperado":true}
-13:53:15	Informação	✅ TESTE 7/25 — HTTP 500 realiza retry e recupera
-13:53:15	Informação	GEMINI - TENTATIVA 1/3
-13:53:15	Informação	HTTP STATUS: 502
-13:53:15	Informação	TEMPO: 0 ms
-13:53:15	Informação	RESPOSTA GEMINI: erro transitório
-13:53:15	Informação	GEMINI - ERRO TRANSITÓRIO HTTP 502. Nova tentativa será realizada.
-13:53:15	Informação	GEMINI - TENTATIVA 2/3
-13:53:15	Informação	HTTP STATUS: 200
-13:53:15	Informação	TEMPO: 0 ms
-13:53:15	Informação	RESPOSTA GEMINI: {"recuperado":true}
-13:53:15	Informação	✅ TESTE 8/25 — HTTP 502 realiza retry e recupera
-13:53:15	Informação	GEMINI - TENTATIVA 1/3
-13:53:15	Informação	HTTP STATUS: 503
-13:53:15	Informação	TEMPO: 0 ms
-13:53:15	Informação	RESPOSTA GEMINI: erro transitório
-13:53:15	Informação	GEMINI - ERRO TRANSITÓRIO HTTP 503. Nova tentativa será realizada.
-13:53:15	Informação	GEMINI - TENTATIVA 2/3
-13:53:15	Informação	HTTP STATUS: 200
-13:53:15	Informação	TEMPO: 0 ms
-13:53:15	Informação	RESPOSTA GEMINI: {"recuperado":true}
-13:53:15	Informação	✅ TESTE 9/25 — HTTP 503 realiza retry e recupera
-13:53:15	Informação	GEMINI - TENTATIVA 1/3
-13:53:15	Informação	HTTP STATUS: 504
-13:53:15	Informação	TEMPO: 0 ms
-13:53:15	Informação	RESPOSTA GEMINI: erro transitório
-13:53:15	Informação	GEMINI - ERRO TRANSITÓRIO HTTP 504. Nova tentativa será realizada.
-13:53:15	Informação	GEMINI - TENTATIVA 2/3
-13:53:15	Informação	HTTP STATUS: 200
-13:53:15	Informação	TEMPO: 0 ms
-13:53:15	Informação	RESPOSTA GEMINI: {"recuperado":true}
-13:53:15	Informação	✅ TESTE 10/25 — HTTP 504 realiza retry e recupera
-13:53:15	Informação	GEMINI - TENTATIVA 1/3
-13:53:15	Informação	HTTP STATUS: 503
-13:53:15	Informação	TEMPO: 0 ms
-13:53:15	Informação	RESPOSTA GEMINI: {}
-13:53:15	Informação	GEMINI - ERRO TRANSITÓRIO HTTP 503. Nova tentativa será realizada.
-13:53:15	Informação	GEMINI - TENTATIVA 2/3
-13:53:15	Informação	HTTP STATUS: 200
-13:53:15	Informação	TEMPO: 0 ms
-13:53:15	Informação	RESPOSTA GEMINI: {"ok":true}
-13:53:15	Informação	✅ TESTE 11/25 — primeiro retry aguarda 1500 ms
-13:53:15	Informação	GEMINI - TENTATIVA 1/3
-13:53:15	Informação	HTTP STATUS: 503
-13:53:15	Informação	TEMPO: 0 ms
-13:53:15	Informação	RESPOSTA GEMINI: {}
-13:53:15	Informação	GEMINI - ERRO TRANSITÓRIO HTTP 503. Nova tentativa será realizada.
-13:53:15	Informação	GEMINI - TENTATIVA 2/3
-13:53:15	Informação	HTTP STATUS: 503
-13:53:15	Informação	TEMPO: 0 ms
-13:53:15	Informação	RESPOSTA GEMINI: {}
-13:53:15	Informação	GEMINI - ERRO TRANSITÓRIO HTTP 503. Nova tentativa será realizada.
-13:53:15	Informação	GEMINI - TENTATIVA 3/3
-13:53:15	Informação	HTTP STATUS: 200
-13:53:15	Informação	TEMPO: 0 ms
-13:53:15	Informação	RESPOSTA GEMINI: {"ok":true}
-13:53:15	Informação	✅ TESTE 12/25 — dois erros transitórios chegam à terceira tentativa
-13:53:15	Informação	✅ TESTE 13/25 — esperas do segundo e terceiro ciclos são 1500 e 3000 ms
-13:53:15	Informação	GEMINI - TENTATIVA 1/3
-13:53:15	Informação	HTTP STATUS: 503
-13:53:15	Informação	TEMPO: 0 ms
-13:53:15	Informação	RESPOSTA GEMINI: {}
-13:53:15	Informação	GEMINI - ERRO TRANSITÓRIO HTTP 503. Nova tentativa será realizada.
-13:53:15	Informação	GEMINI - TENTATIVA 2/3
-13:53:15	Informação	HTTP STATUS: 503
-13:53:15	Informação	TEMPO: 0 ms
-13:53:15	Informação	RESPOSTA GEMINI: {}
-13:53:15	Informação	GEMINI - ERRO TRANSITÓRIO HTTP 503. Nova tentativa será realizada.
-13:53:15	Informação	GEMINI - TENTATIVA 3/3
-13:53:15	Informação	HTTP STATUS: 503
-13:53:15	Informação	TEMPO: 0 ms
-13:53:15	Informação	RESPOSTA GEMINI: {}
-13:53:15	Informação	✅ TESTE 14/25 — três HTTP 503 esgotam as tentativas
-13:53:15	Informação	✅ TESTE 15/25 — erro final informa três tentativas
-13:53:15	Informação	✅ TESTE 16/25 — erro final preserva HTTP 503
-13:53:15	Informação	GEMINI - TENTATIVA 1/3
-13:53:15	Informação	HTTP STATUS: 400
-13:53:15	Informação	TEMPO: 0 ms
-13:53:15	Informação	RESPOSTA GEMINI: erro permanente
-13:53:15	Informação	✅ TESTE 17/25 — HTTP 400 falha sem retry
-13:53:15	Informação	GEMINI - TENTATIVA 1/3
-13:53:15	Informação	HTTP STATUS: 401
-13:53:15	Informação	TEMPO: 0 ms
-13:53:15	Informação	RESPOSTA GEMINI: erro permanente
-13:53:15	Informação	✅ TESTE 18/25 — HTTP 401 falha sem retry
-13:53:15	Informação	GEMINI - TENTATIVA 1/3
-13:53:15	Informação	HTTP STATUS: 403
-13:53:15	Informação	TEMPO: 0 ms
-13:53:15	Informação	RESPOSTA GEMINI: erro permanente
-13:53:15	Informação	✅ TESTE 19/25 — HTTP 403 falha sem retry
-13:53:15	Informação	GEMINI - TENTATIVA 1/3
-13:53:15	Informação	HTTP STATUS: 404
-13:53:15	Informação	TEMPO: 0 ms
-13:53:15	Informação	RESPOSTA GEMINI: erro permanente
-13:53:15	Informação	✅ TESTE 20/25 — HTTP 404 falha sem retry
-13:53:15	Informação	GEMINI - TENTATIVA 1/3
-13:53:15	Informação	GEMINI - ERRO DE TRANSPORTE NA TENTATIVA 1: Error: falha de rede
-13:53:15	Informação	GEMINI - TENTATIVA 2/3
-13:53:15	Informação	HTTP STATUS: 200
-13:53:15	Informação	TEMPO: 0 ms
-13:53:15	Informação	RESPOSTA GEMINI: {"ok":true}
-13:53:15	Informação	✅ TESTE 21/25 — erro de transporte realiza retry e recupera
-13:53:15	Informação	GEMINI - TENTATIVA 1/3
-13:53:15	Informação	GEMINI - ERRO DE TRANSPORTE NA TENTATIVA 1: Error: rede 1
-13:53:15	Informação	GEMINI - TENTATIVA 2/3
-13:53:15	Informação	GEMINI - ERRO DE TRANSPORTE NA TENTATIVA 2: Error: rede 2
-13:53:15	Informação	GEMINI - TENTATIVA 3/3
-13:53:15	Informação	GEMINI - ERRO DE TRANSPORTE NA TENTATIVA 3: Error: rede 3
-13:53:15	Informação	✅ TESTE 22/25 — três erros de transporte esgotam exatamente três tentativas
-13:53:15	Informação	✅ TESTE 23/25 — erro de transporte final informa três tentativas
-13:53:15	Informação	GEMINI - TENTATIVA 1/3
-13:53:15	Informação	HTTP STATUS: 200
-13:53:15	Informação	TEMPO: 0 ms
-13:53:15	Informação	RESPOSTA GEMINI: não é json
-13:53:15	Informação	✅ TESTE 24/25 — HTTP 200 com JSON inválido é rejeitado sem retry
-13:53:15	Informação	GEMINI - TENTATIVA 1/3
-13:53:15	Informação	HTTP STATUS: 429
-13:53:15	Informação	TEMPO: 0 ms
-13:53:15	Informação	RESPOSTA GEMINI: {}
-13:53:15	Informação	GEMINI - ERRO TRANSITÓRIO HTTP 429. Nova tentativa será realizada.
-13:53:15	Informação	GEMINI - TENTATIVA 2/3
-13:53:15	Informação	HTTP STATUS: 500
-13:53:15	Informação	TEMPO: 0 ms
-13:53:15	Informação	RESPOSTA GEMINI: {}
-13:53:15	Informação	GEMINI - ERRO TRANSITÓRIO HTTP 500. Nova tentativa será realizada.
-13:53:15	Informação	GEMINI - TENTATIVA 3/3
-13:53:15	Informação	HTTP STATUS: 200
-13:53:15	Informação	TEMPO: 0 ms
-13:53:15	Informação	RESPOSTA GEMINI: {"fim":"ok"}
-13:53:15	Informação	✅ TESTE 25/25 — sequência de erros transitórios diferentes recupera na terceira tentativa
-13:53:15	Informação	============================================================
-13:53:15	Informação	RESULTADO FINAL — RETRY HTTP GEMINI V6.3
-13:53:15	Informação	============================================================
-13:53:15	Informação	APROVADOS: 25/25
-13:53:15	Informação	FALHAS: 0
-13:53:15	Informação	PERCENTUAL: 100%
-13:53:15	Informação	🏆 TESTAR_RETRY_HTTP_GEMINI_V63: PASSOU
-13:53:15	Informação	============================================================
-13:53:15	Informação	RESULTADO DO CASO: PASSOU_POR_RESUMO_NUMERICO | duração=254ms | assertivas=25 | falhas=0
-13:53:15	Informação	DETALHE: captura_logger=true; linhas_diagnosticas=55; assertivas_estimadas=25; falhas_internas_detectadas=0; retorno={"aprovados":25,"falhas":0,"percentual":100,"passou":true,"resultados":[true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true]}
-13:53:16	Informação	------------------------------------------------------------
-13:53:16	Informação	CASO 28/68 | SUÍTE EXISTENTE 08 | TESTAR_FLUXO_COMPLETO_GEMINI_V63
-13:53:16	Informação	============================================================
-13:53:16	Informação	INÍCIO — TESTAR_FLUXO_COMPLETO_GEMINI_V63
-13:53:16	Informação	============================================================
-13:53:16	Informação	GEMINI - TENTATIVA 1/3
-13:53:16	Informação	HTTP STATUS: 200
-13:53:16	Informação	TEMPO: 0 ms
-13:53:16	Informação	RESPOSTA GEMINI: {"candidates":[{"content":{"parts":[{"text":"RESPOSTA_FINAL"}]}}]}
-13:53:16	Informação	✅ TESTE 1/25 — sucesso HTTP 200 chega ao extrator
-13:53:16	Informação	✅ TESTE 2/25 — fluxo bem-sucedido usa uma tentativa
-13:53:16	Informação	✅ TESTE 3/25 — fluxo preserva status HTTP 200
-13:53:16	Informação	✅ TESTE 4/25 — fluxo preserva tentativas = 1
-13:53:16	Informação	✅ TESTE 5/25 — fluxo marca sucesso
-13:53:16	Informação	GEMINI - TENTATIVA 1/3
-13:53:16	Informação	HTTP STATUS: 503
-13:53:16	Informação	TEMPO: 0 ms
-13:53:16	Informação	RESPOSTA GEMINI: erro
-13:53:16	Informação	GEMINI - ERRO TRANSITÓRIO HTTP 503. Nova tentativa será realizada.
-13:53:16	Informação	GEMINI - TENTATIVA 2/3
-13:53:16	Informação	HTTP STATUS: 200
-13:53:16	Informação	TEMPO: 0 ms
-13:53:16	Informação	RESPOSTA GEMINI: {"candidates":[{"content":{"parts":[{"text":"RECUPERADO_503"}]}}]}
-13:53:16	Informação	✅ TESTE 6/25 — 503 seguido de 200 entrega resposta recuperada
-13:53:16	Informação	✅ TESTE 7/25 — 503 seguido de 200 usa duas tentativas
-13:53:16	Informação	✅ TESTE 8/25 — 503 seguido de 200 informa tentativas = 2
-13:53:16	Informação	GEMINI - TENTATIVA 1/3
-13:53:16	Informação	HTTP STATUS: 429
-13:53:16	Informação	TEMPO: 0 ms
-13:53:16	Informação	RESPOSTA GEMINI: erro
-13:53:16	Informação	GEMINI - ERRO TRANSITÓRIO HTTP 429. Nova tentativa será realizada.
-13:53:16	Informação	GEMINI - TENTATIVA 2/3
-13:53:16	Informação	HTTP STATUS: 500
-13:53:16	Informação	TEMPO: 0 ms
-13:53:16	Informação	RESPOSTA GEMINI: erro
-13:53:16	Informação	GEMINI - ERRO TRANSITÓRIO HTTP 500. Nova tentativa será realizada.
-13:53:16	Informação	GEMINI - TENTATIVA 3/3
-13:53:16	Informação	HTTP STATUS: 200
-13:53:16	Informação	TEMPO: 0 ms
-13:53:16	Informação	RESPOSTA GEMINI: {"candidates":[{"content":{"parts":[{"text":"RECUPERADO_MISTO"}]}}]}
-13:53:16	Informação	✅ TESTE 9/25 — 429 → 500 → 200 entrega resposta recuperada
-13:53:16	Informação	✅ TESTE 10/25 — sequência mista usa três tentativas
-13:53:16	Informação	✅ TESTE 11/25 — sequência mista informa tentativas = 3
-13:53:16	Informação	GEMINI - TENTATIVA 1/3
-13:53:16	Informação	HTTP STATUS: 503
-13:53:16	Informação	TEMPO: 0 ms
-13:53:16	Informação	RESPOSTA GEMINI: erro
-13:53:16	Informação	GEMINI - ERRO TRANSITÓRIO HTTP 503. Nova tentativa será realizada.
-13:53:16	Informação	GEMINI - TENTATIVA 2/3
-13:53:16	Informação	HTTP STATUS: 503
-13:53:16	Informação	TEMPO: 0 ms
-13:53:16	Informação	RESPOSTA GEMINI: erro
-13:53:16	Informação	GEMINI - ERRO TRANSITÓRIO HTTP 503. Nova tentativa será realizada.
-13:53:16	Informação	GEMINI - TENTATIVA 3/3
-13:53:16	Informação	HTTP STATUS: 503
-13:53:16	Informação	TEMPO: 0 ms
-13:53:16	Informação	RESPOSTA GEMINI: erro
-13:53:16	Informação	✅ TESTE 12/25 — três falhas transitórias propagam erro
-13:53:16	Informação	✅ TESTE 13/25 — três falhas transitórias fazem exatamente três chamadas
-13:53:16	Informação	✅ TESTE 14/25 — erro propagado preserva HTTP 503
-13:53:16	Informação	✅ TESTE 15/25 — erro propagado informa tentativas esgotadas
-13:53:16	Informação	GEMINI - TENTATIVA 1/3
-13:53:16	Informação	HTTP STATUS: 400
-13:53:16	Informação	TEMPO: 0 ms
-13:53:16	Informação	RESPOSTA GEMINI: requisição inválida
-13:53:16	Informação	✅ TESTE 16/25 — HTTP 400 propaga erro sem retry
-13:53:16	Informação	✅ TESTE 17/25 — HTTP 400 preserva status no erro
-13:53:16	Informação	GEMINI - TENTATIVA 1/3
-13:53:16	Informação	HTTP STATUS: 200
-13:53:16	Informação	TEMPO: 0 ms
-13:53:16	Informação	RESPOSTA GEMINI: JSON inválido
-13:53:16	Informação	✅ TESTE 18/25 — HTTP 200 com JSON inválido não chega como sucesso
-13:53:16	Informação	✅ TESTE 19/25 — JSON inválido é rejeitado no motor antes da extração
-13:53:16	Informação	GEMINI - TENTATIVA 1/3
-13:53:16	Informação	HTTP STATUS: 200
-13:53:16	Informação	TEMPO: 0 ms
-13:53:16	Informação	RESPOSTA GEMINI: {"candidates":[]}
-13:53:16	Informação	✅ TESTE 20/25 — candidates vazio é rejeitado no extrator
-13:53:16	Informação	✅ TESTE 21/25 — erro de candidates vazio é preservado
-13:53:16	Informação	GEMINI - TENTATIVA 1/3
-13:53:16	Informação	HTTP STATUS: 200
-13:53:16	Informação	TEMPO: 0 ms
-13:53:16	Informação	RESPOSTA GEMINI: {"candidates":[{"content":{"parts":[{"text":"A"},{"text":"B"}]}}]}
-13:53:16	Informação	✅ TESTE 22/25 — múltiplas partes chegam concatenadas
-13:53:16	Informação	GEMINI - TENTATIVA 1/3
-13:53:16	Informação	GEMINI - ERRO DE TRANSPORTE NA TENTATIVA 1: Error: falha de transporte
-13:53:16	Informação	GEMINI - TENTATIVA 2/3
-13:53:16	Informação	HTTP STATUS: 200
-13:53:16	Informação	TEMPO: 0 ms
-13:53:16	Informação	RESPOSTA GEMINI: {"candidates":[{"content":{"parts":[{"text":"TRANSPORTE_RECUPERADO"}]}}]}
-13:53:16	Informação	✅ TESTE 23/25 — falha de transporte seguida de 200 recupera o fluxo
-13:53:16	Informação	✅ TESTE 24/25 — recuperação de transporte usa duas chamadas
-13:53:16	Informação	GEMINI - TENTATIVA 1/3
-13:53:16	Informação	HTTP STATUS: 503
-13:53:16	Informação	TEMPO: 0 ms
-13:53:16	Informação	RESPOSTA GEMINI: erro
-13:53:16	Informação	GEMINI - ERRO TRANSITÓRIO HTTP 503. Nova tentativa será realizada.
-13:53:16	Informação	GEMINI - TENTATIVA 2/3
-13:53:16	Informação	HTTP STATUS: 200
-13:53:16	Informação	TEMPO: 0 ms
-13:53:16	Informação	RESPOSTA GEMINI: {"candidates":[{"content":{"parts":[{}]}}]}
-13:53:16	Informação	✅ TESTE 25/25 — resposta recuperada sem texto utilizável é rejeitada pelo extrator
-13:53:16	Informação	============================================================
-13:53:16	Informação	RESULTADO FINAL — FLUXO COMPLETO GEMINI V6.3
-13:53:16	Informação	============================================================
-13:53:16	Informação	APROVADOS: 25/25
-13:53:16	Informação	FALHAS: 0
-13:53:16	Informação	PERCENTUAL: 100%
-13:53:16	Informação	🏆 TESTAR_FLUXO_COMPLETO_GEMINI_V63: PASSOU
-13:53:16	Informação	============================================================
-13:53:16	Informação	RESULTADO DO CASO: PASSOU_POR_RESUMO_NUMERICO | duração=137ms | assertivas=25 | falhas=0
-13:53:16	Informação	DETALHE: captura_logger=true; linhas_diagnosticas=55; assertivas_estimadas=25; falhas_internas_detectadas=0; retorno={"aprovados":25,"falhas":0,"percentual":100,"passou":true,"resultados":[true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true]}
-13:53:16	Informação	------------------------------------------------------------
-13:53:16	Informação	CASO 29/68 | SUÍTE EXISTENTE 09 | TESTAR_RECONHECIMENTO_SOLUCOES_V63
-13:53:43	Informação	============================================================
-13:53:43	Informação	TESTAR_RECONHECIMENTO_SOLUCOES_V63
-13:53:43	Informação	APROVADOS: 25/25
-13:53:43	Informação	FALHAS: 0
-13:53:43	Informação	PERCENTUAL: 100%
-13:53:43	Informação	✅ TESTE 1 — Tokenização funciona
-13:53:43	Informação	✅ TESTE 2 — Acentos são normalizados
-13:53:43	Informação	✅ TESTE 3 — Palavras duplicadas são removidas
-13:53:43	Informação	✅ TESTE 4 — Similaridade idêntica retorna 100
-13:53:43	Informação	✅ TESTE 5 — Textos diferentes não retornam 100
-13:53:43	Informação	✅ TESTE 6 — Textos sem relação retornam 0
-13:53:43	Informação	✅ TESTE 7 — Arrays semelhantes são comparados
-13:53:43	Informação	✅ TESTE 8 — Resolução perfeita foi persistida
-13:53:43	Informação	✅ TESTE 9 — Comparação perfeita retorna pontuação 100
-13:53:43	Informação	✅ TESTE 10 — Comparação possui todas as dimensões
-13:53:43	Informação	✅ TESTE 11 — Busca relacionada encontra resolução
-13:53:43	Informação	✅ TESTE 12 — Resolução perfeita fica em primeiro lugar
-13:53:43	Informação	✅ TESTE 13 — Busca de validadas retorna apenas VALIDADA
-13:53:43	Informação	✅ TESTE 14 — HIPOTESE nunca é retornada como VALIDADA
-13:53:43	Informação	✅ TESTE 15 — ARQUIVADA não participa da busca
-13:53:43	Informação	✅ TESTE 16 — Resultado classifica múltiplas soluções encontradas
-13:53:43	Informação	✅ TESTE 17 — Classificação mantém a melhor resolução
-13:53:43	Informação	✅ TESTE 18 — Confiança alta para aderência perfeita
-13:53:43	Informação	✅ TESTE 19 — Classificação não altera status da resolução
-13:53:43	Informação	✅ TESTE 20 — Busca respeita limite
-13:53:43	Informação	✅ TESTE 21 — Pontuação sempre fica entre 0 e 100
-13:53:43	Informação	✅ TESTE 22 — Reconhecimento não expõe tecnologia
-13:53:43	Informação	✅ TESTE 23 — Reconhecimento não trata preço
-13:53:43	Informação	✅ TESTE 24 — Nenhuma correspondência para problema totalmente diferente
-13:53:43	Informação	✅ TESTE 25 — Motor é determinístico
-13:53:43	Informação	🏆 TESTAR_RECONHECIMENTO_SOLUCOES_V63: PASSOU
-13:53:43	Informação	🏆 RECONHECIMENTO V6.3: 100%
-13:53:43	Informação	RESULTADO DO CASO: PASSOU_COM_RETORNO_EXPLICITO | duração=26339ms | assertivas=50 | falhas=0
-13:53:43	Informação	DETALHE: captura_logger=true; linhas_diagnosticas=54; assertivas_estimadas=50; falhas_internas_detectadas=0; retorno={"sucesso":true,"aprovados":25,"falhas":0,"percentual":100,"resultados":[{"numero":1,"descricao":"Tokenização funciona","passou":true,"erro":""},{"numero":2,"descricao":"Acentos são normalizados","passou":true,"erro":""},{"numero":3,"descricao":"Palavras duplicadas são removidas","passou":true,"erro":""},{"numero":4,"descricao":"Similaridade idêntica retorna 100","passou":true,"erro":""},{"numero":5,"descricao":"Textos diferentes não retornam 100","passou":true,"erro":""},{"numero":6,"descricao"
-13:53:43	Informação	------------------------------------------------------------
-13:53:43	Informação	CASO 30/68 | SUÍTE EXISTENTE 10 | TESTAR_BIBLIOTECA_RESOLUCOES_V63
-13:53:49	Informação	============================================================
-13:53:49	Informação	TESTAR_BIBLIOTECA_RESOLUCOES_V63
-13:53:49	Informação	APROVADOS: 20/20
-13:53:49	Informação	FALHAS: 0
-13:53:49	Informação	PERCENTUAL: 100%
-13:53:49	Informação	✅ TESTE 1 — Contrato V6.3 disponível
-13:53:49	Informação	✅ TESTE 2 — Status HIPOTESE disponível
-13:53:49	Informação	✅ TESTE 3 — Status VALIDADA disponível
-13:53:49	Informação	✅ TESTE 4 — Status SUPERADA disponível
-13:53:49	Informação	✅ TESTE 5 — Normalização de status
-13:53:49	Informação	✅ TESTE 6 — Status inválido retorna HIPOTESE
-13:53:49	Informação	✅ TESTE 7 — Normalização de confiança
-13:53:49	Informação	✅ TESTE 8 — Serialização estruturada
-13:53:49	Informação	✅ TESTE 9 — Desserialização estruturada
-13:53:49	Informação	✅ TESTE 10 — Criação de resolução
-13:53:49	Informação	✅ TESTE 11 — Resolução criada pode ser recuperada
-13:53:49	Informação	✅ TESTE 12 — Dados estruturados são recuperados como arrays
-13:53:49	Informação	✅ TESTE 13 — HIPOTESE não é considerada validada
-13:53:49	Informação	✅ TESTE 14 — Hipótese não pode ser validada sem evidências
-13:53:49	Informação	✅ TESTE 15 — Hipótese pode ser atualizada
-13:53:49	Informação	✅ TESTE 16 — Validação exige evidência
-13:53:49	Informação	✅ TESTE 17 — Resolução validada é reconhecida como validada
-13:53:49	Informação	✅ TESTE 18 — Busca somente validadas funciona
-13:53:49	Informação	✅ TESTE 19 — Resolução pode ser marcada como SUPERADA
-13:53:49	Informação	✅ TESTE 20 — SUPERADA não é considerada validada
-13:53:49	Informação	🏆 TESTAR_BIBLIOTECA_RESOLUCOES_V63: PASSOU
-13:53:49	Informação	🏆 BIBLIOTECA V6.3: 100%
-13:53:49	Informação	RESULTADO DO CASO: PASSOU_COM_RETORNO_EXPLICITO | duração=5928ms | assertivas=40 | falhas=0
-13:53:49	Informação	DETALHE: captura_logger=true; linhas_diagnosticas=44; assertivas_estimadas=40; falhas_internas_detectadas=0; retorno={"sucesso":true,"aprovados":20,"falhas":0,"percentual":100,"resultados":[{"numero":1,"descricao":"Contrato V6.3 disponível","passou":true,"erro":""},{"numero":2,"descricao":"Status HIPOTESE disponível","passou":true,"erro":""},{"numero":3,"descricao":"Status VALIDADA disponível","passou":true,"erro":""},{"numero":4,"descricao":"Status SUPERADA disponível","passou":true,"erro":""},{"numero":5,"descricao":"Normalização de status","passou":true,"erro":""},{"numero":6,"descricao":"Status inválido re
-13:53:50	Informação	------------------------------------------------------------
-13:53:50	Informação	CASO 31/68 | SUÍTE EXISTENTE 11 | TESTAR_FALSO_POSITIVO_SEMANTICO_V63
-13:53:50	Informação	============================================================
-13:53:50	Informação	INÍCIO — TESTAR_FALSO_POSITIVO_SEMANTICO_V63
-13:53:50	Informação	============================================================
-13:53:50	Informação	✅ TESTE 1/25 — investigação atual foi criada
-13:53:50	Informação	✅ TESTE 2/25 — problema atual contém pedidos
-13:53:50	Informação	✅ TESTE 3/25 — processo atual contém lançamento de pedidos
-13:53:53	Informação	✅ TESTE 4/25 — solução diferente foi criada
-13:53:53	Informação	✅ TESTE 5/25 — solução diferente está VALIDADA
-13:53:53	Informação	✅ TESTE 6/25 — solução possui ID próprio
-13:53:54	Informação	✅ TESTE 7/25 — comparação foi produzida
-13:53:54	Informação	✅ TESTE 8/25 — pontuação é numérica
-13:53:54	Informação	✅ TESTE 9/25 — pontuação permanece entre 0 e 100
-13:53:54	Informação	✅ TESTE 10/25 — dimensão de problema não é perfeita
-13:53:54	Informação	✅ TESTE 11/25 — dimensão de processo não é perfeita
-13:53:54	Informação	✅ TESTE 12/25 — pontuação global não atinge o limiar de solução
-13:53:55	Informação	✅ TESTE 13/25 — busca relacionada executou
-13:53:55	Informação	✅ TESTE 14/25 — solução de estoque não aparece como correspondência forte
-13:53:55	Informação	✅ TESTE 15/25 — nenhuma correspondência incompatível foi aceita acima de 80
-13:53:55	Informação	✅ TESTE 16/25 — classificação do reconhecimento foi produzida
-13:53:55	Informação	✅ TESTE 17/25 — solução incompatível não vira SOLUCAO_ENCONTRADA por si só
-13:53:55	Informação	✅ TESTE 18/25 — decisão foi produzida
-13:53:55	Informação	✅ TESTE 19/25 — decisão não escolhe a solução de estoque
-13:53:55	Informação	✅ TESTE 20/25 — solução de estoque não é tratada como validada para este caso
-13:53:55	Informação	✅ TESTE 21/25 — resposta segura foi produzida
-13:53:55	Informação	✅ TESTE 22/25 — resposta não afirma que encontrou a solução de estoque
-13:53:55	Informação	✅ TESTE 23/25 — resposta não expõe tecnologia ou preço
-13:53:55	Informação	✅ TESTE 24/25 — resposta final passa pelo filtro de segurança
-13:53:55	Informação	✅ TESTE 25/25 — falso positivo não altera o fluxo para solução validada
-13:53:56	Informação	LIMPEZA FALSO POSITIVO V6.3: CONCLUÍDA
-13:53:56	Informação	============================================================
-13:53:56	Informação	RESULTADO FINAL — FALSO POSITIVO SEMÂNTICO V6.3
-13:53:56	Informação	============================================================
-13:53:56	Informação	APROVADOS: 25/25
-13:53:56	Informação	FALHAS: 0
-13:53:56	Informação	PERCENTUAL: 100%
-13:53:56	Informação	🏆 TESTAR_FALSO_POSITIVO_SEMANTICO_V63: PASSOU
-13:53:56	Informação	🏆 FALSO POSITIVO SEMÂNTICO V6.3: 100%
-13:53:56	Informação	============================================================
-13:53:56	Informação	RESULTADO DO CASO: PASSOU_COM_RETORNO_EXPLICITO | duração=5502ms | assertivas=50 | falhas=0
-13:53:56	Informação	DETALHE: captura_logger=true; linhas_diagnosticas=55; assertivas_estimadas=50; falhas_internas_detectadas=0; retorno={"sucesso":true,"aprovados":25,"falhas":0,"percentual":100,"resultados":[{"numero":1,"descricao":"investigação atual foi criada","passou":true},{"numero":2,"descricao":"problema atual contém pedidos","passou":true},{"numero":3,"descricao":"processo atual contém lançamento de pedidos","passou":true},{"numero":4,"descricao":"solução diferente foi criada","passou":true},{"numero":5,"descricao":"solução diferente está VALIDADA","passou":true},{"numero":6,"descricao":"solução possui ID próprio","pass
-13:53:56	Informação	------------------------------------------------------------
-13:53:56	Informação	CASO 32/68 | SUÍTE EXISTENTE 12 | TESTAR_RANKING_SOLUCOES_COMPATIVEIS_V63
-13:53:56	Informação	============================================================
-13:53:56	Informação	INÍCIO — TESTAR_RANKING_SOLUCOES_COMPATIVEIS_V63
-13:53:56	Informação	============================================================
-13:53:56	Informação	✅ TESTE 1/25 — investigação do caso foi criada
-13:53:56	Informação	✅ TESTE 2/25 — problema central está definido
-13:53:56	Informação	✅ TESTE 3/25 — processo está definido
-13:53:58	Informação	✅ TESTE 4/25 — solução específica foi persistida
-13:53:58	Informação	✅ TESTE 5/25 — solução administrativa foi persistida
-13:53:58	Informação	✅ TESTE 6/25 — solução específica está VALIDADA
-13:53:58	Informação	✅ TESTE 7/25 — solução administrativa está VALIDADA
-13:53:58	Informação	✅ TESTE 8/25 — comparação da solução específica foi produzida
-13:53:58	Informação	✅ TESTE 9/25 — comparação da solução administrativa foi produzida
-13:53:58	Informação	✅ TESTE 10/25 — pontuação específica é numérica
-13:53:58	Informação	✅ TESTE 11/25 — pontuação administrativa é numérica
-13:53:58	Informação	✅ TESTE 12/25 — solução específica possui maior aderência
-13:54:00	Informação	✅ TESTE 13/25 — busca relacionada executou
-13:54:00	Informação	✅ TESTE 14/25 — solução específica foi reconhecida
-13:54:00	Informação	✅ TESTE 15/25 — solução administrativa foi reconhecida
-13:54:00	Informação	✅ TESTE 16/25 — as duas soluções permanecem disponíveis
-13:54:00	Informação	✅ TESTE 17/25 — solução específica aparece antes da administrativa
-13:54:00	Informação	✅ TESTE 18/25 — pontuação retornada da específica é maior
-13:54:00	Informação	✅ TESTE 19/25 — ambas permanecem VALIDADA
-13:54:00	Informação	✅ TESTE 20/25 — classificação identifica múltiplas soluções
-13:54:00	Informação	✅ TESTE 21/25 — melhor solução preservada é a específica
-13:54:00	Informação	✅ TESTE 22/25 — decisão foi produzida com múltiplas soluções
-13:54:00	Informação	✅ TESTE 23/25 — decisão preserva a solução de maior aderência
-13:54:00	Informação	✅ TESTE 24/25 — decisão preserva as duas soluções validadas
-13:54:00	Informação	✅ TESTE 25/25 — resultado permanece sem tecnologia, preço ou negociação
-13:54:01	Informação	LIMPEZA RANKING V6.3: CONCLUÍDA
-13:54:01	Informação	============================================================
-13:54:01	Informação	RESULTADO FINAL — RANKING DE SOLUÇÕES COMPATÍVEIS V6.3
-13:54:01	Informação	============================================================
-13:54:01	Informação	APROVADOS: 25/25
-13:54:01	Informação	FALHAS: 0
-13:54:01	Informação	PERCENTUAL: 100%
-13:54:01	Informação	🏆 TESTAR_RANKING_SOLUCOES_COMPATIVEIS_V63: PASSOU
-13:54:01	Informação	🏆 RANKING DE SOLUÇÕES COMPATÍVEIS V6.3: 100%
-13:54:01	Informação	============================================================
-13:54:01	Informação	RESULTADO DO CASO: PASSOU_COM_RETORNO_EXPLICITO | duração=4528ms | assertivas=50 | falhas=0
-13:54:01	Informação	DETALHE: captura_logger=true; linhas_diagnosticas=55; assertivas_estimadas=50; falhas_internas_detectadas=0; retorno={"sucesso":true,"aprovados":25,"falhas":0,"percentual":100,"resultados":[{"numero":1,"descricao":"investigação do caso foi criada","passou":true},{"numero":2,"descricao":"problema central está definido","passou":true},{"numero":3,"descricao":"processo está definido","passou":true},{"numero":4,"descricao":"solução específica foi persistida","passou":true},{"numero":5,"descricao":"solução administrativa foi persistida","passou":true},{"numero":6,"descricao":"solução específica está VALIDADA","pass
-13:54:01	Informação	------------------------------------------------------------
-13:54:01	Informação	CASO 33/68 | SUÍTE EXISTENTE 13 | TESTAR_RECONHECIMENTO_POR_PARAFRASE_V63
-13:54:01	Informação	============================================================
-13:54:01	Informação	INÍCIO — TESTAR_RECONHECIMENTO_POR_PARAFRASE_V63
-13:54:01	Informação	============================================================
-13:54:01	Informação	✅ TESTE 1/25 — investigação por paráfrase foi criada
-13:54:01	Informação	✅ TESTE 2/25 — problema está presente
-13:54:01	Informação	✅ TESTE 3/25 — processo está presente
-13:54:03	Informação	✅ TESTE 4/25 — solução foi persistida
-13:54:03	Informação	✅ TESTE 5/25 — solução está VALIDADA
-13:54:03	Informação	✅ TESTE 6/25 — solução possui ID
-13:54:04	Informação	✅ TESTE 7/25 — comparação foi produzida
-13:54:04	Informação	✅ TESTE 8/25 — pontuação é numérica
-13:54:04	Informação	✅ TESTE 9/25 — pontuação está entre 0 e 100
-13:54:04	Informação	✅ TESTE 10/25 — problema não depende de texto idêntico
-13:54:04	Informação	✅ TESTE 11/25 — processo não depende de texto idêntico
-13:54:04	Informação	✅ TESTE 12/25 — há alguma aderência entre os casos
-13:54:05	Informação	✅ TESTE 13/25 — busca relacionada executou
-13:54:05	Informação	✅ TESTE 14/25 — solução validada foi reconhecida
-13:54:05	Informação	✅ TESTE 15/25 — resultado reconhecido mantém VALIDADA
-13:54:05	Informação	✅ TESTE 16/25 — pontuação do reconhecimento é preservada
-13:54:05	Informação	✅ TESTE 17/25 — reconhecimento não exige igualdade literal do problema
-13:54:05	Informação	✅ TESTE 18/25 — reconhecimento não exige igualdade literal do processo
-13:54:05	Informação	✅ TESTE 19/25 — classificação foi produzida
-13:54:05	Informação	✅ TESTE 20/25 — solução validada reconhecida não vira hipótese
-13:54:05	Informação	✅ TESTE 21/25 — decisão foi produzida
-13:54:05	Informação	✅ TESTE 22/25 — decisão preserva a solução reconhecida
-13:54:05	Informação	✅ TESTE 23/25 — decisão não expõe tecnologia ou preço
-13:54:05	Informação	✅ TESTE 24/25 — resposta segura foi produzida
-13:54:05	Informação	✅ TESTE 25/25 — resposta final passa pelo filtro de segurança
-13:54:05	Informação	LIMPEZA PARÁFRASE V6.3: CONCLUÍDA
-13:54:05	Informação	============================================================
-13:54:05	Informação	RESULTADO FINAL — RECONHECIMENTO POR PARÁFRASE V6.3
-13:54:05	Informação	============================================================
-13:54:05	Informação	APROVADOS: 25/25
-13:54:05	Informação	FALHAS: 0
-13:54:05	Informação	PERCENTUAL: 100%
-13:54:05	Informação	🏆 TESTAR_RECONHECIMENTO_POR_PARAFRASE_V63: PASSOU
-13:54:05	Informação	🏆 RECONHECIMENTO POR PARÁFRASE V6.3: 100%
-13:54:05	Informação	============================================================
-13:54:05	Informação	RESULTADO DO CASO: PASSOU_COM_RETORNO_EXPLICITO | duração=3861ms | assertivas=50 | falhas=0
-13:54:05	Informação	DETALHE: captura_logger=true; linhas_diagnosticas=55; assertivas_estimadas=50; falhas_internas_detectadas=0; retorno={"sucesso":true,"aprovados":25,"falhas":0,"percentual":100,"resultados":[{"numero":1,"descricao":"investigação por paráfrase foi criada","passou":true},{"numero":2,"descricao":"problema está presente","passou":true},{"numero":3,"descricao":"processo está presente","passou":true},{"numero":4,"descricao":"solução foi persistida","passou":true},{"numero":5,"descricao":"solução está VALIDADA","passou":true},{"numero":6,"descricao":"solução possui ID","passou":true},{"numero":7,"descricao":"comparaçã
-13:54:05	Informação	------------------------------------------------------------
-13:54:05	Informação	CASO 34/68 | SUÍTE EXISTENTE 14 | TESTAR_EMPATE_SOLUCOES_V63
-13:54:05	Informação	============================================================
-13:54:05	Informação	INÍCIO — TESTAR_EMPATE_SOLUCOES_V63
-13:54:05	Informação	============================================================
-13:54:05	Informação	✅ TESTE 1/25 — investigação foi criada
-13:54:05	Informação	✅ TESTE 2/25 — problema está definido
-13:54:05	Informação	✅ TESTE 3/25 — processo está definido
-13:54:09	Informação	✅ TESTE 4/25 — solução A foi persistida
-13:54:09	Informação	✅ TESTE 5/25 — solução B foi persistida
-13:54:09	Informação	✅ TESTE 6/25 — solução A está VALIDADA
-13:54:09	Informação	✅ TESTE 7/25 — solução B está VALIDADA
-13:54:09	Informação	✅ TESTE 8/25 — comparação A foi produzida
-13:54:09	Informação	✅ TESTE 9/25 — comparação B foi produzida
-13:54:09	Informação	✅ TESTE 10/25 — pontuação A é numérica
-13:54:09	Informação	✅ TESTE 11/25 — pontuação B é numérica
-13:54:09	Informação	✅ TESTE 12/25 — as pontuações são iguais
-13:54:10	Informação	✅ TESTE 13/25 — busca relacionada executou
-13:54:10	Informação	✅ TESTE 14/25 — solução A foi reconhecida
-13:54:10	Informação	✅ TESTE 15/25 — solução B foi reconhecida
-13:54:10	Informação	✅ TESTE 16/25 — as duas soluções permanecem disponíveis
-13:54:10	Informação	✅ TESTE 17/25 — as duas soluções permanecem VALIDADA
-13:54:10	Informação	✅ TESTE 18/25 — as pontuações retornadas permanecem empatadas
-13:54:10	Informação	✅ TESTE 19/25 — classificação foi produzida
-13:54:10	Informação	✅ TESTE 20/25 — classificação identifica múltiplas soluções
-13:54:10	Informação	✅ TESTE 21/25 — decisão foi produzida
-13:54:10	Informação	✅ TESTE 22/25 — decisão não descarta as duas soluções validadas
-13:54:10	Informação	✅ TESTE 23/25 — decisão preserva a classificação de múltiplas soluções
-13:54:10	Informação	✅ TESTE 24/25 — resposta segura foi produzida
-13:54:10	Informação	✅ TESTE 25/25 — resposta final passa pelo filtro de segurança
-13:54:11	Informação	LIMPEZA EMPATE V6.3: CONCLUÍDA
-13:54:11	Informação	============================================================
-13:54:11	Informação	RESULTADO FINAL — EMPATE ENTRE SOLUÇÕES V6.3
-13:54:11	Informação	============================================================
-13:54:11	Informação	APROVADOS: 25/25
-13:54:11	Informação	FALHAS: 0
-13:54:11	Informação	PERCENTUAL: 100%
-13:54:11	Informação	🏆 TESTAR_EMPATE_SOLUCOES_V63: PASSOU
-13:54:11	Informação	🏆 EMPATE ENTRE SOLUÇÕES V6.3: 100%
-13:54:11	Informação	============================================================
-13:54:11	Informação	RESULTADO DO CASO: PASSOU_COM_RETORNO_EXPLICITO | duração=5438ms | assertivas=50 | falhas=0
-13:54:11	Informação	DETALHE: captura_logger=true; linhas_diagnosticas=55; assertivas_estimadas=50; falhas_internas_detectadas=0; retorno={"sucesso":true,"aprovados":25,"falhas":0,"percentual":100,"resultados":[{"numero":1,"descricao":"investigação foi criada","passou":true},{"numero":2,"descricao":"problema está definido","passou":true},{"numero":3,"descricao":"processo está definido","passou":true},{"numero":4,"descricao":"solução A foi persistida","passou":true},{"numero":5,"descricao":"solução B foi persistida","passou":true},{"numero":6,"descricao":"solução A está VALIDADA","passou":true},{"numero":7,"descricao":"solução B es
-13:54:12	Informação	------------------------------------------------------------
-13:54:12	Informação	CASO 35/68 | SUÍTE EXISTENTE 15 | TESTAR_SOLUCAO_PARCIALMENTE_COMPATIVEL_V63
-13:54:12	Informação	============================================================
-13:54:12	Informação	INÍCIO — TESTAR_SOLUCAO_PARCIALMENTE_COMPATIVEL_V63
-13:54:12	Informação	============================================================
-13:54:12	Informação	✅ TESTE 1/25 — investigação foi criada
-13:54:12	Informação	✅ TESTE 2/25 — problema está definido
-13:54:12	Informação	✅ TESTE 3/25 — processo está definido
-13:54:13	Informação	✅ TESTE 4/25 — solução parcial foi persistida
-13:54:13	Informação	✅ TESTE 5/25 — solução parcial mantém status VALIDADA
-13:54:13	Informação	✅ TESTE 6/25 — solução parcial possui identificador
-13:54:13	Informação	✅ TESTE 7/25 — comparação semântica foi produzida
-13:54:13	Informação	✅ TESTE 8/25 — pontuação da solução é numérica
-13:54:13	Informação	✅ TESTE 9/25 — pontuação permanece no intervalo válido
-13:54:13	Informação	✅ TESTE 10/25 — solução parcial não obtém pontuação perfeita
-13:54:14	Informação	✅ TESTE 11/25 — busca relacionada executou
-13:54:14	Informação	✅ TESTE 12/25 — solução parcialmente relacionada pode ser medida
-13:54:14	Informação	✅ TESTE 13/25 — pontuação retornada coincide com a comparação
-13:54:14	Informação	✅ TESTE 14/25 — solução permanece VALIDADA na biblioteca
-13:54:14	Informação	✅ TESTE 15/25 — classificação foi produzida
-13:54:14	Informação	✅ TESTE 16/25 — resultado permite identificar se a solução atingiu o limiar
-13:54:14	Informação	✅ TESTE 17/25 — classificação não promove solução inexistente
-13:54:14	Informação	✅ TESTE 18/25 — decisão foi produzida
-13:54:14	Informação	✅ TESTE 19/25 — decisão preserva a classificação efetivamente calculada
-13:54:14	Informação	✅ TESTE 20/25 — decisão não inventa resolução principal quando não há candidato
-13:54:14	Informação	✅ TESTE 21/25 — resposta segura foi produzida
-13:54:14	Informação	✅ TESTE 22/25 — resposta não expõe tecnologia
-13:54:14	Informação	✅ TESTE 23/25 — resposta não expõe preço ou negociação
-13:54:14	Informação	✅ TESTE 24/25 — resposta final passa pelo filtro de segurança
-13:54:14	Informação	✅ TESTE 25/25 — resultado permanece determinístico e coerente com a classificação
-13:54:14	Informação	LIMPEZA PARCIAL V6.3: CONCLUÍDA
-13:54:14	Informação	============================================================
-13:54:14	Informação	RESULTADO FINAL — SOLUÇÃO PARCIALMENTE COMPATÍVEL V6.3
-13:54:14	Informação	============================================================
-13:54:14	Informação	APROVADOS: 25/25
-13:54:14	Informação	FALHAS: 0
-13:54:14	Informação	PERCENTUAL: 100%
-13:54:14	Informação	🏆 TESTAR_SOLUCAO_PARCIALMENTE_COMPATIVEL_V63: PASSOU
-13:54:14	Informação	🏆 SOLUÇÃO PARCIALMENTE COMPATÍVEL V6.3: 100%
-13:54:14	Informação	============================================================
-13:54:14	Informação	RESULTADO DO CASO: PASSOU_COM_RETORNO_EXPLICITO | duração=2694ms | assertivas=50 | falhas=0
-13:54:14	Informação	DETALHE: captura_logger=true; linhas_diagnosticas=55; assertivas_estimadas=50; falhas_internas_detectadas=0; retorno={"sucesso":true,"aprovados":25,"falhas":0,"percentual":100,"resultados":[{"numero":1,"descricao":"investigação foi criada","passou":true},{"numero":2,"descricao":"problema está definido","passou":true},{"numero":3,"descricao":"processo está definido","passou":true},{"numero":4,"descricao":"solução parcial foi persistida","passou":true},{"numero":5,"descricao":"solução parcial mantém status VALIDADA","passou":true},{"numero":6,"descricao":"solução parcial possui identificador","passou":true},{"nu
-13:54:15	Informação	------------------------------------------------------------
-13:54:15	Informação	CASO 36/68 | SUÍTE EXISTENTE 16 | TESTAR_RUIDO_NO_CATALOGO_V63
-13:54:15	Informação	============================================================
-13:54:15	Informação	INÍCIO — TESTAR_RUIDO_NO_CATALOGO_V63
-13:54:15	Informação	============================================================
-13:54:15	Informação	✅ TESTE 1/25 — investigação foi criada
-13:54:15	Informação	✅ TESTE 2/25 — problema está definido
-13:54:15	Informação	✅ TESTE 3/25 — processo está definido
-13:54:17	Informação	✅ TESTE 4/25 — solução correta foi persistida
-13:54:17	Informação	✅ TESTE 5/25 — solução parcial foi persistida
-13:54:17	Informação	✅ TESTE 6/25 — solução incompatível foi persistida
-13:54:17	Informação	✅ TESTE 7/25 — as três soluções permanecem VALIDADA na biblioteca
-13:54:18	Informação	✅ TESTE 8/25 — comparação da solução correta foi produzida
-13:54:18	Informação	✅ TESTE 9/25 — comparação da solução parcial foi produzida
-13:54:18	Informação	✅ TESTE 10/25 — comparação do ruído foi produzida
-13:54:18	Informação	✅ TESTE 11/25 — solução correta supera a parcial
-13:54:18	Informação	✅ TESTE 12/25 — solução correta supera o ruído
-13:54:20	Informação	✅ TESTE 13/25 — busca relacionada executou
-13:54:20	Informação	✅ TESTE 14/25 — solução correta foi reconhecida
-13:54:20	Informação	✅ TESTE 15/25 — solução correta aparece antes da parcial
-13:54:20	Informação	✅ TESTE 16/25 — solução correta mantém pontuação superior ao ruído quando ambos são retornados
-13:54:20	Informação	✅ TESTE 17/25 — ruído não supera a solução correta
-13:54:20	Informação	✅ TESTE 18/25 — classificação foi produzida
-13:54:20	Informação	✅ TESTE 19/25 — decisão foi produzida
-13:54:20	Informação	✅ TESTE 20/25 — solução principal é a correta
-13:54:20	Informação	✅ TESTE 21/25 — decisão preserva a classificação calculada
-13:54:20	Informação	✅ TESTE 22/25 — resposta segura foi produzida
-13:54:20	Informação	✅ TESTE 23/25 — resposta não expõe tecnologia
-13:54:20	Informação	✅ TESTE 24/25 — resposta não expõe preço ou negociação
-13:54:20	Informação	✅ TESTE 25/25 — resposta final passa pelo filtro de segurança
-13:54:20	Informação	LIMPEZA RUÍDO V6.3: CONCLUÍDA
-13:54:20	Informação	============================================================
-13:54:20	Informação	RESULTADO FINAL — RUÍDO NO CATÁLOGO V6.3
-13:54:20	Informação	============================================================
-13:54:20	Informação	APROVADOS: 25/25
-13:54:20	Informação	FALHAS: 0
-13:54:20	Informação	PERCENTUAL: 100%
-13:54:20	Informação	🏆 TESTAR_RUIDO_NO_CATALOGO_V63: PASSOU
-13:54:20	Informação	🏆 RUÍDO NO CATÁLOGO V6.3: 100%
-13:54:20	Informação	============================================================
-13:54:20	Informação	RESULTADO DO CASO: PASSOU_COM_RETORNO_EXPLICITO | duração=5764ms | assertivas=50 | falhas=0
-13:54:20	Informação	DETALHE: captura_logger=true; linhas_diagnosticas=55; assertivas_estimadas=50; falhas_internas_detectadas=0; retorno={"sucesso":true,"aprovados":25,"falhas":0,"percentual":100,"resultados":[{"numero":1,"descricao":"investigação foi criada","passou":true},{"numero":2,"descricao":"problema está definido","passou":true},{"numero":3,"descricao":"processo está definido","passou":true},{"numero":4,"descricao":"solução correta foi persistida","passou":true},{"numero":5,"descricao":"solução parcial foi persistida","passou":true},{"numero":6,"descricao":"solução incompatível foi persistida","passou":true},{"numero":7,"
-13:54:21	Informação	------------------------------------------------------------
-13:54:21	Informação	CASO 37/68 | SUÍTE EXISTENTE 17 | TESTAR_CATALOGO_COM_MULTIPLAS_SOLUCOES_V63
-13:54:21	Informação	============================================================
-13:54:21	Informação	INÍCIO — TESTAR_CATALOGO_COM_MULTIPLAS_SOLUCOES_V63
-13:54:21	Informação	============================================================
-13:54:21	Informação	✅ TESTE 1/25 — investigação foi criada
-13:54:21	Informação	✅ TESTE 2/25 — problema está definido
-13:54:21	Informação	✅ TESTE 3/25 — processo está definido
-13:54:21	Informação	✅ TESTE 4/25 — catálogo contém exatamente 20 soluções temporárias
-13:54:33	Informação	✅ TESTE 5/25 — 20 soluções foram persistidas
-13:54:33	Informação	✅ TESTE 6/25 — todos os IDs temporários são únicos
-13:54:37	Informação	✅ TESTE 7/25 — 20 soluções podem ser recuperadas
-13:54:37	Informação	✅ TESTE 8/25 — solução correta permanece VALIDADA
-13:54:43	Informação	✅ TESTE 9/25 — busca relacionada executou sobre o catálogo ampliado
-13:54:43	Informação	✅ TESTE 10/25 — solução correta foi reconhecida no catálogo ampliado
-13:54:43	Informação	✅ TESTE 11/25 — solução correta é o primeiro resultado do ranking
-13:54:43	Informação	✅ TESTE 12/25 — pontuação da solução correta é 100
-13:54:43	Informação	✅ TESTE 13/25 — HIPOTESE não é promovida automaticamente a VALIDADA
-13:54:43	Informação	✅ TESTE 14/25 — EM_ANALISE permanece identificada como EM_ANALISE
-13:54:43	Informação	✅ TESTE 15/25 — SUPERADA permanece identificada como SUPERADA
-13:54:43	Informação	✅ TESTE 16/25 — ARQUIVADA é excluída da busca relacionada
-13:54:48	Informação	✅ TESTE 17/25 — busca somente validadas executou
-13:54:48	Informação	✅ TESTE 18/25 — solução correta está entre as validadas relacionadas
-13:54:48	Informação	✅ TESTE 19/25 — estados não validados não aparecem na lista de validadas
-13:54:48	Informação	✅ TESTE 20/25 — classificação foi produzida
-13:54:48	Informação	✅ TESTE 21/25 — decisão foi produzida
-13:54:48	Informação	✅ TESTE 22/25 — solução principal permanece a correta
-13:54:48	Informação	✅ TESTE 23/25 — resposta segura foi produzida
-13:54:48	Informação	✅ TESTE 24/25 — resposta não expõe tecnologia, preço ou negociação
-13:54:48	Informação	✅ TESTE 25/25 — resposta final passa pelo filtro de segurança
-13:54:53	Informação	LIMPEZA CATÁLOGO 20 V6.3: CONCLUÍDA
-13:54:53	Informação	============================================================
-13:54:53	Informação	RESULTADO FINAL — CATÁLOGO COM MÚLTIPLAS SOLUÇÕES V6.3
-13:54:53	Informação	============================================================
-13:54:53	Informação	APROVADOS: 25/25
-13:54:53	Informação	FALHAS: 0
-13:54:53	Informação	PERCENTUAL: 100%
-13:54:53	Informação	🏆 TESTAR_CATALOGO_COM_MULTIPLAS_SOLUCOES_V63: PASSOU
-13:54:53	Informação	🏆 CATÁLOGO COM MÚLTIPLAS SOLUÇÕES V6.3: 100%
-13:54:53	Informação	============================================================
-13:54:53	Informação	RESULTADO DO CASO: PASSOU_COM_RETORNO_EXPLICITO | duração=31815ms | assertivas=50 | falhas=0
-13:54:53	Informação	DETALHE: captura_logger=true; linhas_diagnosticas=55; assertivas_estimadas=50; falhas_internas_detectadas=0; retorno={"sucesso":true,"aprovados":25,"falhas":0,"percentual":100,"resultados":[{"numero":1,"descricao":"investigação foi criada","passou":true},{"numero":2,"descricao":"problema está definido","passou":true},{"numero":3,"descricao":"processo está definido","passou":true},{"numero":4,"descricao":"catálogo contém exatamente 20 soluções temporárias","passou":true},{"numero":5,"descricao":"20 soluções foram persistidas","passou":true},{"numero":6,"descricao":"todos os IDs temporários são únicos","passou":
-13:54:53	Informação	------------------------------------------------------------
-13:54:53	Informação	CASO 38/68 | SUÍTE EXISTENTE 18 | TESTAR_ESCALA_SEMELHANCA_ESTABILIDADE_V63
-13:54:53	Informação	============================================================
-13:54:53	Informação	INÍCIO — TESTAR_ESCALA_SEMELHANCA_ESTABILIDADE_V63
-13:54:53	Informação	============================================================
-13:54:53	Informação	✅ TESTE 1/25 — investigação de referência foi criada
-13:54:53	Informação	✅ TESTE 2/25 — problema de referência está definido
-13:54:53	Informação	✅ TESTE 3/25 — processo de referência está definido
-13:54:53	Informação	✅ TESTE 4/25 — catálogo contém exatamente 30 soluções temporárias
-13:55:14	Informação	✅ TESTE 5/25 — 30 soluções foram persistidas
-13:55:14	Informação	✅ TESTE 6/25 — todos os 30 IDs temporários são únicos
-13:55:22	Informação	✅ TESTE 7/25 — as 30 soluções podem ser recuperadas
-13:55:22	Informação	✅ TESTE 8/25 — a solução de referência permanece VALIDADA
-13:56:03	Informação	✅ TESTE 9/25 — cinco rodadas independentes de busca foram executadas
-13:56:03	Informação	✅ TESTE 10/25 — a solução de referência foi encontrada
-13:56:03	Informação	✅ TESTE 11/25 — a solução de referência permanece em primeiro lugar
-13:56:03	Informação	✅ TESTE 12/25 — a solução de referência mantém pontuação 100
-13:56:03	Informação	✅ TESTE 13/25 — há soluções semanticamente próximas reconhecidas
-13:56:03	Informação	✅ TESTE 14/25 — nenhuma solução próxima supera a referência
-13:56:03	Informação	✅ TESTE 15/25 — o ranking produz pontuações numéricas para as próximas
-13:56:03	Informação	✅ TESTE 16/25 — as cinco rodadas mantêm a mesma ordem do ranking
-13:56:11	Informação	✅ TESTE 17/25 — busca exclusiva por validadas funciona em escala
-13:56:11	Informação	✅ TESTE 18/25 — a solução de referência está entre as validadas
-13:56:11	Informação	✅ TESTE 19/25 — todos os resultados validados possuem status VALIDADA
-13:56:11	Informação	✅ TESTE 20/25 — classificação foi produzida sobre o catálogo ampliado
-13:56:11	Informação	✅ TESTE 21/25 — decisão foi produzida sobre o ranking ampliado
-13:56:11	Informação	✅ TESTE 22/25 — a solução principal continua sendo a referência
-13:56:11	Informação	✅ TESTE 23/25 — resposta segura foi produzida após o teste de escala
-13:56:11	Informação	✅ TESTE 24/25 — resposta final não expõe tecnologia, preço ou negociação
-13:56:11	Informação	✅ TESTE 25/25 — resposta final passa pelo filtro de segurança
-13:56:18	Informação	LIMPEZA ESCALA V6.3: CONCLUÍDA
-13:56:18	Informação	============================================================
-13:56:18	Informação	RESULTADO FINAL — ESCALA + SEMELHANÇA + ESTABILIDADE V6.3
-13:56:18	Informação	============================================================
-13:56:18	Informação	APROVADOS: 25/25
-13:56:18	Informação	FALHAS: 0
-13:56:18	Informação	PERCENTUAL: 100%
-13:56:18	Informação	🏆 TESTAR_ESCALA_SEMELHANCA_ESTABILIDADE_V63: PASSOU
-13:56:18	Informação	🏆 ESCALA + SEMELHANÇA + ESTABILIDADE V6.3: 100%
-13:56:18	Informação	============================================================
-13:56:18	Informação	RESULTADO DO CASO: PASSOU_COM_RETORNO_EXPLICITO | duração=84827ms | assertivas=50 | falhas=0
-13:56:18	Informação	DETALHE: captura_logger=true; linhas_diagnosticas=55; assertivas_estimadas=50; falhas_internas_detectadas=0; retorno={"sucesso":true,"aprovados":25,"falhas":0,"percentual":100,"resultados":[{"numero":1,"descricao":"investigação de referência foi criada","passou":true},{"numero":2,"descricao":"problema de referência está definido","passou":true},{"numero":3,"descricao":"processo de referência está definido","passou":true},{"numero":4,"descricao":"catálogo contém exatamente 30 soluções temporárias","passou":true},{"numero":5,"descricao":"30 soluções foram persistidas","passou":true},{"numero":6,"descricao":"todo
-13:56:19	Informação	------------------------------------------------------------
-13:56:19	Informação	CASO 39/68 | SUÍTE EXISTENTE 19 | TESTAR_CONCORRENCIA_SOLUCOES_QUASE_IDENTICAS_V63
-13:56:19	Informação	============================================================
-13:56:19	Informação	INÍCIO — TESTAR_CONCORRENCIA_SOLUCOES_QUASE_IDENTICAS_V63
-13:56:19	Informação	============================================================
-13:56:19	Informação	✅ TESTE 1/25 — investigação foi criada
-13:56:19	Informação	✅ TESTE 2/25 — problema está definido
-13:56:19	Informação	✅ TESTE 3/25 — processo está definido
-13:56:19	Informação	✅ TESTE 4/25 — catálogo contém 10 concorrentes temporários
-13:56:28	Informação	✅ TESTE 5/25 — 10 soluções foram persistidas
-13:56:28	Informação	✅ TESTE 6/25 — todos os IDs são únicos
-13:56:30	Informação	✅ TESTE 7/25 — todas as soluções podem ser recuperadas
-13:56:35	Informação	✅ TESTE 8/25 — todas as comparações foram produzidas
-13:56:35	Informação	✅ TESTE 9/25 — a referência exata recebe pontuação 100
-13:56:35	Informação	✅ TESTE 10/25 — existem pelo menos 5 concorrentes semanticamente próximos
-13:56:35	Informação	✅ TESTE 11/25 — todos os concorrentes próximos possuem pontuação válida
-13:56:35	Informação	✅ TESTE 12/25 — nenhum concorrente próximo supera a referência
-13:56:38	Informação	✅ TESTE 13/25 — ranking principal foi produzido
-13:56:38	Informação	✅ TESTE 14/25 — a referência ocupa o primeiro lugar
-13:56:38	Informação	✅ TESTE 15/25 — os concorrentes próximos podem ser reconhecidos sem substituir a referência
-13:56:45	Informação	✅ TESTE 16/25 — três rankings consecutivos mantêm a mesma ordem
-13:56:48	Informação	✅ TESTE 17/25 — busca exclusiva por validadas retorna candidatos
-13:56:48	Informação	✅ TESTE 18/25 — a referência continua entre as validadas
-13:56:48	Informação	✅ TESTE 19/25 — todos os candidatos validados possuem status VALIDADA
-13:56:48	Informação	✅ TESTE 20/25 — classificação reconhece múltiplas soluções quando aplicável
-13:56:48	Informação	✅ TESTE 21/25 — decisão foi produzida
-13:56:48	Informação	✅ TESTE 22/25 — decisão mantém a referência como solução principal
-13:56:48	Informação	✅ TESTE 23/25 — resposta segura foi produzida
-13:56:48	Informação	✅ TESTE 24/25 — resposta não expõe tecnologia, preço ou negociação
-13:56:48	Informação	✅ TESTE 25/25 — resposta final passa pelo filtro de segurança
-13:56:50	Informação	LIMPEZA CONCORRÊNCIA V6.3: CONCLUÍDA
-13:56:50	Informação	============================================================
-13:56:50	Informação	RESULTADO FINAL — CONCORRÊNCIA QUASE IDÊNTICA V6.3
-13:56:50	Informação	============================================================
-13:56:50	Informação	APROVADOS: 25/25
-13:56:50	Informação	FALHAS: 0
-13:56:50	Informação	PERCENTUAL: 100%
-13:56:50	Informação	🏆 TESTAR_CONCORRENCIA_SOLUCOES_QUASE_IDENTICAS_V63: PASSOU
-13:56:50	Informação	🏆 CONCORRÊNCIA DE SOLUÇÕES QUASE IDÊNTICAS V6.3: 100%
-13:56:50	Informação	============================================================
-13:56:50	Informação	RESULTADO DO CASO: PASSOU_COM_RETORNO_EXPLICITO | duração=31281ms | assertivas=50 | falhas=0
-13:56:50	Informação	DETALHE: captura_logger=true; linhas_diagnosticas=55; assertivas_estimadas=50; falhas_internas_detectadas=0; retorno={"sucesso":true,"aprovados":25,"falhas":0,"percentual":100,"resultados":[{"numero":1,"descricao":"investigação foi criada","passou":true},{"numero":2,"descricao":"problema está definido","passou":true},{"numero":3,"descricao":"processo está definido","passou":true},{"numero":4,"descricao":"catálogo contém 10 concorrentes temporários","passou":true},{"numero":5,"descricao":"10 soluções foram persistidas","passou":true},{"numero":6,"descricao":"todos os IDs são únicos","passou":true},{"numero":7,"
-13:56:50	Informação	============================================================
-13:56:50	Informação	FIM DO LOTE | executados=39 | cursor=39/68 | duração=239980ms
-13:56:50	Informação	CONTINUE executando TESTAR_DIAGNOSTICO_PROFUNDO_V63_CONTINUAR().
-13:56:50	Notificação	Execução concluída
+14:48:56	Informação	✅ TESTE 1 — interpretação foi produzida
+14:48:56	Informação	✅ TESTE 2 — problema foi identificado
+14:48:56	Informação	✅ TESTE 3 — processo não foi inventado
+14:48:56	Informação	✅ TESTE 4 — resultado desejado não foi inventado
+14:48:56	Informação	✅ TESTE 5 — contexto não foi inventado
+14:48:56	Informação	✅ TESTE 6 — restrições não foram inventadas
+14:48:56	Informação	✅ TESTE 7 — impacto não foi promovido a confirmado
+14:48:56	Informação	✅ TESTE 8 — impacto vago permanece inferido ou desconhecido
+14:48:56	Informação	✅ TESTE 9 — lacunas contém processo
+14:48:56	Informação	✅ TESTE 10 — lacunas contém resultado desejado
+14:48:56	Informação	✅ TESTE 11 — lacunas contém contexto
+14:48:56	Informação	✅ TESTE 12 — lacunas contém restrições
+14:48:56	Informação	============================================================
+14:48:56	Informação	TESTAR_INFORMACAO_INCOMPLETA_SEMANTICA_V63
+14:48:56	Informação	APROVADOS: 12/12
+14:48:56	Informação	FALHAS: 0
+14:48:56	Informação	PERCENTUAL: 100%
+14:48:56	Informação	🏆 TESTAR_INFORMACAO_INCOMPLETA_SEMANTICA_V63: PASSOU
+14:48:56	Informação	RESULTADO DO CASO: PASSOU_COM_RETORNO_EXPLICITO | duração=1490ms | assertivas=12 | falhas=0
+14:48:56	Informação	DETALHE: captura_logger=true; linhas_diagnosticas=16; assertivas_estimadas=12; falhas_internas_detectadas=0; retorno={"sucesso":true,"aprovados":12,"falhas":0,"percentual":100,"interpretacao":{"versao":"V6.3","problema":"O sistema está apresentando problemas.","processo":"","dores":["O sistema está dando problema","A equipe está sendo atrapalhada"],"impactos":["A equipe está sendo atrapalhada"],"resultado_desejado":"","contexto":"","restricoes":[],"padrao_problema":"Falha em sistema que afeta a operação da equipe.","status":{"problema":"CONFIRMADO","processo":"DESCONHECIDO","dores":"CONFIRMADO","impactos":"INF
+14:48:57	Informação	------------------------------------------------------------
+14:48:57	Informação	CASO 25/68 | SUÍTE EXISTENTE 05 | TESTAR_GUARDA_IMPACTO_SEMANTICO_V63
+14:48:57	Informação	✅ TESTE 1 — erro de digitação sem consequência mensurável — obtido=INFERIDO — esperado=INFERIDO
+14:48:57	Informação	✅ TESTE 2 — retrabalho sem consequência mensurável — obtido=INFERIDO — esperado=INFERIDO
+14:48:57	Informação	✅ TESTE 3 — pedidos sem consequência mensurável — obtido=INFERIDO — esperado=INFERIDO
+14:48:57	Informação	✅ TESTE 4 — perda de tempo explícita — obtido=CONFIRMADO — esperado=CONFIRMADO
+14:48:57	Informação	✅ TESTE 5 — perda de 3 horas — obtido=CONFIRMADO — esperado=CONFIRMADO
+14:48:57	Informação	✅ TESTE 6 — prejuízo explícito — obtido=CONFIRMADO — esperado=CONFIRMADO
+14:48:57	Informação	✅ TESTE 7 — atraso explícito — obtido=CONFIRMADO — esperado=CONFIRMADO
+14:48:57	Informação	✅ TESTE 8 — custo explícito — obtido=CONFIRMADO — esperado=CONFIRMADO
+14:48:57	Informação	✅ TESTE 9 — volume numérico não é impacto — obtido=INFERIDO — esperado=INFERIDO
+14:48:57	Informação	✅ TESTE 10 — status já inferido permanece inferido — obtido=INFERIDO — esperado=INFERIDO
+14:48:57	Informação	✅ TESTE 11 — status desconhecido permanece desconhecido — obtido=DESCONHECIDO — esperado=DESCONHECIDO
+14:48:57	Informação	✅ TESTE 12 — mensagem vazia não promove impacto — obtido=INFERIDO — esperado=INFERIDO
+14:48:57	Informação	============================================================
+14:48:57	Informação	TESTAR_GUARDA_IMPACTO_SEMANTICO_V63
+14:48:57	Informação	APROVADOS: 12/12
+14:48:57	Informação	FALHAS: 0
+14:48:57	Informação	PERCENTUAL: 100%
+14:48:57	Informação	🏆 TESTAR_GUARDA_IMPACTO_SEMANTICO_V63: PASSOU
+14:48:57	Informação	RESULTADO DO CASO: PASSOU_COM_RETORNO_EXPLICITO | duração=15ms | assertivas=12 | falhas=0
+14:48:57	Informação	DETALHE: captura_logger=true; linhas_diagnosticas=16; assertivas_estimadas=12; falhas_internas_detectadas=0; retorno={"sucesso":true,"aprovados":12,"falhas":0,"percentual":100}
+14:48:57	Informação	------------------------------------------------------------
+14:48:57	Informação	CASO 26/68 | SUÍTE EXISTENTE 06 | TESTAR_ROBUSTEZ_GEMINI_V63
+14:48:57	Informação	============================================================
+14:48:57	Informação	INÍCIO — TESTAR_ROBUSTEZ_GEMINI_V63
+14:48:57	Informação	============================================================
+14:48:57	Informação	✅ TESTE 1/25 — candidates ausente é rejeitado
+14:48:57	Informação	✅ TESTE 2/25 — candidates vazio é rejeitado
+14:48:57	Informação	✅ TESTE 3/25 — content ausente é rejeitado
+14:48:57	Informação	✅ TESTE 4/25 — parts ausente é rejeitado
+14:48:57	Informação	✅ TESTE 5/25 — parts vazio é rejeitado
+14:48:57	Informação	✅ TESTE 6/25 — MAX_TOKENS é rejeitado
+14:48:57	Informação	✅ TESTE 7/25 — texto de uma única parte é extraído
+14:48:57	Informação	✅ TESTE 8/25 — texto de múltiplas partes é concatenado
+14:48:57	Informação	✅ TESTE 9/25 — parte sem texto não quebra a extração
+14:48:57	Informação	✅ TESTE 10/25 — JSON puro de interpretação é aceito
+14:48:57	Informação	✅ TESTE 11/25 — JSON envolvido em bloco markdown é aceito
+14:48:57	Informação	✅ TESTE 12/25 — JSON com espaços externos é aceito
+14:48:57	Informação	✅ TESTE 13/25 — JSON com texto ao redor é recuperado
+14:48:57	Informação	✅ TESTE 14/25 — JSON inválido é rejeitado
+14:48:57	Informação	✅ TESTE 15/25 — resposta vazia é rejeitada
+14:48:57	Informação	✅ TESTE 16/25 — resposta somente com markdown é rejeitada
+14:48:57	Informação	✅ TESTE 17/25 — JSON truncado é rejeitado
+14:48:57	Informação	✅ TESTE 18/25 — JSON com estrutura de array é rejeitado pelo contrato
+14:48:57	Informação	✅ TESTE 19/25 — JSON vazio é rejeitado pelo contrato
+14:48:57	Informação	✅ TESTE 20/25 — JSON válido preserva todos os campos principais
+14:48:57	Informação	✅ TESTE 21/25 — campo ausente não é aceito silenciosamente
+14:48:57	Informação	✅ TESTE 22/25 — campo com tipo inválido não é aceito silenciosamente
+14:48:57	Informação	✅ TESTE 23/25 — campo nulo não é aceito silenciosamente
+14:48:57	Informação	✅ TESTE 24/25 — resposta válida permanece determinística em duas execuções
+14:48:57	Informação	✅ TESTE 25/25 — resposta válida continua compatível com o contrato de diagnóstico
+14:48:57	Informação	============================================================
+14:48:57	Informação	RESULTADO FINAL — ROBUSTEZ GEMINI V6.3
+14:48:57	Informação	============================================================
+14:48:57	Informação	APROVADOS: 25/25
+14:48:57	Informação	FALHAS: 0
+14:48:57	Informação	PERCENTUAL: 100%
+14:48:57	Informação	🏆 TESTAR_ROBUSTEZ_GEMINI_V63: PASSOU
+14:48:57	Informação	============================================================
+14:48:57	Informação	RESULTADO DO CASO: PASSOU_POR_RESUMO_NUMERICO | duração=38ms | assertivas=25 | falhas=0
+14:48:57	Informação	DETALHE: captura_logger=true; linhas_diagnosticas=55; assertivas_estimadas=25; falhas_internas_detectadas=0; retorno={"aprovados":25,"falhas":0,"percentual":100,"passou":true,"resultados":[true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true]}
+14:48:58	Informação	------------------------------------------------------------
+14:48:58	Informação	CASO 27/68 | SUÍTE EXISTENTE 07 | TESTAR_RETRY_HTTP_GEMINI_V63
+14:48:58	Informação	============================================================
+14:48:58	Informação	INÍCIO — TESTAR_RETRY_HTTP_GEMINI_V63
+14:48:58	Informação	============================================================
+14:48:58	Informação	GEMINI - TENTATIVA 1/3
+14:48:58	Informação	HTTP STATUS: 200
+14:48:58	Informação	TEMPO: 0 ms
+14:48:58	Informação	RESPOSTA GEMINI: {"ok":true}
+14:48:58	Informação	✅ TESTE 1/25 — HTTP 200 retorna sucesso
+14:48:58	Informação	✅ TESTE 2/25 — HTTP 200 usa uma única tentativa
+14:48:58	Informação	✅ TESTE 3/25 — HTTP 200 informa tentativas = 1
+14:48:58	Informação	✅ TESTE 4/25 — HTTP 200 preserva status_code
+14:48:58	Informação	✅ TESTE 5/25 — HTTP 200 não executa espera
+14:48:58	Informação	GEMINI - TENTATIVA 1/3
+14:48:58	Informação	HTTP STATUS: 429
+14:48:58	Informação	TEMPO: 0 ms
+14:48:58	Informação	RESPOSTA GEMINI: erro transitório
+14:48:58	Informação	GEMINI - ERRO TRANSITÓRIO HTTP 429. Nova tentativa será realizada.
+14:48:58	Informação	GEMINI - TENTATIVA 2/3
+14:48:58	Informação	HTTP STATUS: 200
+14:48:58	Informação	TEMPO: 0 ms
+14:48:58	Informação	RESPOSTA GEMINI: {"recuperado":true}
+14:48:58	Informação	✅ TESTE 6/25 — HTTP 429 realiza retry e recupera
+14:48:58	Informação	GEMINI - TENTATIVA 1/3
+14:48:58	Informação	HTTP STATUS: 500
+14:48:58	Informação	TEMPO: 0 ms
+14:48:58	Informação	RESPOSTA GEMINI: erro transitório
+14:48:58	Informação	GEMINI - ERRO TRANSITÓRIO HTTP 500. Nova tentativa será realizada.
+14:48:58	Informação	GEMINI - TENTATIVA 2/3
+14:48:58	Informação	HTTP STATUS: 200
+14:48:58	Informação	TEMPO: 0 ms
+14:48:58	Informação	RESPOSTA GEMINI: {"recuperado":true}
+14:48:58	Informação	✅ TESTE 7/25 — HTTP 500 realiza retry e recupera
+14:48:58	Informação	GEMINI - TENTATIVA 1/3
+14:48:58	Informação	HTTP STATUS: 502
+14:48:58	Informação	TEMPO: 0 ms
+14:48:58	Informação	RESPOSTA GEMINI: erro transitório
+14:48:58	Informação	GEMINI - ERRO TRANSITÓRIO HTTP 502. Nova tentativa será realizada.
+14:48:58	Informação	GEMINI - TENTATIVA 2/3
+14:48:58	Informação	HTTP STATUS: 200
+14:48:58	Informação	TEMPO: 0 ms
+14:48:58	Informação	RESPOSTA GEMINI: {"recuperado":true}
+14:48:58	Informação	✅ TESTE 8/25 — HTTP 502 realiza retry e recupera
+14:48:58	Informação	GEMINI - TENTATIVA 1/3
+14:48:58	Informação	HTTP STATUS: 503
+14:48:58	Informação	TEMPO: 0 ms
+14:48:58	Informação	RESPOSTA GEMINI: erro transitório
+14:48:58	Informação	GEMINI - ERRO TRANSITÓRIO HTTP 503. Nova tentativa será realizada.
+14:48:58	Informação	GEMINI - TENTATIVA 2/3
+14:48:58	Informação	HTTP STATUS: 200
+14:48:58	Informação	TEMPO: 0 ms
+14:48:58	Informação	RESPOSTA GEMINI: {"recuperado":true}
+14:48:58	Informação	✅ TESTE 9/25 — HTTP 503 realiza retry e recupera
+14:48:58	Informação	GEMINI - TENTATIVA 1/3
+14:48:58	Informação	HTTP STATUS: 504
+14:48:58	Informação	TEMPO: 0 ms
+14:48:58	Informação	RESPOSTA GEMINI: erro transitório
+14:48:58	Informação	GEMINI - ERRO TRANSITÓRIO HTTP 504. Nova tentativa será realizada.
+14:48:58	Informação	GEMINI - TENTATIVA 2/3
+14:48:58	Informação	HTTP STATUS: 200
+14:48:58	Informação	TEMPO: 0 ms
+14:48:58	Informação	RESPOSTA GEMINI: {"recuperado":true}
+14:48:58	Informação	✅ TESTE 10/25 — HTTP 504 realiza retry e recupera
+14:48:58	Informação	GEMINI - TENTATIVA 1/3
+14:48:58	Informação	HTTP STATUS: 503
+14:48:58	Informação	TEMPO: 0 ms
+14:48:58	Informação	RESPOSTA GEMINI: {}
+14:48:58	Informação	GEMINI - ERRO TRANSITÓRIO HTTP 503. Nova tentativa será realizada.
+14:48:58	Informação	GEMINI - TENTATIVA 2/3
+14:48:58	Informação	HTTP STATUS: 200
+14:48:58	Informação	TEMPO: 0 ms
+14:48:58	Informação	RESPOSTA GEMINI: {"ok":true}
+14:48:58	Informação	✅ TESTE 11/25 — primeiro retry aguarda 1500 ms
+14:48:58	Informação	GEMINI - TENTATIVA 1/3
+14:48:58	Informação	HTTP STATUS: 503
+14:48:58	Informação	TEMPO: 0 ms
+14:48:58	Informação	RESPOSTA GEMINI: {}
+14:48:58	Informação	GEMINI - ERRO TRANSITÓRIO HTTP 503. Nova tentativa será realizada.
+14:48:58	Informação	GEMINI - TENTATIVA 2/3
+14:48:58	Informação	HTTP STATUS: 503
+14:48:58	Informação	TEMPO: 0 ms
+14:48:58	Informação	RESPOSTA GEMINI: {}
+14:48:58	Informação	GEMINI - ERRO TRANSITÓRIO HTTP 503. Nova tentativa será realizada.
+14:48:58	Informação	GEMINI - TENTATIVA 3/3
+14:48:58	Informação	HTTP STATUS: 200
+14:48:58	Informação	TEMPO: 0 ms
+14:48:58	Informação	RESPOSTA GEMINI: {"ok":true}
+14:48:58	Informação	✅ TESTE 12/25 — dois erros transitórios chegam à terceira tentativa
+14:48:58	Informação	✅ TESTE 13/25 — esperas do segundo e terceiro ciclos são 1500 e 3000 ms
+14:48:58	Informação	GEMINI - TENTATIVA 1/3
+14:48:58	Informação	HTTP STATUS: 503
+14:48:58	Informação	TEMPO: 0 ms
+14:48:58	Informação	RESPOSTA GEMINI: {}
+14:48:58	Informação	GEMINI - ERRO TRANSITÓRIO HTTP 503. Nova tentativa será realizada.
+14:48:58	Informação	GEMINI - TENTATIVA 2/3
+14:48:58	Informação	HTTP STATUS: 503
+14:48:58	Informação	TEMPO: 0 ms
+14:48:58	Informação	RESPOSTA GEMINI: {}
+14:48:58	Informação	GEMINI - ERRO TRANSITÓRIO HTTP 503. Nova tentativa será realizada.
+14:48:58	Informação	GEMINI - TENTATIVA 3/3
+14:48:58	Informação	HTTP STATUS: 503
+14:48:58	Informação	TEMPO: 0 ms
+14:48:58	Informação	RESPOSTA GEMINI: {}
+14:48:58	Informação	✅ TESTE 14/25 — três HTTP 503 esgotam as tentativas
+14:48:58	Informação	✅ TESTE 15/25 — erro final informa três tentativas
+14:48:58	Informação	✅ TESTE 16/25 — erro final preserva HTTP 503
+14:48:58	Informação	GEMINI - TENTATIVA 1/3
+14:48:58	Informação	HTTP STATUS: 400
+14:48:58	Informação	TEMPO: 0 ms
+14:48:58	Informação	RESPOSTA GEMINI: erro permanente
+14:48:58	Informação	✅ TESTE 17/25 — HTTP 400 falha sem retry
+14:48:58	Informação	GEMINI - TENTATIVA 1/3
+14:48:58	Informação	HTTP STATUS: 401
+14:48:58	Informação	TEMPO: 0 ms
+14:48:58	Informação	RESPOSTA GEMINI: erro permanente
+14:48:58	Informação	✅ TESTE 18/25 — HTTP 401 falha sem retry
+14:48:58	Informação	GEMINI - TENTATIVA 1/3
+14:48:58	Informação	HTTP STATUS: 403
+14:48:58	Informação	TEMPO: 0 ms
+14:48:58	Informação	RESPOSTA GEMINI: erro permanente
+14:48:58	Informação	✅ TESTE 19/25 — HTTP 403 falha sem retry
+14:48:58	Informação	GEMINI - TENTATIVA 1/3
+14:48:58	Informação	HTTP STATUS: 404
+14:48:58	Informação	TEMPO: 0 ms
+14:48:58	Informação	RESPOSTA GEMINI: erro permanente
+14:48:58	Informação	✅ TESTE 20/25 — HTTP 404 falha sem retry
+14:48:58	Informação	GEMINI - TENTATIVA 1/3
+14:48:58	Informação	GEMINI - ERRO DE TRANSPORTE NA TENTATIVA 1: Error: falha de rede
+14:48:58	Informação	GEMINI - TENTATIVA 2/3
+14:48:58	Informação	HTTP STATUS: 200
+14:48:58	Informação	TEMPO: 1 ms
+14:48:58	Informação	RESPOSTA GEMINI: {"ok":true}
+14:48:58	Informação	✅ TESTE 21/25 — erro de transporte realiza retry e recupera
+14:48:58	Informação	GEMINI - TENTATIVA 1/3
+14:48:58	Informação	GEMINI - ERRO DE TRANSPORTE NA TENTATIVA 1: Error: rede 1
+14:48:58	Informação	GEMINI - TENTATIVA 2/3
+14:48:58	Informação	GEMINI - ERRO DE TRANSPORTE NA TENTATIVA 2: Error: rede 2
+14:48:58	Informação	GEMINI - TENTATIVA 3/3
+14:48:58	Informação	GEMINI - ERRO DE TRANSPORTE NA TENTATIVA 3: Error: rede 3
+14:48:58	Informação	✅ TESTE 22/25 — três erros de transporte esgotam exatamente três tentativas
+14:48:58	Informação	✅ TESTE 23/25 — erro de transporte final informa três tentativas
+14:48:58	Informação	GEMINI - TENTATIVA 1/3
+14:48:58	Informação	HTTP STATUS: 200
+14:48:58	Informação	TEMPO: 0 ms
+14:48:58	Informação	RESPOSTA GEMINI: não é json
+14:48:58	Informação	✅ TESTE 24/25 — HTTP 200 com JSON inválido é rejeitado sem retry
+14:48:58	Informação	GEMINI - TENTATIVA 1/3
+14:48:58	Informação	HTTP STATUS: 429
+14:48:58	Informação	TEMPO: 0 ms
+14:48:58	Informação	RESPOSTA GEMINI: {}
+14:48:58	Informação	GEMINI - ERRO TRANSITÓRIO HTTP 429. Nova tentativa será realizada.
+14:48:58	Informação	GEMINI - TENTATIVA 2/3
+14:48:58	Informação	HTTP STATUS: 500
+14:48:58	Informação	TEMPO: 0 ms
+14:48:58	Informação	RESPOSTA GEMINI: {}
+14:48:58	Informação	GEMINI - ERRO TRANSITÓRIO HTTP 500. Nova tentativa será realizada.
+14:48:58	Informação	GEMINI - TENTATIVA 3/3
+14:48:58	Informação	HTTP STATUS: 200
+14:48:58	Informação	TEMPO: 0 ms
+14:48:58	Informação	RESPOSTA GEMINI: {"fim":"ok"}
+14:48:58	Informação	✅ TESTE 25/25 — sequência de erros transitórios diferentes recupera na terceira tentativa
+14:48:58	Informação	============================================================
+14:48:58	Informação	RESULTADO FINAL — RETRY HTTP GEMINI V6.3
+14:48:58	Informação	============================================================
+14:48:58	Informação	APROVADOS: 25/25
+14:48:58	Informação	FALHAS: 0
+14:48:58	Informação	PERCENTUAL: 100%
+14:48:58	Informação	🏆 TESTAR_RETRY_HTTP_GEMINI_V63: PASSOU
+14:48:58	Informação	============================================================
+14:48:58	Informação	RESULTADO DO CASO: PASSOU_POR_RESUMO_NUMERICO | duração=139ms | assertivas=25 | falhas=0
+14:48:58	Informação	DETALHE: captura_logger=true; linhas_diagnosticas=55; assertivas_estimadas=25; falhas_internas_detectadas=0; retorno={"aprovados":25,"falhas":0,"percentual":100,"passou":true,"resultados":[true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true]}
+14:48:58	Informação	------------------------------------------------------------
+14:48:58	Informação	CASO 28/68 | SUÍTE EXISTENTE 08 | TESTAR_FLUXO_COMPLETO_GEMINI_V63
+14:48:58	Informação	============================================================
+14:48:58	Informação	INÍCIO — TESTAR_FLUXO_COMPLETO_GEMINI_V63
+14:48:58	Informação	============================================================
+14:48:58	Informação	GEMINI - TENTATIVA 1/3
+14:48:58	Informação	HTTP STATUS: 200
+14:48:58	Informação	TEMPO: 0 ms
+14:48:58	Informação	RESPOSTA GEMINI: {"candidates":[{"content":{"parts":[{"text":"RESPOSTA_FINAL"}]}}]}
+14:48:58	Informação	✅ TESTE 1/25 — sucesso HTTP 200 chega ao extrator
+14:48:58	Informação	✅ TESTE 2/25 — fluxo bem-sucedido usa uma tentativa
+14:48:58	Informação	✅ TESTE 3/25 — fluxo preserva status HTTP 200
+14:48:58	Informação	✅ TESTE 4/25 — fluxo preserva tentativas = 1
+14:48:58	Informação	✅ TESTE 5/25 — fluxo marca sucesso
+14:48:58	Informação	GEMINI - TENTATIVA 1/3
+14:48:58	Informação	HTTP STATUS: 503
+14:48:58	Informação	TEMPO: 0 ms
+14:48:58	Informação	RESPOSTA GEMINI: erro
+14:48:58	Informação	GEMINI - ERRO TRANSITÓRIO HTTP 503. Nova tentativa será realizada.
+14:48:58	Informação	GEMINI - TENTATIVA 2/3
+14:48:58	Informação	HTTP STATUS: 200
+14:48:58	Informação	TEMPO: 0 ms
+14:48:58	Informação	RESPOSTA GEMINI: {"candidates":[{"content":{"parts":[{"text":"RECUPERADO_503"}]}}]}
+14:48:58	Informação	✅ TESTE 6/25 — 503 seguido de 200 entrega resposta recuperada
+14:48:58	Informação	✅ TESTE 7/25 — 503 seguido de 200 usa duas tentativas
+14:48:58	Informação	✅ TESTE 8/25 — 503 seguido de 200 informa tentativas = 2
+14:48:58	Informação	GEMINI - TENTATIVA 1/3
+14:48:58	Informação	HTTP STATUS: 429
+14:48:58	Informação	TEMPO: 0 ms
+14:48:58	Informação	RESPOSTA GEMINI: erro
+14:48:58	Informação	GEMINI - ERRO TRANSITÓRIO HTTP 429. Nova tentativa será realizada.
+14:48:58	Informação	GEMINI - TENTATIVA 2/3
+14:48:58	Informação	HTTP STATUS: 500
+14:48:58	Informação	TEMPO: 0 ms
+14:48:58	Informação	RESPOSTA GEMINI: erro
+14:48:58	Informação	GEMINI - ERRO TRANSITÓRIO HTTP 500. Nova tentativa será realizada.
+14:48:58	Informação	GEMINI - TENTATIVA 3/3
+14:48:58	Informação	HTTP STATUS: 200
+14:48:58	Informação	TEMPO: 0 ms
+14:48:58	Informação	RESPOSTA GEMINI: {"candidates":[{"content":{"parts":[{"text":"RECUPERADO_MISTO"}]}}]}
+14:48:58	Informação	✅ TESTE 9/25 — 429 → 500 → 200 entrega resposta recuperada
+14:48:58	Informação	✅ TESTE 10/25 — sequência mista usa três tentativas
+14:48:58	Informação	✅ TESTE 11/25 — sequência mista informa tentativas = 3
+14:48:58	Informação	GEMINI - TENTATIVA 1/3
+14:48:58	Informação	HTTP STATUS: 503
+14:48:58	Informação	TEMPO: 0 ms
+14:48:58	Informação	RESPOSTA GEMINI: erro
+14:48:58	Informação	GEMINI - ERRO TRANSITÓRIO HTTP 503. Nova tentativa será realizada.
+14:48:58	Informação	GEMINI - TENTATIVA 2/3
+14:48:58	Informação	HTTP STATUS: 503
+14:48:58	Informação	TEMPO: 0 ms
+14:48:58	Informação	RESPOSTA GEMINI: erro
+14:48:58	Informação	GEMINI - ERRO TRANSITÓRIO HTTP 503. Nova tentativa será realizada.
+14:48:58	Informação	GEMINI - TENTATIVA 3/3
+14:48:58	Informação	HTTP STATUS: 503
+14:48:58	Informação	TEMPO: 0 ms
+14:48:58	Informação	RESPOSTA GEMINI: erro
+14:48:58	Informação	✅ TESTE 12/25 — três falhas transitórias propagam erro
+14:48:58	Informação	✅ TESTE 13/25 — três falhas transitórias fazem exatamente três chamadas
+14:48:58	Informação	✅ TESTE 14/25 — erro propagado preserva HTTP 503
+14:48:58	Informação	✅ TESTE 15/25 — erro propagado informa tentativas esgotadas
+14:48:58	Informação	GEMINI - TENTATIVA 1/3
+14:48:58	Informação	HTTP STATUS: 400
+14:48:58	Informação	TEMPO: 0 ms
+14:48:58	Informação	RESPOSTA GEMINI: requisição inválida
+14:48:58	Informação	✅ TESTE 16/25 — HTTP 400 propaga erro sem retry
+14:48:58	Informação	✅ TESTE 17/25 — HTTP 400 preserva status no erro
+14:48:58	Informação	GEMINI - TENTATIVA 1/3
+14:48:58	Informação	HTTP STATUS: 200
+14:48:58	Informação	TEMPO: 0 ms
+14:48:58	Informação	RESPOSTA GEMINI: JSON inválido
+14:48:58	Informação	✅ TESTE 18/25 — HTTP 200 com JSON inválido não chega como sucesso
+14:48:58	Informação	✅ TESTE 19/25 — JSON inválido é rejeitado no motor antes da extração
+14:48:58	Informação	GEMINI - TENTATIVA 1/3
+14:48:58	Informação	HTTP STATUS: 200
+14:48:58	Informação	TEMPO: 0 ms
+14:48:58	Informação	RESPOSTA GEMINI: {"candidates":[]}
+14:48:58	Informação	✅ TESTE 20/25 — candidates vazio é rejeitado no extrator
+14:48:58	Informação	✅ TESTE 21/25 — erro de candidates vazio é preservado
+14:48:58	Informação	GEMINI - TENTATIVA 1/3
+14:48:58	Informação	HTTP STATUS: 200
+14:48:58	Informação	TEMPO: 0 ms
+14:48:58	Informação	RESPOSTA GEMINI: {"candidates":[{"content":{"parts":[{"text":"A"},{"text":"B"}]}}]}
+14:48:58	Informação	✅ TESTE 22/25 — múltiplas partes chegam concatenadas
+14:48:58	Informação	GEMINI - TENTATIVA 1/3
+14:48:58	Informação	GEMINI - ERRO DE TRANSPORTE NA TENTATIVA 1: Error: falha de transporte
+14:48:58	Informação	GEMINI - TENTATIVA 2/3
+14:48:58	Informação	HTTP STATUS: 200
+14:48:58	Informação	TEMPO: 0 ms
+14:48:58	Informação	RESPOSTA GEMINI: {"candidates":[{"content":{"parts":[{"text":"TRANSPORTE_RECUPERADO"}]}}]}
+14:48:58	Informação	✅ TESTE 23/25 — falha de transporte seguida de 200 recupera o fluxo
+14:48:58	Informação	✅ TESTE 24/25 — recuperação de transporte usa duas chamadas
+14:48:58	Informação	GEMINI - TENTATIVA 1/3
+14:48:58	Informação	HTTP STATUS: 503
+14:48:58	Informação	TEMPO: 0 ms
+14:48:58	Informação	RESPOSTA GEMINI: erro
+14:48:58	Informação	GEMINI - ERRO TRANSITÓRIO HTTP 503. Nova tentativa será realizada.
+14:48:58	Informação	GEMINI - TENTATIVA 2/3
+14:48:58	Informação	HTTP STATUS: 200
+14:48:58	Informação	TEMPO: 0 ms
+14:48:58	Informação	RESPOSTA GEMINI: {"candidates":[{"content":{"parts":[{}]}}]}
+14:48:58	Informação	✅ TESTE 25/25 — resposta recuperada sem texto utilizável é rejeitada pelo extrator
+14:48:58	Informação	============================================================
+14:48:58	Informação	RESULTADO FINAL — FLUXO COMPLETO GEMINI V6.3
+14:48:58	Informação	============================================================
+14:48:58	Informação	APROVADOS: 25/25
+14:48:58	Informação	FALHAS: 0
+14:48:58	Informação	PERCENTUAL: 100%
+14:48:58	Informação	🏆 TESTAR_FLUXO_COMPLETO_GEMINI_V63: PASSOU
+14:48:58	Informação	============================================================
+14:48:58	Informação	RESULTADO DO CASO: PASSOU_POR_RESUMO_NUMERICO | duração=80ms | assertivas=25 | falhas=0
+14:48:58	Informação	DETALHE: captura_logger=true; linhas_diagnosticas=55; assertivas_estimadas=25; falhas_internas_detectadas=0; retorno={"aprovados":25,"falhas":0,"percentual":100,"passou":true,"resultados":[true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true]}
+14:48:59	Informação	------------------------------------------------------------
+14:48:59	Informação	CASO 29/68 | SUÍTE EXISTENTE 09 | TESTAR_RECONHECIMENTO_SOLUCOES_V63
+14:49:32	Informação	============================================================
+14:49:32	Informação	TESTAR_RECONHECIMENTO_SOLUCOES_V63
+14:49:32	Informação	APROVADOS: 25/25
+14:49:32	Informação	FALHAS: 0
+14:49:32	Informação	PERCENTUAL: 100%
+14:49:32	Informação	✅ TESTE 1 — Tokenização funciona
+14:49:32	Informação	✅ TESTE 2 — Acentos são normalizados
+14:49:32	Informação	✅ TESTE 3 — Palavras duplicadas são removidas
+14:49:32	Informação	✅ TESTE 4 — Similaridade idêntica retorna 100
+14:49:32	Informação	✅ TESTE 5 — Textos diferentes não retornam 100
+14:49:32	Informação	✅ TESTE 6 — Textos sem relação retornam 0
+14:49:32	Informação	✅ TESTE 7 — Arrays semelhantes são comparados
+14:49:32	Informação	✅ TESTE 8 — Resolução perfeita foi persistida
+14:49:32	Informação	✅ TESTE 9 — Comparação perfeita retorna pontuação 100
+14:49:32	Informação	✅ TESTE 10 — Comparação possui todas as dimensões
+14:49:32	Informação	✅ TESTE 11 — Busca relacionada encontra resolução
+14:49:32	Informação	✅ TESTE 12 — Resolução perfeita fica em primeiro lugar
+14:49:32	Informação	✅ TESTE 13 — Busca de validadas retorna apenas VALIDADA
+14:49:32	Informação	✅ TESTE 14 — HIPOTESE nunca é retornada como VALIDADA
+14:49:32	Informação	✅ TESTE 15 — ARQUIVADA não participa da busca
+14:49:32	Informação	✅ TESTE 16 — Resultado classifica múltiplas soluções encontradas
+14:49:32	Informação	✅ TESTE 17 — Classificação mantém a melhor resolução
+14:49:32	Informação	✅ TESTE 18 — Confiança alta para aderência perfeita
+14:49:32	Informação	✅ TESTE 19 — Classificação não altera status da resolução
+14:49:32	Informação	✅ TESTE 20 — Busca respeita limite
+14:49:32	Informação	✅ TESTE 21 — Pontuação sempre fica entre 0 e 100
+14:49:32	Informação	✅ TESTE 22 — Reconhecimento não expõe tecnologia
+14:49:32	Informação	✅ TESTE 23 — Reconhecimento não trata preço
+14:49:32	Informação	✅ TESTE 24 — Nenhuma correspondência para problema totalmente diferente
+14:49:32	Informação	✅ TESTE 25 — Motor é determinístico
+14:49:32	Informação	🏆 TESTAR_RECONHECIMENTO_SOLUCOES_V63: PASSOU
+14:49:32	Informação	🏆 RECONHECIMENTO V6.3: 100%
+14:49:32	Informação	RESULTADO DO CASO: PASSOU_COM_RETORNO_EXPLICITO | duração=32882ms | assertivas=50 | falhas=0
+14:49:32	Informação	DETALHE: captura_logger=true; linhas_diagnosticas=54; assertivas_estimadas=50; falhas_internas_detectadas=0; retorno={"sucesso":true,"aprovados":25,"falhas":0,"percentual":100,"resultados":[{"numero":1,"descricao":"Tokenização funciona","passou":true,"erro":""},{"numero":2,"descricao":"Acentos são normalizados","passou":true,"erro":""},{"numero":3,"descricao":"Palavras duplicadas são removidas","passou":true,"erro":""},{"numero":4,"descricao":"Similaridade idêntica retorna 100","passou":true,"erro":""},{"numero":5,"descricao":"Textos diferentes não retornam 100","passou":true,"erro":""},{"numero":6,"descricao"
+14:49:32	Informação	------------------------------------------------------------
+14:49:32	Informação	CASO 30/68 | SUÍTE EXISTENTE 10 | TESTAR_BIBLIOTECA_RESOLUCOES_V63
+14:49:38	Informação	============================================================
+14:49:38	Informação	TESTAR_BIBLIOTECA_RESOLUCOES_V63
+14:49:38	Informação	APROVADOS: 20/20
+14:49:38	Informação	FALHAS: 0
+14:49:38	Informação	PERCENTUAL: 100%
+14:49:38	Informação	✅ TESTE 1 — Contrato V6.3 disponível
+14:49:38	Informação	✅ TESTE 2 — Status HIPOTESE disponível
+14:49:38	Informação	✅ TESTE 3 — Status VALIDADA disponível
+14:49:38	Informação	✅ TESTE 4 — Status SUPERADA disponível
+14:49:38	Informação	✅ TESTE 5 — Normalização de status
+14:49:38	Informação	✅ TESTE 6 — Status inválido retorna HIPOTESE
+14:49:38	Informação	✅ TESTE 7 — Normalização de confiança
+14:49:38	Informação	✅ TESTE 8 — Serialização estruturada
+14:49:38	Informação	✅ TESTE 9 — Desserialização estruturada
+14:49:38	Informação	✅ TESTE 10 — Criação de resolução
+14:49:38	Informação	✅ TESTE 11 — Resolução criada pode ser recuperada
+14:49:38	Informação	✅ TESTE 12 — Dados estruturados são recuperados como arrays
+14:49:38	Informação	✅ TESTE 13 — HIPOTESE não é considerada validada
+14:49:38	Informação	✅ TESTE 14 — Hipótese não pode ser validada sem evidências
+14:49:38	Informação	✅ TESTE 15 — Hipótese pode ser atualizada
+14:49:38	Informação	✅ TESTE 16 — Validação exige evidência
+14:49:38	Informação	✅ TESTE 17 — Resolução validada é reconhecida como validada
+14:49:38	Informação	✅ TESTE 18 — Busca somente validadas funciona
+14:49:38	Informação	✅ TESTE 19 — Resolução pode ser marcada como SUPERADA
+14:49:38	Informação	✅ TESTE 20 — SUPERADA não é considerada validada
+14:49:38	Informação	🏆 TESTAR_BIBLIOTECA_RESOLUCOES_V63: PASSOU
+14:49:38	Informação	🏆 BIBLIOTECA V6.3: 100%
+14:49:38	Informação	RESULTADO DO CASO: PASSOU_COM_RETORNO_EXPLICITO | duração=5787ms | assertivas=40 | falhas=0
+14:49:38	Informação	DETALHE: captura_logger=true; linhas_diagnosticas=44; assertivas_estimadas=40; falhas_internas_detectadas=0; retorno={"sucesso":true,"aprovados":20,"falhas":0,"percentual":100,"resultados":[{"numero":1,"descricao":"Contrato V6.3 disponível","passou":true,"erro":""},{"numero":2,"descricao":"Status HIPOTESE disponível","passou":true,"erro":""},{"numero":3,"descricao":"Status VALIDADA disponível","passou":true,"erro":""},{"numero":4,"descricao":"Status SUPERADA disponível","passou":true,"erro":""},{"numero":5,"descricao":"Normalização de status","passou":true,"erro":""},{"numero":6,"descricao":"Status inválido re
+14:49:38	Informação	------------------------------------------------------------
+14:49:38	Informação	CASO 31/68 | SUÍTE EXISTENTE 11 | TESTAR_FALSO_POSITIVO_SEMANTICO_V63
+14:49:38	Informação	============================================================
+14:49:38	Informação	INÍCIO — TESTAR_FALSO_POSITIVO_SEMANTICO_V63
+14:49:38	Informação	============================================================
+14:49:38	Informação	✅ TESTE 1/25 — investigação atual foi criada
+14:49:38	Informação	✅ TESTE 2/25 — problema atual contém pedidos
+14:49:38	Informação	✅ TESTE 3/25 — processo atual contém lançamento de pedidos
+14:49:40	Informação	✅ TESTE 4/25 — solução diferente foi criada
+14:49:40	Informação	✅ TESTE 5/25 — solução diferente está VALIDADA
+14:49:40	Informação	✅ TESTE 6/25 — solução possui ID próprio
+14:49:40	Informação	✅ TESTE 7/25 — comparação foi produzida
+14:49:40	Informação	✅ TESTE 8/25 — pontuação é numérica
+14:49:40	Informação	✅ TESTE 9/25 — pontuação permanece entre 0 e 100
+14:49:40	Informação	✅ TESTE 10/25 — dimensão de problema não é perfeita
+14:49:40	Informação	✅ TESTE 11/25 — dimensão de processo não é perfeita
+14:49:40	Informação	✅ TESTE 12/25 — pontuação global não atinge o limiar de solução
+14:49:41	Informação	✅ TESTE 13/25 — busca relacionada executou
+14:49:41	Informação	✅ TESTE 14/25 — solução de estoque não aparece como correspondência forte
+14:49:41	Informação	✅ TESTE 15/25 — nenhuma correspondência incompatível foi aceita acima de 80
+14:49:41	Informação	✅ TESTE 16/25 — classificação do reconhecimento foi produzida
+14:49:41	Informação	✅ TESTE 17/25 — solução incompatível não vira SOLUCAO_ENCONTRADA por si só
+14:49:41	Informação	✅ TESTE 18/25 — decisão foi produzida
+14:49:41	Informação	✅ TESTE 19/25 — decisão não escolhe a solução de estoque
+14:49:41	Informação	✅ TESTE 20/25 — solução de estoque não é tratada como validada para este caso
+14:49:41	Informação	✅ TESTE 21/25 — resposta segura foi produzida
+14:49:41	Informação	✅ TESTE 22/25 — resposta não afirma que encontrou a solução de estoque
+14:49:41	Informação	✅ TESTE 23/25 — resposta não expõe tecnologia ou preço
+14:49:41	Informação	✅ TESTE 24/25 — resposta final passa pelo filtro de segurança
+14:49:41	Informação	✅ TESTE 25/25 — falso positivo não altera o fluxo para solução validada
+14:49:41	Informação	LIMPEZA FALSO POSITIVO V6.3: CONCLUÍDA
+14:49:41	Informação	============================================================
+14:49:41	Informação	RESULTADO FINAL — FALSO POSITIVO SEMÂNTICO V6.3
+14:49:41	Informação	============================================================
+14:49:41	Informação	APROVADOS: 25/25
+14:49:41	Informação	FALHAS: 0
+14:49:41	Informação	PERCENTUAL: 100%
+14:49:41	Informação	🏆 TESTAR_FALSO_POSITIVO_SEMANTICO_V63: PASSOU
+14:49:41	Informação	🏆 FALSO POSITIVO SEMÂNTICO V6.3: 100%
+14:49:41	Informação	============================================================
+14:49:41	Informação	RESULTADO DO CASO: PASSOU_COM_RETORNO_EXPLICITO | duração=3023ms | assertivas=50 | falhas=0
+14:49:41	Informação	DETALHE: captura_logger=true; linhas_diagnosticas=55; assertivas_estimadas=50; falhas_internas_detectadas=0; retorno={"sucesso":true,"aprovados":25,"falhas":0,"percentual":100,"resultados":[{"numero":1,"descricao":"investigação atual foi criada","passou":true},{"numero":2,"descricao":"problema atual contém pedidos","passou":true},{"numero":3,"descricao":"processo atual contém lançamento de pedidos","passou":true},{"numero":4,"descricao":"solução diferente foi criada","passou":true},{"numero":5,"descricao":"solução diferente está VALIDADA","passou":true},{"numero":6,"descricao":"solução possui ID próprio","pass
+14:49:42	Informação	------------------------------------------------------------
+14:49:42	Informação	CASO 32/68 | SUÍTE EXISTENTE 12 | TESTAR_RANKING_SOLUCOES_COMPATIVEIS_V63
+14:49:42	Informação	============================================================
+14:49:42	Informação	INÍCIO — TESTAR_RANKING_SOLUCOES_COMPATIVEIS_V63
+14:49:42	Informação	============================================================
+14:49:42	Informação	✅ TESTE 1/25 — investigação do caso foi criada
+14:49:42	Informação	✅ TESTE 2/25 — problema central está definido
+14:49:42	Informação	✅ TESTE 3/25 — processo está definido
+14:49:44	Informação	✅ TESTE 4/25 — solução específica foi persistida
+14:49:44	Informação	✅ TESTE 5/25 — solução administrativa foi persistida
+14:49:44	Informação	✅ TESTE 6/25 — solução específica está VALIDADA
+14:49:44	Informação	✅ TESTE 7/25 — solução administrativa está VALIDADA
+14:49:44	Informação	✅ TESTE 8/25 — comparação da solução específica foi produzida
+14:49:44	Informação	✅ TESTE 9/25 — comparação da solução administrativa foi produzida
+14:49:44	Informação	✅ TESTE 10/25 — pontuação específica é numérica
+14:49:44	Informação	✅ TESTE 11/25 — pontuação administrativa é numérica
+14:49:44	Informação	✅ TESTE 12/25 — solução específica possui maior aderência
+14:49:45	Informação	✅ TESTE 13/25 — busca relacionada executou
+14:49:45	Informação	✅ TESTE 14/25 — solução específica foi reconhecida
+14:49:45	Informação	✅ TESTE 15/25 — solução administrativa foi reconhecida
+14:49:45	Informação	✅ TESTE 16/25 — as duas soluções permanecem disponíveis
+14:49:45	Informação	✅ TESTE 17/25 — solução específica aparece antes da administrativa
+14:49:45	Informação	✅ TESTE 18/25 — pontuação retornada da específica é maior
+14:49:45	Informação	✅ TESTE 19/25 — ambas permanecem VALIDADA
+14:49:45	Informação	✅ TESTE 20/25 — classificação identifica múltiplas soluções
+14:49:45	Informação	✅ TESTE 21/25 — melhor solução preservada é a específica
+14:49:45	Informação	✅ TESTE 22/25 — decisão foi produzida com múltiplas soluções
+14:49:45	Informação	✅ TESTE 23/25 — decisão preserva a solução de maior aderência
+14:49:45	Informação	✅ TESTE 24/25 — decisão preserva as duas soluções validadas
+14:49:45	Informação	✅ TESTE 25/25 — resultado permanece sem tecnologia, preço ou negociação
+14:49:45	Informação	LIMPEZA RANKING V6.3: CONCLUÍDA
+14:49:45	Informação	============================================================
+14:49:45	Informação	RESULTADO FINAL — RANKING DE SOLUÇÕES COMPATÍVEIS V6.3
+14:49:45	Informação	============================================================
+14:49:45	Informação	APROVADOS: 25/25
+14:49:45	Informação	FALHAS: 0
+14:49:45	Informação	PERCENTUAL: 100%
+14:49:45	Informação	🏆 TESTAR_RANKING_SOLUCOES_COMPATIVEIS_V63: PASSOU
+14:49:45	Informação	🏆 RANKING DE SOLUÇÕES COMPATÍVEIS V6.3: 100%
+14:49:45	Informação	============================================================
+14:49:45	Informação	RESULTADO DO CASO: PASSOU_COM_RETORNO_EXPLICITO | duração=3694ms | assertivas=50 | falhas=0
+14:49:45	Informação	DETALHE: captura_logger=true; linhas_diagnosticas=55; assertivas_estimadas=50; falhas_internas_detectadas=0; retorno={"sucesso":true,"aprovados":25,"falhas":0,"percentual":100,"resultados":[{"numero":1,"descricao":"investigação do caso foi criada","passou":true},{"numero":2,"descricao":"problema central está definido","passou":true},{"numero":3,"descricao":"processo está definido","passou":true},{"numero":4,"descricao":"solução específica foi persistida","passou":true},{"numero":5,"descricao":"solução administrativa foi persistida","passou":true},{"numero":6,"descricao":"solução específica está VALIDADA","pass
+14:49:46	Informação	------------------------------------------------------------
+14:49:46	Informação	CASO 33/68 | SUÍTE EXISTENTE 13 | TESTAR_RECONHECIMENTO_POR_PARAFRASE_V63
+14:49:46	Informação	============================================================
+14:49:46	Informação	INÍCIO — TESTAR_RECONHECIMENTO_POR_PARAFRASE_V63
+14:49:46	Informação	============================================================
+14:49:46	Informação	✅ TESTE 1/25 — investigação por paráfrase foi criada
+14:49:46	Informação	✅ TESTE 2/25 — problema está presente
+14:49:46	Informação	✅ TESTE 3/25 — processo está presente
+14:49:48	Informação	✅ TESTE 4/25 — solução foi persistida
+14:49:48	Informação	✅ TESTE 5/25 — solução está VALIDADA
+14:49:48	Informação	✅ TESTE 6/25 — solução possui ID
+14:49:48	Informação	✅ TESTE 7/25 — comparação foi produzida
+14:49:48	Informação	✅ TESTE 8/25 — pontuação é numérica
+14:49:48	Informação	✅ TESTE 9/25 — pontuação está entre 0 e 100
+14:49:48	Informação	✅ TESTE 10/25 — problema não depende de texto idêntico
+14:49:48	Informação	✅ TESTE 11/25 — processo não depende de texto idêntico
+14:49:48	Informação	✅ TESTE 12/25 — há alguma aderência entre os casos
+14:49:50	Informação	✅ TESTE 13/25 — busca relacionada executou
+14:49:50	Informação	✅ TESTE 14/25 — solução validada foi reconhecida
+14:49:50	Informação	✅ TESTE 15/25 — resultado reconhecido mantém VALIDADA
+14:49:50	Informação	✅ TESTE 16/25 — pontuação do reconhecimento é preservada
+14:49:50	Informação	✅ TESTE 17/25 — reconhecimento não exige igualdade literal do problema
+14:49:50	Informação	✅ TESTE 18/25 — reconhecimento não exige igualdade literal do processo
+14:49:50	Informação	✅ TESTE 19/25 — classificação foi produzida
+14:49:50	Informação	✅ TESTE 20/25 — solução validada reconhecida não vira hipótese
+14:49:50	Informação	✅ TESTE 21/25 — decisão foi produzida
+14:49:50	Informação	✅ TESTE 22/25 — decisão preserva a solução reconhecida
+14:49:50	Informação	✅ TESTE 23/25 — decisão não expõe tecnologia ou preço
+14:49:50	Informação	✅ TESTE 24/25 — resposta segura foi produzida
+14:49:50	Informação	✅ TESTE 25/25 — resposta final passa pelo filtro de segurança
+14:49:50	Informação	LIMPEZA PARÁFRASE V6.3: CONCLUÍDA
+14:49:50	Informação	============================================================
+14:49:50	Informação	RESULTADO FINAL — RECONHECIMENTO POR PARÁFRASE V6.3
+14:49:50	Informação	============================================================
+14:49:50	Informação	APROVADOS: 25/25
+14:49:50	Informação	FALHAS: 0
+14:49:50	Informação	PERCENTUAL: 100%
+14:49:50	Informação	🏆 TESTAR_RECONHECIMENTO_POR_PARAFRASE_V63: PASSOU
+14:49:50	Informação	🏆 RECONHECIMENTO POR PARÁFRASE V6.3: 100%
+14:49:50	Informação	============================================================
+14:49:50	Informação	RESULTADO DO CASO: PASSOU_COM_RETORNO_EXPLICITO | duração=4218ms | assertivas=50 | falhas=0
+14:49:50	Informação	DETALHE: captura_logger=true; linhas_diagnosticas=55; assertivas_estimadas=50; falhas_internas_detectadas=0; retorno={"sucesso":true,"aprovados":25,"falhas":0,"percentual":100,"resultados":[{"numero":1,"descricao":"investigação por paráfrase foi criada","passou":true},{"numero":2,"descricao":"problema está presente","passou":true},{"numero":3,"descricao":"processo está presente","passou":true},{"numero":4,"descricao":"solução foi persistida","passou":true},{"numero":5,"descricao":"solução está VALIDADA","passou":true},{"numero":6,"descricao":"solução possui ID","passou":true},{"numero":7,"descricao":"comparaçã
+14:49:50	Informação	------------------------------------------------------------
+14:49:50	Informação	CASO 34/68 | SUÍTE EXISTENTE 14 | TESTAR_EMPATE_SOLUCOES_V63
+14:49:50	Informação	============================================================
+14:49:50	Informação	INÍCIO — TESTAR_EMPATE_SOLUCOES_V63
+14:49:50	Informação	============================================================
+14:49:50	Informação	✅ TESTE 1/25 — investigação foi criada
+14:49:50	Informação	✅ TESTE 2/25 — problema está definido
+14:49:50	Informação	✅ TESTE 3/25 — processo está definido
+14:49:53	Informação	✅ TESTE 4/25 — solução A foi persistida
+14:49:53	Informação	✅ TESTE 5/25 — solução B foi persistida
+14:49:53	Informação	✅ TESTE 6/25 — solução A está VALIDADA
+14:49:53	Informação	✅ TESTE 7/25 — solução B está VALIDADA
+14:49:53	Informação	✅ TESTE 8/25 — comparação A foi produzida
+14:49:53	Informação	✅ TESTE 9/25 — comparação B foi produzida
+14:49:53	Informação	✅ TESTE 10/25 — pontuação A é numérica
+14:49:53	Informação	✅ TESTE 11/25 — pontuação B é numérica
+14:49:53	Informação	✅ TESTE 12/25 — as pontuações são iguais
+14:49:54	Informação	✅ TESTE 13/25 — busca relacionada executou
+14:49:54	Informação	✅ TESTE 14/25 — solução A foi reconhecida
+14:49:54	Informação	✅ TESTE 15/25 — solução B foi reconhecida
+14:49:54	Informação	✅ TESTE 16/25 — as duas soluções permanecem disponíveis
+14:49:54	Informação	✅ TESTE 17/25 — as duas soluções permanecem VALIDADA
+14:49:54	Informação	✅ TESTE 18/25 — as pontuações retornadas permanecem empatadas
+14:49:54	Informação	✅ TESTE 19/25 — classificação foi produzida
+14:49:54	Informação	✅ TESTE 20/25 — classificação identifica múltiplas soluções
+14:49:54	Informação	✅ TESTE 21/25 — decisão foi produzida
+14:49:54	Informação	✅ TESTE 22/25 — decisão não descarta as duas soluções validadas
+14:49:54	Informação	✅ TESTE 23/25 — decisão preserva a classificação de múltiplas soluções
+14:49:54	Informação	✅ TESTE 24/25 — resposta segura foi produzida
+14:49:54	Informação	✅ TESTE 25/25 — resposta final passa pelo filtro de segurança
+14:49:55	Informação	LIMPEZA EMPATE V6.3: CONCLUÍDA
+14:49:55	Informação	============================================================
+14:49:55	Informação	RESULTADO FINAL — EMPATE ENTRE SOLUÇÕES V6.3
+14:49:55	Informação	============================================================
+14:49:55	Informação	APROVADOS: 25/25
+14:49:55	Informação	FALHAS: 0
+14:49:55	Informação	PERCENTUAL: 100%
+14:49:55	Informação	🏆 TESTAR_EMPATE_SOLUCOES_V63: PASSOU
+14:49:55	Informação	🏆 EMPATE ENTRE SOLUÇÕES V6.3: 100%
+14:49:55	Informação	============================================================
+14:49:55	Informação	RESULTADO DO CASO: PASSOU_COM_RETORNO_EXPLICITO | duração=4351ms | assertivas=50 | falhas=0
+14:49:55	Informação	DETALHE: captura_logger=true; linhas_diagnosticas=55; assertivas_estimadas=50; falhas_internas_detectadas=0; retorno={"sucesso":true,"aprovados":25,"falhas":0,"percentual":100,"resultados":[{"numero":1,"descricao":"investigação foi criada","passou":true},{"numero":2,"descricao":"problema está definido","passou":true},{"numero":3,"descricao":"processo está definido","passou":true},{"numero":4,"descricao":"solução A foi persistida","passou":true},{"numero":5,"descricao":"solução B foi persistida","passou":true},{"numero":6,"descricao":"solução A está VALIDADA","passou":true},{"numero":7,"descricao":"solução B es
+14:49:55	Informação	------------------------------------------------------------
+14:49:55	Informação	CASO 35/68 | SUÍTE EXISTENTE 15 | TESTAR_SOLUCAO_PARCIALMENTE_COMPATIVEL_V63
+14:49:55	Informação	============================================================
+14:49:55	Informação	INÍCIO — TESTAR_SOLUCAO_PARCIALMENTE_COMPATIVEL_V63
+14:49:55	Informação	============================================================
+14:49:55	Informação	✅ TESTE 1/25 — investigação foi criada
+14:49:55	Informação	✅ TESTE 2/25 — problema está definido
+14:49:55	Informação	✅ TESTE 3/25 — processo está definido
+14:49:56	Informação	✅ TESTE 4/25 — solução parcial foi persistida
+14:49:56	Informação	✅ TESTE 5/25 — solução parcial mantém status VALIDADA
+14:49:56	Informação	✅ TESTE 6/25 — solução parcial possui identificador
+14:49:57	Informação	✅ TESTE 7/25 — comparação semântica foi produzida
+14:49:57	Informação	✅ TESTE 8/25 — pontuação da solução é numérica
+14:49:57	Informação	✅ TESTE 9/25 — pontuação permanece no intervalo válido
+14:49:57	Informação	✅ TESTE 10/25 — solução parcial não obtém pontuação perfeita
+14:49:58	Informação	✅ TESTE 11/25 — busca relacionada executou
+14:49:58	Informação	✅ TESTE 12/25 — solução parcialmente relacionada pode ser medida
+14:49:58	Informação	✅ TESTE 13/25 — pontuação retornada coincide com a comparação
+14:49:58	Informação	✅ TESTE 14/25 — solução permanece VALIDADA na biblioteca
+14:49:58	Informação	✅ TESTE 15/25 — classificação foi produzida
+14:49:58	Informação	✅ TESTE 16/25 — resultado permite identificar se a solução atingiu o limiar
+14:49:58	Informação	✅ TESTE 17/25 — classificação não promove solução inexistente
+14:49:58	Informação	✅ TESTE 18/25 — decisão foi produzida
+14:49:58	Informação	✅ TESTE 19/25 — decisão preserva a classificação efetivamente calculada
+14:49:58	Informação	✅ TESTE 20/25 — decisão não inventa resolução principal quando não há candidato
+14:49:58	Informação	✅ TESTE 21/25 — resposta segura foi produzida
+14:49:58	Informação	✅ TESTE 22/25 — resposta não expõe tecnologia
+14:49:58	Informação	✅ TESTE 23/25 — resposta não expõe preço ou negociação
+14:49:58	Informação	✅ TESTE 24/25 — resposta final passa pelo filtro de segurança
+14:49:58	Informação	✅ TESTE 25/25 — resultado permanece determinístico e coerente com a classificação
+14:49:58	Informação	LIMPEZA PARCIAL V6.3: CONCLUÍDA
+14:49:58	Informação	============================================================
+14:49:58	Informação	RESULTADO FINAL — SOLUÇÃO PARCIALMENTE COMPATÍVEL V6.3
+14:49:58	Informação	============================================================
+14:49:58	Informação	APROVADOS: 25/25
+14:49:58	Informação	FALHAS: 0
+14:49:58	Informação	PERCENTUAL: 100%
+14:49:58	Informação	🏆 TESTAR_SOLUCAO_PARCIALMENTE_COMPATIVEL_V63: PASSOU
+14:49:58	Informação	🏆 SOLUÇÃO PARCIALMENTE COMPATÍVEL V6.3: 100%
+14:49:58	Informação	============================================================
+14:49:58	Informação	RESULTADO DO CASO: PASSOU_COM_RETORNO_EXPLICITO | duração=3172ms | assertivas=50 | falhas=0
+14:49:58	Informação	DETALHE: captura_logger=true; linhas_diagnosticas=55; assertivas_estimadas=50; falhas_internas_detectadas=0; retorno={"sucesso":true,"aprovados":25,"falhas":0,"percentual":100,"resultados":[{"numero":1,"descricao":"investigação foi criada","passou":true},{"numero":2,"descricao":"problema está definido","passou":true},{"numero":3,"descricao":"processo está definido","passou":true},{"numero":4,"descricao":"solução parcial foi persistida","passou":true},{"numero":5,"descricao":"solução parcial mantém status VALIDADA","passou":true},{"numero":6,"descricao":"solução parcial possui identificador","passou":true},{"nu
+14:49:58	Informação	------------------------------------------------------------
+14:49:58	Informação	CASO 36/68 | SUÍTE EXISTENTE 16 | TESTAR_RUIDO_NO_CATALOGO_V63
+14:49:58	Informação	============================================================
+14:49:58	Informação	INÍCIO — TESTAR_RUIDO_NO_CATALOGO_V63
+14:49:58	Informação	============================================================
+14:49:58	Informação	✅ TESTE 1/25 — investigação foi criada
+14:49:58	Informação	✅ TESTE 2/25 — problema está definido
+14:49:58	Informação	✅ TESTE 3/25 — processo está definido
+14:50:01	Informação	✅ TESTE 4/25 — solução correta foi persistida
+14:50:01	Informação	✅ TESTE 5/25 — solução parcial foi persistida
+14:50:01	Informação	✅ TESTE 6/25 — solução incompatível foi persistida
+14:50:01	Informação	✅ TESTE 7/25 — as três soluções permanecem VALIDADA na biblioteca
+14:50:02	Informação	✅ TESTE 8/25 — comparação da solução correta foi produzida
+14:50:02	Informação	✅ TESTE 9/25 — comparação da solução parcial foi produzida
+14:50:02	Informação	✅ TESTE 10/25 — comparação do ruído foi produzida
+14:50:02	Informação	✅ TESTE 11/25 — solução correta supera a parcial
+14:50:02	Informação	✅ TESTE 12/25 — solução correta supera o ruído
+14:50:03	Informação	✅ TESTE 13/25 — busca relacionada executou
+14:50:03	Informação	✅ TESTE 14/25 — solução correta foi reconhecida
+14:50:03	Informação	✅ TESTE 15/25 — solução correta aparece antes da parcial
+14:50:03	Informação	✅ TESTE 16/25 — solução correta mantém pontuação superior ao ruído quando ambos são retornados
+14:50:03	Informação	✅ TESTE 17/25 — ruído não supera a solução correta
+14:50:03	Informação	✅ TESTE 18/25 — classificação foi produzida
+14:50:03	Informação	✅ TESTE 19/25 — decisão foi produzida
+14:50:03	Informação	✅ TESTE 20/25 — solução principal é a correta
+14:50:03	Informação	✅ TESTE 21/25 — decisão preserva a classificação calculada
+14:50:03	Informação	✅ TESTE 22/25 — resposta segura foi produzida
+14:50:03	Informação	✅ TESTE 23/25 — resposta não expõe tecnologia
+14:50:03	Informação	✅ TESTE 24/25 — resposta não expõe preço ou negociação
+14:50:03	Informação	✅ TESTE 25/25 — resposta final passa pelo filtro de segurança
+14:50:04	Informação	LIMPEZA RUÍDO V6.3: CONCLUÍDA
+14:50:04	Informação	============================================================
+14:50:04	Informação	RESULTADO FINAL — RUÍDO NO CATÁLOGO V6.3
+14:50:04	Informação	============================================================
+14:50:04	Informação	APROVADOS: 25/25
+14:50:04	Informação	FALHAS: 0
+14:50:04	Informação	PERCENTUAL: 100%
+14:50:04	Informação	🏆 TESTAR_RUIDO_NO_CATALOGO_V63: PASSOU
+14:50:04	Informação	🏆 RUÍDO NO CATÁLOGO V6.3: 100%
+14:50:04	Informação	============================================================
+14:50:04	Informação	RESULTADO DO CASO: PASSOU_COM_RETORNO_EXPLICITO | duração=5466ms | assertivas=50 | falhas=0
+14:50:04	Informação	DETALHE: captura_logger=true; linhas_diagnosticas=55; assertivas_estimadas=50; falhas_internas_detectadas=0; retorno={"sucesso":true,"aprovados":25,"falhas":0,"percentual":100,"resultados":[{"numero":1,"descricao":"investigação foi criada","passou":true},{"numero":2,"descricao":"problema está definido","passou":true},{"numero":3,"descricao":"processo está definido","passou":true},{"numero":4,"descricao":"solução correta foi persistida","passou":true},{"numero":5,"descricao":"solução parcial foi persistida","passou":true},{"numero":6,"descricao":"solução incompatível foi persistida","passou":true},{"numero":7,"
+14:50:04	Informação	------------------------------------------------------------
+14:50:04	Informação	CASO 37/68 | SUÍTE EXISTENTE 17 | TESTAR_CATALOGO_COM_MULTIPLAS_SOLUCOES_V63
+14:50:04	Informação	============================================================
+14:50:04	Informação	INÍCIO — TESTAR_CATALOGO_COM_MULTIPLAS_SOLUCOES_V63
+14:50:04	Informação	============================================================
+14:50:04	Informação	✅ TESTE 1/25 — investigação foi criada
+14:50:04	Informação	✅ TESTE 2/25 — problema está definido
+14:50:04	Informação	✅ TESTE 3/25 — processo está definido
+14:50:04	Informação	✅ TESTE 4/25 — catálogo contém exatamente 20 soluções temporárias
+14:50:17	Informação	✅ TESTE 5/25 — 20 soluções foram persistidas
+14:50:17	Informação	✅ TESTE 6/25 — todos os IDs temporários são únicos
+14:50:21	Informação	✅ TESTE 7/25 — 20 soluções podem ser recuperadas
+14:50:21	Informação	✅ TESTE 8/25 — solução correta permanece VALIDADA
+14:50:26	Informação	✅ TESTE 9/25 — busca relacionada executou sobre o catálogo ampliado
+14:50:26	Informação	✅ TESTE 10/25 — solução correta foi reconhecida no catálogo ampliado
+14:50:26	Informação	✅ TESTE 11/25 — solução correta é o primeiro resultado do ranking
+14:50:26	Informação	✅ TESTE 12/25 — pontuação da solução correta é 100
+14:50:26	Informação	✅ TESTE 13/25 — HIPOTESE não é promovida automaticamente a VALIDADA
+14:50:26	Informação	✅ TESTE 14/25 — EM_ANALISE permanece identificada como EM_ANALISE
+14:50:26	Informação	✅ TESTE 15/25 — SUPERADA permanece identificada como SUPERADA
+14:50:26	Informação	✅ TESTE 16/25 — ARQUIVADA é excluída da busca relacionada
+14:50:31	Informação	✅ TESTE 17/25 — busca somente validadas executou
+14:50:31	Informação	✅ TESTE 18/25 — solução correta está entre as validadas relacionadas
+14:50:31	Informação	✅ TESTE 19/25 — estados não validados não aparecem na lista de validadas
+14:50:31	Informação	✅ TESTE 20/25 — classificação foi produzida
+14:50:31	Informação	✅ TESTE 21/25 — decisão foi produzida
+14:50:31	Informação	✅ TESTE 22/25 — solução principal permanece a correta
+14:50:31	Informação	✅ TESTE 23/25 — resposta segura foi produzida
+14:50:31	Informação	✅ TESTE 24/25 — resposta não expõe tecnologia, preço ou negociação
+14:50:31	Informação	✅ TESTE 25/25 — resposta final passa pelo filtro de segurança
+14:50:36	Informação	LIMPEZA CATÁLOGO 20 V6.3: CONCLUÍDA
+14:50:36	Informação	============================================================
+14:50:36	Informação	RESULTADO FINAL — CATÁLOGO COM MÚLTIPLAS SOLUÇÕES V6.3
+14:50:36	Informação	============================================================
+14:50:36	Informação	APROVADOS: 25/25
+14:50:36	Informação	FALHAS: 0
+14:50:36	Informação	PERCENTUAL: 100%
+14:50:36	Informação	🏆 TESTAR_CATALOGO_COM_MULTIPLAS_SOLUCOES_V63: PASSOU
+14:50:36	Informação	🏆 CATÁLOGO COM MÚLTIPLAS SOLUÇÕES V6.3: 100%
+14:50:36	Informação	============================================================
+14:50:36	Informação	RESULTADO DO CASO: PASSOU_COM_RETORNO_EXPLICITO | duração=31696ms | assertivas=50 | falhas=0
+14:50:36	Informação	DETALHE: captura_logger=true; linhas_diagnosticas=55; assertivas_estimadas=50; falhas_internas_detectadas=0; retorno={"sucesso":true,"aprovados":25,"falhas":0,"percentual":100,"resultados":[{"numero":1,"descricao":"investigação foi criada","passou":true},{"numero":2,"descricao":"problema está definido","passou":true},{"numero":3,"descricao":"processo está definido","passou":true},{"numero":4,"descricao":"catálogo contém exatamente 20 soluções temporárias","passou":true},{"numero":5,"descricao":"20 soluções foram persistidas","passou":true},{"numero":6,"descricao":"todos os IDs temporários são únicos","passou":
+14:50:36	Informação	------------------------------------------------------------
+14:50:36	Informação	CASO 38/68 | SUÍTE EXISTENTE 18 | TESTAR_ESCALA_SEMELHANCA_ESTABILIDADE_V63
+14:50:36	Informação	============================================================
+14:50:36	Informação	INÍCIO — TESTAR_ESCALA_SEMELHANCA_ESTABILIDADE_V63
+14:50:36	Informação	============================================================
+14:50:36	Informação	✅ TESTE 1/25 — investigação de referência foi criada
+14:50:36	Informação	✅ TESTE 2/25 — problema de referência está definido
+14:50:36	Informação	✅ TESTE 3/25 — processo de referência está definido
+14:50:36	Informação	✅ TESTE 4/25 — catálogo contém exatamente 30 soluções temporárias
+14:50:54	Informação	✅ TESTE 5/25 — 30 soluções foram persistidas
+14:50:54	Informação	✅ TESTE 6/25 — todos os 30 IDs temporários são únicos
+14:51:01	Informação	✅ TESTE 7/25 — as 30 soluções podem ser recuperadas
+14:51:01	Informação	✅ TESTE 8/25 — a solução de referência permanece VALIDADA
+14:51:43	Informação	✅ TESTE 9/25 — cinco rodadas independentes de busca foram executadas
+14:51:43	Informação	✅ TESTE 10/25 — a solução de referência foi encontrada
+14:51:43	Informação	✅ TESTE 11/25 — a solução de referência permanece em primeiro lugar
+14:51:43	Informação	✅ TESTE 12/25 — a solução de referência mantém pontuação 100
+14:51:43	Informação	✅ TESTE 13/25 — há soluções semanticamente próximas reconhecidas
+14:51:43	Informação	✅ TESTE 14/25 — nenhuma solução próxima supera a referência
+14:51:43	Informação	✅ TESTE 15/25 — o ranking produz pontuações numéricas para as próximas
+14:51:43	Informação	✅ TESTE 16/25 — as cinco rodadas mantêm a mesma ordem do ranking
+14:51:52	Informação	✅ TESTE 17/25 — busca exclusiva por validadas funciona em escala
+14:51:52	Informação	✅ TESTE 18/25 — a solução de referência está entre as validadas
+14:51:52	Informação	✅ TESTE 19/25 — todos os resultados validados possuem status VALIDADA
+14:51:52	Informação	✅ TESTE 20/25 — classificação foi produzida sobre o catálogo ampliado
+14:51:52	Informação	✅ TESTE 21/25 — decisão foi produzida sobre o ranking ampliado
+14:51:52	Informação	✅ TESTE 22/25 — a solução principal continua sendo a referência
+14:51:52	Informação	✅ TESTE 23/25 — resposta segura foi produzida após o teste de escala
+14:51:52	Informação	✅ TESTE 24/25 — resposta final não expõe tecnologia, preço ou negociação
+14:51:52	Informação	✅ TESTE 25/25 — resposta final passa pelo filtro de segurança
+14:52:00	Informação	LIMPEZA ESCALA V6.3: CONCLUÍDA
+14:52:00	Informação	============================================================
+14:52:00	Informação	RESULTADO FINAL — ESCALA + SEMELHANÇA + ESTABILIDADE V6.3
+14:52:00	Informação	============================================================
+14:52:00	Informação	APROVADOS: 25/25
+14:52:00	Informação	FALHAS: 0
+14:52:00	Informação	PERCENTUAL: 100%
+14:52:00	Informação	🏆 TESTAR_ESCALA_SEMELHANCA_ESTABILIDADE_V63: PASSOU
+14:52:00	Informação	🏆 ESCALA + SEMELHANÇA + ESTABILIDADE V6.3: 100%
+14:52:00	Informação	============================================================
+14:52:00	Informação	RESULTADO DO CASO: PASSOU_COM_RETORNO_EXPLICITO | duração=83146ms | assertivas=50 | falhas=0
+14:52:00	Informação	DETALHE: captura_logger=true; linhas_diagnosticas=55; assertivas_estimadas=50; falhas_internas_detectadas=0; retorno={"sucesso":true,"aprovados":25,"falhas":0,"percentual":100,"resultados":[{"numero":1,"descricao":"investigação de referência foi criada","passou":true},{"numero":2,"descricao":"problema de referência está definido","passou":true},{"numero":3,"descricao":"processo de referência está definido","passou":true},{"numero":4,"descricao":"catálogo contém exatamente 30 soluções temporárias","passou":true},{"numero":5,"descricao":"30 soluções foram persistidas","passou":true},{"numero":6,"descricao":"todo
+14:52:00	Informação	------------------------------------------------------------
+14:52:00	Informação	CASO 39/68 | SUÍTE EXISTENTE 19 | TESTAR_CONCORRENCIA_SOLUCOES_QUASE_IDENTICAS_V63
+14:52:00	Informação	============================================================
+14:52:00	Informação	INÍCIO — TESTAR_CONCORRENCIA_SOLUCOES_QUASE_IDENTICAS_V63
+14:52:00	Informação	============================================================
+14:52:00	Informação	✅ TESTE 1/25 — investigação foi criada
+14:52:00	Informação	✅ TESTE 2/25 — problema está definido
+14:52:00	Informação	✅ TESTE 3/25 — processo está definido
+14:52:00	Informação	✅ TESTE 4/25 — catálogo contém 10 concorrentes temporários
+14:52:06	Informação	✅ TESTE 5/25 — 10 soluções foram persistidas
+14:52:06	Informação	✅ TESTE 6/25 — todos os IDs são únicos
+14:52:08	Informação	✅ TESTE 7/25 — todas as soluções podem ser recuperadas
+14:52:13	Informação	✅ TESTE 8/25 — todas as comparações foram produzidas
+14:52:13	Informação	✅ TESTE 9/25 — a referência exata recebe pontuação 100
+14:52:13	Informação	✅ TESTE 10/25 — existem pelo menos 5 concorrentes semanticamente próximos
+14:52:13	Informação	✅ TESTE 11/25 — todos os concorrentes próximos possuem pontuação válida
+14:52:13	Informação	✅ TESTE 12/25 — nenhum concorrente próximo supera a referência
+14:52:16	Informação	✅ TESTE 13/25 — ranking principal foi produzido
+14:52:16	Informação	✅ TESTE 14/25 — a referência ocupa o primeiro lugar
+14:52:16	Informação	✅ TESTE 15/25 — os concorrentes próximos podem ser reconhecidos sem substituir a referência
+14:52:22	Informação	✅ TESTE 16/25 — três rankings consecutivos mantêm a mesma ordem
+14:52:25	Informação	✅ TESTE 17/25 — busca exclusiva por validadas retorna candidatos
+14:52:25	Informação	✅ TESTE 18/25 — a referência continua entre as validadas
+14:52:25	Informação	✅ TESTE 19/25 — todos os candidatos validados possuem status VALIDADA
+14:52:25	Informação	✅ TESTE 20/25 — classificação reconhece múltiplas soluções quando aplicável
+14:52:25	Informação	✅ TESTE 21/25 — decisão foi produzida
+14:52:25	Informação	✅ TESTE 22/25 — decisão mantém a referência como solução principal
+14:52:25	Informação	✅ TESTE 23/25 — resposta segura foi produzida
+14:52:25	Informação	✅ TESTE 24/25 — resposta não expõe tecnologia, preço ou negociação
+14:52:25	Informação	✅ TESTE 25/25 — resposta final passa pelo filtro de segurança
+14:52:27	Informação	LIMPEZA CONCORRÊNCIA V6.3: CONCLUÍDA
+14:52:27	Informação	============================================================
+14:52:27	Informação	RESULTADO FINAL — CONCORRÊNCIA QUASE IDÊNTICA V6.3
+14:52:27	Informação	============================================================
+14:52:27	Informação	APROVADOS: 25/25
+14:52:27	Informação	FALHAS: 0
+14:52:27	Informação	PERCENTUAL: 100%
+14:52:27	Informação	🏆 TESTAR_CONCORRENCIA_SOLUCOES_QUASE_IDENTICAS_V63: PASSOU
+14:52:27	Informação	🏆 CONCORRÊNCIA DE SOLUÇÕES QUASE IDÊNTICAS V6.3: 100%
+14:52:27	Informação	============================================================
+14:52:27	Informação	RESULTADO DO CASO: PASSOU_COM_RETORNO_EXPLICITO | duração=26882ms | assertivas=50 | falhas=0
+14:52:27	Informação	DETALHE: captura_logger=true; linhas_diagnosticas=55; assertivas_estimadas=50; falhas_internas_detectadas=0; retorno={"sucesso":true,"aprovados":25,"falhas":0,"percentual":100,"resultados":[{"numero":1,"descricao":"investigação foi criada","passou":true},{"numero":2,"descricao":"problema está definido","passou":true},{"numero":3,"descricao":"processo está definido","passou":true},{"numero":4,"descricao":"catálogo contém 10 concorrentes temporários","passou":true},{"numero":5,"descricao":"10 soluções foram persistidas","passou":true},{"numero":6,"descricao":"todos os IDs são únicos","passou":true},{"numero":7,"
+14:52:28	Informação	============================================================
+14:52:28	Informação	FIM DO LOTE | executados=39 | cursor=39/68 | duração=229319ms
+14:52:28	Informação	CONTINUE executando TESTAR_DIAGNOSTICO_PROFUNDO_V63_CONTINUAR().
+14:52:27	Notificação	Execução concluída
