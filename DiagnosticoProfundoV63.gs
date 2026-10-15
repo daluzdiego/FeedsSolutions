@@ -183,6 +183,20 @@ function TESTAR_DIAGNOSTICO_PROFUNDO_V63_FULL_STATUS() {
   } catch (e) {
     gatilhos = [{ erro: FEEDS_PROFUNDO_V63_textoErro_(e) }];
   }
+  var resultadosFalhos = [];
+  var resultadosSemVerificacao = [];
+  var resultadosLentos = [];
+  for (var i = 1; i <= casos.length; i++) {
+    var brutoResultado = props.getProperty(FEEDS_PROFUNDO_V63_PREFIXO_ + 'RESULTADO_' + i);
+    if (!brutoResultado) continue;
+    try {
+      var item = JSON.parse(brutoResultado);
+      if (item.status === 'FALHOU' || item.status === 'FUNCAO_AUSENTE') resultadosFalhos.push(item);
+      if (item.status === 'EXECUTOU_SEM_EXCECAO_NAO_VERIFICADO') resultadosSemVerificacao.push(item);
+      if (Number(item.duracao_ms || 0) >= 30000) resultadosLentos.push(item);
+    } catch (e) {}
+  }
+  resultadosLentos.sort(function(a, b) { return Number(b.duracao_ms || 0) - Number(a.duracao_ms || 0); });
   var status = {
     run_id: runId,
     cursor: cursor,
@@ -191,6 +205,9 @@ function TESTAR_DIAGNOSTICO_PROFUNDO_V63_FULL_STATUS() {
     status: props.getProperty(FEEDS_PROFUNDO_V63_PREFIXO_ + 'FULL_STATUS') || 'NAO_INICIADO',
     erro: props.getProperty(FEEDS_PROFUNDO_V63_PREFIXO_ + 'FULL_ERRO') || '',
     resumo_final: resumo,
+    casos_falhos_detalhados: resultadosFalhos,
+    casos_sem_verificacao_detalhados: resultadosSemVerificacao,
+    casos_mais_lentos: resultadosLentos.slice(0, 10),
     gatilhos_pendentes: gatilhos
   };
   Logger.log('STATUS FULL — DIAGNÓSTICO PROFUNDO V6.3');
