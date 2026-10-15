@@ -103,6 +103,8 @@ function TESTAR_DIAGNOSTICO_PROFUNDO_V63_FULL() {
  * Se houver exceção fatal, registra o erro e interrompe para não criar loop infinito.
  */
 function TESTAR_DIAGNOSTICO_PROFUNDO_V63_FULL_CONTINUAR_AUTO() {
+  // Remove o gatilho já disparado para permitir criar o próximo lote.
+  FEEDS_PROFUNDO_V63_removerGatilhosFull_();
   var props = PropertiesService.getScriptProperties();
   var lock = LockService.getScriptLock();
   if (!lock.tryLock(5000)) {
