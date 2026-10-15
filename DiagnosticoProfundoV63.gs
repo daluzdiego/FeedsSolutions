@@ -27,7 +27,9 @@
 
 var FEEDS_PROFUNDO_V63_PREFIXO_ = 'FEEDS_PROFUNDO_V63_';
 var FEEDS_PROFUNDO_V63_ABA_ = 'RELATORIO_TESTE_PROFUNDO_V63';
-var FEEDS_PROFUNDO_V63_LIMITE_MS_ = 210000;
+var FEEDS_PROFUNDO_V63_LIMITE_MS_ = 165000;
+// Reserva tempo para persistir e registrar o lote antes do limite do Apps Script.
+var FEEDS_PROFUNDO_V63_RESERVA_LOTE_MS_ = 25000;
 
 function TESTAR_DIAGNOSTICO_PROFUNDO_V63_RESETAR() {
   var props = PropertiesService.getScriptProperties();
@@ -39,6 +41,8 @@ function TESTAR_DIAGNOSTICO_PROFUNDO_V63_RESETAR() {
   });
 
   // Cada rodada recebe um relatório novo. Não apaga histórico anterior.
+  // A suíte profunda executa testes legados caros; manter lotes curtos evita timeout.
+  // O limite do lote é menor que o tempo máximo da plataforma para permitir gravação final.
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var runId = Utilities.getUuid();
   var nomeAba = FEEDS_PROFUNDO_V63_ABA_ + '_' + runId.slice(0, 8);
@@ -94,7 +98,7 @@ function TESTAR_DIAGNOSTICO_PROFUNDO_V63_CONTINUAR() {
   Logger.log('Limite conservador do lote: ' + FEEDS_PROFUNDO_V63_LIMITE_MS_ + ' ms');
   Logger.log('============================================================');
 
-  while (cursor < casos.length && (Date.now() - inicioLote) < FEEDS_PROFUNDO_V63_LIMITE_MS_) {
+  while (cursor < casos.length && (Date.now() - inicioLote) < (FEEDS_PROFUNDO_V63_LIMITE_MS_ - FEEDS_PROFUNDO_V63_RESERVA_LOTE_MS_)) {
     var caso = casos[cursor];
     var inicioCaso = Date.now();
     var resultado;
