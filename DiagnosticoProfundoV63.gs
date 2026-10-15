@@ -171,15 +171,31 @@ function TESTAR_DIAGNOSTICO_PROFUNDO_V63_FULL_STATUS() {
   var bruto = props.getProperty(FEEDS_PROFUNDO_V63_PREFIXO_ + 'RESUMO_FINAL');
   var resumo = null;
   try { resumo = bruto ? JSON.parse(bruto) : null; } catch (e) {}
-  return {
+  var gatilhos = [];
+  try {
+    gatilhos = ScriptApp.getProjectTriggers()
+      .filter(function(t) {
+        return t.getHandlerFunction() === 'TESTAR_DIAGNOSTICO_PROFUNDO_V63_FULL_CONTINUAR_AUTO';
+      })
+      .map(function(t) {
+        return { handler: t.getHandlerFunction(), event_type: String(t.getEventType()) };
+      });
+  } catch (e) {
+    gatilhos = [{ erro: FEEDS_PROFUNDO_V63_textoErro_(e) }];
+  }
+  var status = {
     run_id: runId,
     cursor: cursor,
     total: casos.length,
     progresso_percentual: Math.round(cursor / Math.max(1, casos.length) * 100),
     status: props.getProperty(FEEDS_PROFUNDO_V63_PREFIXO_ + 'FULL_STATUS') || 'NAO_INICIADO',
     erro: props.getProperty(FEEDS_PROFUNDO_V63_PREFIXO_ + 'FULL_ERRO') || '',
-    resumo_final: resumo
+    resumo_final: resumo,
+    gatilhos_pendentes: gatilhos
   };
+  Logger.log('STATUS FULL — DIAGNÓSTICO PROFUNDO V6.3');
+  Logger.log(JSON.stringify(status, null, 2));
+  return status;
 }
 
 function TESTAR_DIAGNOSTICO_PROFUNDO_V63_CONTINUAR() {
