@@ -509,17 +509,34 @@ function FEEDS_PROFUNDO_V63_executarLegado_(caso) {
     Array.isArray(retorno.resultados) ? retorno.resultados : [];
   var evidenciasAssertivas = linhasAssertivas.slice();
 
+  function resultadoRetornoPassou_(item) {
+    if (typeof item === 'boolean') return item;
+    if (!item || typeof item !== 'object') return false;
+    return item.passou === true && !item.erro;
+  }
+
+  var quantidadeFalhasRetorno = resultadosRetorno.filter(function(item) {
+    return !resultadoRetornoPassou_(item);
+  }).length;
+
   if (resultadosRetorno.length) {
     evidenciasAssertivas = linhasAssertivas.filter(function(linha) {
       return !FEEDS_PROFUNDO_V63_ehLinhaTesteDuplicada_(linha);
     });
     resultadosRetorno.forEach(function(item, indice) {
-      var passou = item && item.passou === true && !item.erro;
+      var passou = resultadoRetornoPassou_(item);
+      var numero = item && typeof item === 'object' && item.numero
+        ? item.numero
+        : indice + 1;
+      var descricao = item && typeof item === 'object' && item.descricao
+        ? item.descricao
+        : (typeof item === 'boolean' ? 'assertiva booleana retornada' : 'resultado retornado');
+      var erro = item && typeof item === 'object' ? item.erro : '';
       evidenciasAssertivas.push(
         (passou ? '✅ ASSERTIVA RETORNO: ' : '❌ ASSERTIVA RETORNO: ') +
-        'teste=' + (item && (item.numero || indice + 1)) +
-        ' | descrição=' + String(item && item.descricao || '') +
-        ' | erro=' + String(item && item.erro || '')
+        'teste=' + numero +
+        ' | descrição=' + String(descricao) +
+        ' | erro=' + String(erro || '')
       );
     });
   }
@@ -528,15 +545,18 @@ function FEEDS_PROFUNDO_V63_executarLegado_(caso) {
   var falhasInternas = 0;
   evidenciasAssertivas.forEach(function(linha) {
     if (/(?:✅|PASSOU\s*[-:])/i.test(linha) && /TESTE|ASSERTIVA|PASSOU\s*[-:]/i.test(linha)) assertivas++;
-    if (/(?:❌\s*TESTE|ASSERTIVA FALHOU|TESTAR_[A-Z0-9_]+:\s*FALHOU|FALHAS(?: FUNCIONAIS)?:\s*[1-9]\d*|FALHOU\s*[-:])/i.test(linha)) falhasInternas++;
+    if (/(?:❌\s*TESTE|❌\s*ASSERTIVA|ASSERTIVA FALHOU|TESTAR_[A-Z0-9_]+:\s*FALHOU|FALHAS(?: FUNCIONAIS)?:\s*[1-9]\d*|FALHOU\s*[-:])/i.test(linha)) falhasInternas++;
   });
 
   var retornoFalha = retorno === false ||
     (retorno && typeof retorno === 'object' &&
-      (retorno.sucesso === false || retorno.success === false || retorno.aprovado === false));
+      (retorno.sucesso === false || retorno.success === false || retorno.aprovado === false ||
+       retorno.passou === false || Number(retorno.falhas || 0) > 0)) ||
+    quantidadeFalhasRetorno > 0;
   var retornoSucesso = retorno === true ||
     (retorno && typeof retorno === 'object' &&
-      (retorno.sucesso === true || retorno.success === true || retorno.aprovado === true));
+      (retorno.sucesso === true || retorno.success === true || retorno.aprovado === true ||
+       (retorno.passou === true && Number(retorno.falhas || 0) === 0)));
 
   // Lê também os resumos numéricos. Isso detecta, por exemplo,
   // 24/25 mesmo se o teste não lançar exceção nem imprimir ❌.
