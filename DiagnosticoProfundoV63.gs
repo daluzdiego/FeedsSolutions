@@ -558,6 +558,16 @@ function FEEDS_PROFUNDO_V63_executarLegado_(caso) {
     if (/(?:❌\s*TESTE|❌\s*ASSERTIVA|ASSERTIVA FALHOU|TESTAR_[A-Z0-9_]+:\s*FALHOU|FALHAS(?: FUNCIONAIS)?:\s*[1-9]\d*|FALHOU\s*[-:])/i.test(linha)) falhasInternas++;
   });
 
+  // As suítes mais antigas podem retornar resultados: [true, false, ...]
+  // sem nomes nem logs por assertiva. Contamos esses booleanos diretamente
+  // no retorno, sem depender de padrões do Logger.
+  if (resultadosRetorno.length && resultadosRetorno.every(function(item) {
+    return typeof item === 'boolean';
+  })) {
+    assertivas = resultadosRetorno.length;
+    falhasInternas = Math.max(falhasInternas, quantidadeFalhasRetorno);
+  }
+
   var retornoFalha = retorno === false ||
     (retorno && typeof retorno === 'object' &&
       (retorno.sucesso === false || retorno.success === false || retorno.aprovado === false ||
