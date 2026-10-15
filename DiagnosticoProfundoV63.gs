@@ -196,6 +196,16 @@ function FEEDS_PROFUNDO_V63_montarCasos_() {
 function FEEDS_PROFUNDO_V63_casosDeterministicos_() {
   return [
     {
+      tipo: 'deterministico', grupo: 'DIAGNÓSTICO DO TESTADOR', nome: 'Leitura de resultados booleanos e estruturados não cria falso negativo',
+      fn: function(ctx) {
+        FEEDS_PROFUNDO_V63_assert_(ctx, 'boolean true representa aprovação', FEEDS_PROFUNDO_V63_itemResultadoPassou_(true) === true, 'valor=true');
+        FEEDS_PROFUNDO_V63_assert_(ctx, 'boolean false representa reprovação', FEEDS_PROFUNDO_V63_itemResultadoPassou_(false) === false, 'valor=false');
+        FEEDS_PROFUNDO_V63_assert_(ctx, 'objeto passou=true sem erro representa aprovação', FEEDS_PROFUNDO_V63_itemResultadoPassou_({passou:true, erro:''}) === true, 'formato={passou:true}');
+        FEEDS_PROFUNDO_V63_assert_(ctx, 'objeto passou=false representa reprovação', FEEDS_PROFUNDO_V63_itemResultadoPassou_({passou:false}) === false, 'formato={passou:false}');
+        FEEDS_PROFUNDO_V63_assert_(ctx, 'objeto com erro não representa aprovação', FEEDS_PROFUNDO_V63_itemResultadoPassou_({passou:true, erro:'falhou validação'}) === false, 'formato={passou:true, erro:...}');
+      }
+    },
+    {
       tipo: 'deterministico', grupo: 'DIAGNÓSTICO DO TESTADOR', nome: 'Deduplicação reconhece os formatos reais de log sem filtrar assertivas distintas',
       fn: function(ctx) {
         FEEDS_PROFUNDO_V63_assert_(ctx, 'reconhece teste numerado como 1/25', FEEDS_PROFUNDO_V63_ehLinhaTesteDuplicada_('✅ TESTE 1/25 — catálogo foi persistido'), 'formato=TESTE 1/25');
@@ -450,6 +460,12 @@ function FEEDS_PROFUNDO_V63_assert_(ctx, nome, condicao, detalhe) {
   });
 }
 
+function FEEDS_PROFUNDO_V63_itemResultadoPassou_(item) {
+  if (typeof item === 'boolean') return item;
+  if (!item || typeof item !== 'object') return false;
+  return item.passou === true && !item.erro;
+}
+
 function FEEDS_PROFUNDO_V63_ehLinhaTesteDuplicada_(linha) {
   return /^(?:✅|❌)\s*TESTE\s+\d+(?:\s*\/\s*\d+)?\s*[—-]/i
     .test(String(linha || '').trim());
@@ -509,14 +525,8 @@ function FEEDS_PROFUNDO_V63_executarLegado_(caso) {
     Array.isArray(retorno.resultados) ? retorno.resultados : [];
   var evidenciasAssertivas = linhasAssertivas.slice();
 
-  function resultadoRetornoPassou_(item) {
-    if (typeof item === 'boolean') return item;
-    if (!item || typeof item !== 'object') return false;
-    return item.passou === true && !item.erro;
-  }
-
   var quantidadeFalhasRetorno = resultadosRetorno.filter(function(item) {
-    return !resultadoRetornoPassou_(item);
+    return !FEEDS_PROFUNDO_V63_itemResultadoPassou_(item);
   }).length;
 
   if (resultadosRetorno.length) {
@@ -524,7 +534,7 @@ function FEEDS_PROFUNDO_V63_executarLegado_(caso) {
       return !FEEDS_PROFUNDO_V63_ehLinhaTesteDuplicada_(linha);
     });
     resultadosRetorno.forEach(function(item, indice) {
-      var passou = resultadoRetornoPassou_(item);
+      var passou = FEEDS_PROFUNDO_V63_itemResultadoPassou_(item);
       var numero = item && typeof item === 'object' && item.numero
         ? item.numero
         : indice + 1;
