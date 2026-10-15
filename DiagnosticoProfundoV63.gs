@@ -27,7 +27,7 @@
 
 var FEEDS_PROFUNDO_V63_PREFIXO_ = 'FEEDS_PROFUNDO_V63_';
 var FEEDS_PROFUNDO_V63_ABA_ = 'RELATORIO_TESTE_PROFUNDO_V63';
-var FEEDS_PROFUNDO_V63_LIMITE_MS_ = 165000;
+var FEEDS_PROFUNDO_V63_LIMITE_MS_ = 90000;
 // Reserva tempo para persistir e registrar o lote antes do limite do Apps Script.
 var FEEDS_PROFUNDO_V63_RESERVA_LOTE_MS_ = 25000;
 
@@ -75,6 +75,109 @@ function TESTAR_DIAGNOSTICO_PROFUNDO_V63_RESETAR() {
   Logger.log('Próximo passo: execute TESTAR_DIAGNOSTICO_PROFUNDO_V63_CONTINUAR().');
   Logger.log('============================================================');
   return { sucesso: true, run_id: runId, proximo: 'TESTAR_DIAGNOSTICO_PROFUNDO_V63_CONTINUAR' };
+}
+
+/**
+ * EXECUÇÃO FULL AUTOMÁTICA
+ *
+ * Inicie esta função uma única vez no Apps Script.
+ * Ela reinicia a rodada e processa os 70 casos em lotes sucessivos,
+ * usando gatilhos temporizados para continuar sem intervenção manual.
+ * Cada caso conserva resultado/duração e o resumo final fica em ScriptProperties
+ * e na aba exclusiva do relatório.
+ */
+function TESTAR_DIAGNOSTICO_PROFUNDO_V63_FULL() {
+  FEEDS_PROFUNDO_V63_removerGatilhosFull_();
+  var inicio = TESTAR_DIAGNOSTICO_PROFUNDO_V63_RESETAR();
+  var resultado = TESTAR_DIAGNOSTICO_PROFUNDO_V63_FULL_CONTINUAR_AUTO();
+  return {
+    iniciado: true,
+    run_id: inicio.run_id,
+    primeiro_lote: resultado,
+    observacao: 'A execução continuará automaticamente por gatilhos até os 70 casos ou até uma falha fatal.'
+  };
+}
+
+/**
+ * Processa um lote e agenda exatamente uma continuação quando necessário.
+ * Se houver exceção fatal, registra o erro e interrompe para não criar loop infinito.
+ */
+function TESTAR_DIAGNOSTICO_PROFUNDO_V63_FULL_CONTINUAR_AUTO() {
+  var props = PropertiesService.getScriptProperties();
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(5000)) {
+    FEEDS_PROFUNDO_V63_agendarContinuacaoFull_();
+    return { concluido: false, motivo: 'Outra execução está ativa; continuação agendada.' };
+  }
+
+  var resultado;
+  try {
+    resultado = TESTAR_DIAGNOSTICO_PROFUNDO_V63_CONTINUAR();
+    if (resultado && resultado.concluido === true) {
+      props.setProperty(FEEDS_PROFUNDO_V63_PREFIXO_ + 'FULL_STATUS', 'CONCLUIDO');
+      FEEDS_PROFUNDO_V63_removerGatilhosFull_();
+      Logger.log('FULL FINALIZADO: ' + JSON.stringify(resultado));
+      return resultado;
+    }
+
+    if (resultado && Number(resultado.cursor) < Number(resultado.total)) {
+      props.setProperty(FEEDS_PROFUNDO_V63_PREFIXO_ + 'FULL_STATUS', 'EM_ANDAMENTO');
+      FEEDS_PROFUNDO_V63_agendarContinuacaoFull_();
+      Logger.log('FULL: continuação automática agendada; progresso=' +
+        resultado.cursor + '/' + resultado.total);
+    }
+    return resultado;
+  } catch (erro) {
+    props.setProperty(FEEDS_PROFUNDO_V63_PREFIXO_ + 'FULL_STATUS', 'ERRO_FATAL');
+    props.setProperty(FEEDS_PROFUNDO_V63_PREFIXO_ + 'FULL_ERRO', FEEDS_PROFUNDO_V63_textoErro_(erro));
+    FEEDS_PROFUNDO_V63_removerGatilhosFull_();
+    Logger.log('FULL INTERROMPIDO POR ERRO FATAL: ' + FEEDS_PROFUNDO_V63_textoErro_(erro));
+    throw erro;
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function FEEDS_PROFUNDO_V63_agendarContinuacaoFull_() {
+  var props = PropertiesService.getScriptProperties();
+  var gatilhos = ScriptApp.getProjectTriggers().filter(function(t) {
+    return t.getHandlerFunction() === 'TESTAR_DIAGNOSTICO_PROFUNDO_V63_FULL_CONTINUAR_AUTO';
+  });
+  if (!gatilhos.length) {
+    ScriptApp.newTrigger('TESTAR_DIAGNOSTICO_PROFUNDO_V63_FULL_CONTINUAR_AUTO')
+      .timeBased()
+      .after(60 * 1000)
+      .create();
+  }
+  props.setProperty(FEEDS_PROFUNDO_V63_PREFIXO_ + 'FULL_STATUS', 'AGUARDANDO_CONTINUACAO');
+}
+
+function FEEDS_PROFUNDO_V63_removerGatilhosFull_() {
+  ScriptApp.getProjectTriggers().forEach(function(t) {
+    if (t.getHandlerFunction() === 'TESTAR_DIAGNOSTICO_PROFUNDO_V63_FULL_CONTINUAR_AUTO') {
+      ScriptApp.deleteTrigger(t);
+    }
+  });
+}
+
+/** Consulta o estado da última execução FULL sem reiniciar os testes. */
+function TESTAR_DIAGNOSTICO_PROFUNDO_V63_FULL_STATUS() {
+  var props = PropertiesService.getScriptProperties();
+  var runId = props.getProperty(FEEDS_PROFUNDO_V63_PREFIXO_ + 'RUN_ID');
+  var cursor = Number(props.getProperty(FEEDS_PROFUNDO_V63_PREFIXO_ + 'CURSOR') || 0);
+  var casos = FEEDS_PROFUNDO_V63_montarCasos_();
+  var bruto = props.getProperty(FEEDS_PROFUNDO_V63_PREFIXO_ + 'RESUMO_FINAL');
+  var resumo = null;
+  try { resumo = bruto ? JSON.parse(bruto) : null; } catch (e) {}
+  return {
+    run_id: runId,
+    cursor: cursor,
+    total: casos.length,
+    progresso_percentual: Math.round(cursor / Math.max(1, casos.length) * 100),
+    status: props.getProperty(FEEDS_PROFUNDO_V63_PREFIXO_ + 'FULL_STATUS') || 'NAO_INICIADO',
+    erro: props.getProperty(FEEDS_PROFUNDO_V63_PREFIXO_ + 'FULL_ERRO') || '',
+    resumo_final: resumo
+  };
 }
 
 function TESTAR_DIAGNOSTICO_PROFUNDO_V63_CONTINUAR() {
