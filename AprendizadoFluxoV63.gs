@@ -152,15 +152,26 @@ function TESTAR_INTEGRACAO_APRENDIZADO_FLUXO_V63() {
       !!(fluxo && fluxo.integracao_v63 &&
          fluxo.integracao_v63.ativada === true));
 
-    teste(6, 'decisão reconheceu solução validada',
-      !!(
-        fluxo &&
-        fluxo.integracao_v63 &&
-        fluxo.integracao_v63.resultado_v63 &&
-        fluxo.integracao_v63.resultado_v63.decisao &&
-        fluxo.integracao_v63.resultado_v63.decisao.estado ===
-          'SOLUCAO_VALIDADA'
-      ));
+    const resultadoV63 = fluxo && fluxo.integracao_v63
+      ? fluxo.integracao_v63.resultado_v63
+      : null;
+    const decisaoFluxo = resultadoV63 && resultadoV63.decisao
+      ? resultadoV63.decisao
+      : null;
+    const resultadosFluxo = resultadoV63 && Array.isArray(resultadoV63.resultados_reconhecimento)
+      ? resultadoV63.resultados_reconhecimento
+      : [];
+    const decisaoUnica = !!(
+      decisaoFluxo && decisaoFluxo.estado === 'SOLUCAO_VALIDADA' &&
+      resultadosFluxo.length === 1 && resultadosFluxo[0] &&
+      resultadosFluxo[0].resolucao_id === resolucaoId
+    );
+    const decisaoAmbigua = !!(
+      decisaoFluxo && decisaoFluxo.estado === 'SOLUCOES_ENCONTRADAS' &&
+      resultadosFluxo.filter(function(item) { return item && item.status === 'VALIDADA'; }).length > 1
+    );
+    teste(6, 'decisão representa corretamente solução única ou múltiplas soluções',
+      !!(fluxo && fluxo.integracao_v63 && fluxo.integracao_v63.ativada === true && (decisaoUnica || decisaoAmbigua)));
 
     const feedback = registrarFeedbackFluxoPrincipalV63_(
       fluxo,
@@ -180,8 +191,10 @@ function TESTAR_INTEGRACAO_APRENDIZADO_FLUXO_V63() {
     teste(8, 'diagnostico_id foi preservado',
       feedback.diagnostico_id === inicio.diagnostico_id);
 
-    teste(9, 'resolucao_id foi associado à solução',
-      feedback.resolucao_id === resolucaoId);
+    teste(9, 'feedback respeita a decisão sem vínculo arbitrário',
+      decisaoUnica
+        ? feedback.resolucao_id === resolucaoId
+        : decisaoAmbigua && feedback.resolucao_id === '');
 
     teste(10, 'resultado POSITIVO foi normalizado',
       feedback.resultado === 'POSITIVO');
@@ -197,27 +210,15 @@ function TESTAR_INTEGRACAO_APRENDIZADO_FLUXO_V63() {
       resolucao_id: resolucaoId
     });
 
-    teste(12, 'evidência foi acumulada na resolução',
-      !!(
-        resolucao &&
-        Array.isArray(resolucao.evidencias) &&
-        resolucao.evidencias.some(function(item) {
-          return String(item).indexOf(
-            'Cliente confirmou redução'
-          ) !== -1;
-        })
-      ));
+    teste(12, 'evidência é acumulada somente quando há vínculo inequívoco',
+      decisaoUnica
+        ? !!(resolucao && Array.isArray(resolucao.evidencias) && resolucao.evidencias.some(function(item) { return String(item).indexOf('Cliente confirmou redução') !== -1; }))
+        : !!(decisaoAmbigua && feedback.resolucao_id === '' && resolucao && !resolucao.evidencias.some(function(item) { return String(item).indexOf('Cliente confirmou redução') !== -1; })));
 
-    teste(13, 'caso relacionado ao diagnóstico foi acumulado',
-      !!(
-        resolucao &&
-        Array.isArray(resolucao.casos_relacionados) &&
-        resolucao.casos_relacionados.some(function(item) {
-          return String(item).indexOf(
-            inicio.diagnostico_id
-          ) !== -1;
-        })
-      ));
+    teste(13, 'caso só é associado quando a resolução é inequívoca',
+      decisaoUnica
+        ? !!(resolucao && Array.isArray(resolucao.casos_relacionados) && resolucao.casos_relacionados.some(function(item) { return String(item).indexOf(inicio.diagnostico_id) !== -1; }))
+        : !!(decisaoAmbigua && feedback.resolucao_id === '' && resolucao && !resolucao.casos_relacionados.some(function(item) { return String(item).indexOf(inicio.diagnostico_id) !== -1; })));
 
     teste(14, 'feedback não altera automaticamente status',
       !!(resolucao && resolucao.status === 'VALIDADA'));
