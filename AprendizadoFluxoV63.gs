@@ -213,12 +213,12 @@ function TESTAR_INTEGRACAO_APRENDIZADO_FLUXO_V63() {
     teste(12, 'evidência é acumulada somente quando há vínculo inequívoco',
       decisaoUnica
         ? !!(resolucao && Array.isArray(resolucao.evidencias) && resolucao.evidencias.some(function(item) { return String(item).indexOf('Cliente confirmou redução') !== -1; }))
-        : !!(decisaoAmbigua && feedback.resolucao_id === '' && resolucao && !resolucao.evidencias.some(function(item) { return String(item).indexOf('Cliente confirmou redução') !== -1; })));
+        : !!(decisaoAmbigua && feedback.resolucao_id === '' && resolucao && Array.isArray(resolucao.evidencias) && !resolucao.evidencias.some(function(item) { return String(item).indexOf('Cliente confirmou redução') !== -1; })));
 
     teste(13, 'caso só é associado quando a resolução é inequívoca',
       decisaoUnica
         ? !!(resolucao && Array.isArray(resolucao.casos_relacionados) && resolucao.casos_relacionados.some(function(item) { return String(item).indexOf(inicio.diagnostico_id) !== -1; }))
-        : !!(decisaoAmbigua && feedback.resolucao_id === '' && resolucao && !resolucao.casos_relacionados.some(function(item) { return String(item).indexOf(inicio.diagnostico_id) !== -1; })));
+        : !!(decisaoAmbigua && feedback.resolucao_id === '' && resolucao && Array.isArray(resolucao.casos_relacionados) && !resolucao.casos_relacionados.some(function(item) { return String(item).indexOf(inicio.diagnostico_id) !== -1; })));
 
     teste(14, 'feedback não altera automaticamente status',
       !!(resolucao && resolucao.status === 'VALIDADA'));
