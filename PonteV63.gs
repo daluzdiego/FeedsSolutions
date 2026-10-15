@@ -999,6 +999,20 @@ function TESTAR_PONTE_INTEGRACAO_V63() {
   );
 
 
+  Logger.log(
+    'DIAGNÓSTICO PONTE: ' +
+    JSON.stringify({
+      classificacao: resultado && resultado.reconhecimento && resultado.reconhecimento.classificacao,
+      total_resultados: resultado && Array.isArray(resultado.resultados_reconhecimento) ? resultado.resultados_reconhecimento.length : null,
+      total_validadas: resultado && Array.isArray(resultado.resultados_reconhecimento) ? resultado.resultados_reconhecimento.filter(function(item) { return item && item.status === 'VALIDADA'; }).length : null,
+      ids_validados: resultado && Array.isArray(resultado.resultados_reconhecimento) ? resultado.resultados_reconhecimento.filter(function(item) { return item && item.status === 'VALIDADA'; }).map(function(item) { return item.resolucao_id || item.id || ''; }) : [],
+      resolucao_teste: resolucaoId,
+      decisao_estado: resultado && resultado.decisao && resultado.decisao.estado,
+      decisao_resolucao_principal: resultado && resultado.decisao && resultado.decisao.resolucao_principal
+    })
+  );
+
+
   teste(
     18,
     'Decisão indica solução validada',
