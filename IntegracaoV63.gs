@@ -1720,6 +1720,20 @@ function TESTAR_INTEGRACAO_CICLO_V63() {
   );
 
 
+  Logger.log(
+    'DIAGNÓSTICO DECISÃO INTEGRAÇÃO: ' +
+    JSON.stringify({
+      classificacao: classificacao && classificacao.classificacao,
+      total_resultados: Array.isArray(resultados) ? resultados.length : null,
+      total_validadas: Array.isArray(resultados) ? resultados.filter(function(item) { return item && item.status === 'VALIDADA'; }).length : null,
+      ids_validados: Array.isArray(resultados) ? resultados.filter(function(item) { return item && item.status === 'VALIDADA'; }).map(function(item) { return item.resolucao_id || item.id || ''; }) : [],
+      resolucao_teste: resolucaoId,
+      decisao_estado: decisao && decisao.estado,
+      decisao_resolucao_principal: decisao && decisao.resolucao_principal
+    })
+  );
+
+
   teste(
     20,
     'Decisão identifica solução validada',
