@@ -68,11 +68,30 @@ function TESTAR_INTEGRACAO_V64() {
     var info = inserirEstadoInvestigacaoV64EmInformacoes_([{ tipo: 'NOTA_LEGADA', valor: 'preservar' }], e8);
     assert('persistência aditiva preserva notas antigas', info.length === 2 && info[0].valor === 'preservar');
 
+    var e9 = criarEstadoInvestigacaoVazioV64_();
+    atualizarFatoV64_(e9, 'processo', 'Lançamento manual', 'Lançamos manualmente', 'CONFIRMADO', 'turno-1');
+    var contrato = ajustarContinuidadeDiagnostico_(e9, {
+      proximaPergunta: 'Quantos pedidos são processados por dia?',
+      dimensaoAlvo: 'escala',
+      justificativa: 'medir volume',
+      lacunaQueReduz: 'escala'
+    }, null, function() { return { equivalente: false, indice: -1 }; });
+    assert('ajustarContinuidadeDiagnostico_ retorna apenas o contrato de validação',
+      contrato.valida === true && contrato.perguntaAjustada === 'Quantos pedidos são processados por dia?' &&
+      Object.keys(contrato).sort().join(',') === 'motivo,perguntaAjustada,valida');
+
+    var perguntaInvalida = ajustarContinuidadeDiagnostico_(e9, {
+      proximaPergunta: 'Quais pedidos são processados por dia?',
+      dimensaoAlvo: 'escala'
+    }, { texto: 'Olá, tudo certo?', tipo: 'MENSAGEM_SISTEMA' }, function() { return { equivalente: false }; });
+    assert('continuidade rejeita mensagem genérica como pergunta pendente',
+      perguntaInvalida.valida === false && perguntaInvalida.motivo === 'PERGUNTA_PENDENTE_INVALIDA');
+
   } catch (e) {
     resultados.push({ teste: 'execução da suíte', passou: false, detalhe: String(e && e.stack || e) });
   }
   var aprovados = resultados.filter(function(r) { return r.passou; }).length;
-  var resumo = { versao: 'V6.4', suite: 'INTEGRACAO_DETERMINISTICA', sucesso: resultados.length === 10 && aprovados === resultados.length, total: resultados.length, aprovados: aprovados, falhas: resultados.length - aprovados, resultados: resultados };
+  var resumo = { versao: 'V6.4', suite: 'INTEGRACAO_DETERMINISTICA', sucesso: resultados.length === 12 && aprovados === resultados.length, total: resultados.length, aprovados: aprovados, falhas: resultados.length - aprovados, resultados: resultados };
   Logger.log('FEEDS SOLUTIONS V6.4 — INTEGRAÇÃO DETERMINÍSTICA: ' + JSON.stringify(resumo));
   return resumo;
 }
