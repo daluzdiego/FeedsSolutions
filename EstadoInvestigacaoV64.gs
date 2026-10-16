@@ -98,6 +98,30 @@ function atualizarFatoV64_(estado, dimensao, valor, evidencia, certeza, origem, 
     fatoAnterior.valor !== null &&
     String(valorNovo).trim().toLowerCase() !== String(fatoAnterior.valor).trim().toLowerCase();
 
+  if (anteriorConfirmado && novoValorContradiz && opcoes.tipoAtualizacao === 'EXTENSAO') {
+    if (!Array.isArray(fatoAnterior.detalhes)) fatoAnterior.detalhes = [];
+    fatoAnterior.detalhes.push({
+      valor: valorNovo,
+      evidencia: evidenciaNova,
+      origem: origem === undefined ? null : origem,
+      certeza: certeza,
+      registradoEm: new Date().toISOString()
+    });
+    if (evidenciaNova && evidenciaNova !== fatoAnterior.evidencia) {
+      if (!Array.isArray(fatoAnterior.evidenciasAdicionais)) fatoAnterior.evidenciasAdicionais = [];
+      fatoAnterior.evidenciasAdicionais.push({
+        evidencia: evidenciaNova,
+        origem: origem === undefined ? null : origem,
+        registradoEm: new Date().toISOString()
+      });
+    }
+    estado.fatos[dimensao] = fatoAnterior;
+    var conflitoAbertoNaExtensao = fatoAnterior.conflitos.some(function(item) { return !item.resolvido; });
+    estado.lacunas[dimensao] = conflitoAbertoNaExtensao;
+    estado.atualizadoEm = new Date().toISOString();
+    return { atualizado: true, conflito: conflitoAbertoNaExtensao, complemento: true, fato: fatoAnterior };
+  }
+
   if (anteriorConfirmado && novoValorContradiz && opcoes.resolverConflito === true && certeza === CERTEZA_V64.CONFIRMADO) {
     fatoAnterior.conflitos = fatoAnterior.conflitos.map(function(item) {
       if (!item.resolvido) {
