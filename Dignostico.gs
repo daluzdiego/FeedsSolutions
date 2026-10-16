@@ -2007,26 +2007,22 @@ function ajustarContinuidadeDiagnostico_(
   let respondeu = false;
   let negativa = false;
 
-  // Classificação determinística por dimensão: a mensagem atual pode ser
-  // uma resposta curta contextual, mesmo que o Gemini devolva campos vazios.
   if (dimensao === 'VOLUME') {
-    respondeu =
-      /\b\d+(?:[.,]\d+)?\b/.test(mensagem) ||
+    respondeu = /\b\d+(?:[.,]\d+)?\b/.test(mensagem) ||
       /\b(nenhum|nenhuma|zero|um|uma|dois|duas|tres|quatro|cinco|seis|sete|oito|nove|dez)\b/.test(mensagem);
     if (respondeu && !resultado.volume) {
       const match = mensagemOriginal.match(/\b\d+(?:[.,]\d+)?\s*(?:mil|milhao|milhões)?\s*(?:pedidos?|vendas?|clientes?|ordens?|orcamentos?|orçamentos?|atendimentos?|divulgacoes?|publicacoes?|postagens?)?(?:\s+(?:por|ao|na|no)\s+(?:dia|semana|mes|mês))?/i);
       resultado.volume = match ? match[0].trim() : mensagemOriginal;
     }
   } else if (dimensao === 'FREQUENCIA') {
-    respondeu =
-      /\b(diari[oa]mente|todos os dias|todo dia|semanalmente|toda semana|mensalmente|todo mes|todo mês|ocasionalmente|eventualmente|uma vez|\d+\s*(?:x|vez(?:es)?)\s*(?:por|ao|na|no)\s*(?:dia|semana|mes|mês)|por dia|por semana|por mes|por mês|diaria|diário|semanal|mensal)\b/.test(mensagem) ||
-      (/\b(nao|não)\b/.test(mensagem) && /\b(frequencia|frequência|vezes|acontece|ocorre)\b/.test(mensagem));
+    respondeu = /\b(diari[oa]mente|todos os dias|todo dia|semanalmente|toda semana|mensalmente|todo mes|todo mês|ocasionalmente|eventualmente|uma vez|\d+\s*(?:x|vez(?:es)?)\s*(?:por|ao|na|no)\s*(?:dia|semana|mes|mês)|por dia|por semana|por mes|por mês|diaria|diário|semanal|mensal)\b/.test(mensagem) ||
+      (/^(sim|nao|não|às vezes|as vezes|frequentemente|raramente)$/.test(mensagem));
     if (respondeu && !resultado.frequencia) {
       if (/diari|todos os dias|todo dia|por dia/.test(mensagem)) resultado.frequencia = 'Diária';
       else if (/seman|por semana|toda semana/.test(mensagem)) resultado.frequencia = 'Semanal';
       else if (/mens|por mes|por mês|todo mes|todo mês/.test(mensagem)) resultado.frequencia = 'Mensal';
-      else if (/ocasional|eventualmente/.test(mensagem)) resultado.frequencia = 'Ocasional';
-      else if (/\b(nao|não)\b/.test(mensagem)) resultado.frequencia = 'Negada pelo empresário';
+      else if (/ocasional|eventualmente|as vezes|às vezes|raramente/.test(mensagem)) resultado.frequencia = 'Ocasional';
+      else if (/frequentemente/.test(mensagem)) resultado.frequencia = 'Frequente';
     }
   } else if (dimensao === 'IMPACTO') {
     respondeu = mensagem.length >= 2;
@@ -2047,19 +2043,11 @@ function ajustarContinuidadeDiagnostico_(
     respondeu = mensagem.length >= 4 && !respostaSemConteudo && respostaConcreta;
     if (respondeu && !resultado.objetivo) resultado.objetivo = mensagemOriginal;
   } else {
-    // Para uma pergunta não reconhecida, só consideramos respondida se a IA
-    // indicou isso explicitamente ou trouxe uma nova pergunta coerente.
     respondeu = resultado.respondeu_pergunta_pendente === true ||
       (!!resultado.proxima_pergunta && normalizarTextoDiagnostico_(resultado.proxima_pergunta) !== perguntaNorm && mensagem.length >= 3);
   }
 
-  // Mesmo que a IA retorne false ou campos vazios, a continuidade determinística
-  // prevalece para as dimensões conhecidas.
-  if (dimensao !== 'OUTRA') {
-    resultado.respondeu_pergunta_pendente = respondeu;
-  } else {
-    resultado.respondeu_pergunta_pendente = respondeu;
-  }
+  resultado.respondeu_pergunta_pendente = respondeu;
 
   if (!respondeu) {
     resultado.informacao_faltante = pergunta;
@@ -2067,11 +2055,10 @@ function ajustarContinuidadeDiagnostico_(
     return resultado;
   }
 
-  // Normaliza a próxima lacuna e impede repetir a dimensão já respondida.
   const proximaInformacao = normalizarTextoDiagnostico_(resultado.informacao_faltante || '');
   const proximaPergunta = normalizarTextoDiagnostico_(resultado.proxima_pergunta || '');
   const proximaDimensao = classificarDimensaoPerguntaDiagnostico_(proximaPergunta);
-  const infoEhMesmaDimensao = proximaInformacao &&
+  const infoEhMesmaDimensao = !!proximaInformacao &&
     classificarDimensaoPerguntaDiagnostico_(proximaInformacao) === dimensao;
   const perguntaEhMesmaDimensao = proximaDimensao === dimensao;
   const perguntaInvalida = !proximaPergunta ||
