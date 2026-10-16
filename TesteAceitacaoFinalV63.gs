@@ -598,7 +598,8 @@ function TESTAR_CORRECAO_REPETICAO_PERGUNTAS_DIAGNOSTICO_V1() {
     { nome: '20 por dia', pergunta: 'Quantas divulgações vocês costumam fazer por semana?', resposta: '20 por dia' },
     { nome: '50 por semana', pergunta: 'Quantas divulgações vocês costumam fazer por semana?', resposta: '~50 por semana' },
     { nome: 'diariamente na pergunta de erros', pergunta: 'Esse processo costuma gerar erros, retrabalho ou atrasos?', resposta: 'diariamente' },
-    { nome: 'não sei na pergunta de erros', pergunta: 'Esse processo costuma gerar erros, retrabalho ou atrasos?', resposta: 'não sei dizer' }
+    { nome: 'não sei na pergunta de erros', pergunta: 'Esse processo costuma gerar erros, retrabalho ou atrasos?', resposta: 'não sei dizer' },
+    { nome: 'contexto responde frequência e não repete processo', pergunta: 'O que você gostaria de alcançar resolvendo isso?', resposta: 'Quero reduzir o retrabalho causado pelos erros.' }
   ];
   const falhas = [];
   casos.forEach(function(caso) {
@@ -614,8 +615,35 @@ function TESTAR_CORRECAO_REPETICAO_PERGUNTAS_DIAGNOSTICO_V1() {
       ' | próxima=' + resultado.proxima_pergunta);
     if (!passou) falhas.push(caso.nome);
   });
-  if (falhas.length) throw new Error('Regressões falharam: ' + falhas.join('; '));
-  Logger.log('APROVADO: ' + casos.length + '/' + casos.length);
-  return { sucesso: true, aprovados: casos.length, total: casos.length };
-}
 
+  // Reproduz o defeito real: a IA devolveu campos vazios na segunda mensagem,
+  // mas a continuidade precisa reconhecer a resposta contextual e avançar.
+  const perguntaObjetivo = 'O que você gostaria de alcançar resolvendo isso?';
+  const casoReal = ajustarContinuidadeDiagnostico_({
+    processo: '',
+    dor_principal: '',
+    frequencia: '',
+    impacto: '',
+    volume: '',
+    objetivo: '',
+    informacao_faltante: perguntaObjetivo,
+    proxima_pergunta: perguntaObjetivo,
+    respondeu_pergunta_pendente: false
+  }, perguntaObjetivo,
+  'Isso acontece praticamente todos os dias e a maior dificuldade é o retrabalho causado pelos erros.');
+
+  const casoRealPassou =
+    casoReal.respondeu_pergunta_pendente === true &&
+    casoReal.proxima_pergunta !== perguntaObjetivo;
+  Logger.log((casoRealPassou ? 'PASSOU: ' : 'FALHOU: ') +
+    'regressão real: resposta contextual avança sem repetir pergunta' +
+    ' | resultado=' + JSON.stringify(casoReal));
+  if (!casoRealPassou) falhas.push('regressão real da segunda mensagem');
+
+  if (falhas.length) {
+    Logger.log('FALHAS: ' + falhas.join('; '));
+    return { sucesso: false, aprovados: casos.length + (casoRealPassou ? 1 : 0), total: casos.length + 1, falhas: falhas };
+  }
+  Logger.log('APROVADO: ' + (casos.length + 1) + '/' + (casos.length + 1));
+  return { sucesso: true, aprovados: casos.length + 1, total: casos.length + 1, falhas: [] };
+}
