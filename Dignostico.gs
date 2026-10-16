@@ -1823,6 +1823,13 @@ function normalizarAnaliseDiagnostico_(
   resultado.informacao_faltante = String(resultado.informacao_faltante || '').trim();
   resultado.proxima_pergunta = String(resultado.proxima_pergunta || '').trim();
   resultado.respondeu_pergunta_pendente = resultado.respondeu_pergunta_pendente === true;
+  // Memória consolidada: a resposta da IA é incremental, mas contexto confirmado persiste.
+  if (!resultado.processo && diagnostico.processo) resultado.processo = String(diagnostico.processo || '').trim();
+  if (!resultado.dor_principal && diagnostico.dor_principal) resultado.dor_principal = String(diagnostico.dor_principal || '').trim();
+  if (!resultado.frequencia && diagnostico.frequencia) resultado.frequencia = String(diagnostico.frequencia || '').trim();
+  if (!resultado.impacto && diagnostico.impacto) resultado.impacto = String(diagnostico.impacto || '').trim();
+  if (!resultado.volume && diagnostico.volume) resultado.volume = String(diagnostico.volume || '').trim();
+  if (!resultado.objetivo && diagnostico.objetivo) resultado.objetivo = String(diagnostico.objetivo || '').trim();
 
   // 1. PROCESSO
   if (!resultado.processo) {
