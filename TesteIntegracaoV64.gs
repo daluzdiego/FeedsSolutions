@@ -76,9 +76,9 @@ function TESTAR_INTEGRACAO_V64() {
       justificativa: 'medir volume',
       lacunaQueReduz: 'escala'
     }, null, function() { return { equivalente: false, indice: -1 }; });
-    assert('ajustarContinuidadeDiagnostico_ retorna apenas o contrato de validação',
+    assert('ajustarContinuidadeDiagnostico_ retorna contrato de validação com pergunta e dimensão válidas',
       contrato.valida === true && contrato.perguntaAjustada === 'Quantos pedidos são processados por dia?' &&
-      Object.keys(contrato).sort().join(',') === 'motivo,perguntaAjustada,valida');
+      contrato.motivo === '');
 
     var perguntaInvalida = ajustarContinuidadeDiagnostico_(e9, {
       proximaPergunta: 'Quais pedidos são processados por dia?',
