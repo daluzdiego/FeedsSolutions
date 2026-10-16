@@ -188,6 +188,16 @@ function TESTAR_CONVERSACIONAL_V64() {
       !!e12Recuperado && e12Recuperado.perguntaPendente.texto === e12.perguntaPendente.texto &&
       envelope[0].tipo === 'LEGADO');
 
+    // 13. O fallback determinístico recupera a investigação sem preencher lacunas.
+    var e13 = estadoBase();
+    var fallback13 = selecionarFallbackDeterministicoInvestigacaoV64_(e13);
+    assert('13. fallback seleciona uma pergunta válida para lacuna ainda aberta',
+      !!fallback13 && fallback13.validacao.valida &&
+      e13.lacunas[fallback13.candidata.dimensaoAlvo] !== false &&
+      !e13.perguntasFeitas.some(function(p) {
+        return (p.dimensao || classificarDimensaoPerguntaV64_(p.texto || p, e13)) === fallback13.candidata.dimensaoAlvo;
+      }));
+
   } catch (erro) {
     resultados.push({ teste: 'execução da suíte', passou: false, detalhe: erro && erro.stack ? erro.stack : String(erro) });
   }
@@ -196,7 +206,7 @@ function TESTAR_CONVERSACIONAL_V64() {
   var resumo = {
     versao: 'V6.4',
     suite: 'CONVERSACIONAL_DETERMINISTICA',
-    sucesso: resultados.length === 12 && aprovados === resultados.length,
+    sucesso: resultados.length === 13 && aprovados === resultados.length,
     total: resultados.length,
     aprovados: aprovados,
     falhas: resultados.length - aprovados,
