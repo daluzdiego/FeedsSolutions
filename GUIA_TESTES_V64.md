@@ -47,7 +47,7 @@ A ativação só deve ocorrer depois de registrar os resultados dos testes reais
 
 ## Implementação e rollback
 
-- A implementação está isolada na branch `v6.4-investigacao-adaptativa`.
+- A implementação foi incorporada à `main` no commit `0a1b8358dc6b998a4574b51aef415b8e0791577f`; o motor segue desativado por padrão.
 - O estado V6.4 é serializado como envelope `ESTADO_INVESTIGACAO_V64` no campo existente `INVESTIGACOES.informacoes`, preservando outros itens legados.
 - Para rollback imediato após ativação, definir `FEEDS_MOTOR_INVESTIGACAO_V64_ATIVO = false`; o caminho legado continua disponível.
 - Não houve alteração de `Admin.html`, `Index.html` ou `Styles.html`, nem exclusão de dados históricos.
