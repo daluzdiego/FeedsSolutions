@@ -1376,55 +1376,44 @@ function construirEntradaDiagnosticoIA_(
   mensagem,
   contexto
 ) {
-
   const historico = contexto.historico || [];
   const perguntaPendente = contexto.pergunta_pendente || '';
 
   return [
-    'VOCÊ É O MOTOR DE COMPREENSÃO DO DIAGNÓSTICO EMPRESARIAL.',
-    'Sua função é extrair fatos da mensagem atual e escolher UMA próxima pergunta.',
-    'O motor de dados é responsável por consolidar e preservar o histórico.',
+    'VOCÊ É O MOTOR DE COMPREENSÃO DO DIAGNÓSTICO EMPRESARIAL DA FEEDS SOLUTIONS.',
+    'Analise a mensagem atual em conjunto com o diagnóstico consolidado e o histórico.',
+    'O histórico e o diagnóstico consolidado são memória válida. Não os descarte só porque a mensagem atual é curta.',
     '',
-    'REGRAS ABSOLUTAS:',
-    '1. Nunca apague uma informação válida já descoberta.',
-    '2. PROCESSO: retorne somente a NOVA etapa/atividade revelada pela mensagem atual.',
-    '3. Nunca retorne no campo processo uma etapa que já esteja nas etapas conhecidas.',
-    '4. Nunca transforme o processo inteiro em uma nova etapa.',
-    '5. DORES: retorne somente uma dor explicitamente revelada pela mensagem atual. Se não houver nova dor, deixe vazio.',
-    '6. Não substitua uma dor anterior por uma dor nova. O motor fará o acúmulo.',
-    '7. FREQUÊNCIA: somente periodicidade explícita: diária, semanal, mensal, ocasional etc.',
-    '8. IMPACTO: tempo perdido, custo, atraso, erro, retrabalho ou outra consequência explicitamente informada.',
-    '9. VOLUME: não coloque volume em impacto. Para quantidade como "80 pedidos por dia", deixe impacto vazio e informe a informação no campo volume quando possível.',
-    '10. OBJETIVO: só preencha se o empresário disser claramente o que quer alcançar.',
-    '11. Se houver pergunta pendente, diga se a mensagem atual realmente respondeu aquela pergunta.',
-    '12. Se não respondeu, preserve a pergunta pendente e não invente outra lacuna.',
-    '12A. Se NÃO houver pergunta pendente, responda_pergunta_pendente deve ser false.',
-    '13. Se respondeu, escolha a próxima lacuna mais útil.',
-    '14. Prioridade de lacunas: volume/quantidade → erros/retrabalho/atrasos → objetivo → outra informação necessária.',
-    '15. Faça somente UMA pergunta por vez.',
-    '16. Não ofereça solução, preço, venda ou promessa.',
-    '17. Não transforme inferências em fatos.',
-    '18. Se uma mensagem trouxer várias informações, extraia todas nos campos adequados, mas faça somente uma pergunta.',
-    '19. RESPOSTA NEGATIVA: "não", "nao", "sem", "nunca", "não gera", "não acontece" etc. é uma resposta válida e encerra a dimensão perguntada.',
-    '20. Nunca transforme algo que o empresário negou em dor, erro, retrabalho, atraso ou impacto.',
-    '21. Se uma dimensão já foi respondida negativamente, nunca pergunte novamente sobre ela nesta conversa.',
-    '22. O VOLUME CONSOLIDADO é memória confirmada; nunca o apague porque a mensagem atual não contém volume.',
-    '23. Se o cliente responder negativamente à pergunta de erros/retrabalho/atrasos, avance para objetivo.',
+    'REGRAS OBRIGATÓRIAS:',
+    '1. Extraia todas as informações explícitas da mensagem atual, mesmo quando ela responde à pergunta pendente com linguagem natural.',
+    '2. Preserve o contexto anterior: campos sem informação nova devem ficar vazios na análise incremental; nunca apague o diagnóstico consolidado.',
+    '3. Se a mensagem disser "isso acontece praticamente todos os dias", registre frequência diária quando houver relação contextual clara com o processo já descrito.',
+    '4. Se a mensagem mencionar retrabalho causado por erros, reconheça isso como confirmação/ênfase da dor existente, não como uma nova dor duplicada.',
+    '5. Se houver pergunta pendente, avalie se a mensagem a respondeu. Uma resposta pode ser indireta e contextual; não exija repetição literal da pergunta.',
+    '6. Se a mensagem não respondeu à pergunta pendente, preserve-a e não repita perguntas sobre dimensões já respondidas.',
+    '7. Se respondeu à pergunta pendente, escolha a próxima lacuna ainda não respondida. Não repita a mesma pergunta nem uma pergunta semanticamente equivalente.',
+    '8. Prioridade padrão: volume/quantidade → erros/retrabalho/atrasos → objetivo. Ignore dimensões já confirmadas ou explicitamente negadas.',
+    '9. Faça no máximo UMA pergunta por resposta. Se não houver lacuna essencial, deixe informacao_faltante e proxima_pergunta vazios.',
+    '10. Não invente fatos, medidas, objetivos, impactos ou contexto empresarial.',
+    '11. VOLUME é quantidade processada; IMPACTO é consequência (tempo perdido, custo, atraso, erros etc.). Não misture os campos.',
+    '12. OBJETIVO só pode ser preenchido quando o empresário expressar o que quer alcançar; jamais copie a pergunta para o campo objetivo.',
+    '13. Não ofereça solução, tecnologia, preço, venda ou promessa.',
+    '14. respon­deu_pergunta_pendente deve ser booleano verdadeiro/falso sem aspas.',
     '',
-    'FORMATO: SOMENTE JSON válido.',
+    'FORMATO: SOMENTE JSON VÁLIDO, sem markdown:',
     '{',
-    '  "processo": "somente nova etapa; vazio se não houver",',
-    '  "dor_principal": "somente nova dor explícita; vazio se não houver",',
-    '  "frequencia": "periodicidade explícita; vazio se não houver",',
-    '  "impacto": "tempo/custo/erro/retrabalho/atraso/consequência explícita; vazio se não houver",',
-    '  "volume": "quantidade explícita, por exemplo 80 pedidos/dia; vazio se não houver",',
-    '  "objetivo": "objetivo explícito; vazio se não houver",',
-    '  "respondeu_pergunta_pendente": true ou false,',
-    '  "informacao_faltante": "a informação mais importante que ainda falta",',
-    '  "proxima_pergunta": "uma única pergunta curta e natural"',
+    '  "processo": "",',
+    '  "dor_principal": "",',
+    '  "frequencia": "",',
+    '  "impacto": "",',
+    '  "volume": "",',
+    '  "objetivo": "",',
+    '  "respondeu_pergunta_pendente": false,',
+    '  "informacao_faltante": "",',
+    '  "proxima_pergunta": ""',
     '}',
     '',
-    'DIAGNÓSTICO CONSOLIDADO:',
+    'DIAGNÓSTICO CONSOLIDADO (MEMÓRIA; NÃO DESCARTAR):',
     JSON.stringify(contexto.diagnostico || {}),
     '',
     'DORES JÁ REGISTRADAS:',
@@ -1439,24 +1428,16 @@ function construirEntradaDiagnosticoIA_(
     'ETAPAS JÁ IDENTIFICADAS:',
     JSON.stringify(contexto.etapas_processo || []),
     '',
-    'PERGUNTA PENDENTE:',
+    'PERGUNTA PENDENTE (RESPONDER OU AVANÇAR, NÃO REPETIR AUTOMATICAMENTE):',
     perguntaPendente || 'Nenhuma',
     '',
-    'HISTÓRICO RECENTE:',
+    'HISTÓRICO RECENTE EM ORDEM:',
     JSON.stringify(historico),
     '',
-    'NOVA MENSAGEM:',
+    'MENSAGEM ATUAL DO EMPRESÁRIO:',
     mensagem
-  ].join('\n');
-
+  ].join('\\n');
 }
-
-
-/**
- * ============================================================
- * CONSTRUIR CONTEXTO
- * ============================================================
- */
 
 function construirContextoDiagnostico_(
   diagnostico
