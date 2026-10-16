@@ -2044,7 +2044,7 @@ function ajustarContinuidadeDiagnostico_(
         else if (/frequentemente/.test(mensagem)) resultado.frequencia = 'Frequente';
       }
 
-      const frequenciaAtual = String(resultado.frequencia || '').toLowerCase();
+      const frequenciaAtual = normalizarTextoDiagnostico_(resultado.frequencia || '');
       if (/diaria/.test(frequenciaAtual)) {
         resultado.informacao_faltante = 'quantidade média de itens processados por dia';
         resultado.proxima_pergunta = 'Entendi que isso acontece diariamente. Em média, quantas divulgações vocês fazem por dia?';
