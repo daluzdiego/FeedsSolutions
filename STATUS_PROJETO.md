@@ -98,7 +98,7 @@ InterpretacaoIA_V63.gs, InterpretacaoV63.gs, SolucoesV63.gs, DecisãoV63.gs, Res
 | Categoria | Resultado atual | O que significa |
 |---|---:|---|
 | Testes unitários determinísticos | **100% — 19/19** | Estado explícito, evidência, certeza, conflitos e serialização verificados em execução isolada de JavaScript. Ainda requer execução no Apps Script. |
-| Integração técnica determinística | **100% — 12/12 + adaptador 4/4** | Gate, precedência, pergunta pendente, adaptação e preservação do estado verificados em execução isolada. Ainda requer execução no Apps Script. |
+| Integração técnica determinística | **100% — 14/14 + adaptador 4/4** | Gate, precedência, pergunta pendente, adaptação e preservação do estado verificados em execução isolada. Ainda requer execução no Apps Script. |
 | Qualidade conversacional real | **0% validada com Gemini real** | Há 12 cenários conversacionais determinísticos e uma função de teste ponta a ponta com Gemini, mas o teste real ainda não foi executado. |
 
 **Revisão humana:** 0/3–5 diálogos revisados.  
