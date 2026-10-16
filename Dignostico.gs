@@ -2121,14 +2121,6 @@ function classificarDimensaoPerguntaDiagnostico_(perguntaNormalizada) {
   if (/quantos|quantidade|volume|numero de clientes|numero de pedidos|quantas vendas/.test(p)) return 'VOLUME';
   return 'OUTRA';
 }
-  const p = normalizarTextoDiagnostico_(perguntaNormalizada || '');
-  if (/frequencia|periodicidade|quantas vezes|por dia|por semana|por mes|ao dia|ao mes|diariamente|diaria|semanalmente|semanal|mensalmente|mensal|todo dia|todos os dias|toda semana|todas as semanas|divulgacoes.*semana|publicacoes.*semana|postagens.*semana|com que frequencia|quantas vezes por|publica|posta|vezes por/.test(p)) return 'FREQUENCIA';
-  if (/impacto|consequencia|efeito|afeta|prejuizo|perda/.test(p)) return 'IMPACTO';
-  if (/quantos|quantidade|volume|numero de clientes|numero de pedidos|quantas vendas/.test(p)) return 'VOLUME';
-  if (/erro|retrabalho|atraso|revisao|conferencia/.test(p)) return 'ERROS';
-  if (/objetivo|o que voce gostaria|o que voces gostariam|melhorar ou alcancar|resultado deseja/.test(p)) return 'OBJETIVO';
-  return 'OUTRA';
-}
 
 
 /**
