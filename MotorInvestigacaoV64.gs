@@ -62,6 +62,9 @@ function construirPromptProximaPerguntaV64_(estado, ultimaMensagem, motivoRejeic
     'Use o estado consolidado, a última resposta e as lacunas reais. Não siga uma sequência fixa.',
     'Não pergunte algo que já esteja confirmado ou explicitamente marcado como não aplicável.',
     'Não repita semanticamente nenhuma pergunta já feita.',
+    'Se escala/quantidade já estiver informada, não repita perguntas sobre quantidade diária, semanal ou volume.',
+    'Horários de pico, distribuição ao longo do dia, turnos e janelas de recebimento são FREQUENCIA, não ESCALA.',
+    'Se o motivo anterior indicar REPETICAO_SEMANTICA ou DIMENSAO_JA_SUFICIENTE, mude para outra lacuna essencial ainda aberta.',
     'Não pergunte por critérios de aceitação antes de compreender processo e dor.',
     'Não pergunte sobre integrações antes de saber quais ferramentas/sistemas/canais participam do processo.',
     'Se a última resposta for ambígua, faça uma pergunta de esclarecimento estreita, ligada ao que foi dito.',
@@ -316,10 +319,10 @@ function validarPerguntaInvestigativaV64_(estado, candidata, adaptadorSemantico)
 
 function classificarDimensaoPerguntaV64_(pergunta, estado) {
   var p = normalizarPerguntaInvestigacaoV64_(pergunta);
-  if (/horario|horarios|pico|maior movimento|distribuicao ao longo do dia|em que periodo|em que horario|turno de maior/.test(p)) {
+  if (/horario|horarios|pico|maior movimento|distribuicao ao longo do dia|em que periodo|em que horario|turno de maior|horas de pico|distribuicao temporal/.test(p)) {
     return 'frequencia';
   }
-  if (/quantos|quantas|quantidade|volume|media de pedidos|itens por dia|pedidos por dia|pedidos por semana|pedidos por mes/.test(p)) {
+  if (/quantos|quantas|quantidade|volume|media de pedidos|itens por dia|pedidos por dia|pedidos por semana|pedidos por mes|quantidade diaria|quantidade semanal/.test(p)) {
     return 'escala';
   }
   if (/objetivo|resultado deseja|alcancar|melhorar|conseguir ao final/.test(p)) return 'objetivo';
