@@ -29,6 +29,18 @@ function TESTAR_INTEGRACAO_V64() {
     assert('critério explicitamente desconhecido permite concluir com ressalva',
       g3.pode === true && g3.ressalvas.indexOf('aceitacao') !== -1);
 
+    var e3b = criarEstadoInvestigacaoVazioV64_();
+    atualizarFatoV64_(e3b, 'processo', 'Lançamento manual', 'Lançamos manualmente', 'CONFIRMADO', 'turno-1');
+    atualizarFatoV64_(e3b, 'dor_causa', 'Retrabalho', 'Precisamos conferir de novo', 'CONFIRMADO', 'turno-1');
+    atualizarFatoV64_(e3b, 'escala', 'Cerca de 100 pedidos/dia', 'São cerca de 100 pedidos/dia', 'ESTIMADO', 'turno-2');
+    atualizarFatoV64_(e3b, 'frequencia', 'Diária', 'Acontece diariamente', 'CONFIRMADO', 'turno-2');
+    atualizarFatoV64_(e3b, 'impacto', 'Duas horas', 'Gastamos duas horas', 'CONFIRMADO', 'turno-3');
+    atualizarFatoV64_(e3b, 'objetivo', 'Reduzir retrabalho', 'Queremos reduzir retrabalho', 'CONFIRMADO', 'turno-3');
+    atualizarFatoV64_(e3b, 'aceitacao', 'Reduzir pela metade', 'Consideraremos sucesso reduzir pela metade', 'CONFIRMADO', 'turno-4');
+    var gateEstimado = podeConcluirDiagnosticoV64_(e3b);
+    assert('não permite concluir com escala ainda estimada',
+      gateEstimado.pode === false && gateEstimado.motivo === 'DIMENSAO_ESSENCIAL_NAO_CONFIRMADA:escala');
+
     var e4 = criarEstadoInvestigacaoVazioV64_();
     var prematura = validarPerguntaInvestigativaV64_(e4, {
       proximaPergunta: 'Como vamos medir o sucesso da solução?',
@@ -118,7 +130,7 @@ function TESTAR_INTEGRACAO_V64() {
     resultados.push({ teste: 'execução da suíte', passou: false, detalhe: String(e && e.stack || e) });
   }
   var aprovados = resultados.filter(function(r) { return r.passou; }).length;
-  var resumo = { versao: 'V6.4', suite: 'INTEGRACAO_DETERMINISTICA', sucesso: resultados.length === 16 && aprovados === resultados.length, total: resultados.length, aprovados: aprovados, falhas: resultados.length - aprovados, resultados: resultados };
+  var resumo = { versao: 'V6.4', suite: 'INTEGRACAO_DETERMINISTICA', sucesso: resultados.length === 17 && aprovados === resultados.length, total: resultados.length, aprovados: aprovados, falhas: resultados.length - aprovados, resultados: resultados };
   Logger.log('FEEDS SOLUTIONS V6.4 — INTEGRAÇÃO DETERMINÍSTICA: ' + JSON.stringify(resumo));
   return resumo;
 }
