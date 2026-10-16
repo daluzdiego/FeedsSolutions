@@ -217,9 +217,12 @@ function atualizarFatoV64_(estado, dimensao, valor, evidencia, certeza, origem, 
     atualizadoEm: new Date().toISOString()
   };
 
-  // ESTIMADO mantém a dimensão em aberto para confirmação; DESCONHECIDO também.
-  estado.lacunas[dimensao] = certeza !== CERTEZA_V64.CONFIRMADO &&
-    certeza !== CERTEZA_V64.NEGADO;
+  // Fato legado estimado que ainda não foi confirmado deve permanecer como lacuna.
+  // NEGADO só encerra lacuna quando há negação explícita / não aplicabilidade.
+  // "Não sei" é uma resposta válida sobre desconhecimento, mas mantém a lacuna.
+  estado.lacunas[dimensao] = certeza === CERTEZA_V64.ESTIMADO ||
+    certeza === CERTEZA_V64.DESCONHECIDO ||
+    (certeza === CERTEZA_V64.NEGADO && String(opcoes.certezaDetalhe || '') === 'NAO_SEI');
   estado.atualizadoEm = new Date().toISOString();
 
   return {
