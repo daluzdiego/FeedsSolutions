@@ -115,6 +115,20 @@ function TESTAR_INTEGRACAO_V64() {
     assert('histórico legado classifica horários de pico como frequência',
       inferirDimensaoPerguntaV64_('Quais são os dias e horários de pico dos pedidos?') === 'frequencia');
 
+    var eHistoria = criarEstadoInvestigacaoVazioV64_();
+    var importacao = reconstruirHistoricoInvestigacaoV64_(eHistoria, [
+      { ordem: 1, remetente: 'SISTEMA', tipo: 'PERGUNTA_IA', mensagem: 'Qual etapa do processo gera erros?' },
+      { ordem: 2, remetente: 'EMPRESARIO', tipo: 'EMPRESARIO', mensagem: 'O lançamento dos pedidos.' },
+      { ordem: 3, remetente: 'SISTEMA', tipo: 'RESPOSTA', mensagem: 'Obrigado pela informação.' },
+      { ordem: 4, remetente: 'SISTEMA', tipo: 'PERGUNTA_IA', mensagem: 'Quantos pedidos são processados por dia?' },
+      { ordem: 5, remetente: 'EMPRESARIO', tipo: 'EMPRESARIO', mensagem: 'São 100 pedidos por dia.' }
+    ], 'São 100 pedidos por dia.');
+    assert('migração mantém cronologia e não duplica turno atual',
+      eHistoria.historico.map(function(t) { return t.papel; }).join(',') === 'SISTEMA,EMPRESARIO,SISTEMA' &&
+      eHistoria.historico.length === 3);
+    assert('migração não deixa pergunta respondida marcada como pendente',
+      eHistoria.perguntaPendente === null && importacao.perguntaPendente === null);
+
     var estadoComHistorico = criarEstadoInvestigacaoVazioV64_();
     registrarPerguntaFeitaV64_(estadoComHistorico, 'Quais são os dias e horários de pico dos pedidos?', 'frequencia', 'q-pico');
     var tentativaPicoComoEscala = validarPerguntaInvestigativaV64_(estadoComHistorico, {
@@ -130,7 +144,7 @@ function TESTAR_INTEGRACAO_V64() {
     resultados.push({ teste: 'execução da suíte', passou: false, detalhe: String(e && e.stack || e) });
   }
   var aprovados = resultados.filter(function(r) { return r.passou; }).length;
-  var resumo = { versao: 'V6.4', suite: 'INTEGRACAO_DETERMINISTICA', sucesso: resultados.length === 17 && aprovados === resultados.length, total: resultados.length, aprovados: aprovados, falhas: resultados.length - aprovados, resultados: resultados };
+  var resumo = { versao: 'V6.4', suite: 'INTEGRACAO_DETERMINISTICA', sucesso: resultados.length === 19 && aprovados === resultados.length, total: resultados.length, aprovados: aprovados, falhas: resultados.length - aprovados, resultados: resultados };
   Logger.log('FEEDS SOLUTIONS V6.4 — INTEGRAÇÃO DETERMINÍSTICA: ' + JSON.stringify(resumo));
   return resumo;
 }
