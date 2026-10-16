@@ -935,26 +935,42 @@ function construirResultadoTriagemV1_(
  */
 
 function TESTAR_TRIAGEM_V1_CASO_01_() {
-
-  return avaliarCompatibilidadeTriagemV1_({
-
-    dor:
-      'erros e retrabalho',
-
-    processo:
-      'copiar dados entre planilhas',
-
-    impacto:
-      'muitos erros',
-
-    frequencia:
-      'diariamente',
-
-    possibilidade_de_atuacao:
-      'SIM'
-
+  var resultado = avaliarCompatibilidadeTriagemV1_({
+    dor: 'erros e retrabalho',
+    processo: 'copiar dados entre planilhas',
+    impacto: 'muitos erros',
+    frequencia: 'diariamente',
+    possibilidade_de_atuacao: 'SIM'
   });
 
+  var verificacoes = [
+    ['versao V1', resultado && resultado.versao === 'V1'],
+    ['classificacao COMPATIVEL', resultado && resultado.classificacao === 'COMPATIVEL'],
+    ['compatibilidade COMPATIVEL', resultado && resultado.compatibilidade === 'COMPATIVEL'],
+    ['confianca ALTA', resultado && resultado.confianca === 'ALTA'],
+    ['valor potencial ALTO', resultado && resultado.valor_potencial === 'ALTO'],
+    ['dor preservada', resultado && resultado.dor === 'erros e retrabalho'],
+    ['processo preservado', resultado && resultado.processo === 'copiar dados entre planilhas'],
+    ['proxima acao DEMONSTRAR_VALOR', resultado && resultado.proxima_acao === 'DEMONSTRAR_VALOR'],
+    ['nenhuma informacao faltante', resultado && Array.isArray(resultado.informacoes_faltantes) && resultado.informacoes_faltantes.length === 0]
+  ];
+  var falhas = verificacoes.filter(function(item) {
+    var passou = item[1] === true;
+    Logger.log((passou ? 'PASSOU: ' : 'FALHOU: ') + item[0]);
+    return !passou;
+  }).map(function(item) { return item[0]; });
+
+  Logger.log('APROVADOS: ' + (verificacoes.length - falhas.length) + '/' + verificacoes.length);
+  if (falhas.length) {
+    throw new Error('Triagem V1 caso 01 falhou: ' + falhas.join('; '));
+  }
+  return {
+    sucesso: true,
+    aprovados: verificacoes.length,
+    falhas: 0,
+    percentual: 100,
+    resultado: resultado
+  };
 }
 
 
