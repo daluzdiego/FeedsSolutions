@@ -56,7 +56,7 @@ function TESTAR_CONVERSACIONAL_V64() {
     registrarPerguntaFeitaV64_(e2, 'Quantas divulgações vocês costumam fazer por semana?', 'escala', 'q-volume');
     definirPerguntaPendenteV64_(e2, { id: 'q-volume', dimensao: 'escala', texto: 'Quantas divulgações vocês costumam fazer por semana?' });
     var r2 = processarTurnoInvestigacaoV64_(e2, 'Diariamente.', adaptadores({
-      interpretar: function() { return { fatos: [fato('escala', 'Diariamente', 'Diariamente', 'ESTIMADO', 'PERIODICIDADE')], respondeuPerguntaPendente: true, ambiguidade: true, explicacaoAmbiguidade: 'A resposta informa frequência, não quantidade.' }; },
+      interpretar: function() { return { fatos: [fato('frequencia', 'Diária', 'Diariamente', 'CONFIRMADO', 'PERIODICIDADE')], respondeuPerguntaPendente: true, ambiguidade: true, explicacaoAmbiguidade: 'A resposta informa frequência, não quantidade.' }; },
       selecionarPergunta: function() { return { proximaPergunta: 'Em média, quantas divulgações são feitas por dia?', dimensaoAlvo: 'escala', justificativa: 'A periodicidade foi informada, mas a quantidade não.', lacunaQueReduz: 'quantidade diária' }; }
     }));
     assert('2. periodicidade provoca esclarecimento estreito e não repete', r2.sucesso && r2.proxima_pergunta === 'Em média, quantas divulgações são feitas por dia?' &&
