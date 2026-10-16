@@ -1401,9 +1401,12 @@ function construirEntradaDiagnosticoIA_(
     '5. Se houver pergunta pendente, avalie se a mensagem a respondeu. Uma resposta pode ser indireta e contextual; não exija repetição literal da pergunta.',
     '6. Se a mensagem não respondeu à pergunta pendente, preserve-a e não repita perguntas sobre dimensões já respondidas.',
     '7. Se respondeu à pergunta pendente, escolha a próxima lacuna ainda não respondida. Não repita a mesma pergunta nem uma pergunta semanticamente equivalente.',
-    '8. Prioridade padrão: volume/quantidade → erros/retrabalho/atrasos → objetivo. Ignore dimensões já confirmadas ou explicitamente negadas.',
-    '9. Faça no máximo UMA pergunta por resposta. Se não houver lacuna essencial, deixe informacao_faltante e proxima_pergunta vazios.',
-    '10. Não invente fatos, medidas, objetivos, impactos ou contexto empresarial.',
+    '8. Não siga um checklist rígido. Escolha a próxima pergunta pela lacuna mais importante que ainda impede compreender o trabalho e formular requisitos confiáveis.',
+    '9. Investigue progressivamente: etapas concretas do processo; ferramentas/canais e pessoas envolvidos; ponto exato em que ocorre a dor; causa conhecida versus hipótese; exemplos e exceções; volume e frequência; impacto mensurável ou estimado; objetivo; restrições e como será validado o sucesso.',
+    '10. Não pergunte novamente algo já confirmado. Se a resposta revelar uma dimensão diferente da perguntada, registre-a e esclareça apenas o que falta.',
+    '11. Faça no máximo UMA pergunta por resposta, ligada ao contexto já contado. Evite perguntas genéricas como “qual o impacto?” sem explicar a que aspecto se refere.',
+    '12. Não conclua a investigação apenas porque processo, dor e volume estão preenchidos. Se ainda faltam causa, fluxo real, consequência ou objetivo relevante, continue investigando sem inventar.',
+    '13. Não invente fatos, medidas, objetivos, impactos ou contexto empresarial. Diferencie fatos, estimativas, hipóteses, negações e desconhecidos.',
     '11. VOLUME é quantidade processada; IMPACTO é consequência (tempo perdido, custo, atraso, erros etc.). Não misture os campos.',
     '12. OBJETIVO só pode ser preenchido quando o empresário expressar o que quer alcançar; jamais copie a pergunta para o campo objetivo.',
     '13. Não ofereça solução, tecnologia, preço, venda ou promessa.',
@@ -1606,37 +1609,25 @@ function obterPerguntaPendenteDiagnostico_(
   if (!historico || !historico.length) return '';
 
   for (let i = historico.length - 1; i >= 0; i--) {
+    const item = historico[i] || {};
+    const remetente = String(item.remetente || '').trim().toUpperCase();
+    const tipo = String(item.tipo || '').trim().toUpperCase();
+    const pergunta = String(item.mensagem || '').trim();
+    if (!pergunta) continue;
 
-    const item = historico[i];
+    // Nunca tratar qualquer mensagem do sistema como pergunta pendente.
+    const tipoPergunta = /^(PERGUNTA_IA|PERGUNTA_DIAGNOSTICO|PERGUNTA_INVESTIGACAO)$/.test(tipo);
+    const mensagemInterrogativa = /\?/.test(pergunta);
+    const remetenteSistemaComPergunta =
+      remetente === 'SISTEMA' &&
+      mensagemInterrogativa &&
+      /\b(qual|quais|como|quando|onde|quant[oa]s?|quanto|por que|porque|quem|com que frequencia|o que|existe|costuma|acontece|consegue)\b/i.test(pergunta);
 
-    const remetente =
-      String(item.remetente || '')
-        .trim()
-        .toUpperCase();
-
-    const tipo =
-      String(item.tipo || '')
-        .trim()
-        .toUpperCase();
-
-    if (
-      remetente === 'SISTEMA' ||
-      tipo === 'PERGUNTA_IA'
-    ) {
-
-      const pergunta =
-        String(item.mensagem || '').trim();
-
-      if (pergunta) return pergunta;
-
-    }
-
+    if (tipoPergunta || remetenteSistemaComPergunta) return pergunta;
   }
 
   return '';
-
 }
-
 
 function extrairEtapasProcessoDiagnostico_(
   processo
@@ -2038,11 +2029,42 @@ function ajustarContinuidadeDiagnostico_(
   let negativa = false;
 
   if (dimensao === 'VOLUME') {
-    respondeu = /\b\d+(?:[.,]\d+)?\b/.test(mensagem) ||
+    // Respostas de periodicidade a uma pergunta de quantidade são informação válida:
+    // registrar frequência e reformular a pergunta para obter a quantidade.
+    const respostaPeriodicidade =
+      /\b(diariamente|diario|diaria|todos os dias|todo dia|semanalmente|semanal|toda semana|mensalmente|mensal|todo mes|todo mês|ocasionalmente|ocasional|eventualmente|as vezes|às vezes|raramente|frequentemente)\b/.test(mensagem);
+
+    if (respostaPeriodicidade) {
+      respondeu = true;
+      if (!resultado.frequencia) {
+        if (/diari|todos os dias|todo dia/.test(mensagem)) resultado.frequencia = 'Diária';
+        else if (/seman|toda semana/.test(mensagem)) resultado.frequencia = 'Semanal';
+        else if (/mens|todo mes|todo mês/.test(mensagem)) resultado.frequencia = 'Mensal';
+        else if (/ocasional|eventualmente|as vezes|às vezes|raramente/.test(mensagem)) resultado.frequencia = 'Ocasional';
+        else if (/frequentemente/.test(mensagem)) resultado.frequencia = 'Frequente';
+      }
+
+      const frequenciaAtual = String(resultado.frequencia || '').toLowerCase();
+      if (/diaria/.test(frequenciaAtual)) {
+        resultado.informacao_faltante = 'quantidade média de itens processados por dia';
+        resultado.proxima_pergunta = 'Entendi que isso acontece diariamente. Em média, quantas divulgações vocês fazem por dia?';
+      } else if (/semanal/.test(frequenciaAtual)) {
+        resultado.informacao_faltante = 'quantidade média de itens processados por semana';
+        resultado.proxima_pergunta = 'Entendi que isso acontece semanalmente. Em média, quantas divulgações vocês fazem por semana?';
+      } else if (/mensal/.test(frequenciaAtual)) {
+        resultado.informacao_faltante = 'quantidade média de itens processados por mês';
+        resultado.proxima_pergunta = 'Entendi que isso acontece mensalmente. Em média, quantas divulgações vocês fazem por mês?';
+      } else {
+        resultado.informacao_faltante = 'quantidade aproximada de itens em um período típico';
+        resultado.proxima_pergunta = 'Entendi que isso acontece ocasionalmente. Em uma semana típica, aproximadamente quantas divulgações vocês fazem?';
+      }
+    } else {
+      respondeu = /\b\d+(?:[.,]\d+)?\b/.test(mensagem) ||
       /\b(nenhum|nenhuma|zero|um|uma|dois|duas|tres|quatro|cinco|seis|sete|oito|nove|dez)\b/.test(mensagem);
-    if (respondeu && !resultado.volume) {
-      const match = mensagemOriginal.match(/\b\d+(?:[.,]\d+)?\s*(?:mil|milhao|milhões)?\s*(?:pedidos?|vendas?|clientes?|ordens?|orcamentos?|orçamentos?|atendimentos?|divulgacoes?|publicacoes?|postagens?)?(?:\s+(?:por|ao|na|no)\s+(?:dia|semana|mes|mês))?/i);
-      resultado.volume = match ? match[0].trim() : mensagemOriginal;
+      if (respondeu && !resultado.volume) {
+        const match = mensagemOriginal.match(/\b\d+(?:[.,]\d+)?\s*(?:mil|milhao|milhões)?\s*(?:pedidos?|vendas?|clientes?|ordens?|orcamentos?|orçamentos?|atendimentos?|divulgacoes?|publicacoes?|postagens?)?(?:\s+(?:por|ao|na|no)\s+(?:dia|semana|mes|mês))?/i);
+        resultado.volume = match ? match[0].trim() : mensagemOriginal;
+      }
     }
   } else if (dimensao === 'FREQUENCIA') {
     respondeu = /\b(diari[oa]mente|todos os dias|todo dia|semanalmente|toda semana|mensalmente|todo mes|todo mês|ocasionalmente|eventualmente|uma vez|\d+\s*(?:x|vez(?:es)?)\s*(?:por|ao|na|no)\s*(?:dia|semana|mes|mês)|por dia|por semana|por mes|por mês|diaria|diário|semanal|mensal)\b/.test(mensagem) ||
