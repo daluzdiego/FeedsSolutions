@@ -402,6 +402,12 @@ function processarTurnoInvestigacaoV64_(estado, mensagem, adaptadores) {
     dimensao: validacao.dimensaoAlvo || perguntaCandidata.dimensaoAlvo,
     texto: perguntaFinal
   });
+  adicionarTurnoHistoricoV64_(estado, {
+    id: 'SISTEMA_V64_' + numeroTurno,
+    papel: 'SISTEMA',
+    texto: perguntaFinal,
+    origem: 'motor-v6.4'
+  });
 
   var gateFinal = podeConcluirDiagnosticoV64_(estado);
   return {
