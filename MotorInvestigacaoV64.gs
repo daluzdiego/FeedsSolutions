@@ -43,7 +43,8 @@ function construirPromptInterpretacaoTurnoV64_(mensagem, estado) {
     'CONFIRMADO = dito explicitamente; ESTIMADO = aproximação declarada pelo empresário; NEGADO = explicitamente não se aplica/não existe ou o empresário declara que não sabe responder, sempre detalhando qual dos casos; DESCONHECIDO = sem evidência.',
     'Se a resposta for ambígua, não preencha a dimensão por conveniência; indique ambiguidade e explique o que precisa ser esclarecido.',
     'Uma correção do empresário deve ser registrada como fato novo e não deve apagar silenciosamente a informação anterior.',
-    'Retorne somente JSON com o formato: {"fatos":[{"dimensao":"processo|dor_causa|escala|impacto|excecoes|objetivo|restricoes|aceitacao","valor":"...","evidencia":"...","certeza":"CONFIRMADO|ESTIMADO|NEGADO|DESCONHECIDO","certezaDetalhe":"NAO_SEI|NAO_SE_APLICA|NAO_EXISTE|APROXIMADO|"}],"respondeuPerguntaPendente":true,"ambiguidade":false,"explicacaoAmbiguidade":""}.',
+    'Classifique cada atualização como NOVO, EXTENSAO, CORRECAO ou CONFIRMACAO. EXTENSAO acrescenta detalhe compatível sem contradizer o fato anterior; CORRECAO contradiz/corrige informação anterior e deve gerar conflito para esclarecimento.', 
+    'Retorne somente JSON com o formato: {"fatos":[{"dimensao":"processo|dor_causa|escala|impacto|excecoes|objetivo|restricoes|aceitacao","valor":"...","evidencia":"...","certeza":"CONFIRMADO|ESTIMADO|NEGADO|DESCONHECIDO","certezaDetalhe":"NAO_SEI|NAO_SE_APLICA|NAO_EXISTE|APROXIMADO|","tipoAtualizacao":"NOVO|EXTENSAO|CORRECAO|CONFIRMACAO"}],"respondeuPerguntaPendente":true,"ambiguidade":false,"explicacaoAmbiguidade":""}.',
     '',
     'ESTADO ATUAL:',
     JSON.stringify(resumoEstadoInvestigacaoV64_(estado)),
@@ -123,9 +124,10 @@ function interpretarTurnoInvestigacaoV64_(mensagem, estado, adaptador) {
               valor: { type: 'string' },
               evidencia: { type: 'string' },
               certeza: { type: 'string', enum: ['CONFIRMADO','ESTIMADO','NEGADO','DESCONHECIDO'] },
-              certezaDetalhe: { type: 'string' }
+              certezaDetalhe: { type: 'string' },
+              tipoAtualizacao: { type: 'string', enum: ['NOVO','EXTENSAO','CORRECAO','CONFIRMACAO'] }
             },
-            required: ['dimensao','valor','evidencia','certeza','certezaDetalhe']
+            required: ['dimensao','valor','evidencia','certeza','certezaDetalhe','tipoAtualizacao']
           }
         },
         respondeuPerguntaPendente: { type: 'boolean' },
@@ -236,6 +238,10 @@ function validarPerguntaInvestigativaV64_(estado, candidata, adaptadorSemantico)
   if (contagem > 1) {
     return { valida: false, motivo: 'MULTIPLAS_PERGUNTAS_NO_MESMO_TURNO', perguntaAjustada: '' };
   }
+  if (estado && estado.lacunas && estado.lacunas[dimensao] === false &&
+      !(candidata && candidata.forcarDetalhamento === true)) {
+    return { valida: false, motivo: 'DIMENSAO_JA_SUFICIENTE', perguntaAjustada: '' };
+  }
   var precedencia = verificarPrecedenciaPerguntaV64_(estado, dimensao);
   if (!precedencia.valida) {
     return {
@@ -331,7 +337,7 @@ function processarTurnoInvestigacaoV64_(estado, mensagem, adaptadores) {
       fato.evidencia,
       fato.certeza,
       'turno-' + numeroTurno,
-      { certezaDetalhe: fato.certezaDetalhe || null }
+      { certezaDetalhe: fato.certezaDetalhe || null, tipoAtualizacao: fato.tipoAtualizacao || '' }
     );
     if (resultado.conflito) conflitos.push(fato.dimensao);
   });
@@ -354,11 +360,16 @@ function processarTurnoInvestigacaoV64_(estado, mensagem, adaptadores) {
     };
     validacao = { valida: true, motivo: '', perguntaAjustada: perguntaCandidata.proximaPergunta, dimensaoAlvo: dimensaoConflito };
   } else if (interpretacao.ambiguidade === true) {
-    perguntaCandidata = selecionarProximaPerguntaInvestigacaoV64_(
-      estado, texto, String(interpretacao.explicacaoAmbiguidade || 'RESPOSTA_AMBIGUA'),
-      adaptadores.selecionarPergunta
-    );
-    validacao = validarPerguntaInvestigativaV64_(estado, perguntaCandidata, adaptadores.verificarRepeticao);
+    while (tentativas < 3) {
+      perguntaCandidata = selecionarProximaPerguntaInvestigacaoV64_(
+        estado, texto, motivoRejeicao || String(interpretacao.explicacaoAmbiguidade || 'RESPOSTA_AMBIGUA'),
+        adaptadores.selecionarPergunta
+      );
+      validacao = validarPerguntaInvestigativaV64_(estado, perguntaCandidata, adaptadores.verificarRepeticao);
+      if (validacao.valida) break;
+      motivoRejeicao = validacao.motivo + (validacao.dimensoesPrecedentes ? ':' + validacao.dimensoesPrecedentes.join(',') : '');
+      tentativas++;
+    }
   } else {
     var gate = podeConcluirDiagnosticoV64_(estado);
     if (gate.pode) {
