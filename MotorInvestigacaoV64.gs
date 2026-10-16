@@ -348,30 +348,45 @@ function podeConcluirDiagnosticoV64_(estado) {
   for (var i = 0; i < essenciais.length; i++) {
     var dim = essenciais[i];
     var fato = estado && estado.fatos && estado.fatos[dim];
-    if (!fato || fato.certeza === CERTEZA_V64.DESCONHECIDO) {
-      return { pode: false, motivo: 'DIMENSAO_ESSENCIAL_DESCONHECIDA:' + dim };
+    if (!fato || fato.certeza === CERTEZA_V64.DESCONHECIDO ||
+        fato.certeza === CERTEZA_V64.ESTIMADO ||
+        (fato.certeza === CERTEZA_V64.NEGADO && fato.certezaDetalhe === 'NAO_SEI')) {
+      return {
+        pode: false,
+        motivo: (fato && fato.certeza === CERTEZA_V64.ESTIMADO
+          ? 'DIMENSAO_ESSENCIAL_NAO_CONFIRMADA:'
+          : 'DIMENSAO_ESSENCIAL_DESCONHECIDA:') + dim
+      };
     }
     if (fato.conflitos && fato.conflitos.some(function(c) { return !c.resolvido; })) {
       return { pode: false, motivo: 'CONFLITO_NAO_RESOLVIDO:' + dim };
     }
   }
-  var objetivo = estado.fatos.objetivo;
+
   var aceitacao = estado.fatos.aceitacao;
-  if (objetivo.certeza === CERTEZA_V64.CONFIRMADO &&
-      (!aceitacao || aceitacao.certeza === CERTEZA_V64.DESCONHECIDO)) {
+  if (!aceitacao || aceitacao.certeza === CERTEZA_V64.DESCONHECIDO ||
+      aceitacao.certeza === CERTEZA_V64.ESTIMADO ||
+      (aceitacao.certeza === CERTEZA_V64.NEGADO &&
+       ['NAO_SEI','NAO_SE_APLICA','NAO_EXISTE'].indexOf(String(aceitacao.certezaDetalhe || '')) === -1)) {
     return { pode: false, motivo: 'CRITERIOS_ACEITACAO_DESCONHECIDOS' };
   }
+
   if (estado && Array.isArray(estado.conflitos) &&
       estado.conflitos.some(function(c) { return !c.resolvido; })) {
     return { pode: false, motivo: 'HA_CONFLITOS_NAO_RESOLVIDOS' };
   }
-  return { pode: true, motivo: '', ressalvas: Object.keys(DIMENSOES_V64).map(function(k) {
-    return DIMENSOES_V64[k];
-  }).filter(function(dim) {
-    var f = estado.fatos[dim];
-    return f && (f.certeza === CERTEZA_V64.ESTIMADO ||
-      (f.certeza === CERTEZA_V64.NEGADO && f.certezaDetalhe === 'NAO_SEI'));
-  }) };
+
+  return {
+    pode: true,
+    motivo: '',
+    ressalvas: Object.keys(DIMENSOES_V64).map(function(k) {
+      return DIMENSOES_V64[k];
+    }).filter(function(dim) {
+      var f = estado.fatos[dim];
+      return f && (f.certeza === CERTEZA_V64.ESTIMADO ||
+        (f.certeza === CERTEZA_V64.NEGADO && f.certezaDetalhe === 'NAO_SEI'));
+    })
+  };
 }
 
 function processarTurnoInvestigacaoV64_(estado, mensagem, adaptadores) {
