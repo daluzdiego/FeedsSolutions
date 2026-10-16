@@ -2016,7 +2016,7 @@ function ajustarContinuidadeDiagnostico_(
     }
   } else if (dimensao === 'FREQUENCIA') {
     respondeu = /\b(diari[oa]mente|todos os dias|todo dia|semanalmente|toda semana|mensalmente|todo mes|todo mês|ocasionalmente|eventualmente|uma vez|\d+\s*(?:x|vez(?:es)?)\s*(?:por|ao|na|no)\s*(?:dia|semana|mes|mês)|por dia|por semana|por mes|por mês|diaria|diário|semanal|mensal)\b/.test(mensagem) ||
-      (/^(sim|nao|não|às vezes|as vezes|frequentemente|raramente)$/.test(mensagem));
+      /^(sim|nao|não|às vezes|as vezes|frequentemente|raramente)$/.test(mensagem);
     if (respondeu && !resultado.frequencia) {
       if (/diari|todos os dias|todo dia|por dia/.test(mensagem)) resultado.frequencia = 'Diária';
       else if (/seman|por semana|toda semana/.test(mensagem)) resultado.frequencia = 'Semanal';
