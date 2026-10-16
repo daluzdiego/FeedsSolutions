@@ -418,10 +418,41 @@ function processarMensagemDiagnostico(dados) {
    * ==========================================================
    */
 
+  let usarMotorV64 = motorInvestigacaoV64Ativo_();
+  let resultadoMotorV64 = null;
   let analise;
 
   try {
-    analise = analisarMensagemDiagnostico_(entradaIA);
+    if (usarMotorV64) {
+      try {
+        resultadoMotorV64 = processarTurnoPersistidoV64_(
+          diagnostico,
+          contexto,
+          mensagem
+        );
+        if (!resultadoMotorV64 || !resultadoMotorV64.resultado ||
+            resultadoMotorV64.resultado.sucesso !== true) {
+          throw new Error(
+            'MOTOR_INVESTIGACAO_V64_SEM_PERGUNTA_VALIDA: ' +
+            String(resultadoMotorV64 && resultadoMotorV64.resultado &&
+              (resultadoMotorV64.resultado.motivo || resultadoMotorV64.resultado.erro) || 'sem detalhe')
+          );
+        }
+        analise = {
+          sucesso: true,
+          tempo_ms: '',
+          dados: resultadoMotorV64.analise
+        };
+      } catch (erroMotorV64) {
+        Logger.log('V6.4 indisponível nesta rodada; usando fallback V6.3: ' +
+          String(erroMotorV64 && erroMotorV64.message || erroMotorV64));
+        usarMotorV64 = false;
+        resultadoMotorV64 = null;
+        analise = analisarMensagemDiagnostico_(entradaIA);
+      }
+    } else {
+      analise = analisarMensagemDiagnostico_(entradaIA);
+    }
     if (!analise || !analise.dados) {
       throw new Error('ANALISE_IA_INVALIDA');
     }
@@ -451,12 +482,13 @@ function processarMensagemDiagnostico(dados) {
    * ==========================================================
    */
 
-  const analiseNormalizada =
-    normalizarAnaliseDiagnostico_(
-      analise.dados,
-      mensagem,
-      contexto.diagnostico || {}
-    );
+  const analiseNormalizada = usarMotorV64
+    ? Object.assign({}, analise.dados)
+    : normalizarAnaliseDiagnostico_(
+        analise.dados,
+        mensagem,
+        contexto.diagnostico || {}
+      );
 
 
   /*
@@ -482,12 +514,13 @@ function processarMensagemDiagnostico(dados) {
    * ==========================================================
    */
 
-  const analiseContinuidade =
-    ajustarContinuidadeDiagnostico_(
-      analiseNormalizada,
-      contexto.pergunta_pendente || '',
-      mensagem
-    );
+  const analiseContinuidade = usarMotorV64
+    ? analiseNormalizada
+    : ajustarContinuidadeDiagnosticoLegado_(
+        analiseNormalizada,
+        contexto.pergunta_pendente || '',
+        mensagem
+      );
 
 
   /*
@@ -509,11 +542,14 @@ function processarMensagemDiagnostico(dados) {
    * ==========================================================
    */
 
-  const novoEstado =
-    determinarEstadoDiagnostico_(
-      novoDiagnostico,
-      analiseContinuidade
-    );
+  const novoEstado = usarMotorV64
+    ? (resultadoMotorV64.resultado.status_diagnostico === 'CONCLUIDO'
+        ? DIAGNOSTICO_ESTADOS.PRONTO_PARA_ANALISE
+        : DIAGNOSTICO_ESTADOS.INVESTIGACAO)
+    : determinarEstadoDiagnostico_(
+        novoDiagnostico,
+        analiseContinuidade
+      );
 
 
   novoDiagnostico.status_diagnostico =
@@ -636,11 +672,13 @@ const investigacaoV622 =
    * ==========================================================
    */
 
-  const respostaLegada =
-    obterRespostaConversa_(
-      analiseContinuidade,
-      novoEstado
-    );
+  const respostaLegada = usarMotorV64
+    ? (String(resultadoMotorV64.resultado.proxima_pergunta || '').trim() ||
+       obterRespostaConversa_(analiseContinuidade, novoEstado))
+    : obterRespostaConversa_(
+        analiseContinuidade,
+        novoEstado
+      );
 
 
   const resultadoFluxoParaV63 = {
@@ -746,6 +784,7 @@ const investigacaoV622 =
 
   const resposta =
     (
+      (!usarMotorV64 || resultadoMotorV64.resultado.status_diagnostico === 'CONCLUIDO') &&
       integracaoV63 &&
       integracaoV63.ativada === true &&
       integracaoV63.resposta_cliente
@@ -846,7 +885,11 @@ const investigacaoV622 =
         resposta,
 
       tipo:
-        'PERGUNTA_IA',
+        usarMotorV64
+          ? (String(resultadoMotorV64.resultado.proxima_pergunta || '').trim()
+              ? 'PERGUNTA_INVESTIGATIVA'
+              : 'RESPOSTA_DIAGNOSTICO_V64')
+          : 'PERGUNTA_IA',
 
       timestamp:
         new Date()
@@ -1616,7 +1659,7 @@ function obterPerguntaPendenteDiagnostico_(
     if (!pergunta) continue;
 
     // Nunca tratar qualquer mensagem do sistema como pergunta pendente.
-    const tipoPergunta = /^(PERGUNTA_IA|PERGUNTA_DIAGNOSTICO|PERGUNTA_INVESTIGACAO)$/.test(tipo);
+    const tipoPergunta = /^(PERGUNTA_IA|PERGUNTA_DIAGNOSTICO|PERGUNTA_INVESTIGACAO|PERGUNTA_INVESTIGATIVA)$/.test(tipo);
     const mensagemInterrogativa = /\?/.test(pergunta);
     const remetenteSistemaComPergunta =
       remetente === 'SISTEMA' &&
@@ -1987,7 +2030,7 @@ function normalizarAnaliseDiagnostico_(
   return resultado;
 }
 
-function ajustarContinuidadeDiagnostico_(
+function ajustarContinuidadeDiagnosticoLegado_(
   analise,
   perguntaPendente,
   mensagemAtual
@@ -2146,6 +2189,34 @@ function ajustarContinuidadeDiagnostico_(
 
   return resultado;
 }
+
+/**
+ * V6.4 — Validador de continuidade, sem interpretação semântica.
+ * A interpretação e a escolha da pergunta pertencem ao motor de investigação.
+ * Retorno deliberadamente restrito ao contrato de validação.
+ */
+function ajustarContinuidadeDiagnostico_(estado, perguntaCandidata, perguntaPendente, adaptadorSemantico) {
+  if (perguntaPendente) {
+    var pendente = typeof perguntaPendente === 'string'
+      ? { texto: perguntaPendente, tipo: 'PERGUNTA_INVESTIGATIVA' }
+      : perguntaPendente;
+    var textoPendente = String(pendente && (pendente.texto || pendente.mensagem) || '').trim();
+    var tipoPendente = String(pendente && pendente.tipo || '').toUpperCase();
+    if (!textoPendente || !/\\?/.test(textoPendente) ||
+        (tipoPendente && tipoPendente !== 'PERGUNTA_INVESTIGATIVA' &&
+         tipoPendente !== 'PERGUNTA_IA' && tipoPendente !== 'PERGUNTA_DIAGNOSTICO' &&
+         tipoPendente !== 'PERGUNTA_INVESTIGACAO')) {
+      return { valida: false, motivo: 'PERGUNTA_PENDENTE_INVALIDA', perguntaAjustada: '' };
+    }
+  }
+  var validacao = validarPerguntaInvestigativaV64_(estado, perguntaCandidata, adaptadorSemantico);
+  return {
+    valida: validacao.valida === true,
+    motivo: String(validacao.motivo || ''),
+    perguntaAjustada: String(validacao.perguntaAjustada || '')
+  };
+}
+
 
 function classificarDimensaoPerguntaDiagnostico_(perguntaNormalizada) {
   const p = normalizarTextoDiagnostico_(perguntaNormalizada || '');
@@ -6498,7 +6569,7 @@ function testarContinuidadeDiagnosticoV5() {
   // CASO 1 — PRIMEIRA MENSAGEM
   // ----------------------------------------------------------
   const primeira =
-    ajustarContinuidadeDiagnostico_(
+    ajustarContinuidadeDiagnosticoLegado_(
       {
         processo: 'colocação manual de pedidos em planilha',
         dor_principal: 'perda de tempo com trabalho manual',
@@ -6524,7 +6595,7 @@ function testarContinuidadeDiagnosticoV5() {
   // CASO 2 — RESPOSTA À PERGUNTA DE FREQUÊNCIA
   // ----------------------------------------------------------
   const respostaFrequencia =
-    ajustarContinuidadeDiagnostico_(
+    ajustarContinuidadeDiagnosticoLegado_(
       {
         processo: 'captação de clientes pelas redes sociais',
         dor_principal: 'dificuldade para captar clientes',
@@ -6556,7 +6627,7 @@ function testarContinuidadeDiagnosticoV5() {
   }
 
   const respostaFrequenciaNegativa =
-    ajustarContinuidadeDiagnostico_(
+    ajustarContinuidadeDiagnosticoLegado_(
       {
         processo: 'captação de clientes pelas redes sociais',
         dor_principal: 'dificuldade para captar clientes',
@@ -6590,7 +6661,7 @@ function testarContinuidadeDiagnosticoV5() {
   // CASO 2 — RESPOSTA À PERGUNTA DE IMPACTO
   // ----------------------------------------------------------
   const respostaImpacto =
-    ajustarContinuidadeDiagnostico_(
+    ajustarContinuidadeDiagnosticoLegado_(
       {
         processo: 'captação de clientes pelas redes sociais',
         dor_principal: 'dificuldade para captar clientes',
@@ -6624,7 +6695,7 @@ function testarContinuidadeDiagnosticoV5() {
   // CASO 3 — RESPOSTA CONTEXTUAL DE VOLUME
   // ----------------------------------------------------------
   const respostaVolumeContextual =
-    ajustarContinuidadeDiagnostico_(
+    ajustarContinuidadeDiagnosticoLegado_(
       {
         processo: 'postagem no Facebook',
         dor_principal: 'não consigo captar clientes',
@@ -6664,7 +6735,7 @@ function testarContinuidadeDiagnosticoV5() {
   // CASO 2 — RESPOSTA À PERGUNTA DE VOLUME
   // ----------------------------------------------------------
   const segunda =
-    ajustarContinuidadeDiagnostico_(
+    ajustarContinuidadeDiagnosticoLegado_(
       {
         processo: '',
         dor_principal: '',
@@ -7295,7 +7366,7 @@ function testarProtecoesDiagnosticoV5_2() {
   // ----------------------------------------------------------
   // 1. PRIMEIRA MENSAGEM NÃO RESPONDE PERGUNTA
   // ----------------------------------------------------------
-  const primeira = ajustarContinuidadeDiagnostico_(
+  const primeira = ajustarContinuidadeDiagnosticoLegado_(
     {
       processo: 'colocação manual de pedidos em planilha',
       dor_principal: 'perda de tempo com trabalho manual',
@@ -7363,7 +7434,7 @@ function testarProtecoesDiagnosticoV5_2() {
   // ----------------------------------------------------------
   // 4. NEGAÇÃO DE ERROS AVANÇA PARA OBJETIVO
   // ----------------------------------------------------------
-  const negativa = ajustarContinuidadeDiagnostico_(
+  const negativa = ajustarContinuidadeDiagnosticoLegado_(
     {
       processo: '',
       dor_principal: '',
@@ -46072,7 +46143,7 @@ function TESTAR_DIAGNOSTICO_OBJETIVO_V623() {
       'Qual é o objetivo principal que você deseja alcançar com essa melhoria?';
 
     const analiseContinuidade =
-      ajustarContinuidadeDiagnostico_(
+      ajustarContinuidadeDiagnosticoLegado_(
         analiseNormalizada,
         perguntaPendente,
         mensagem

@@ -27,7 +27,7 @@ function TESTAR_QUALIDADE_INVESTIGACAO_CONVERSACIONAL_V63() {
 
   var perguntaVolume = 'Quantas divulgações vocês costumam fazer por semana?';
 
-  var diaria = ajustarContinuidadeDiagnostico_({
+  var diaria = ajustarContinuidadeDiagnosticoLegado_({
     volume: '',
     frequencia: '',
     respondeu_pergunta_pendente: false,
@@ -45,7 +45,7 @@ function TESTAR_QUALIDADE_INVESTIGACAO_CONVERSACIONAL_V63() {
     normalizarTextoDiagnostico_(diaria.proxima_pergunta).indexOf('quantas divulgacoes voces fazem por dia') !== -1,
     diaria.proxima_pergunta);
 
-  var eventual = ajustarContinuidadeDiagnostico_({
+  var eventual = ajustarContinuidadeDiagnosticoLegado_({
     volume: '',
     frequencia: '',
     respondeu_pergunta_pendente: false,
@@ -59,7 +59,7 @@ function TESTAR_QUALIDADE_INVESTIGACAO_CONVERSACIONAL_V63() {
     eventual.proxima_pergunta !== perguntaVolume,
     JSON.stringify(eventual));
 
-  var numerica = ajustarContinuidadeDiagnostico_({
+  var numerica = ajustarContinuidadeDiagnosticoLegado_({
     volume: '',
     frequencia: '',
     respondeu_pergunta_pendente: false,
