@@ -431,7 +431,7 @@ function processarTurnoInvestigacaoV64_(estado, mensagem, adaptadores) {
     sucesso: true,
     estado: estado,
     interpretacao: interpretacao,
-    status_diagnostico: gateFinal.pode ? 'CONCLUIDO' : 'INVESTIGACAO',
+    status_diagnostico: gateFinal.pode && !estado.perguntaPendente ? 'CONCLUIDO' : 'INVESTIGACAO',
     gate: gateFinal,
     proxima_pergunta: perguntaFinal,
     decisao_pergunta: {
