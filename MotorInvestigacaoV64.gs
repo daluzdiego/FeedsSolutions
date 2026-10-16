@@ -147,7 +147,7 @@ function selecionarProximaPerguntaInvestigacaoV64_(estado, ultimaMensagem, motiv
       type: 'object',
       properties: {
         proximaPergunta: { type: 'string' },
-        dimensaoAlvo: { type: 'string', enum: ['processo','dor_causa','escala','impacto','excecoes','objetivo','restricoes','aceitacao'] },
+        dimensaoAlvo: { type: 'string', enum: ['processo','dor_causa','escala','frequencia','impacto','excecoes','objetivo','restricoes','aceitacao'] },
         justificativa: { type: 'string' },
         lacunaQueReduz: { type: 'string' }
       },
@@ -235,11 +235,27 @@ function validarPerguntaInvestigativaV64_(estado, candidata, adaptadorSemantico)
   if (!pergunta || !/\?/.test(pergunta)) {
     return { valida: false, motivo: 'NAO_E_PERGUNTA_INVESTIGATIVA', perguntaAjustada: '' };
   }
-  var contagem = (pergunta.match(/\?/g) || []).length;
-  if (contagem > 1) {
+  if ((pergunta.match(/\?/g) || []).length > 1) {
     return { valida: false, motivo: 'MULTIPLAS_PERGUNTAS_NO_MESMO_TURNO', perguntaAjustada: '' };
   }
-  if (estado && estado.lacunas && estado.lacunas[dimensao] === false &&
+  if (!estado || !estado.fatos || !estado.lacunas ||
+      !estado.fatos.hasOwnProperty(dimensao)) {
+    return { valida: false, motivo: 'DIMENSAO_ALVO_INVALIDA', perguntaAjustada: '' };
+  }
+
+  // A classificação explícita do texto tem precedência: impede que o Gemini
+  // rotule uma pergunta sobre horários de pico como uma lacuna nova de escala.
+  var dimensaoDetectada = classificarDimensaoPerguntaV64_(pergunta, estado);
+  if (dimensaoDetectada && dimensaoDetectada !== dimensao) {
+    return {
+      valida: false,
+      motivo: 'DIMENSAO_ALVO_NAO_CORRESPONDE_A_PERGUNTA',
+      dimensaoDetectada: dimensaoDetectada,
+      perguntaAjustada: ''
+    };
+  }
+
+  if (estado.lacunas[dimensao] === false &&
       !(candidata && candidata.forcarDetalhamento === true)) {
     return { valida: false, motivo: 'DIMENSAO_JA_SUFICIENTE', perguntaAjustada: '' };
   }
@@ -262,6 +278,7 @@ function validarPerguntaInvestigativaV64_(estado, candidata, adaptadorSemantico)
       valida: false,
       motivo: 'REPETICAO_SEMANTICA',
       perguntaEquivalenteIndice: comparacao.indice,
+      dimensaoEquivalente: compararDimensaoPerguntaComHistoricoV64_(estado, comparacao.indice),
       perguntaAjustada: ''
     };
   }
@@ -273,6 +290,32 @@ function validarPerguntaInvestigativaV64_(estado, candidata, adaptadorSemantico)
     justificativa: String(candidata.justificativa || ''),
     lacunaQueReduz: String(candidata.lacunaQueReduz || '')
   };
+}
+
+function classificarDimensaoPerguntaV64_(pergunta, estado) {
+  var p = normalizarPerguntaInvestigacaoV64_(pergunta);
+  if (/horario|horarios|pico|maior movimento|distribuicao ao longo do dia|em que periodo|em que horario|turno de maior/.test(p)) {
+    return 'frequencia';
+  }
+  if (/quantos|quantas|quantidade|volume|media de pedidos|itens por dia|pedidos por dia|pedidos por semana|pedidos por mes/.test(p)) {
+    return 'escala';
+  }
+  if (/objetivo|resultado deseja|alcancar|melhorar|conseguir ao final/.test(p)) return 'objetivo';
+  if (/aceitacao|criterio de sucesso|considerar concluido|medir o sucesso|funcionou/.test(p)) return 'aceitacao';
+  if (/restricao|orcamento|prazo|permissao|seguranca|integracao|ferramenta|sistema|canal/.test(p)) return 'restricoes';
+  if (/excecao|fora do padrao|regra especial/.test(p)) return 'excecoes';
+  if (/tempo|custo|impacto|atraso|retrabalho|consequencia|erro|perda|prejuizo/.test(p)) return 'impacto';
+  if (/dor|problema|falha|etapa|causa/.test(p)) return 'dor_causa';
+  if (/como acontece|como funciona|descreva o processo|primeiro passo|passo a passo/.test(p)) return 'processo';
+  return null;
+}
+
+function compararDimensaoPerguntaComHistoricoV64_(estado, indice) {
+  var perguntas = estado && estado.perguntasFeitas || [];
+  var registro = perguntas[indice];
+  if (!registro) return null;
+  if (registro.dimensao) return registro.dimensao;
+  return classificarDimensaoPerguntaV64_(registro.texto || registro, estado);
 }
 
 function podeConcluirDiagnosticoV64_(estado) {
