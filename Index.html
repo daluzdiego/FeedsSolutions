@@ -403,11 +403,15 @@
         $('sendBtn').disabled=false;
         $('typing').classList.remove('active');
         if(!r||!r.sucesso){
-          setError('chatError','Não foi possível processar esta resposta. Tente novamente.');
+          setError('chatError','Não consegui concluir essa etapa. Sua conversa continua salva; tente enviar uma nova mensagem em instantes.');
+          $('entrada').value=mensagem;
           return;
         }
         state.lastResult=r;
         addMessage(r.resposta||'Obrigado. Vamos continuar.','bot');
+        if(r.recuperacao_pendente===true){
+          return;
+        }
         updateFromResult(r);
         if(shouldShowResult(r)){
           prepareResult(r);
@@ -417,7 +421,8 @@
       .withFailureHandler(function(e){
         $('sendBtn').disabled=false;
         $('typing').classList.remove('active');
-        setError('chatError',obterMensagemErroCliente(e,'Ocorreu um erro ao processar sua resposta.'));
+        setError('chatError','Não consegui concluir essa etapa por uma instabilidade temporária. Sua conversa continua salva. Tente novamente em alguns instantes.');
+        $('entrada').value=mensagem;
       })
       .processarMensagemDiagnostico({
         empresa_id:state.empresa_id,
