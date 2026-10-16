@@ -92,6 +92,12 @@ function TESTAR_ESTADO_INVESTIGACAO_V64() {
     }
     verificar('fato confirmado sem evidência é rejeitado', confirmouSemEvidencia);
 
+    var estadoForjado = novo();
+    estadoForjado.fatos.processo = { valor: 'Sem fonte', evidencia: null, certeza: CERTEZA_V64.CONFIRMADO, origem: 'teste', conflitos: [] };
+    var validacaoForjada = validarEstadoInvestigacaoV64_(estadoForjado);
+    verificar('estado persistido com confirmação sem evidência é inválido',
+      validacaoForjada.valido === false && validacaoForjada.erros.some(function(e) { return /EVIDENCIA_AUSENTE_EM_FATO_CONFIRMADO/.test(e); }));
+
     var estadoPersistencia = novo();
     atualizarFatoV64_(estadoPersistencia, DIMENSOES_V64.DOR_CAUSA,
       'Retrabalho', 'Precisamos conferir tudo novamente', CERTEZA_V64.CONFIRMADO, 'turno-8');
