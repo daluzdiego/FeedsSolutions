@@ -113,14 +113,15 @@ function obterOuCriarEstadoInvestigacaoV64_(diagnostico, contexto) {
 
 function inferirDimensaoPerguntaV64_(texto) {
   var t = normalizarPerguntaInvestigacaoV64_(texto);
+  if (/horario|horarios|pico|maior movimento|distribuicao ao longo do dia|em que periodo|turno/.test(t)) return 'frequencia';
   if (/objetivo|resultado deseja|melhorar|alcancar/.test(t)) return 'objetivo';
-  if (/aceitacao|considerar concluido|funcionou|sucesso/.test(t)) return 'aceitacao';
+  if (/aceitacao|criterio de sucesso|considerar concluido|funcionou|sucesso/.test(t)) return 'aceitacao';
   if (/restricao|orcamento|prazo|permissao|seguranca|integracao|ferramenta|sistema|canal/.test(t)) return 'restricoes';
   if (/excecao|fora do padrao|regra especial/.test(t)) return 'excecoes';
-  if (/tempo|custo|impacto|atraso|retrabalho|consequencia|erro/.test(t)) return 'impacto';
-  if (/quant|volume|pedidos por|itens por/.test(t)) return 'escala';
-  if (/frequencia|diariamente|semanalmente|quantas vezes/.test(t)) return 'frequencia';
-  if (/dor|problema|falha|etapa/.test(t)) return 'dor_causa';
+  if (/tempo|custo|impacto|atraso|retrabalho|consequencia|erro|perda|prejuizo/.test(t)) return 'impacto';
+  if (/quant|volume|pedidos por|itens por|quantidade diaria|quantidade semanal/.test(t)) return 'escala';
+  if (/frequencia|diariamente|semanalmente|mensalmente|quantas vezes|periodicidade/.test(t)) return 'frequencia';
+  if (/dor|problema|falha|etapa|causa/.test(t)) return 'dor_causa';
   return 'processo';
 }
 
