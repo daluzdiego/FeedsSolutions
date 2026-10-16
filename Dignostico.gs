@@ -877,7 +877,11 @@ const investigacaoV622 =
         resposta,
 
       tipo:
-        usarMotorV64 ? 'PERGUNTA_INVESTIGATIVA' : 'PERGUNTA_IA',
+        usarMotorV64
+          ? (String(resultadoMotorV64.resultado.proxima_pergunta || '').trim()
+              ? 'PERGUNTA_INVESTIGATIVA'
+              : 'RESPOSTA_DIAGNOSTICO_V64')
+          : 'PERGUNTA_IA',
 
       timestamp:
         new Date()
