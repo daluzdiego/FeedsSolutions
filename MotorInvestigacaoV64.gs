@@ -431,14 +431,33 @@ function processarTurnoInvestigacaoV64_(estado, mensagem, adaptadores) {
     var motivoEsclarecimento = naoRespondeuPerguntaPendente
       ? 'RESPOSTA_NAO_RESPONDEU_PERGUNTA_PENDENTE'
       : String(interpretacao.explicacaoAmbiguidade || 'RESPOSTA_AMBIGUA');
-    while (tentativas < 3) {
+    while (tentativas < 6) {
       perguntaCandidata = selecionarProximaPerguntaInvestigacaoV64_(
         estado, texto, motivoRejeicao || motivoEsclarecimento,
         adaptadores.selecionarPergunta
       );
       validacao = validarPerguntaInvestigativaV64_(estado, perguntaCandidata, adaptadores.verificarRepeticao);
       if (validacao.valida) break;
-      motivoRejeicao = validacao.motivo + (validacao.dimensoesPrecedentes ? ':' + validacao.dimensoesPrecedentes.join(',') : '');
+
+      // Se uma paráfrase da pergunta anterior for proposta novamente, não
+      // deixe a investigação travar na mesma dimensão: passe à próxima lacuna.
+      var dimensaoRepetida = validacao.dimensaoEquivalente ||
+        (validacao.perguntaEquivalenteIndice >= 0
+          ? compararDimensaoPerguntaComHistoricoV64_(estado, validacao.perguntaEquivalenteIndice)
+          : null);
+      if (validacao.motivo === 'REPETICAO_SEMANTICA' && dimensaoRepetida) {
+        estado.lacunas[dimensaoRepetida] = false;
+        if (estado.fatos[dimensaoRepetida] &&
+            estado.fatos[dimensaoRepetida].certeza === CERTEZA_V64.DESCONHECIDO) {
+          estado.fatos[dimensaoRepetida].certezaDetalhe = 'LACUNA_REPROGRAMADA_APOS_REPETICAO';
+        }
+        motivoRejeicao = 'A pergunta repetiu a lacuna ' + dimensaoRepetida +
+          '. Escolha outra dimensão ainda aberta e uma pergunta que busque informação diferente.';
+      } else {
+        motivoRejeicao = validacao.motivo +
+          (validacao.dimensoesPrecedentes ? ':' + validacao.dimensoesPrecedentes.join(',') : '') +
+          (validacao.dimensaoDetectada ? ':dimensaoDetectada=' + validacao.dimensaoDetectada : '');
+      }
       tentativas++;
     }
   } else {
@@ -454,13 +473,29 @@ function processarTurnoInvestigacaoV64_(estado, mensagem, adaptadores) {
         proxima_pergunta: ''
       };
     }
-    while (tentativas < 3) {
+    while (tentativas < 6) {
       perguntaCandidata = selecionarProximaPerguntaInvestigacaoV64_(
         estado, texto, motivoRejeicao, adaptadores.selecionarPergunta
       );
       validacao = validarPerguntaInvestigativaV64_(estado, perguntaCandidata, adaptadores.verificarRepeticao);
       if (validacao.valida) break;
-      motivoRejeicao = validacao.motivo + (validacao.dimensoesPrecedentes ? ':' + validacao.dimensoesPrecedentes.join(',') : '');
+      var dimensaoRepetidaNormal = validacao.dimensaoEquivalente ||
+        (validacao.perguntaEquivalenteIndice >= 0
+          ? compararDimensaoPerguntaComHistoricoV64_(estado, validacao.perguntaEquivalenteIndice)
+          : null);
+      if (validacao.motivo === 'REPETICAO_SEMANTICA' && dimensaoRepetidaNormal) {
+        estado.lacunas[dimensaoRepetidaNormal] = false;
+        if (estado.fatos[dimensaoRepetidaNormal] &&
+            estado.fatos[dimensaoRepetidaNormal].certeza === CERTEZA_V64.DESCONHECIDO) {
+          estado.fatos[dimensaoRepetidaNormal].certezaDetalhe = 'LACUNA_REPROGRAMADA_APOS_REPETICAO';
+        }
+        motivoRejeicao = 'Não repita a lacuna ' + dimensaoRepetidaNormal +
+          '; selecione uma dimensão essencial ainda aberta.';
+      } else {
+        motivoRejeicao = validacao.motivo +
+          (validacao.dimensoesPrecedentes ? ':' + validacao.dimensoesPrecedentes.join(',') : '') +
+          (validacao.dimensaoDetectada ? ':dimensaoDetectada=' + validacao.dimensaoDetectada : '');
+      }
       tentativas++;
     }
   }
