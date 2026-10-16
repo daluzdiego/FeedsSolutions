@@ -89,7 +89,8 @@ InterpretacaoIA_V63.gs, InterpretacaoV63.gs, SolucoesV63.gs, DecisãoV63.gs, Res
 # FASE V6.4 — INVESTIGAÇÃO CONVERSACIONAL ORIENTADA A EVIDÊNCIAS
 
 **Estado:** EM IMPLEMENTAÇÃO — NÃO ACEITA PARA PRODUÇÃO  
-**Branch:** `v6.4-investigacao-adaptativa`  
+**Branch de implementação:** `v6.4-investigacao-adaptativa` (incorporada à `main`)  
+**Commit de integração:** `0a1b8358dc6b998a4574b51aef415b8e0791577f`  
 **Ativação do motor:** desativada por padrão (`FEEDS_MOTOR_INVESTIGACAO_V64_ATIVO = false`)  
 **Baseline V6.3:** preservado; caminho legado continua disponível.
 
