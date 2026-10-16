@@ -84,6 +84,14 @@ function TESTAR_ESTADO_INVESTIGACAO_V64() {
     catch (e) { errosInvalidos = /DIMENSAO_INVESTIGACAO_V64_INVALIDA/.test(String(e)); }
     verificar('dimensão inválida é rejeitada explicitamente', errosInvalidos);
 
+    var confirmouSemEvidencia = false;
+    try {
+      atualizarFatoV64_(novo(), DIMENSOES_V64.PROCESSO, 'Processo inventado', '', CERTEZA_V64.CONFIRMADO, 'turno-x');
+    } catch (e) {
+      confirmouSemEvidencia = /EVIDENCIA_OBRIGATORIA_PARA_CONFIRMADO/.test(String(e));
+    }
+    verificar('fato confirmado sem evidência é rejeitado', confirmouSemEvidencia);
+
     var estadoPersistencia = novo();
     atualizarFatoV64_(estadoPersistencia, DIMENSOES_V64.DOR_CAUSA,
       'Retrabalho', 'Precisamos conferir tudo novamente', CERTEZA_V64.CONFIRMADO, 'turno-8');
