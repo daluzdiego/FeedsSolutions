@@ -35,6 +35,22 @@ function TESTAR_ESTADO_INVESTIGACAO_V64() {
     verificar('mesmo fato confirmado preserva valor e acumula evidência adicional',
       r3.atualizado && estado.fatos.processo.valor === 'Lançamento manual de pedidos' &&
       estado.fatos.processo.evidenciasAdicionais.length === 1);
+    verificar('conflito não resolvido mantém lacuna aberta',
+      estado.lacunas.processo === true);
+
+    var estadoResolucao = novo();
+    atualizarFatoV64_(estadoResolucao, DIMENSOES_V64.PROCESSO,
+      'Lançamento manual', 'Antes era manual', CERTEZA_V64.CONFIRMADO, 'turno-a');
+    atualizarFatoV64_(estadoResolucao, DIMENSOES_V64.PROCESSO,
+      'Lançamento automático', 'Agora é automático', CERTEZA_V64.CONFIRMADO, 'turno-b');
+    var resolucao = atualizarFatoV64_(estadoResolucao, DIMENSOES_V64.PROCESSO,
+      'Lançamento automático', 'Confirmei: agora é automático', CERTEZA_V64.CONFIRMADO, 'turno-c',
+      { resolverConflito: true });
+    verificar('conflito só é resolvido mediante confirmação explícita',
+      resolucao.conflitoResolvido === true &&
+      estadoResolucao.fatos.processo.valor === 'Lançamento automático' &&
+      estadoResolucao.lacunas.processo === false &&
+      estadoResolucao.conflitos.every(function(c) { return c.resolvido === true; }));
 
     atualizarFatoV64_(estado, DIMENSOES_V64.ESCALA, 'cerca de 100 pedidos/dia',
       'São uns 100 pedidos por dia', CERTEZA_V64.ESTIMADO, 'turno-4');
