@@ -418,30 +418,38 @@ function processarMensagemDiagnostico(dados) {
    * ==========================================================
    */
 
-  const usarMotorV64 = motorInvestigacaoV64Ativo_();
+  let usarMotorV64 = motorInvestigacaoV64Ativo_();
   let resultadoMotorV64 = null;
   let analise;
 
   try {
     if (usarMotorV64) {
-      resultadoMotorV64 = processarTurnoPersistidoV64_(
-        diagnostico,
-        contexto,
-        mensagem
-      );
-      if (!resultadoMotorV64 || !resultadoMotorV64.resultado ||
-          resultadoMotorV64.resultado.sucesso !== true) {
-        throw new Error(
-          'MOTOR_INVESTIGACAO_V64_SEM_PERGUNTA_VALIDA: ' +
-          String(resultadoMotorV64 && resultadoMotorV64.resultado &&
-            (resultadoMotorV64.resultado.motivo || resultadoMotorV64.resultado.erro) || 'sem detalhe')
+      try {
+        resultadoMotorV64 = processarTurnoPersistidoV64_(
+          diagnostico,
+          contexto,
+          mensagem
         );
+        if (!resultadoMotorV64 || !resultadoMotorV64.resultado ||
+            resultadoMotorV64.resultado.sucesso !== true) {
+          throw new Error(
+            'MOTOR_INVESTIGACAO_V64_SEM_PERGUNTA_VALIDA: ' +
+            String(resultadoMotorV64 && resultadoMotorV64.resultado &&
+              (resultadoMotorV64.resultado.motivo || resultadoMotorV64.resultado.erro) || 'sem detalhe')
+          );
+        }
+        analise = {
+          sucesso: true,
+          tempo_ms: '',
+          dados: resultadoMotorV64.analise
+        };
+      } catch (erroMotorV64) {
+        Logger.log('V6.4 indisponível nesta rodada; usando fallback V6.3: ' +
+          String(erroMotorV64 && erroMotorV64.message || erroMotorV64));
+        usarMotorV64 = false;
+        resultadoMotorV64 = null;
+        analise = analisarMensagemDiagnostico_(entradaIA);
       }
-      analise = {
-        sucesso: true,
-        tempo_ms: '',
-        dados: resultadoMotorV64.analise
-      };
     } else {
       analise = analisarMensagemDiagnostico_(entradaIA);
     }
