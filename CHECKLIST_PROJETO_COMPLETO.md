@@ -386,7 +386,8 @@ Esse é o próximo grande bloco do produto.
 # 14. V6.4 — INVESTIGAÇÃO CONVERSACIONAL ORIENTADA A EVIDÊNCIAS
 
 **Status da fase:** EM IMPLEMENTAÇÃO — NÃO ACEITA PARA PRODUÇÃO  
-**Branch:** `v6.4-investigacao-adaptativa`  
+**Branch de implementação:** `v6.4-investigacao-adaptativa` (incorporada à `main`)  
+**Commit de integração:** `0a1b8358dc6b998a4574b51aef415b8e0791577f`  
 **Ativação:** desativada por padrão; baseline V6.3 preservado.
 
 ## Estado estruturado
