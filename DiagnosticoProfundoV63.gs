@@ -384,7 +384,6 @@ function FEEDS_PROFUNDO_V63_casosDeterministicos_() {
       tipo: 'deterministico', grupo: 'CLASSIFICAÇÃO', nome: 'Perguntas de frequência em linguagem natural',
       fn: function(ctx) {
         [
-          'Quantas divulgações vocês costumam fazer por semana?',
           'Com que frequência isso acontece?',
           'Quantas vezes por mês vocês fazem isso?',
           'Vocês publicam diariamente?',
@@ -402,6 +401,9 @@ function FEEDS_PROFUNDO_V63_casosDeterministicos_() {
       fn: function(ctx) {
         var casos = [
           ['Quantos pedidos vocês processam?', 'VOLUME'],
+          ['Quantas câmeras você precisa adicionar por semana?', 'VOLUME'],
+          ['Quantas divulgações vocês costumam fazer por semana?', 'VOLUME'],
+          ['Quantos pedidos são processados por dia?', 'VOLUME'],
           ['Qual o impacto disso no negócio?', 'IMPACTO'],
           ['Esse processo gera retrabalho ou atrasos?', 'ERROS'],
           ['O que você gostaria de melhorar ou alcançar?', 'OBJETIVO'],
