@@ -2196,46 +2196,95 @@ function ajustarContinuidadeDiagnosticoLegado_(
  * Retorno deliberadamente restrito ao contrato de validação.
  */
 function ajustarContinuidadeDiagnostico_(estado, perguntaCandidata, perguntaPendente, adaptadorSemantico) {
+  // V64-FIX-20261016: validação explícita e diagnóstico de continuidade.
+  function retorno(valida, motivo, perguntaAjustada, detalhes) {
+    var r = {
+      valida: valida === true,
+      motivo: String(motivo || ''),
+      perguntaAjustada: String(perguntaAjustada || '')
+    };
+    if (detalhes) r.detalhes = detalhes;
+    return r;
+  }
+
   if (perguntaPendente) {
     var pendente = typeof perguntaPendente === 'string'
       ? { texto: perguntaPendente, tipo: 'PERGUNTA_INVESTIGATIVA' }
       : perguntaPendente;
     var textoPendente = String(pendente && (pendente.texto || pendente.mensagem) || '').trim();
     var tipoPendente = String(pendente && pendente.tipo || '').toUpperCase();
+    var tiposPermitidos = [
+      'PERGUNTA_INVESTIGATIVA',
+      'PERGUNTA_IA',
+      'PERGUNTA_DIAGNOSTICO',
+      'PERGUNTA_INVESTIGACAO'
+    ];
     var parecePerguntaReal = /\?/.test(textoPendente) &&
       /\b(qual|quais|como|quando|onde|quantos|quantas|quanto|quanta|por que|porque|quem|o que|existe|costuma|acontece|consegue|há|tem|seria|poderia)\b/i.test(textoPendente);
+
     if (!parecePerguntaReal ||
-        (tipoPendente && tipoPendente !== 'PERGUNTA_INVESTIGATIVA' &&
-         tipoPendente !== 'PERGUNTA_IA' && tipoPendente !== 'PERGUNTA_DIAGNOSTICO' &&
-         tipoPendente !== 'PERGUNTA_INVESTIGACAO')) {
-      return { valida: false, motivo: 'PERGUNTA_PENDENTE_INVALIDA', perguntaAjustada: '' };
+        (tipoPendente && tiposPermitidos.indexOf(tipoPendente) === -1)) {
+      return retorno(false, 'PERGUNTA_PENDENTE_INVALIDA', '', {
+        tipoRecebido: tipoPendente,
+        textoRecebido: textoPendente
+      });
     }
   }
 
   if (!estado || !estado.fatos || !estado.lacunas) {
-    return { valida: false, motivo: 'ESTADO_INVESTIGACAO_INVALIDO', perguntaAjustada: '' };
+    return retorno(false, 'ESTADO_INVESTIGACAO_INVALIDO', '');
   }
-  var pergunta = String(perguntaCandidata && (perguntaCandidata.proximaPergunta || perguntaCandidata.texto) || '').trim();
+  if (!perguntaCandidata || typeof perguntaCandidata !== 'object') {
+    return retorno(false, 'PERGUNTA_CANDIDATA_INVALIDA', '');
+  }
+
+  var pergunta = String(
+    perguntaCandidata.proximaPergunta || perguntaCandidata.texto || ''
+  ).trim();
+  var dimensao = String(
+    perguntaCandidata.dimensaoAlvo || perguntaCandidata.dimensao || ''
+  ).trim().toLowerCase();
+
   if (!pergunta || !/\?/.test(pergunta)) {
-    return { valida: false, motivo: 'NAO_E_PERGUNTA_INVESTIGATIVA', perguntaAjustada: '' };
+    return retorno(false, 'NAO_E_PERGUNTA_INVESTIGATIVA', '');
   }
-  var dimensao = String(perguntaCandidata.dimensaoAlvo || perguntaCandidata.dimensao || '').trim();
-  var adaptador = adaptadorSemantico || function(perguntas, candidata) {
-    var nova = normalizarTextoDiagnostico_(candidata);
-    for (var i = 0; i < perguntas.length; i++) {
-      var texto = typeof perguntas[i] === 'string' ? perguntas[i] : perguntas[i].texto;
-      if (normalizarTextoDiagnostico_(texto) === nova) {
-        return { equivalente: true, indice: i, motivo: 'mesma pergunta normalizada' };
-      }
+  if ((pergunta.match(/\?/g) || []).length > 1) {
+    return retorno(false, 'MULTIPLAS_PERGUNTAS_NO_MESMO_TURNO', '');
+  }
+  if (!dimensao || !Object.prototype.hasOwnProperty.call(estado.fatos, dimensao)) {
+    return retorno(false, 'DIMENSAO_ALVO_INVALIDA', '', { dimensaoRecebida: dimensao });
+  }
+  if (typeof validarPerguntaInvestigativaV64_ !== 'function') {
+    return retorno(false, 'VALIDADOR_V64_INDISPONIVEL', '');
+  }
+
+  var candidata = {};
+  Object.keys(perguntaCandidata).forEach(function(chave) {
+    candidata[chave] = perguntaCandidata[chave];
+  });
+  candidata.proximaPergunta = pergunta;
+  candidata.dimensaoAlvo = dimensao;
+
+  var validacao = validarPerguntaInvestigativaV64_(
+    estado,
+    candidata,
+    adaptadorSemantico
+  );
+
+  if (!validacao || typeof validacao !== 'object') {
+    return retorno(false, 'VALIDACAO_SEM_RESULTADO', '');
+  }
+
+  return retorno(
+    validacao.valida === true,
+    validacao.motivo || '',
+    validacao.perguntaAjustada || '',
+    validacao.valida === true ? null : {
+      dimensaoAlvo: dimensao,
+      perguntaCandidata: pergunta,
+      motivoValidador: validacao.motivo || 'SEM_MOTIVO'
     }
-    return { equivalente: false, indice: -1, motivo: '' };
-  };
-  var validacao = validarPerguntaInvestigativaV64_(estado, perguntaCandidata, adaptador);
-  return {
-    valida: validacao.valida === true,
-    motivo: String(validacao.motivo || ''),
-    perguntaAjustada: String(validacao.perguntaAjustada || '')
-  };
+  );
 }
 
 
