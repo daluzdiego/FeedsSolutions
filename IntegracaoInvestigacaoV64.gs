@@ -45,6 +45,25 @@ function obterOuCriarEstadoInvestigacaoV64_(diagnostico, contexto) {
   if (estado) return { estado: estado, investigacao: investigacao, inicializado: false };
 
   estado = criarEstadoInvestigacaoVazioV64_();
+
+  // Em conversas iniciadas antes da V6.4, reconstrua os fatos a partir do
+  // histórico de falas do empresário com proveniência por turno.
+  // Nunca marque esse material como confirmado: sem extração semântica,
+  // ele permanece ESTIMADO e será confirmado no diálogo atual.
+  var historicoBase = Array.isArray(contexto.historico) ? contexto.historico : [];
+  var falasEmpresarioBase = historicoBase.filter(function(item) {
+    return item && String(item.remetente || '').toUpperCase() === 'EMPRESARIO' &&
+      String(item.mensagem || '').trim();
+  });
+  falasEmpresarioBase.slice(-6).forEach(function(item, indice) {
+    adicionarTurnoHistoricoV64_(estado, {
+      id: 'BASELINE_TURNO_' + (item.ordem || indice + 1),
+      papel: 'EMPRESARIO',
+      texto: String(item.mensagem || '').trim(),
+      dataHora: item.timestamp || null,
+      origem: 'reconstrucao-historico-v6.3'
+    });
+  });
   var fatosLegados = [
     ['processo', diagnostico.processo_resumo || diagnostico.processo_nome || investigacao.processo || ''],
     ['dor_causa', diagnostico.dor_principal || investigacao.problema_central || ''],
@@ -62,18 +81,17 @@ function obterOuCriarEstadoInvestigacaoV64_(diagnostico, contexto) {
     atualizarFatoV64_(estado, 'excecoes', investigacao.excecoes.join('; '), null, CERTEZA_V64.ESTIMADO, 'baseline-v6.3');
   }
 
-  var historico = Array.isArray(contexto.historico) ? contexto.historico : [];
   var perguntaMaisRecente = null;
-  historico.forEach(function(item, indice) {
+  historicoBase.forEach(function(item, indice) {
     if (!item) return;
     var texto = String(item.mensagem || '').trim();
     var remetente = String(item.remetente || '').toUpperCase();
     var tipo = String(item.tipo || '').toUpperCase();
     if (!texto) return;
 
-    // O último turno do empresário já foi salvo no fluxo legado e será
-    // registrado por processarTurnoInvestigacaoV64_ para evitar duplicação.
-    if (remetente === 'EMPRESARIO' && indice === historico.length - 1) return;
+    // Turnos anteriores do empresário já foram incluídos acima para a migração.
+    // Não duplicar o último turno atual: o motor o adicionará ao processar.
+    if (remetente === 'EMPRESARIO') return;
 
     adicionarTurnoHistoricoV64_(estado, {
       id: 'LEGADO_' + (item.ordem || indice + 1),
