@@ -611,7 +611,7 @@ function TESTAR_CORRECAO_REPETICAO_PERGUNTAS_DIAGNOSTICO_V1() {
 
   const falhas = [];
   casos.forEach(function(caso) {
-    const resultado = ajustarContinuidadeDiagnostico_(
+    const resultado = ajustarContinuidadeDiagnosticoLegado_(
       {
         processo: '',
         dor_principal: '',
@@ -639,7 +639,7 @@ function TESTAR_CORRECAO_REPETICAO_PERGUNTAS_DIAGNOSTICO_V1() {
   // sobre objetivo; ela reforça frequência e retrabalho. Portanto a pergunta
   // de objetivo deve ser preservada, e a memória não deve ser apagada.
   const perguntaObjetivo = 'O que você gostaria de alcançar resolvendo isso?';
-  const casoReal = ajustarContinuidadeDiagnostico_({
+  const casoReal = ajustarContinuidadeDiagnosticoLegado_({
     processo: '',
     dor_principal: '',
     frequencia: '',
