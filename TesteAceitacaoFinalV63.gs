@@ -594,20 +594,32 @@ function TESTAR_ACEITACAO_FINAL_V63() {
  */
 function TESTAR_CORRECAO_REPETICAO_PERGUNTAS_DIAGNOSTICO_V1() {
   const casos = [
-    { nome: 'uma por mês', pergunta: 'Quantas divulgações vocês costumam fazer por semana?', resposta: 'uma por mês' },
-    { nome: '20 por dia', pergunta: 'Quantas divulgações vocês costumam fazer por semana?', resposta: '20 por dia' },
-    { nome: '50 por semana', pergunta: 'Quantas divulgações vocês costumam fazer por semana?', resposta: '~50 por semana' },
-    { nome: 'diariamente na pergunta de erros', pergunta: 'Esse processo costuma gerar erros, retrabalho ou atrasos?', resposta: 'diariamente' },
-    { nome: 'não sei na pergunta de erros', pergunta: 'Esse processo costuma gerar erros, retrabalho ou atrasos?', resposta: 'não sei dizer' },
-    { nome: 'contexto responde frequência e não repete processo', pergunta: 'O que você gostaria de alcançar resolvendo isso?', resposta: 'Quero reduzir o retrabalho causado pelos erros.' }
+    { nome: 'uma por mês', pergunta: 'Quantas divulgações vocês costumam fazer por semana?', resposta: 'uma por mês', esperado: 'FREQUENCIA' },
+    { nome: '20 por dia', pergunta: 'Quantas divulgações vocês costumam fazer por semana?', resposta: '20 por dia', esperado: 'FREQUENCIA' },
+    { nome: '50 por semana', pergunta: 'Quantas divulgações vocês costumam fazer por semana?', resposta: '~50 por semana', esperado: 'FREQUENCIA' },
+    { nome: 'resposta contextual na pergunta de erros', pergunta: 'Esse processo costuma gerar erros, retrabalho ou atrasos?', resposta: 'A maior dificuldade é o retrabalho causado pelos erros.', esperado: 'OBJETIVO' },
+    { nome: 'não sei na pergunta de erros', pergunta: 'Esse processo costuma gerar erros, retrabalho ou atrasos?', resposta: 'não sei dizer', esperado: 'OBJETIVO' },
+    { nome: 'objetivo concreto encerra ou avança', pergunta: 'O que você gostaria de alcançar resolvendo isso?', resposta: 'Quero reduzir o retrabalho causado pelos erros.', esperado: '' }
   ];
+
   const falhas = [];
   casos.forEach(function(caso) {
     const resultado = ajustarContinuidadeDiagnostico_(
-      { proxima_pergunta: caso.pergunta, informacao_faltante: caso.pergunta },
+      {
+        processo: '',
+        dor_principal: '',
+        frequencia: '',
+        impacto: '',
+        volume: '',
+        objetivo: '',
+        proxima_pergunta: caso.pergunta,
+        informacao_faltante: caso.pergunta,
+        respondeu_pergunta_pendente: false
+      },
       caso.pergunta,
       caso.resposta
     );
+
     const passou = resultado.respondeu_pergunta_pendente === true &&
       resultado.proxima_pergunta !== caso.pergunta;
     Logger.log((passou ? 'PASSOU: ' : 'FALHOU: ') + caso.nome +
@@ -616,8 +628,9 @@ function TESTAR_CORRECAO_REPETICAO_PERGUNTAS_DIAGNOSTICO_V1() {
     if (!passou) falhas.push(caso.nome);
   });
 
-  // Reproduz o defeito real: a IA devolveu campos vazios na segunda mensagem,
-  // mas a continuidade precisa reconhecer a resposta contextual e avançar.
+  // Reprodução fiel do log real: a segunda mensagem não responde à pergunta
+  // sobre objetivo; ela reforça frequência e retrabalho. Portanto a pergunta
+  // de objetivo deve ser preservada, e a memória não deve ser apagada.
   const perguntaObjetivo = 'O que você gostaria de alcançar resolvendo isso?';
   const casoReal = ajustarContinuidadeDiagnostico_({
     processo: '',
@@ -632,18 +645,22 @@ function TESTAR_CORRECAO_REPETICAO_PERGUNTAS_DIAGNOSTICO_V1() {
   }, perguntaObjetivo,
   'Isso acontece praticamente todos os dias e a maior dificuldade é o retrabalho causado pelos erros.');
 
+  // Uma resposta que não informa objetivo NÃO deve ser aceita como objetivo.
+  // A pergunta continua pendente, mas os fatos contextuais são preservados
+  // pelo normalizador e pelo diagnóstico consolidado.
   const casoRealPassou =
-    casoReal.respondeu_pergunta_pendente === true &&
-    casoReal.proxima_pergunta !== perguntaObjetivo;
+    casoReal.respondeu_pergunta_pendente === false &&
+    casoReal.proxima_pergunta === perguntaObjetivo &&
+    !casoReal.objetivo;
+
   Logger.log((casoRealPassou ? 'PASSOU: ' : 'FALHOU: ') +
-    'regressão real: resposta contextual avança sem repetir pergunta' +
+    'regressão real: mensagem que só reforça frequência/dor não é confundida com objetivo' +
     ' | resultado=' + JSON.stringify(casoReal));
   if (!casoRealPassou) falhas.push('regressão real da segunda mensagem');
 
-  if (falhas.length) {
-    Logger.log('FALHAS: ' + falhas.join('; '));
-    return { sucesso: false, aprovados: casos.length + (casoRealPassou ? 1 : 0), total: casos.length + 1, falhas: falhas };
-  }
-  Logger.log('APROVADO: ' + (casos.length + 1) + '/' + (casos.length + 1));
-  return { sucesso: true, aprovados: casos.length + 1, total: casos.length + 1, falhas: [] };
+  const total = casos.length + 1;
+  const aprovados = total - falhas.length;
+  Logger.log('APROVADO: ' + aprovados + '/' + total);
+  if (falhas.length) Logger.log('FALHAS: ' + falhas.join('; '));
+  return { sucesso: falhas.length === 0, aprovados: aprovados, total: total, falhas: falhas };
 }
