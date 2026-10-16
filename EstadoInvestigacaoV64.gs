@@ -10,6 +10,7 @@ var DIMENSOES_V64 = {
   PROCESSO: 'processo',
   DOR_CAUSA: 'dor_causa',
   ESCALA: 'escala',
+  FREQUENCIA: 'frequencia',
   IMPACTO: 'impacto',
   EXCECOES: 'excecoes',
   OBJETIVO: 'objetivo',
