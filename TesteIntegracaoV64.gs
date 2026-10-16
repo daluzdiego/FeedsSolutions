@@ -124,10 +124,11 @@ function TESTAR_INTEGRACAO_V64() {
       { ordem: 5, remetente: 'EMPRESARIO', tipo: 'EMPRESARIO', mensagem: 'São 100 pedidos por dia.' }
     ], 'São 100 pedidos por dia.');
     assert('migração mantém cronologia e não duplica turno atual',
-      eHistoria.historico.map(function(t) { return t.papel; }).join(',') === 'SISTEMA,EMPRESARIO,SISTEMA' &&
-      eHistoria.historico.length === 3);
-    assert('migração não deixa pergunta respondida marcada como pendente',
-      eHistoria.perguntaPendente === null && importacao.perguntaPendente === null);
+      eHistoria.historico.map(function(t) { return t.papel; }).join(',') === 'SISTEMA,EMPRESARIO,SISTEMA,SISTEMA' &&
+      eHistoria.historico.length === 4);
+    assert('migração mantém pendente a pergunta que a mensagem atual precisa responder',
+      eHistoria.perguntaPendente.texto === 'Quantos pedidos são processados por dia?' &&
+      importacao.perguntaPendente.texto === eHistoria.perguntaPendente.texto);
 
     var estadoComHistorico = criarEstadoInvestigacaoVazioV64_();
     registrarPerguntaFeitaV64_(estadoComHistorico, 'Quais são os dias e horários de pico dos pedidos?', 'frequencia', 'q-pico');
