@@ -418,10 +418,33 @@ function processarMensagemDiagnostico(dados) {
    * ==========================================================
    */
 
+  const usarMotorV64 = motorInvestigacaoV64Ativo_();
+  let resultadoMotorV64 = null;
   let analise;
 
   try {
-    analise = analisarMensagemDiagnostico_(entradaIA);
+    if (usarMotorV64) {
+      resultadoMotorV64 = processarTurnoPersistidoV64_(
+        diagnostico,
+        contexto,
+        mensagem
+      );
+      if (!resultadoMotorV64 || !resultadoMotorV64.resultado ||
+          resultadoMotorV64.resultado.sucesso !== true) {
+        throw new Error(
+          'MOTOR_INVESTIGACAO_V64_SEM_PERGUNTA_VALIDA: ' +
+          String(resultadoMotorV64 && resultadoMotorV64.resultado &&
+            (resultadoMotorV64.resultado.motivo || resultadoMotorV64.resultado.erro) || 'sem detalhe')
+        );
+      }
+      analise = {
+        sucesso: true,
+        tempo_ms: '',
+        dados: resultadoMotorV64.analise
+      };
+    } else {
+      analise = analisarMensagemDiagnostico_(entradaIA);
+    }
     if (!analise || !analise.dados) {
       throw new Error('ANALISE_IA_INVALIDA');
     }
@@ -451,12 +474,13 @@ function processarMensagemDiagnostico(dados) {
    * ==========================================================
    */
 
-  const analiseNormalizada =
-    normalizarAnaliseDiagnostico_(
-      analise.dados,
-      mensagem,
-      contexto.diagnostico || {}
-    );
+  const analiseNormalizada = usarMotorV64
+    ? Object.assign({}, analise.dados)
+    : normalizarAnaliseDiagnostico_(
+        analise.dados,
+        mensagem,
+        contexto.diagnostico || {}
+      );
 
 
   /*
@@ -482,12 +506,13 @@ function processarMensagemDiagnostico(dados) {
    * ==========================================================
    */
 
-  const analiseContinuidade =
-    ajustarContinuidadeDiagnostico_(
-      analiseNormalizada,
-      contexto.pergunta_pendente || '',
-      mensagem
-    );
+  const analiseContinuidade = usarMotorV64
+    ? analiseNormalizada
+    : ajustarContinuidadeDiagnostico_(
+        analiseNormalizada,
+        contexto.pergunta_pendente || '',
+        mensagem
+      );
 
 
   /*
@@ -509,11 +534,14 @@ function processarMensagemDiagnostico(dados) {
    * ==========================================================
    */
 
-  const novoEstado =
-    determinarEstadoDiagnostico_(
-      novoDiagnostico,
-      analiseContinuidade
-    );
+  const novoEstado = usarMotorV64
+    ? (resultadoMotorV64.resultado.status_diagnostico === 'CONCLUIDO'
+        ? DIAGNOSTICO_ESTADOS.PRONTO_PARA_ANALISE
+        : DIAGNOSTICO_ESTADOS.INVESTIGACAO)
+    : determinarEstadoDiagnostico_(
+        novoDiagnostico,
+        analiseContinuidade
+      );
 
 
   novoDiagnostico.status_diagnostico =
@@ -636,11 +664,13 @@ const investigacaoV622 =
    * ==========================================================
    */
 
-  const respostaLegada =
-    obterRespostaConversa_(
-      analiseContinuidade,
-      novoEstado
-    );
+  const respostaLegada = usarMotorV64
+    ? (String(resultadoMotorV64.resultado.proxima_pergunta || '').trim() ||
+       obterRespostaConversa_(analiseContinuidade, novoEstado))
+    : obterRespostaConversa_(
+        analiseContinuidade,
+        novoEstado
+      );
 
 
   const resultadoFluxoParaV63 = {
@@ -746,6 +776,7 @@ const investigacaoV622 =
 
   const resposta =
     (
+      (!usarMotorV64 || resultadoMotorV64.resultado.status_diagnostico === 'CONCLUIDO') &&
       integracaoV63 &&
       integracaoV63.ativada === true &&
       integracaoV63.resposta_cliente
@@ -846,7 +877,7 @@ const investigacaoV622 =
         resposta,
 
       tipo:
-        'PERGUNTA_IA',
+        usarMotorV64 ? 'PERGUNTA_INVESTIGATIVA' : 'PERGUNTA_IA',
 
       timestamp:
         new Date()
@@ -1616,7 +1647,7 @@ function obterPerguntaPendenteDiagnostico_(
     if (!pergunta) continue;
 
     // Nunca tratar qualquer mensagem do sistema como pergunta pendente.
-    const tipoPergunta = /^(PERGUNTA_IA|PERGUNTA_DIAGNOSTICO|PERGUNTA_INVESTIGACAO)$/.test(tipo);
+    const tipoPergunta = /^(PERGUNTA_IA|PERGUNTA_DIAGNOSTICO|PERGUNTA_INVESTIGACAO|PERGUNTA_INVESTIGATIVA)$/.test(tipo);
     const mensagemInterrogativa = /\?/.test(pergunta);
     const remetenteSistemaComPergunta =
       remetente === 'SISTEMA' &&
