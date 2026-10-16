@@ -231,6 +231,13 @@ function TESTAR_ACEITACAO_FINAL_V63_CONTINUAR() {
 function obterTestesAceitacaoFinalV63_() {
   return [
     {
+      etapa: 'Qualidade — investigação conversacional',
+      nome: 'TESTAR_QUALIDADE_INVESTIGACAO_CONVERSACIONAL_V63',
+      fn: typeof TESTAR_QUALIDADE_INVESTIGACAO_CONVERSACIONAL_V63 === 'function'
+        ? TESTAR_QUALIDADE_INVESTIGACAO_CONVERSACIONAL_V63
+        : null
+    },
+    {
       etapa: 'Interpretação — resistência',
       nome: 'TESTAR_RESISTENCIA_INTERPRETACAO_V63',
       fn: typeof TESTAR_RESISTENCIA_INTERPRETACAO_V63 === 'function'
