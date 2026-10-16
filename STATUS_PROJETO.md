@@ -82,3 +82,37 @@ Será aberta com escopo e critérios de sucesso explícitos.
 InterpretacaoIA_V63.gs, InterpretacaoV63.gs, SolucoesV63.gs, DecisãoV63.gs, RespostaSegura.gs, PonteV63.gs, IntegracaoV63.gs, IntegracaoFluxoPrincipalV63.gs, AprendizadoV63.gs, AprendizadoReconhecimentoV63.gs, AprendizadoFluxoV63.gs, AprendizadoFechamentoV63.gs, ResultadoRealV63.gs, RobustezOperacionalV63.gs e TesteAceitacaoFinalV63.gs.
 
 **STATUS GERAL: 🟢 FEEDS SOLUTIONS V6.3 — ESTÁVEL E ACEITA.**
+
+
+---
+
+# FASE V6.4 — INVESTIGAÇÃO CONVERSACIONAL ORIENTADA A EVIDÊNCIAS
+
+**Estado:** EM IMPLEMENTAÇÃO — NÃO ACEITA PARA PRODUÇÃO  
+**Branch:** `v6.4-investigacao-adaptativa`  
+**Ativação do motor:** desativada por padrão (`FEEDS_MOTOR_INVESTIGACAO_V64_ATIVO = false`)  
+**Baseline V6.3:** preservado; caminho legado continua disponível.
+
+## Três indicadores independentes de validação
+
+| Categoria | Resultado atual | O que significa |
+|---|---:|---|
+| Testes unitários determinísticos | **100% — 19/19** | Estado explícito, evidência, certeza, conflitos e serialização verificados em execução isolada de JavaScript. Ainda requer execução no Apps Script. |
+| Integração técnica determinística | **100% — 12/12 + adaptador 4/4** | Gate, precedência, pergunta pendente, adaptação e preservação do estado verificados em execução isolada. Ainda requer execução no Apps Script. |
+| Qualidade conversacional real | **0% validada com Gemini real** | Há 12 cenários conversacionais determinísticos e uma função de teste ponta a ponta com Gemini, mas o teste real ainda não foi executado. |
+
+**Revisão humana:** 0/3–5 diálogos revisados.  
+**Aceite da V6.4:** pendente. Não declarar concluída antes do teste Gemini, regressão V6.3 e revisão humana.
+
+## Implementado na branch
+
+- Estado estruturado com fatos, evidências, certeza, origem, conflitos, lacunas, perguntas e histórico.
+- Frequência modelada separadamente de escala/volume e impacto.
+- Preservação de fatos confirmados; contradições ficam registradas e bloqueiam a conclusão até resolução explícita.
+- Persistência versionada no campo existente `INVESTIGACOES.informacoes`, sem criar colunas nem apagar itens legados.
+- Seleção adaptativa de pergunta por Gemini, usando o estado consolidado.
+- Validação de pergunta repetida/prematura e gate de conclusão.
+- Integração ao fluxo principal protegida por chave de ativação e fallback V6.3.
+- Testes V6.4 separados dos resultados de aceitação V6.3.
+
+Consulte `GUIA_TESTES_V64.md` para a ordem exata de execução, arquivos, funções e resultados esperados.
