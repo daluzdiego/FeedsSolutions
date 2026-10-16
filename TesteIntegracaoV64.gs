@@ -78,14 +78,16 @@ function TESTAR_INTEGRACAO_V64() {
     }, null, function() { return { equivalente: false, indice: -1 }; });
     assert('ajustarContinuidadeDiagnostico_ retorna contrato de validação com pergunta e dimensão válidas',
       contrato.valida === true && contrato.perguntaAjustada === 'Quantos pedidos são processados por dia?' &&
-      contrato.motivo === '');
+      contrato.motivo === '',
+      'Retorno observado: ' + JSON.stringify(contrato));
 
     var perguntaInvalida = ajustarContinuidadeDiagnostico_(e9, {
       proximaPergunta: 'Quais pedidos são processados por dia?',
       dimensaoAlvo: 'escala'
     }, { texto: 'Olá, tudo certo?', tipo: 'MENSAGEM_SISTEMA' }, function() { return { equivalente: false }; });
     assert('continuidade rejeita mensagem genérica como pergunta pendente',
-      perguntaInvalida.valida === false && perguntaInvalida.motivo === 'PERGUNTA_PENDENTE_INVALIDA');
+      perguntaInvalida.valida === false && perguntaInvalida.motivo === 'PERGUNTA_PENDENTE_INVALIDA',
+      'Retorno observado: ' + JSON.stringify(perguntaInvalida));
 
     var e10 = criarEstadoInvestigacaoVazioV64_();
     atualizarFatoV64_(e10, 'processo', 'Lançamento manual', 'Lançamos manualmente', 'CONFIRMADO', 'turno-1');
