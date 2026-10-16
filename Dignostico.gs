@@ -516,7 +516,7 @@ function processarMensagemDiagnostico(dados) {
 
   const analiseContinuidade = usarMotorV64
     ? analiseNormalizada
-    : ajustarContinuidadeDiagnostico_(
+    : ajustarContinuidadeDiagnosticoLegado_(
         analiseNormalizada,
         contexto.pergunta_pendente || '',
         mensagem
@@ -2030,7 +2030,7 @@ function normalizarAnaliseDiagnostico_(
   return resultado;
 }
 
-function ajustarContinuidadeDiagnostico_(
+function ajustarContinuidadeDiagnosticoLegado_(
   analise,
   perguntaPendente,
   mensagemAtual
@@ -2189,6 +2189,34 @@ function ajustarContinuidadeDiagnostico_(
 
   return resultado;
 }
+
+/**
+ * V6.4 — Validador de continuidade, sem interpretação semântica.
+ * A interpretação e a escolha da pergunta pertencem ao motor de investigação.
+ * Retorno deliberadamente restrito ao contrato de validação.
+ */
+function ajustarContinuidadeDiagnostico_(estado, perguntaCandidata, perguntaPendente) {
+  if (perguntaPendente) {
+    var pendente = typeof perguntaPendente === 'string'
+      ? { texto: perguntaPendente, tipo: 'PERGUNTA_INVESTIGATIVA' }
+      : perguntaPendente;
+    var textoPendente = String(pendente && (pendente.texto || pendente.mensagem) || '').trim();
+    var tipoPendente = String(pendente && pendente.tipo || '').toUpperCase();
+    if (!textoPendente || !/\\?/.test(textoPendente) ||
+        (tipoPendente && tipoPendente !== 'PERGUNTA_INVESTIGATIVA' &&
+         tipoPendente !== 'PERGUNTA_IA' && tipoPendente !== 'PERGUNTA_DIAGNOSTICO' &&
+         tipoPendente !== 'PERGUNTA_INVESTIGACAO')) {
+      return { valida: false, motivo: 'PERGUNTA_PENDENTE_INVALIDA', perguntaAjustada: '' };
+    }
+  }
+  var validacao = validarPerguntaInvestigativaV64_(estado, perguntaCandidata);
+  return {
+    valida: validacao.valida === true,
+    motivo: String(validacao.motivo || ''),
+    perguntaAjustada: String(validacao.perguntaAjustada || '')
+  };
+}
+
 
 function classificarDimensaoPerguntaDiagnostico_(perguntaNormalizada) {
   const p = normalizarTextoDiagnostico_(perguntaNormalizada || '');
@@ -6541,7 +6569,7 @@ function testarContinuidadeDiagnosticoV5() {
   // CASO 1 — PRIMEIRA MENSAGEM
   // ----------------------------------------------------------
   const primeira =
-    ajustarContinuidadeDiagnostico_(
+    ajustarContinuidadeDiagnosticoLegado_(
       {
         processo: 'colocação manual de pedidos em planilha',
         dor_principal: 'perda de tempo com trabalho manual',
@@ -6567,7 +6595,7 @@ function testarContinuidadeDiagnosticoV5() {
   // CASO 2 — RESPOSTA À PERGUNTA DE FREQUÊNCIA
   // ----------------------------------------------------------
   const respostaFrequencia =
-    ajustarContinuidadeDiagnostico_(
+    ajustarContinuidadeDiagnosticoLegado_(
       {
         processo: 'captação de clientes pelas redes sociais',
         dor_principal: 'dificuldade para captar clientes',
@@ -6599,7 +6627,7 @@ function testarContinuidadeDiagnosticoV5() {
   }
 
   const respostaFrequenciaNegativa =
-    ajustarContinuidadeDiagnostico_(
+    ajustarContinuidadeDiagnosticoLegado_(
       {
         processo: 'captação de clientes pelas redes sociais',
         dor_principal: 'dificuldade para captar clientes',
@@ -6633,7 +6661,7 @@ function testarContinuidadeDiagnosticoV5() {
   // CASO 2 — RESPOSTA À PERGUNTA DE IMPACTO
   // ----------------------------------------------------------
   const respostaImpacto =
-    ajustarContinuidadeDiagnostico_(
+    ajustarContinuidadeDiagnosticoLegado_(
       {
         processo: 'captação de clientes pelas redes sociais',
         dor_principal: 'dificuldade para captar clientes',
@@ -6667,7 +6695,7 @@ function testarContinuidadeDiagnosticoV5() {
   // CASO 3 — RESPOSTA CONTEXTUAL DE VOLUME
   // ----------------------------------------------------------
   const respostaVolumeContextual =
-    ajustarContinuidadeDiagnostico_(
+    ajustarContinuidadeDiagnosticoLegado_(
       {
         processo: 'postagem no Facebook',
         dor_principal: 'não consigo captar clientes',
@@ -6707,7 +6735,7 @@ function testarContinuidadeDiagnosticoV5() {
   // CASO 2 — RESPOSTA À PERGUNTA DE VOLUME
   // ----------------------------------------------------------
   const segunda =
-    ajustarContinuidadeDiagnostico_(
+    ajustarContinuidadeDiagnosticoLegado_(
       {
         processo: '',
         dor_principal: '',
@@ -7338,7 +7366,7 @@ function testarProtecoesDiagnosticoV5_2() {
   // ----------------------------------------------------------
   // 1. PRIMEIRA MENSAGEM NÃO RESPONDE PERGUNTA
   // ----------------------------------------------------------
-  const primeira = ajustarContinuidadeDiagnostico_(
+  const primeira = ajustarContinuidadeDiagnosticoLegado_(
     {
       processo: 'colocação manual de pedidos em planilha',
       dor_principal: 'perda de tempo com trabalho manual',
@@ -7406,7 +7434,7 @@ function testarProtecoesDiagnosticoV5_2() {
   // ----------------------------------------------------------
   // 4. NEGAÇÃO DE ERROS AVANÇA PARA OBJETIVO
   // ----------------------------------------------------------
-  const negativa = ajustarContinuidadeDiagnostico_(
+  const negativa = ajustarContinuidadeDiagnosticoLegado_(
     {
       processo: '',
       dor_principal: '',
@@ -46115,7 +46143,7 @@ function TESTAR_DIAGNOSTICO_OBJETIVO_V623() {
       'Qual é o objetivo principal que você deseja alcançar com essa melhoria?';
 
     const analiseContinuidade =
-      ajustarContinuidadeDiagnostico_(
+      ajustarContinuidadeDiagnosticoLegado_(
         analiseNormalizada,
         perguntaPendente,
         mensagem
