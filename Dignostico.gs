@@ -2195,7 +2195,7 @@ function ajustarContinuidadeDiagnosticoLegado_(
  * A interpretação e a escolha da pergunta pertencem ao motor de investigação.
  * Retorno deliberadamente restrito ao contrato de validação.
  */
-function ajustarContinuidadeDiagnostico_(estado, perguntaCandidata, perguntaPendente) {
+function ajustarContinuidadeDiagnostico_(estado, perguntaCandidata, perguntaPendente, adaptadorSemantico) {
   if (perguntaPendente) {
     var pendente = typeof perguntaPendente === 'string'
       ? { texto: perguntaPendente, tipo: 'PERGUNTA_INVESTIGATIVA' }
@@ -2209,7 +2209,7 @@ function ajustarContinuidadeDiagnostico_(estado, perguntaCandidata, perguntaPend
       return { valida: false, motivo: 'PERGUNTA_PENDENTE_INVALIDA', perguntaAjustada: '' };
     }
   }
-  var validacao = validarPerguntaInvestigativaV64_(estado, perguntaCandidata);
+  var validacao = validarPerguntaInvestigativaV64_(estado, perguntaCandidata, adaptadorSemantico);
   return {
     valida: validacao.valida === true,
     motivo: String(validacao.motivo || ''),
