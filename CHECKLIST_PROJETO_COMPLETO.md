@@ -413,7 +413,7 @@ Esse é o próximo grande bloco do produto.
 - [x] Teste unitário determinístico criado — execução isolada: 19/19
 - [x] Teste conversacional determinístico criado — execução isolada: 12/12
 - [x] Teste do adaptador criado — execução isolada: 4/4
-- [x] Teste de integração determinístico criado — execução isolada: 12/12
+- [x] Teste de integração determinístico criado — execução isolada: 14/14
 - [x] Função de teste ponta a ponta com Gemini real criada
 - [ ] Suítes V6.4 executadas no Google Apps Script
 - [ ] Teste ponta a ponta com Gemini executado e aprovado
