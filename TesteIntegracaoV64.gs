@@ -100,11 +100,35 @@ function TESTAR_INTEGRACAO_V64() {
     assert('motor V6.4 permanece desativado até a aceitação real',
       motorInvestigacaoV64Ativo_() === false);
 
+    var estadoNaoPerdeLacuna = criarEstadoInvestigacaoVazioV64_();
+    atualizarFatoV64_(estadoNaoPerdeLacuna, 'processo', 'Recebimento por WhatsApp', 'Recebemos pedidos pelo WhatsApp', 'CONFIRMADO', 'turno-1');
+    registrarPerguntaFeitaV64_(estadoNaoPerdeLacuna, 'Quais são os horários de pico?', 'frequencia', 'pico-1');
+    var textoDepoisRepeticao = '';
+    for (var tentativa = 0; tentativa < 2; tentativa++) {
+      var resultadoRepeticao = processarTurnoInvestigacaoV64_(estadoNaoPerdeLacuna, 'Ainda não sei informar os horários.', {
+        interpretar: function() { return { fatos: [], respondeuPerguntaPendente: true, ambiguidade: false, explicacaoAmbiguidade: '' }; },
+        selecionarPergunta: function() { return { proximaPergunta: 'Quais são os horários de pico?', dimensaoAlvo: 'frequencia', justificativa: 'mapear horário', lacunaQueReduz: 'horários de pico' }; },
+        verificarRepeticao: function() { return { equivalente: true, indice: 0, motivo: 'mesma lacuna temporal' }; }
+      });
+      textoDepoisRepeticao = resultadoRepeticao.motivo || '';
+    }
+    assert('repetição de pergunta não fecha silenciosamente a lacuna',
+      estadoNaoPerdeLacuna.lacunas.frequencia === true &&
+      estadoNaoPerdeLacuna.fatos.frequencia.certeza === 'DESCONHECIDO' &&
+      /REPETICAO_SEMANTICA/.test(textoDepoisRepeticao));
+
+    var escalaEfrequencia = criarEstadoInvestigacaoVazioV64_();
+    atualizarFatoV64_(escalaEfrequencia, 'processo', 'Recebimento de pedidos', 'Recebemos pedidos', 'CONFIRMADO', 'turno-1');
+    var classPico = classificarDimensaoPerguntaV64_('Quais são os dias e horários de pico?', escalaEfrequencia);
+    var classQuantidadePico = classificarDimensaoPerguntaV64_('Quantos pedidos chegam no horário de pico?', escalaEfrequencia);
+    assert('classifica horários como frequência e quantidade em pico como escala',
+      classPico === 'frequencia' && classQuantidadePico === 'escala');
+
   } catch (e) {
     resultados.push({ teste: 'execução da suíte', passou: false, detalhe: String(e && e.stack || e) });
   }
   var aprovados = resultados.filter(function(r) { return r.passou; }).length;
-  var resumo = { versao: 'V6.4', suite: 'INTEGRACAO_DETERMINISTICA', sucesso: resultados.length === 14 && aprovados === resultados.length, total: resultados.length, aprovados: aprovados, falhas: resultados.length - aprovados, resultados: resultados };
+  var resumo = { versao: 'V6.4', suite: 'INTEGRACAO_DETERMINISTICA', sucesso: resultados.length === 16 && aprovados === resultados.length, total: resultados.length, aprovados: aprovados, falhas: resultados.length - aprovados, resultados: resultados };
   Logger.log('FEEDS SOLUTIONS V6.4 — INTEGRAÇÃO DETERMINÍSTICA: ' + JSON.stringify(resumo));
   return resumo;
 }
