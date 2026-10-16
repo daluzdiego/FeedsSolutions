@@ -100,11 +100,25 @@ function TESTAR_INTEGRACAO_V64() {
     assert('motor V6.4 permanece desativado até a aceitação real',
       motorInvestigacaoV64Ativo_() === false);
 
+    assert('histórico legado classifica horários de pico como frequência',
+      inferirDimensaoPerguntaV64_('Quais são os dias e horários de pico dos pedidos?') === 'frequencia');
+
+    var estadoComHistorico = criarEstadoInvestigacaoVazioV64_();
+    registrarPerguntaFeitaV64_(estadoComHistorico, 'Quais são os dias e horários de pico dos pedidos?', 'frequencia', 'q-pico');
+    var tentativaPicoComoEscala = validarPerguntaInvestigativaV64_(estadoComHistorico, {
+      proximaPergunta: 'Quais são os dias e horários em que chegam esses pedidos com mais intensidade?',
+      dimensaoAlvo: 'escala'
+    }, function() { return { equivalente: true, indice: 0, motivo: 'mesma informação de horários de pico' }; });
+    assert('pergunta sobre horários de pico rotulada como escala é rejeitada',
+      tentativaPicoComoEscala.valida === false &&
+      tentativaPicoComoEscala.motivo === 'DIMENSAO_ALVO_NAO_CORRESPONDE_A_PERGUNTA' &&
+      tentativaPicoComoEscala.dimensaoDetectada === 'frequencia');
+
   } catch (e) {
     resultados.push({ teste: 'execução da suíte', passou: false, detalhe: String(e && e.stack || e) });
   }
   var aprovados = resultados.filter(function(r) { return r.passou; }).length;
-  var resumo = { versao: 'V6.4', suite: 'INTEGRACAO_DETERMINISTICA', sucesso: resultados.length === 14 && aprovados === resultados.length, total: resultados.length, aprovados: aprovados, falhas: resultados.length - aprovados, resultados: resultados };
+  var resumo = { versao: 'V6.4', suite: 'INTEGRACAO_DETERMINISTICA', sucesso: resultados.length === 16 && aprovados === resultados.length, total: resultados.length, aprovados: aprovados, falhas: resultados.length - aprovados, resultados: resultados };
   Logger.log('FEEDS SOLUTIONS V6.4 — INTEGRAÇÃO DETERMINÍSTICA: ' + JSON.stringify(resumo));
   return resumo;
 }
