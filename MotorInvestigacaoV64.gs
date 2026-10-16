@@ -197,6 +197,7 @@ function compararPerguntaSemanticamenteV64_(perguntasFeitas, candidata, adaptado
   var texto = String(candidata || '').trim();
   var normalizada = normalizarPerguntaInvestigacaoV64_(texto);
   var perguntas = Array.isArray(perguntasFeitas) ? perguntasFeitas : [];
+  if (!perguntas.length) return { equivalente: false, indice: -1, motivo: '', metodo: 'SEM_HISTORICO' };
   for (var i = 0; i < perguntas.length; i++) {
     var existente = typeof perguntas[i] === 'string' ? perguntas[i] : perguntas[i].texto;
     if (normalizarPerguntaInvestigacaoV64_(existente) === normalizada) {
