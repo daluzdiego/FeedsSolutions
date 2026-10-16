@@ -84,6 +84,9 @@ function atualizarFatoV64_(estado, dimensao, valor, evidencia, certeza, origem, 
     ? null : valor;
   var evidenciaNova = evidencia === undefined || evidencia === null || String(evidencia).trim() === ''
     ? null : String(evidencia).trim();
+  if (certeza === CERTEZA_V64.CONFIRMADO && !evidenciaNova) {
+    throw new Error('EVIDENCIA_OBRIGATORIA_PARA_CONFIRMADO: ' + dimensao);
+  }
   var fatoAnterior = estado.fatos[dimensao] || {
     valor: null,
     evidencia: null,
