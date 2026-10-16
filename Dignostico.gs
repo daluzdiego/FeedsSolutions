@@ -1985,295 +1985,116 @@ function ajustarContinuidadeDiagnostico_(
   perguntaPendente,
   mensagemAtual
 ) {
-
   const resultado = Object.assign({}, analise || {});
   const pergunta = String(perguntaPendente || '').trim();
   const mensagemOriginal = String(mensagemAtual || '').trim();
   const mensagem = normalizarTextoDiagnostico_(mensagemOriginal);
 
-  // ----------------------------------------------------------
-  // 0. SEM PERGUNTA PENDENTE
-  // ----------------------------------------------------------
-  if (!pergunta) {
+  if (!pergunta || !mensagem) {
     resultado.respondeu_pergunta_pendente = false;
     return resultado;
   }
 
   const perguntaNorm = normalizarTextoDiagnostico_(pergunta);
-  let respondeuDeterministicamente = false;
-  let respostaNegativa = false;
+  const dimensao = classificarDimensaoPerguntaDiagnostico_(perguntaNorm);
+  const jaNegada = (arguments.length > 3 && arguments[3]) || [];
+  let respondeu = false;
+  let negativa = false;
 
-  // ----------------------------------------------------------
-  // 1. VOLUME / QUANTIDADE
-  // ----------------------------------------------------------
-  if (/quant[oa]s|quantidade|volume|numero de/.test(perguntaNorm)) {
-
-    /*
-     * Respostas de volume podem ser contextuais:
-     * "5", "5, mas nenhum converte em compra",
-     * "5 clientes" ou "aproximadamente 5".
-     *
-     * A pergunta já fornece a unidade. Portanto, exigir que
-     * o usuário repita "clientes", "vendas" etc. é artificial
-     * e causa repetição indevida da pergunta.
-     */
-    const respondeuVolume =
-      /\b\d+(?:[.,]\d+)?\b/i.test(mensagem) ||
-      /\b(?:nenhum|nenhuma|zero|um|uma|dois|duas|tres|quatro|cinco|seis|sete|oito|nove|dez|alguns|algumas)\b/i.test(mensagem);
-
-    if (respondeuVolume) {
-      respondeuDeterministicamente = true;
-
-      // Preserva evidência mínima se a IA não consolidar volume.
-      if (!String(resultado.volume || '').trim()) {
-        const volumeEncontrado =
-          mensagemOriginal.match(/\b\d+(?:[.,]\d+)?\b/);
-
-        if (volumeEncontrado) {
-          resultado.volume = volumeEncontrado[0];
-        } else if (/\b(?:nenhum|nenhuma|zero)\b/i.test(mensagem)) {
-          resultado.volume = '0';
-        }
-      }
+  // Classificação determinística por dimensão: a mensagem atual pode ser
+  // uma resposta curta contextual, mesmo que o Gemini devolva campos vazios.
+  if (dimensao === 'VOLUME') {
+    respondeu =
+      /\b\d+(?:[.,]\d+)?\b/.test(mensagem) ||
+      /\b(nenhum|nenhuma|zero|um|uma|dois|duas|tres|quatro|cinco|seis|sete|oito|nove|dez)\b/.test(mensagem);
+    if (respondeu && !resultado.volume) {
+      const match = mensagemOriginal.match(/\b\d+(?:[.,]\d+)?\s*(?:mil|milhao|milhões)?\s*(?:pedidos?|vendas?|clientes?|ordens?|orcamentos?|orçamentos?|atendimentos?|divulgacoes?|publicacoes?|postagens?)?(?:\s+(?:por|ao|na|no)\s+(?:dia|semana|mes|mês))?/i);
+      resultado.volume = match ? match[0].trim() : mensagemOriginal;
     }
-  }
-
-  // ----------------------------------------------------------
-  // ----------------------------------------------------------
-  // ----------------------------------------------------------
-  //
-  // Reconhece deterministicamente respostas à pergunta
-  // "Com que frequência..." para impedir repetição infinita.
-  // Respostas negativas também são respostas válidas.
-  // ----------------------------------------------------------
-  if (
-    /frequencia|frequência|periodicidade|com que frequencia|com que frequência|quantas vezes|por dia|por semana|por mes|por mês|ao dia|ao mes|ao mês/
-      .test(perguntaNorm)
-  ) {
-
-    const respondeuFrequencia =
-      /\b(diari(?:a|amente)|semanal(?:mente)?|mensal(?:mente)?|quinzenal(?:mente)?|ocasional(?:mente)?|eventualmente|todo dia|todos os dias|toda semana|todas as semanas|todo mes|todo mês|por dia|por semana|por mes|por mês|ao dia|ao mes|ao mês|\d+\s*(?:x|vezes)\s*(?:ao|por)\s*(?:dia|semana|mes|mês)|\d+\s+(?:post|posts|postagem|postagens)\s+(?:por|na)\s+(?:dia|semana|mes|mês)|(?:um|uma|dois|duas|tres|quatro|cinco|seis|sete|oito|nove|dez)\s+(?:vez(?:es)?\s+)?(?:por|ao|na|no)\s+(?:dia|semana|mes|mês))\b/i
-        .test(mensagem);
-
-    const respostaFrequenciaNegativa =
-      /\b(?:nao|não)\b/i.test(mensagem) &&
-      /\b(?:post(?:ar|ando|amos)?|public(?:ar|ando|amos)?|frequencia|frequência|vezes)\b/i.test(mensagem);
-
-    if (
-      respondeuFrequencia ||
-      respostaFrequenciaNegativa
-    ) {
-      respondeuDeterministicamente = true;
+  } else if (dimensao === 'FREQUENCIA') {
+    respondeu =
+      /\b(diari[oa]mente|todos os dias|todo dia|semanalmente|toda semana|mensalmente|todo mes|todo mês|ocasionalmente|eventualmente|uma vez|\d+\s*(?:x|vez(?:es)?)\s*(?:por|ao|na|no)\s*(?:dia|semana|mes|mês)|por dia|por semana|por mes|por mês|diaria|diário|semanal|mensal)\b/.test(mensagem) ||
+      (/\b(nao|não)\b/.test(mensagem) && /\b(frequencia|frequência|vezes|acontece|ocorre)\b/.test(mensagem));
+    if (respondeu && !resultado.frequencia) {
+      if (/diari|todos os dias|todo dia|por dia/.test(mensagem)) resultado.frequencia = 'Diária';
+      else if (/seman|por semana|toda semana/.test(mensagem)) resultado.frequencia = 'Semanal';
+      else if (/mens|por mes|por mês|todo mes|todo mês/.test(mensagem)) resultado.frequencia = 'Mensal';
+      else if (/ocasional|eventualmente/.test(mensagem)) resultado.frequencia = 'Ocasional';
+      else if (/\b(nao|não)\b/.test(mensagem)) resultado.frequencia = 'Negada pelo empresário';
     }
-  }
-
-  // ----------------------------------------------------------
-  // 3. IMPACTO / CONSEQUÊNCIA
-  // ----------------------------------------------------------
-  //
-  // Uma pergunta de impacto pode receber uma resposta livre.
-  // Exemplos válidos:
-  // - não tenho clientes entrando na loja
-  // - perdemos vendas
-  // - estamos deixando dinheiro na mesa
-  // - isso atrasa as entregas
-  // - não sei medir o impacto
-  //
-  // O importante aqui é reconhecer que o empresário respondeu
-  // à dimensão perguntada. A IA continuará responsável por
-  // extrair e consolidar o conteúdo sem inventar fatos.
-  // ----------------------------------------------------------
-  if (
-    /impacto|consequencia|consequência|efeito|resultado no seu negocio|resultado no seu negócio/
-      .test(perguntaNorm)
-  ) {
-
-    const respostaImpacto =
-      mensagem.length >= 2;
-
-    if (respostaImpacto) {
-      respondeuDeterministicamente = true;
-
-      // Se a IA não extrair o impacto, preservamos a resposta
-      // literal do empresário como evidência, sem inventar.
-      if (!String(resultado.impacto || '').trim()) {
-        resultado.impacto = mensagemOriginal;
-      }
-    }
-  }
-
-  // ----------------------------------------------------------
-  // 4. ERROS / RETRABALHO / ATRASOS
-  // ----------------------------------------------------------
-
-  // ----------------------------------------------------------
-  if (
-    /erro|erros|atraso|atrasos|retrabalho|revisao|revisão|conferencia|conferência/
-      .test(perguntaNorm)
-  ) {
-
-    const respondeuProblema = mensagem.length >= 2;
-
-    if (respondeuProblema) {
-      respondeuDeterministicamente = true;
-    }
-
-    respostaNegativa =
-      mensagemNegaTemaDiagnostico_(
-        mensagemOriginal,
-        'erros_retrabalho_atrasos'
-      );
-  }
-
-  // ----------------------------------------------------------
-  // 3. PERGUNTA DE OBJETIVO
-  // ----------------------------------------------------------
-  if (
-    /objetivo|alcançar|alcancar|melhorar|resultado|ganhar|reduzir/
-      .test(perguntaNorm)
-  ) {
-
-    // Uma resposta de objetivo pode ser direta e contextual:
-    // "diminuir retrabalho", "menos erros", "economizar tempo".
-    // Não exigimos palavras como "quero" ou "gostaria".
-    const respostaGenericaValida =
-      mensagem.length >= 4 &&
-      !/^(nao sei|nao sei dizer|nao tenho certeza|nao sabemos|n sei|nao)$/.test(mensagem);
-
-    const respondeuObjetivo =
-      /\b(quero|queremos|gostaria|gostariamos|gostaríamos|preciso|precisamos|pretendo|pretendemos|nosso objetivo|desejo|desejamos|reduzir|diminuir|aumentar|melhorar|ganhar|economizar|agilizar|evitar|eliminar|acabar com|parar de|ter mais|ter menos|menos|mais rapidez|mais rapido|mais rápido)\b/i
-        .test(mensagem) ||
-      respostaGenericaValida;
-
-    if (respondeuObjetivo) {
-      respondeuDeterministicamente = true;
-
-      // Guarda a resposta literal como evidência se a IA não
-      // tiver consolidado o objetivo; não inventa intenção.
-      if (!String(resultado.objetivo || '').trim()) {
-        resultado.objetivo = mensagemOriginal;
-      }
-    }
-  }
-
-  // 4. PERGUNTA RESPONDIDA
-  // ----------------------------------------------------------
-  if (respondeuDeterministicamente) {
-
-    resultado.respondeu_pergunta_pendente = true;
-
-    // Se a resposta foi negativa para erros/retrabalho/atrasos,
-    // essa dimensão está encerrada. Não aceitamos uma pergunta
-    // criada pela IA sobre a mesma dimensão.
-    if (respostaNegativa) {
-
+  } else if (dimensao === 'IMPACTO') {
+    respondeu = mensagem.length >= 2;
+    if (respondeu && !resultado.impacto) resultado.impacto = mensagemOriginal;
+  } else if (dimensao === 'ERROS') {
+    respondeu = mensagem.length >= 2;
+    negativa = mensagemNegaTemaDiagnostico_(mensagemOriginal, 'erros_retrabalho_atrasos');
+    if (negativa) {
       resultado.resposta_negativa = true;
       resultado.dimensao_negada = 'erros_retrabalho_atrasos';
-
-      resultado.informacao_faltante =
-        'objetivo do empresário para melhorar o processo';
-
-      resultado.proxima_pergunta =
-        'O que você gostaria de melhorar ou alcançar nesse processo?';
-
-      return resultado;
+    } else if (respondeu && !resultado.impacto && /erro|retrabalho|atras|confer|revis|falha/.test(mensagem)) {
+      resultado.impacto = mensagemOriginal;
     }
+  } else if (dimensao === 'OBJETIVO') {
+    respondeu = mensagem.length >= 4 &&
+      !/^(nao sei|não sei|nao sei dizer|não sei dizer|nao tenho certeza|não tenho certeza|n sei|nao|não)$/.test(mensagem);
+    if (respondeu && !resultado.objetivo) resultado.objetivo = mensagemOriginal;
+  } else {
+    // Para uma pergunta não reconhecida, só consideramos respondida se a IA
+    // indicou isso explicitamente ou trouxe uma nova pergunta coerente.
+    respondeu = resultado.respondeu_pergunta_pendente === true ||
+      (!!resultado.proxima_pergunta && normalizarTextoDiagnostico_(resultado.proxima_pergunta) !== perguntaNorm && mensagem.length >= 3);
+  }
 
-    const proximaNorm =
-      normalizarTextoDiagnostico_(
-        resultado.proxima_pergunta || ''
-      );
+  // Mesmo que a IA retorne false ou campos vazios, a continuidade determinística
+  // prevalece para as dimensões conhecidas.
+  if (dimensao !== 'OUTRA') {
+    resultado.respondeu_pergunta_pendente = respondeu;
+  } else {
+    resultado.respondeu_pergunta_pendente = respondeu;
+  }
 
-    const infoNorm =
-      normalizarTextoDiagnostico_(
-        resultado.informacao_faltante || ''
-      );
-
-    const dimensaoPerguntaAtual = classificarDimensaoPerguntaDiagnostico_(perguntaNorm);
-    const dimensaoProximaPergunta = classificarDimensaoPerguntaDiagnostico_(proximaNorm);
-    const mesmaDimensao = dimensaoPerguntaAtual !== 'OUTRA' && dimensaoPerguntaAtual === dimensaoProximaPergunta;
-    const respostaIAValida =
-      !!proximaNorm &&
-      proximaNorm !== perguntaNorm &&
-      infoNorm !== perguntaNorm &&
-      !mesmaDimensao;
-
-    if (!respostaIAValida) {
-
-      if (/quantos|quantidade|volume/.test(perguntaNorm)) {
-
-        resultado.informacao_faltante =
-          'erros, retrabalho ou atrasos gerados pelo processo';
-
-        resultado.proxima_pergunta =
-          'Esse processo costuma gerar erros, retrabalho ou atrasos?';
-
-      } else if (
-        /frequencia|frequência|periodicidade|com que frequencia|com que frequência/
-          .test(perguntaNorm)
-      ) {
-
-        resultado.informacao_faltante =
-          'erros, retrabalho ou atrasos gerados pelo processo';
-
-        resultado.proxima_pergunta =
-          'Esse processo costuma gerar erros, retrabalho ou atrasos?';
-      } else if (
-        /impacto|consequencia|consequência|efeito|resultado no seu negocio|resultado no seu negócio/
-          .test(perguntaNorm)
-      ) {
-
-        resultado.informacao_faltante =
-          'erros, retrabalho ou atrasos gerados pelo processo';
-
-        resultado.proxima_pergunta =
-          'Esse processo costuma gerar erros, retrabalho ou atrasos?';
-      } else if (
-        /erro|erros|atraso|atrasos|retrabalho|revisao|revisão|conferencia|conferência/
-          .test(perguntaNorm)
-      ) {
-
-        resultado.informacao_faltante =
-          'objetivo do empresário para melhorar o processo';
-
-        resultado.proxima_pergunta =
-          'O que você gostaria de melhorar ou alcançar nesse processo?';
-
-      } else if (
-        /objetivo|alcançar|alcancar|melhorar|resultado|ganhar|reduzir/
-          .test(perguntaNorm)
-      ) {
-
-        // Objetivo é a última lacuna obrigatória deste fluxo V5.2.
-        // Se o empresário respondeu e a IA não trouxe uma nova lacuna
-        // válida, encerramos a investigação em vez de inventar outra pergunta.
-        resultado.informacao_faltante = '';
-        resultado.proxima_pergunta = '';
-
-      } else {
-
-        resultado.informacao_faltante =
-          'outro impacto relevante do processo';
-
-        resultado.proxima_pergunta =
-          'Existe algum outro impacto importante desse processo?';
-      }
-    }
-
+  if (!respondeu) {
+    resultado.informacao_faltante = pergunta;
+    resultado.proxima_pergunta = pergunta;
     return resultado;
   }
 
-  // ----------------------------------------------------------
-  // 5. NÃO RESPONDEU À PERGUNTA
-  // ----------------------------------------------------------
-  resultado.respondeu_pergunta_pendente = false;
-  resultado.informacao_faltante = pergunta;
-  resultado.proxima_pergunta = pergunta;
+  // Normaliza a próxima lacuna e impede repetir a dimensão já respondida.
+  const proximaInformacao = normalizarTextoDiagnostico_(resultado.informacao_faltante || '');
+  const proximaPergunta = normalizarTextoDiagnostico_(resultado.proxima_pergunta || '');
+  const proximaDimensao = classificarDimensaoPerguntaDiagnostico_(proximaPergunta);
+  const infoEhMesmaDimensao = proximaInformacao &&
+    classificarDimensaoPerguntaDiagnostico_(proximaInformacao) === dimensao;
+  const perguntaEhMesmaDimensao = proximaDimensao === dimensao;
+  const perguntaInvalida = !proximaPergunta ||
+    proximaPergunta === perguntaNorm ||
+    perguntaEhMesmaDimensao ||
+    infoEhMesmaDimensao;
+
+  if (negativa && dimensao === 'ERROS') {
+    resultado.informacao_faltante = 'objetivo do empresário para melhorar o processo';
+    resultado.proxima_pergunta = 'O que você gostaria de melhorar ou alcançar nesse processo?';
+    return resultado;
+  }
+
+  if (perguntaInvalida) {
+    if (dimensao === 'VOLUME' || dimensao === 'FREQUENCIA' || dimensao === 'IMPACTO') {
+      resultado.informacao_faltante = 'erros, retrabalho ou atrasos gerados pelo processo';
+      resultado.proxima_pergunta = 'Esse processo costuma gerar erros, retrabalho ou atrasos?';
+    } else if (dimensao === 'ERROS') {
+      resultado.informacao_faltante = 'objetivo do empresário para melhorar o processo';
+      resultado.proxima_pergunta = 'O que você gostaria de melhorar ou alcançar nesse processo?';
+    } else if (dimensao === 'OBJETIVO') {
+      resultado.informacao_faltante = '';
+      resultado.proxima_pergunta = '';
+    } else {
+      resultado.informacao_faltante = '';
+      resultado.proxima_pergunta = '';
+    }
+  }
 
   return resultado;
-
 }
-
 
 function classificarDimensaoPerguntaDiagnostico_(perguntaNormalizada) {
   const p = normalizarTextoDiagnostico_(perguntaNormalizada || '');
