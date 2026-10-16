@@ -127,7 +127,8 @@ function TESTAR_CONVERSACIONAL_V64() {
           : { proximaPergunta: 'Quantos pedidos vocês processam por dia?', dimensaoAlvo: 'escala', justificativa: 'Medir o volume.', lacunaQueReduz: 'volume diário' };
       },
       verificarRepeticao: function(perguntas, candidata) {
-        return normalizarPerguntaInvestigacaoV64_(candidata).indexOf('quantos pedidos') === 0
+        return normalizarPerguntaInvestigacaoV64_(candidata).indexOf('quantos pedidos') === 0 ||
+          normalizarPerguntaInvestigacaoV64_(candidata).indexOf('quantos pedidos voces processam') === 0
           ? { equivalente: true, indice: 0, motivo: 'mesma informação de volume diário' }
           : { equivalente: false, indice: -1, motivo: '' };
       }
