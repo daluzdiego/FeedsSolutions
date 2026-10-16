@@ -2093,7 +2093,7 @@ function ajustarContinuidadeDiagnostico_(
 
 function classificarDimensaoPerguntaDiagnostico_(perguntaNormalizada) {
   const p = normalizarTextoDiagnostico_(perguntaNormalizada || '');
-  if (/objetivo|alcancar|melhorar|resultado desejado|ganhar|reduzir|aumentar/.test(p)) return 'OBJETIVO';
+  if (/qual o objetivo|objetivo|alcancar|melhorar|resultado desejado|ganhar|reduzir|aumentar|o que voce gostaria/.test(p)) return 'OBJETIVO';
   if (/impacto|consequencia|efeito|afeta|prejuizo|perda/.test(p)) return 'IMPACTO';
   if (/erro|retrabalho|atraso|revisao|conferencia/.test(p)) return 'ERROS';
   if (/frequencia|periodicidade|quantas vezes|por dia|por semana|por mes|ao dia|ao mes|diariamente|diaria|semanalmente|semanal|mensalmente|mensal|todo dia|todos os dias|toda semana|todas as semanas|divulgacoes.*semana|publicacoes.*semana|postagens.*semana|com que frequencia|quantas vezes por|publica|posta|vezes por/.test(p)) return 'FREQUENCIA';
