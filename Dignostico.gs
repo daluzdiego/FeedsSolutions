@@ -1398,7 +1398,7 @@ function construirEntradaDiagnosticoIA_(
     '11. VOLUME é quantidade processada; IMPACTO é consequência (tempo perdido, custo, atraso, erros etc.). Não misture os campos.',
     '12. OBJETIVO só pode ser preenchido quando o empresário expressar o que quer alcançar; jamais copie a pergunta para o campo objetivo.',
     '13. Não ofereça solução, tecnologia, preço, venda ou promessa.',
-    '14. respon­deu_pergunta_pendente deve ser booleano verdadeiro/falso sem aspas.',
+    '14. respondeu_pergunta_pendente deve ser booleano verdadeiro/falso sem aspas.',
     '',
     'FORMATO: SOMENTE JSON VÁLIDO, sem markdown:',
     '{',
