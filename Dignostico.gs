@@ -2002,6 +2002,27 @@ function ajustarContinuidadeDiagnostico_(
     return resultado;
   }
 
+  // Prioridade para a pergunta explícita de objetivo: seus verbos ("melhorar",
+  // "alcançar", "reduzir") podem aparecer em mensagens que também falam de frequência.
+  const perguntaNormAntecipada = normalizarTextoDiagnostico_(pergunta);
+  const perguntaEhObjetivo = /objetivo|o que voce gostaria|o que voces gostariam|melhorar ou alcancar|resultado desejado/.test(perguntaNormAntecipada);
+  if (perguntaEhObjetivo) {
+    const respostaSemConteudo = /^(nao sei|não sei|nao sei dizer|não sei dizer|nao tenho certeza|não tenho certeza|n sei|nao|não|depende|talvez)$/.test(mensagem);
+    const respostaConcreta = /\b(quero|queremos|gostaria|gostariamos|preciso|precisamos|pretendo|pretendemos|objetivo|reduzir|diminuir|aumentar|melhorar|economizar|agilizar|evitar|eliminar|acabar com|parar de|menos|mais|automatizar|organizar|ganhar tempo)\b/.test(mensagem) ||
+      /\b(retrabalho|erros?|atrasos?|tempo|custos?|vendas?|clientes?|produtividade|eficiencia|eficiência)\b/.test(mensagem);
+    const respondeuObjetivo = mensagem.length >= 4 && !respostaSemConteudo && respostaConcreta;
+    resultado.respondeu_pergunta_pendente = respondeuObjetivo;
+    if (!respondeuObjetivo) {
+      resultado.informacao_faltante = pergunta;
+      resultado.proxima_pergunta = pergunta;
+      return resultado;
+    }
+    if (!String(resultado.objetivo || '').trim()) resultado.objetivo = mensagemOriginal;
+    resultado.informacao_faltante = '';
+    resultado.proxima_pergunta = '';
+    return resultado;
+  }
+
   const perguntaNorm = normalizarTextoDiagnostico_(pergunta);
   const dimensao = classificarDimensaoPerguntaDiagnostico_(perguntaNorm);
   let respondeu = false;
