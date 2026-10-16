@@ -123,7 +123,7 @@ function interpretarTurnoInvestigacaoV64_(mensagem, estado, adaptador) {
           items: {
             type: 'object',
             properties: {
-              dimensao: { type: 'string', enum: ['processo','dor_causa','escala','impacto','excecoes','objetivo','restricoes','aceitacao'] },
+              dimensao: { type: 'string', enum: ['processo','dor_causa','escala','frequencia','impacto','excecoes','objetivo','restricoes','aceitacao'] },
               valor: { type: 'string' },
               evidencia: { type: 'string' },
               certeza: { type: 'string', enum: ['CONFIRMADO','ESTIMADO','NEGADO','DESCONHECIDO'] },
@@ -327,7 +327,7 @@ function classificarDimensaoPerguntaV64_(pergunta, estado) {
   }
   if (/objetivo|resultado deseja|alcancar|melhorar|conseguir ao final/.test(p)) return 'objetivo';
   if (/aceitacao|criterio de sucesso|considerar concluido|medir o sucesso|funcionou/.test(p)) return 'aceitacao';
-  if (/restricao|orcamento|prazo|permissao|seguranca|integracao|ferramenta|sistema|canal/.test(p)) return 'restricoes';
+  if (/restricao|orcamento|prazo|permissao|seguranca|integracao|ferramenta|quais sistemas|sistemas atuais|quais canais|canais de entrada|ferramentas atuais/.test(p)) return 'restricoes';
   if (/excecao|fora do padrao|regra especial/.test(p)) return 'excecoes';
   if (/tempo|custo|impacto|atraso|retrabalho|consequencia|erro|perda|prejuizo/.test(p)) return 'impacto';
   if (/dor|problema|falha|etapa|causa/.test(p)) return 'dor_causa';
