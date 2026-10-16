@@ -197,17 +197,39 @@ function compararPerguntaSemanticamenteV64_(perguntasFeitas, candidata, adaptado
   var normalizada = normalizarPerguntaInvestigacaoV64_(texto);
   var perguntas = Array.isArray(perguntasFeitas) ? perguntasFeitas : [];
   if (!perguntas.length) return { equivalente: false, indice: -1, motivo: '', metodo: 'SEM_HISTORICO' };
+
+  // Comparação determinística lexical para não gastar chamada de IA quando
+  // a sobreposição e a dimensão já são claramente equivalentes.
+  var tokensNova = normalizada.split(' ').filter(function(t) {
+    return t.length > 2 && !/^(qual|quais|como|quando|onde|voce|voces|para|pela|pelo|isso|esse|essa|sobre|entre|mais|menos|uma|uns|dos|das|por|dia|dias|que|com|tem|ser|sao|estao|acontece)$/.test(t);
+  });
+  var dimNova = classificarDimensaoPerguntaV64_(texto, null);
   for (var i = 0; i < perguntas.length; i++) {
-    var existente = typeof perguntas[i] === 'string' ? perguntas[i] : perguntas[i].texto;
-    if (normalizarPerguntaInvestigacaoV64_(existente) === normalizada) {
-      return { equivalente: true, indice: i, metodo: 'NORMALIZACAO_LITERAL' };
+    var registro = perguntas[i];
+    var existente = typeof registro === 'string' ? registro : registro.texto;
+    var normalizadaExistente = normalizarPerguntaInvestigacaoV64_(existente);
+    if (normalizadaExistente === normalizada) {
+      return { equivalente: true, indice: i, motivo: 'mesma pergunta normalizada', metodo: 'NORMALIZACAO_LITERAL' };
+    }
+    var tokensExistentes = normalizadaExistente.split(' ').filter(function(t) {
+      return t.length > 2 && !/^(qual|quais|como|quando|onde|voce|voces|para|pela|pelo|isso|esse|essa|sobre|entre|mais|menos|uma|uns|dos|das|por|dia|dias|que|com|tem|ser|sao|estao|acontece)$/.test(t);
+    });
+    var intersecao = tokensNova.filter(function(t) { return tokensExistentes.indexOf(t) !== -1; });
+    var uniao = tokensNova.filter(function(t, idx, arr) { return arr.indexOf(t) === idx; })
+      .concat(tokensExistentes.filter(function(t) { return tokensNova.indexOf(t) === -1; }));
+    var jaccard = uniao.length ? intersecao.length / uniao.length : 0;
+    var dimAntiga = (registro && registro.dimensao) ||
+      classificarDimensaoPerguntaV64_(existente, null);
+    if (jaccard >= 0.72 && (!dimNova || !dimAntiga || dimNova === dimAntiga)) {
+      return { equivalente: true, indice: i, motivo: 'alto grau de sobreposição lexical (' + jaccard.toFixed(2) + ')', metodo: 'SIMILARIDADE_LEXICAL' };
     }
   }
   if (typeof adaptador === 'function') return adaptador(perguntas, texto);
   var retorno = chamarGeminiJsonInvestigacaoV64_([
     'Compare semanticamente as perguntas já feitas com a pergunta candidata.',
+    'SIM quando duas perguntas buscam a mesma resposta central, mesmo com paráfrases.',
+    'NÃO quando perguntam por variáveis distintas, como quantidade total versus horários de pico.',
     'Responda JSON: {"equivalente":true|false,"indice":0,"motivo":"..."}.',
-    'SIM somente quando buscam essencialmente a mesma informação, mesmo com palavras diferentes.',
     'Perguntas já feitas:',
     JSON.stringify(perguntas),
     'Pergunta candidata:',
