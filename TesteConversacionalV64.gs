@@ -116,23 +116,31 @@ function TESTAR_CONVERSACIONAL_V64() {
     assert('6. informação extra de outra dimensão não se perde',
       r6.estado.fatos.escala.valor === '100 pedidos por dia' && r6.estado.fatos.impacto.valor === '2 horas');
 
-    // 7. A pergunta semanticamente repetida é rejeitada e o motor tenta outra.
+    // 7. Uma pergunta sobre volume já respondida não pode entrar em loop.
     var e7 = estadoBase();
+    atualizarFatoV64_(e7, 'escala', '100 pedidos por dia', 'São 100 pedidos por dia', 'CONFIRMADO', 'baseline');
     registrarPerguntaFeitaV64_(e7, 'Qual é o volume diário de pedidos?', 'escala', 'q-antiga');
+    var selecionadas7 = 0;
     var r7 = processarTurnoInvestigacaoV64_(e7, 'O problema ocorre todos os dias.', adaptadores({
       interpretar: function() { return { fatos: [fato('frequencia', 'Diária', 'todos os dias', 'CONFIRMADO')], respondeuPerguntaPendente: true, ambiguidade: false }; },
       selecionarPergunta: function(estado, mensagem, motivo) {
-        return motivo.indexOf('REPETICAO_SEMANTICA') !== -1
-          ? { proximaPergunta: 'Quais consequências concretas os erros causam?', dimensaoAlvo: 'impacto', justificativa: 'Investigar consequência ainda desconhecida.', lacunaQueReduz: 'consequências' }
-          : { proximaPergunta: 'Quantos pedidos vocês processam por dia?', dimensaoAlvo: 'escala', justificativa: 'Medir o volume.', lacunaQueReduz: 'volume diário' };
+        selecionadas7++;
+        if (motivo.indexOf('DIMENSAO_JA_SUFICIENTE') !== -1 ||
+            motivo.indexOf('REPETICAO_SEMANTICA') !== -1 ||
+            motivo.indexOf('DIMENSAO_ALVO_NAO_CORRESPONDE') !== -1) {
+          return { proximaPergunta: 'Quais consequências concretas os erros causam?', dimensaoAlvo: 'impacto', justificativa: 'Investigar consequência ainda desconhecida.', lacunaQueReduz: 'consequências' };
+        }
+        return { proximaPergunta: 'Quantos pedidos vocês processam por dia?', dimensaoAlvo: 'escala', justificativa: 'Medir o volume.', lacunaQueReduz: 'volume diário' };
       },
       verificarRepeticao: function(perguntas, candidata) {
-        return normalizarPerguntaInvestigacaoV64_(candidata).indexOf('quantos pedidos') === 0
+        var p = normalizarPerguntaInvestigacaoV64_(candidata);
+        return p.indexOf('quantos pedidos') === 0
           ? { equivalente: true, indice: 0, motivo: 'mesma informação de volume diário' }
           : { equivalente: false, indice: -1, motivo: '' };
       }
     }));
-    assert('7. repetição semântica é rejeitada e substituída', r7.sucesso && r7.proxima_pergunta === 'Quais consequências concretas os erros causam?');
+    assert('7. repetição semântica ou dimensão já suficiente é substituída', r7.sucesso &&
+      r7.proxima_pergunta === 'Quais consequências concretas os erros causam?' && selecionadas7 >= 2);
 
     // 8. Comparação semântica é delegada ao avaliador semântico.
     var cmp = compararPerguntaSemanticamenteV64_(

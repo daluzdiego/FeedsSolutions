@@ -62,6 +62,9 @@ function construirPromptProximaPerguntaV64_(estado, ultimaMensagem, motivoRejeic
     'Use o estado consolidado, a última resposta e as lacunas reais. Não siga uma sequência fixa.',
     'Não pergunte algo que já esteja confirmado ou explicitamente marcado como não aplicável.',
     'Não repita semanticamente nenhuma pergunta já feita.',
+    'Se escala/quantidade já estiver informada, não repita perguntas sobre quantidade diária, semanal ou volume.',
+    'Horários de pico, distribuição ao longo do dia, turnos e janelas de recebimento são FREQUENCIA, não ESCALA.',
+    'Se o motivo anterior indicar REPETICAO_SEMANTICA ou DIMENSAO_JA_SUFICIENTE, mude para outra lacuna essencial ainda aberta.',
     'Não pergunte por critérios de aceitação antes de compreender processo e dor.',
     'Não pergunte sobre integrações antes de saber quais ferramentas/sistemas/canais participam do processo.',
     'Se a última resposta for ambígua, faça uma pergunta de esclarecimento estreita, ligada ao que foi dito.',
@@ -147,7 +150,7 @@ function selecionarProximaPerguntaInvestigacaoV64_(estado, ultimaMensagem, motiv
       type: 'object',
       properties: {
         proximaPergunta: { type: 'string' },
-        dimensaoAlvo: { type: 'string', enum: ['processo','dor_causa','escala','impacto','excecoes','objetivo','restricoes','aceitacao'] },
+        dimensaoAlvo: { type: 'string', enum: ['processo','dor_causa','escala','frequencia','impacto','excecoes','objetivo','restricoes','aceitacao'] },
         justificativa: { type: 'string' },
         lacunaQueReduz: { type: 'string' }
       },
@@ -197,17 +200,39 @@ function compararPerguntaSemanticamenteV64_(perguntasFeitas, candidata, adaptado
   var normalizada = normalizarPerguntaInvestigacaoV64_(texto);
   var perguntas = Array.isArray(perguntasFeitas) ? perguntasFeitas : [];
   if (!perguntas.length) return { equivalente: false, indice: -1, motivo: '', metodo: 'SEM_HISTORICO' };
+
+  // Comparação determinística lexical para não gastar chamada de IA quando
+  // a sobreposição e a dimensão já são claramente equivalentes.
+  var tokensNova = normalizada.split(' ').filter(function(t) {
+    return t.length > 2 && !/^(qual|quais|como|quando|onde|voce|voces|para|pela|pelo|isso|esse|essa|sobre|entre|mais|menos|uma|uns|dos|das|por|dia|dias|que|com|tem|ser|sao|estao|acontece)$/.test(t);
+  });
+  var dimNova = classificarDimensaoPerguntaV64_(texto, null);
   for (var i = 0; i < perguntas.length; i++) {
-    var existente = typeof perguntas[i] === 'string' ? perguntas[i] : perguntas[i].texto;
-    if (normalizarPerguntaInvestigacaoV64_(existente) === normalizada) {
-      return { equivalente: true, indice: i, metodo: 'NORMALIZACAO_LITERAL' };
+    var registro = perguntas[i];
+    var existente = typeof registro === 'string' ? registro : registro.texto;
+    var normalizadaExistente = normalizarPerguntaInvestigacaoV64_(existente);
+    if (normalizadaExistente === normalizada) {
+      return { equivalente: true, indice: i, motivo: 'mesma pergunta normalizada', metodo: 'NORMALIZACAO_LITERAL' };
+    }
+    var tokensExistentes = normalizadaExistente.split(' ').filter(function(t) {
+      return t.length > 2 && !/^(qual|quais|como|quando|onde|voce|voces|para|pela|pelo|isso|esse|essa|sobre|entre|mais|menos|uma|uns|dos|das|por|dia|dias|que|com|tem|ser|sao|estao|acontece)$/.test(t);
+    });
+    var intersecao = tokensNova.filter(function(t) { return tokensExistentes.indexOf(t) !== -1; });
+    var uniao = tokensNova.filter(function(t, idx, arr) { return arr.indexOf(t) === idx; })
+      .concat(tokensExistentes.filter(function(t) { return tokensNova.indexOf(t) === -1; }));
+    var jaccard = uniao.length ? intersecao.length / uniao.length : 0;
+    var dimAntiga = (registro && registro.dimensao) ||
+      classificarDimensaoPerguntaV64_(existente, null);
+    if (jaccard >= 0.72 && (!dimNova || !dimAntiga || dimNova === dimAntiga)) {
+      return { equivalente: true, indice: i, motivo: 'alto grau de sobreposição lexical (' + jaccard.toFixed(2) + ')', metodo: 'SIMILARIDADE_LEXICAL' };
     }
   }
   if (typeof adaptador === 'function') return adaptador(perguntas, texto);
   var retorno = chamarGeminiJsonInvestigacaoV64_([
     'Compare semanticamente as perguntas já feitas com a pergunta candidata.',
+    'SIM quando duas perguntas buscam a mesma resposta central, mesmo com paráfrases.',
+    'NÃO quando perguntam por variáveis distintas, como quantidade total versus horários de pico.',
     'Responda JSON: {"equivalente":true|false,"indice":0,"motivo":"..."}.',
-    'SIM somente quando buscam essencialmente a mesma informação, mesmo com palavras diferentes.',
     'Perguntas já feitas:',
     JSON.stringify(perguntas),
     'Pergunta candidata:',
@@ -235,11 +260,27 @@ function validarPerguntaInvestigativaV64_(estado, candidata, adaptadorSemantico)
   if (!pergunta || !/\?/.test(pergunta)) {
     return { valida: false, motivo: 'NAO_E_PERGUNTA_INVESTIGATIVA', perguntaAjustada: '' };
   }
-  var contagem = (pergunta.match(/\?/g) || []).length;
-  if (contagem > 1) {
+  if ((pergunta.match(/\?/g) || []).length > 1) {
     return { valida: false, motivo: 'MULTIPLAS_PERGUNTAS_NO_MESMO_TURNO', perguntaAjustada: '' };
   }
-  if (estado && estado.lacunas && estado.lacunas[dimensao] === false &&
+  if (!estado || !estado.fatos || !estado.lacunas ||
+      !estado.fatos.hasOwnProperty(dimensao)) {
+    return { valida: false, motivo: 'DIMENSAO_ALVO_INVALIDA', perguntaAjustada: '' };
+  }
+
+  // A classificação explícita do texto tem precedência: impede que o Gemini
+  // rotule uma pergunta sobre horários de pico como uma lacuna nova de escala.
+  var dimensaoDetectada = classificarDimensaoPerguntaV64_(pergunta, estado);
+  if (dimensaoDetectada && dimensaoDetectada !== dimensao) {
+    return {
+      valida: false,
+      motivo: 'DIMENSAO_ALVO_NAO_CORRESPONDE_A_PERGUNTA',
+      dimensaoDetectada: dimensaoDetectada,
+      perguntaAjustada: ''
+    };
+  }
+
+  if (estado.lacunas[dimensao] === false &&
       !(candidata && candidata.forcarDetalhamento === true)) {
     return { valida: false, motivo: 'DIMENSAO_JA_SUFICIENTE', perguntaAjustada: '' };
   }
@@ -262,6 +303,7 @@ function validarPerguntaInvestigativaV64_(estado, candidata, adaptadorSemantico)
       valida: false,
       motivo: 'REPETICAO_SEMANTICA',
       perguntaEquivalenteIndice: comparacao.indice,
+      dimensaoEquivalente: compararDimensaoPerguntaComHistoricoV64_(estado, comparacao.indice),
       perguntaAjustada: ''
     };
   }
@@ -273,6 +315,32 @@ function validarPerguntaInvestigativaV64_(estado, candidata, adaptadorSemantico)
     justificativa: String(candidata.justificativa || ''),
     lacunaQueReduz: String(candidata.lacunaQueReduz || '')
   };
+}
+
+function classificarDimensaoPerguntaV64_(pergunta, estado) {
+  var p = normalizarPerguntaInvestigacaoV64_(pergunta);
+  if (/horario|horarios|pico|maior movimento|distribuicao ao longo do dia|em que periodo|em que horario|turno de maior|horas de pico|distribuicao temporal/.test(p)) {
+    return 'frequencia';
+  }
+  if (/quantos|quantas|quantidade|volume|media de pedidos|itens por dia|pedidos por dia|pedidos por semana|pedidos por mes|quantidade diaria|quantidade semanal/.test(p)) {
+    return 'escala';
+  }
+  if (/objetivo|resultado deseja|alcancar|melhorar|conseguir ao final/.test(p)) return 'objetivo';
+  if (/aceitacao|criterio de sucesso|considerar concluido|medir o sucesso|funcionou/.test(p)) return 'aceitacao';
+  if (/restricao|orcamento|prazo|permissao|seguranca|integracao|ferramenta|sistema|canal/.test(p)) return 'restricoes';
+  if (/excecao|fora do padrao|regra especial/.test(p)) return 'excecoes';
+  if (/tempo|custo|impacto|atraso|retrabalho|consequencia|erro|perda|prejuizo/.test(p)) return 'impacto';
+  if (/dor|problema|falha|etapa|causa/.test(p)) return 'dor_causa';
+  if (/como acontece|como funciona|descreva o processo|primeiro passo|passo a passo/.test(p)) return 'processo';
+  return null;
+}
+
+function compararDimensaoPerguntaComHistoricoV64_(estado, indice) {
+  var perguntas = estado && estado.perguntasFeitas || [];
+  var registro = perguntas[indice];
+  if (!registro) return null;
+  if (registro.dimensao) return registro.dimensao;
+  return classificarDimensaoPerguntaV64_(registro.texto || registro, estado);
 }
 
 function podeConcluirDiagnosticoV64_(estado) {
@@ -366,14 +434,33 @@ function processarTurnoInvestigacaoV64_(estado, mensagem, adaptadores) {
     var motivoEsclarecimento = naoRespondeuPerguntaPendente
       ? 'RESPOSTA_NAO_RESPONDEU_PERGUNTA_PENDENTE'
       : String(interpretacao.explicacaoAmbiguidade || 'RESPOSTA_AMBIGUA');
-    while (tentativas < 3) {
+    while (tentativas < 6) {
       perguntaCandidata = selecionarProximaPerguntaInvestigacaoV64_(
         estado, texto, motivoRejeicao || motivoEsclarecimento,
         adaptadores.selecionarPergunta
       );
       validacao = validarPerguntaInvestigativaV64_(estado, perguntaCandidata, adaptadores.verificarRepeticao);
       if (validacao.valida) break;
-      motivoRejeicao = validacao.motivo + (validacao.dimensoesPrecedentes ? ':' + validacao.dimensoesPrecedentes.join(',') : '');
+
+      // Se uma paráfrase da pergunta anterior for proposta novamente, não
+      // deixe a investigação travar na mesma dimensão: passe à próxima lacuna.
+      var dimensaoRepetida = validacao.dimensaoEquivalente ||
+        (validacao.perguntaEquivalenteIndice >= 0
+          ? compararDimensaoPerguntaComHistoricoV64_(estado, validacao.perguntaEquivalenteIndice)
+          : null);
+      if (validacao.motivo === 'REPETICAO_SEMANTICA' && dimensaoRepetida) {
+        estado.lacunas[dimensaoRepetida] = false;
+        if (estado.fatos[dimensaoRepetida] &&
+            estado.fatos[dimensaoRepetida].certeza === CERTEZA_V64.DESCONHECIDO) {
+          estado.fatos[dimensaoRepetida].certezaDetalhe = 'LACUNA_REPROGRAMADA_APOS_REPETICAO';
+        }
+        motivoRejeicao = 'A pergunta repetiu a lacuna ' + dimensaoRepetida +
+          '. Escolha outra dimensão ainda aberta e uma pergunta que busque informação diferente.';
+      } else {
+        motivoRejeicao = validacao.motivo +
+          (validacao.dimensoesPrecedentes ? ':' + validacao.dimensoesPrecedentes.join(',') : '') +
+          (validacao.dimensaoDetectada ? ':dimensaoDetectada=' + validacao.dimensaoDetectada : '');
+      }
       tentativas++;
     }
   } else {
@@ -389,13 +476,29 @@ function processarTurnoInvestigacaoV64_(estado, mensagem, adaptadores) {
         proxima_pergunta: ''
       };
     }
-    while (tentativas < 3) {
+    while (tentativas < 6) {
       perguntaCandidata = selecionarProximaPerguntaInvestigacaoV64_(
         estado, texto, motivoRejeicao, adaptadores.selecionarPergunta
       );
       validacao = validarPerguntaInvestigativaV64_(estado, perguntaCandidata, adaptadores.verificarRepeticao);
       if (validacao.valida) break;
-      motivoRejeicao = validacao.motivo + (validacao.dimensoesPrecedentes ? ':' + validacao.dimensoesPrecedentes.join(',') : '');
+      var dimensaoRepetidaNormal = validacao.dimensaoEquivalente ||
+        (validacao.perguntaEquivalenteIndice >= 0
+          ? compararDimensaoPerguntaComHistoricoV64_(estado, validacao.perguntaEquivalenteIndice)
+          : null);
+      if (validacao.motivo === 'REPETICAO_SEMANTICA' && dimensaoRepetidaNormal) {
+        estado.lacunas[dimensaoRepetidaNormal] = false;
+        if (estado.fatos[dimensaoRepetidaNormal] &&
+            estado.fatos[dimensaoRepetidaNormal].certeza === CERTEZA_V64.DESCONHECIDO) {
+          estado.fatos[dimensaoRepetidaNormal].certezaDetalhe = 'LACUNA_REPROGRAMADA_APOS_REPETICAO';
+        }
+        motivoRejeicao = 'Não repita a lacuna ' + dimensaoRepetidaNormal +
+          '; selecione uma dimensão essencial ainda aberta.';
+      } else {
+        motivoRejeicao = validacao.motivo +
+          (validacao.dimensoesPrecedentes ? ':' + validacao.dimensoesPrecedentes.join(',') : '') +
+          (validacao.dimensaoDetectada ? ':dimensaoDetectada=' + validacao.dimensaoDetectada : '');
+      }
       tentativas++;
     }
   }

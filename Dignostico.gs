@@ -2202,14 +2202,35 @@ function ajustarContinuidadeDiagnostico_(estado, perguntaCandidata, perguntaPend
       : perguntaPendente;
     var textoPendente = String(pendente && (pendente.texto || pendente.mensagem) || '').trim();
     var tipoPendente = String(pendente && pendente.tipo || '').toUpperCase();
-    if (!textoPendente || !/\\?/.test(textoPendente) ||
+    var parecePerguntaReal = /\?/.test(textoPendente) &&
+      /\b(qual|quais|como|quando|onde|quantos|quantas|quanto|quanta|por que|porque|quem|o que|existe|costuma|acontece|consegue|há|tem|seria|poderia)\b/i.test(textoPendente);
+    if (!parecePerguntaReal ||
         (tipoPendente && tipoPendente !== 'PERGUNTA_INVESTIGATIVA' &&
          tipoPendente !== 'PERGUNTA_IA' && tipoPendente !== 'PERGUNTA_DIAGNOSTICO' &&
          tipoPendente !== 'PERGUNTA_INVESTIGACAO')) {
       return { valida: false, motivo: 'PERGUNTA_PENDENTE_INVALIDA', perguntaAjustada: '' };
     }
   }
-  var validacao = validarPerguntaInvestigativaV64_(estado, perguntaCandidata, adaptadorSemantico);
+
+  if (!estado || !estado.fatos || !estado.lacunas) {
+    return { valida: false, motivo: 'ESTADO_INVESTIGACAO_INVALIDO', perguntaAjustada: '' };
+  }
+  var pergunta = String(perguntaCandidata && (perguntaCandidata.proximaPergunta || perguntaCandidata.texto) || '').trim();
+  if (!pergunta || !/\?/.test(pergunta)) {
+    return { valida: false, motivo: 'NAO_E_PERGUNTA_INVESTIGATIVA', perguntaAjustada: '' };
+  }
+  var dimensao = String(perguntaCandidata.dimensaoAlvo || perguntaCandidata.dimensao || '').trim();
+  var adaptador = adaptadorSemantico || function(perguntas, candidata) {
+    var nova = normalizarTextoDiagnostico_(candidata);
+    for (var i = 0; i < perguntas.length; i++) {
+      var texto = typeof perguntas[i] === 'string' ? perguntas[i] : perguntas[i].texto;
+      if (normalizarTextoDiagnostico_(texto) === nova) {
+        return { equivalente: true, indice: i, motivo: 'mesma pergunta normalizada' };
+      }
+    }
+    return { equivalente: false, indice: -1, motivo: '' };
+  };
+  var validacao = validarPerguntaInvestigativaV64_(estado, perguntaCandidata, adaptador);
   return {
     valida: validacao.valida === true,
     motivo: String(validacao.motivo || ''),
