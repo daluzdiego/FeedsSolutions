@@ -11,7 +11,7 @@ function motorInvestigacaoV64Ativo_() {
   return FEEDS_MOTOR_INVESTIGACAO_V64_ATIVO === true;
 }
 
-function obterOuCriarEstadoInvestigacaoV64_(diagnostico, contexto) {
+function obterOuCriarEstadoInvestigacaoV64_(diagnostico, contexto, mensagemAtual) {
   diagnostico = diagnostico || {};
   contexto = contexto || {};
   if (typeof buscarInvestigacaoV62_ !== 'function' ||
@@ -45,25 +45,6 @@ function obterOuCriarEstadoInvestigacaoV64_(diagnostico, contexto) {
   if (estado) return { estado: estado, investigacao: investigacao, inicializado: false };
 
   estado = criarEstadoInvestigacaoVazioV64_();
-
-  // Em conversas iniciadas antes da V6.4, reconstrua os fatos a partir do
-  // histórico de falas do empresário com proveniência por turno.
-  // Nunca marque esse material como confirmado: sem extração semântica,
-  // ele permanece ESTIMADO e será confirmado no diálogo atual.
-  var historicoBase = Array.isArray(contexto.historico) ? contexto.historico : [];
-  var falasEmpresarioBase = historicoBase.filter(function(item) {
-    return item && String(item.remetente || '').toUpperCase() === 'EMPRESARIO' &&
-      String(item.mensagem || '').trim();
-  });
-  falasEmpresarioBase.slice(-6).forEach(function(item, indice) {
-    adicionarTurnoHistoricoV64_(estado, {
-      id: 'BASELINE_TURNO_' + (item.ordem || indice + 1),
-      papel: 'EMPRESARIO',
-      texto: String(item.mensagem || '').trim(),
-      dataHora: item.timestamp || null,
-      origem: 'reconstrucao-historico-v6.3'
-    });
-  });
   var fatosLegados = [
     ['processo', diagnostico.processo_resumo || diagnostico.processo_nome || investigacao.processo || ''],
     ['dor_causa', diagnostico.dor_principal || investigacao.problema_central || ''],
@@ -81,34 +62,86 @@ function obterOuCriarEstadoInvestigacaoV64_(diagnostico, contexto) {
     atualizarFatoV64_(estado, 'excecoes', investigacao.excecoes.join('; '), null, CERTEZA_V64.ESTIMADO, 'baseline-v6.3');
   }
 
-  var perguntaMaisRecente = null;
-  historicoBase.forEach(function(item, indice) {
-    if (!item) return;
-    var texto = String(item.mensagem || '').trim();
-    var remetente = String(item.remetente || '').toUpperCase();
-    var tipo = String(item.tipo || '').toUpperCase();
-    if (!texto) return;
+  reconstruirHistoricoInvestigacaoV64_(estado, contexto.historico, mensagemAtual);
+  return { estado: estado, investigacao: investigacao, inicializado: true };
+}
 
-    // Turnos anteriores do empresário já foram incluídos acima para a migração.
-    // Não duplicar o último turno atual: o motor o adicionará ao processar.
-    if (remetente === 'EMPRESARIO') return;
+/**
+ * Reconstrói o contexto legado em ordem cronológica sem duplicar a mensagem
+ * atual, que já foi salva pelo fluxo V6.3 e será inserida pelo motor V6.4.
+ * A pergunta só fica pendente quando a última mensagem relevante do sistema
+ * é uma pergunta real e nenhum turno posterior do empresário a respondeu.
+ */
+function reconstruirHistoricoInvestigacaoV64_(estado, historico, mensagemAtual) {
+  var itens = Array.isArray(historico) ? historico : [];
+  var atual = String(mensagemAtual || '').trim();
+  var indiceMensagemAtual = -1;
+
+  if (atual) {
+    for (var busca = itens.length - 1; busca >= 0; busca--) {
+      var candidato = itens[busca] || {};
+      if (String(candidato.remetente || '').toUpperCase() === 'EMPRESARIO' &&
+          String(candidato.mensagem || '').trim() === atual) {
+        indiceMensagemAtual = busca;
+        break;
+      }
+    }
+  }
+
+  // Preservar a cronologia mais recente limita o prompt e evita remontar
+  // conversas indefinidamente longas em cada nova mensagem.
+  var inicio = Math.max(0, itens.length - 16);
+  var perguntaPendente = null;
+
+  for (var i = inicio; i < itens.length; i++) {
+    if (i === indiceMensagemAtual) continue;
+    var item = itens[i] || {};
+    var texto = String(item.mensagem || '').trim();
+    var remetente = String(item.remetente || '').trim().toUpperCase();
+    var tipo = String(item.tipo || '').trim().toUpperCase();
+    if (!texto) continue;
 
     adicionarTurnoHistoricoV64_(estado, {
-      id: 'LEGADO_' + (item.ordem || indice + 1),
+      id: 'LEGADO_' + (item.ordem || i + 1),
       papel: remetente,
       texto: texto,
       dataHora: item.timestamp || null,
       origem: 'historico-v6.3'
     });
 
-    if (/^(PERGUNTA_IA|PERGUNTA_DIAGNOSTICO|PERGUNTA_INVESTIGACAO|PERGUNTA_INVESTIGATIVA)$/.test(tipo)) {
+    var perguntaExplícita = /^(PERGUNTA_IA|PERGUNTA_DIAGNOSTICO|PERGUNTA_INVESTIGACAO|PERGUNTA_INVESTIGATIVA)$/.test(tipo);
+    var perguntaNatural = remetente === 'SISTEMA' &&
+      /\?/.test(texto) &&
+      /\b(qual|quais|como|quando|onde|quantos|quantas|quanto|quanta|por que|quem|o que|existe|costuma|acontece|consegue|há|tem)\b/i.test(texto);
+    var ePergunta = (perguntaExplícita || perguntaNatural) && remetente === 'SISTEMA';
+
+    if (ePergunta) {
       var dimensao = inferirDimensaoPerguntaV64_(texto);
-      registrarPerguntaFeitaV64_(estado, texto, dimensao, 'LEGADO_Q_' + (item.ordem || indice + 1));
-      perguntaMaisRecente = { id: 'LEGADO_Q_' + (item.ordem || indice + 1), dimensao: dimensao, texto: texto };
+      var jaExiste = estado.perguntasFeitas.some(function(p) {
+        return normalizarPerguntaInvestigacaoV64_(p.texto) === normalizarPerguntaInvestigacaoV64_(texto);
+      });
+      if (!jaExiste) {
+        registrarPerguntaFeitaV64_(estado, texto, dimensao, 'LEGADO_Q_' + (item.ordem || i + 1));
+      }
+      perguntaPendente = { id: 'LEGADO_Q_' + (item.ordem || i + 1), dimensao: dimensao, texto: texto };
+    } else if (remetente === 'EMPRESARIO' ||
+               (remetente === 'SISTEMA' && perguntaPendente)) {
+      // Uma fala posterior do empresário responde à pergunta pendente anterior.
+      // Mensagens genéricas posteriores do sistema também não devem deixá-la ativa.
+      perguntaPendente = null;
     }
-  });
-  if (perguntaMaisRecente) definirPerguntaPendenteV64_(estado, perguntaMaisRecente);
-  return { estado: estado, investigacao: investigacao, inicializado: true };
+  }
+
+  if (perguntaPendente) {
+    definirPerguntaPendenteV64_(estado, perguntaPendente);
+  } else {
+    estado.perguntaPendente = null;
+  }
+  return {
+    historicoImportado: estado.historico.length,
+    perguntasImportadas: estado.perguntasFeitas.length,
+    perguntaPendente: estado.perguntaPendente
+  };
 }
 
 function inferirDimensaoPerguntaV64_(texto) {
@@ -177,7 +210,7 @@ function reconciliarPerguntaPendenteV64_(estado, perguntaDoHistorico) {
 }
 
 function processarTurnoPersistidoV64_(diagnostico, contexto, mensagem) {
-  var carregado = obterOuCriarEstadoInvestigacaoV64_(diagnostico, contexto);
+  var carregado = obterOuCriarEstadoInvestigacaoV64_(diagnostico, contexto, mensagem);
   reconciliarPerguntaPendenteV64_(carregado.estado, contexto && contexto.pergunta_pendente);
   var resultado = processarTurnoInvestigacaoV64_(carregado.estado, mensagem);
   var persistencia = persistirEstadoInvestigacaoV64_(carregado.investigacao.investigacao_id, resultado.estado);
