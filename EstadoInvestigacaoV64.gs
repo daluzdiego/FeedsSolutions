@@ -98,6 +98,33 @@ function atualizarFatoV64_(estado, dimensao, valor, evidencia, certeza, origem, 
     fatoAnterior.valor !== null &&
     String(valorNovo).trim().toLowerCase() !== String(fatoAnterior.valor).trim().toLowerCase();
 
+  if (anteriorConfirmado && novoValorContradiz && opcoes.resolverConflito === true && certeza === CERTEZA_V64.CONFIRMADO) {
+    fatoAnterior.conflitos = fatoAnterior.conflitos.map(function(item) {
+      if (!item.resolvido) {
+        item.resolvido = true;
+        item.resolvidoEm = new Date().toISOString();
+        item.valorEscolhido = valorNovo;
+      }
+      return item;
+    });
+    estado.conflitos = (estado.conflitos || []).map(function(item) {
+      if (item.dimensao === dimensao && !item.resolvido) {
+        item.resolvido = true;
+        item.resolvidoEm = new Date().toISOString();
+        item.valorEscolhido = valorNovo;
+      }
+      return item;
+    });
+    fatoAnterior.valor = valorNovo;
+    fatoAnterior.evidencia = evidenciaNova;
+    fatoAnterior.origem = origem === undefined ? null : origem;
+    fatoAnterior.certeza = CERTEZA_V64.CONFIRMADO;
+    estado.fatos[dimensao] = fatoAnterior;
+    estado.lacunas[dimensao] = false;
+    estado.atualizadoEm = new Date().toISOString();
+    return { atualizado: true, conflito: false, conflitoResolvido: true, fato: fatoAnterior };
+  }
+
   if (anteriorConfirmado && novoValorContradiz) {
     var conflito = {
       dimensao: dimensao,
@@ -146,9 +173,10 @@ function atualizarFatoV64_(estado, dimensao, valor, evidencia, certeza, origem, 
       });
     }
     estado.fatos[dimensao] = fatoAnterior;
-    estado.lacunas[dimensao] = false;
+    var possuiConflitoAberto = fatoAnterior.conflitos.some(function(item) { return !item.resolvido; });
+    estado.lacunas[dimensao] = possuiConflitoAberto;
     estado.atualizadoEm = new Date().toISOString();
-    return { atualizado: true, conflito: false, fato: fatoAnterior, evidênciaAdicionada: !!evidenciaNova };
+    return { atualizado: true, conflito: possuiConflitoAberto, fato: fatoAnterior, evidênciaAdicionada: !!evidenciaNova };
   }
 
   estado.fatos[dimensao] = {
