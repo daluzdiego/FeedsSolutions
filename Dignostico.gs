@@ -2152,16 +2152,29 @@ function ajustarContinuidadeDiagnostico_(
       .test(perguntaNorm)
   ) {
 
+    // Uma resposta de objetivo pode ser direta e contextual:
+    // "diminuir retrabalho", "menos erros", "economizar tempo".
+    // Não exigimos palavras como "quero" ou "gostaria".
+    const respostaGenericaValida =
+      mensagem.length >= 4 &&
+      !/^(nao sei|nao sei dizer|nao tenho certeza|nao sabemos|n sei|nao)$/.test(mensagem);
+
     const respondeuObjetivo =
-      /\b(quero|queremos|gostaria|gostariamos|gostaríamos|preciso|precisamos|pretendo|pretendemos|nosso objetivo|nosso objetivo é|nosso objetivo e|desejo|desejamos|reduzir|aumentar|melhorar|ganhar|economizar|agilizar)\b/i
-        .test(mensagem);
+      /\b(quero|queremos|gostaria|gostariamos|gostaríamos|preciso|precisamos|pretendo|pretendemos|nosso objetivo|desejo|desejamos|reduzir|diminuir|aumentar|melhorar|ganhar|economizar|agilizar|evitar|eliminar|acabar com|parar de|ter mais|ter menos|menos|mais rapidez|mais rapido|mais rápido)\b/i
+        .test(mensagem) ||
+      respostaGenericaValida;
 
     if (respondeuObjetivo) {
       respondeuDeterministicamente = true;
+
+      // Guarda a resposta literal como evidência se a IA não
+      // tiver consolidado o objetivo; não inventa intenção.
+      if (!String(resultado.objetivo || '').trim()) {
+        resultado.objetivo = mensagemOriginal;
+      }
     }
   }
 
-  // ----------------------------------------------------------
   // 4. PERGUNTA RESPONDIDA
   // ----------------------------------------------------------
   if (respondeuDeterministicamente) {
