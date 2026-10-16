@@ -87,11 +87,24 @@ function TESTAR_INTEGRACAO_V64() {
     assert('continuidade rejeita mensagem genérica como pergunta pendente',
       perguntaInvalida.valida === false && perguntaInvalida.motivo === 'PERGUNTA_PENDENTE_INVALIDA');
 
+    var e10 = criarEstadoInvestigacaoVazioV64_();
+    atualizarFatoV64_(e10, 'processo', 'Lançamento manual', 'Lançamos manualmente', 'CONFIRMADO', 'turno-1');
+    atualizarFatoV64_(e10, 'escala', '100 pedidos por dia', 'São 100 pedidos por dia', 'CONFIRMADO', 'turno-2');
+    var perguntaDimensaoFechada = validarPerguntaInvestigativaV64_(e10, {
+      proximaPergunta: 'Quantos pedidos são processados por dia?',
+      dimensaoAlvo: 'escala'
+    }, function() { return { equivalente: false }; });
+    assert('não pergunta novamente uma dimensão já suficiente',
+      perguntaDimensaoFechada.valida === false && perguntaDimensaoFechada.motivo === 'DIMENSAO_JA_SUFICIENTE');
+
+    assert('motor V6.4 permanece desativado até a aceitação real',
+      motorInvestigacaoV64Ativo_() === false);
+
   } catch (e) {
     resultados.push({ teste: 'execução da suíte', passou: false, detalhe: String(e && e.stack || e) });
   }
   var aprovados = resultados.filter(function(r) { return r.passou; }).length;
-  var resumo = { versao: 'V6.4', suite: 'INTEGRACAO_DETERMINISTICA', sucesso: resultados.length === 12 && aprovados === resultados.length, total: resultados.length, aprovados: aprovados, falhas: resultados.length - aprovados, resultados: resultados };
+  var resumo = { versao: 'V6.4', suite: 'INTEGRACAO_DETERMINISTICA', sucesso: resultados.length === 14 && aprovados === resultados.length, total: resultados.length, aprovados: aprovados, falhas: resultados.length - aprovados, resultados: resultados };
   Logger.log('FEEDS SOLUTIONS V6.4 — INTEGRAÇÃO DETERMINÍSTICA: ' + JSON.stringify(resumo));
   return resumo;
 }
