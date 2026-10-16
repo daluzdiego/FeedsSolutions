@@ -289,6 +289,8 @@ function validarEstadoInvestigacaoV64_(estado) {
     if (!fato) erros.push('FATO_AUSENTE:' + dim);
     else if (!Object.keys(CERTEZA_V64).some(function(k) { return CERTEZA_V64[k] === fato.certeza; })) {
       erros.push('CERTEZA_INVALIDA:' + dim);
+    } else if (fato.certeza === CERTEZA_V64.CONFIRMADO && !String(fato.evidencia || '').trim()) {
+      erros.push('EVIDENCIA_AUSENTE_EM_FATO_CONFIRMADO:' + dim);
     }
     if (typeof estado.lacunas[dim] !== 'boolean') erros.push('LACUNA_INVALIDA:' + dim);
   });
