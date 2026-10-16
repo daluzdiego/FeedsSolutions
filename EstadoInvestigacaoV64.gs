@@ -268,3 +268,97 @@ function validarEstadoInvestigacaoV64_(estado) {
   if (!Array.isArray(estado.historico)) erros.push('HISTORICO_INVALIDO');
   return { valido: erros.length === 0, erros: erros };
 }
+
+
+/**
+ * Serialização versionada para persistência no campo INVESTIGACOES.informacoes.
+ * Mantém os registros legados e adiciona/atualiza somente o envelope V6.4.
+ */
+function serializarEstadoInvestigacaoV64_(estado) {
+  var validacao = validarEstadoInvestigacaoV64_(estado);
+  if (!validacao.valido) {
+    throw new Error('ESTADO_INVESTIGACAO_V64_NAO_SERIALIZAVEL: ' + validacao.erros.join(','));
+  }
+  return JSON.stringify(estado);
+}
+
+function desserializarEstadoInvestigacaoV64_(valor) {
+  if (valor === null || valor === undefined || valor === '') return null;
+  var objeto = valor;
+  if (typeof valor === 'string') {
+    try { objeto = JSON.parse(valor); }
+    catch (e) { return null; }
+  }
+  if (!objeto || typeof objeto !== 'object') return null;
+  var validacao = validarEstadoInvestigacaoV64_(objeto);
+  return validacao.valido ? objeto : null;
+}
+
+function extrairEstadoInvestigacaoV64DeInformacoes_(informacoes) {
+  var lista = informacoes;
+  if (typeof lista === 'string') {
+    try { lista = JSON.parse(lista); }
+    catch (e) { return null; }
+  }
+  if (!Array.isArray(lista)) return null;
+  for (var i = lista.length - 1; i >= 0; i--) {
+    var item = lista[i];
+    if (!item || item.tipo !== 'ESTADO_INVESTIGACAO_V64') continue;
+    var estado = desserializarEstadoInvestigacaoV64_(item.estado);
+    if (estado) return estado;
+  }
+  return null;
+}
+
+function inserirEstadoInvestigacaoV64EmInformacoes_(informacoes, estado) {
+  var validacao = validarEstadoInvestigacaoV64_(estado);
+  if (!validacao.valido) {
+    throw new Error('ESTADO_INVESTIGACAO_V64_INVALIDO: ' + validacao.erros.join(','));
+  }
+  var lista = informacoes;
+  if (typeof lista === 'string') {
+    try { lista = JSON.parse(lista); }
+    catch (e) { lista = []; }
+  }
+  if (!Array.isArray(lista)) lista = [];
+  else lista = lista.slice();
+
+  var envelope = {
+    tipo: 'ESTADO_INVESTIGACAO_V64',
+    versao: 'V6.4',
+    estado: JSON.parse(serializarEstadoInvestigacaoV64_(estado)),
+    atualizado_em: new Date().toISOString()
+  };
+  var indice = -1;
+  for (var i = 0; i < lista.length; i++) {
+    if (lista[i] && lista[i].tipo === 'ESTADO_INVESTIGACAO_V64') {
+      indice = i;
+      break;
+    }
+  }
+  if (indice === -1) lista.push(envelope);
+  else lista[indice] = envelope;
+  return lista;
+}
+
+/**
+ * Persistência compatível com a estrutura V6.2 existente.
+ * Depende de buscarInvestigacaoV62_ e atualizarInvestigacaoV62_ (Dados.gs).
+ * Nenhuma coluna nova é criada; outros itens de informacoes são preservados.
+ */
+function carregarEstadoInvestigacaoV64_(investigacao) {
+  if (!investigacao) return null;
+  return extrairEstadoInvestigacaoV64DeInformacoes_(investigacao.informacoes);
+}
+
+function persistirEstadoInvestigacaoV64_(investigacaoId, estado) {
+  if (!investigacaoId) throw new Error('INVESTIGACAO_ID_OBRIGATORIO_V64');
+  if (typeof buscarInvestigacaoV62_ !== 'function' ||
+      typeof atualizarInvestigacaoV62_ !== 'function') {
+    throw new Error('PERSISTENCIA_V62_INDISPONIVEL_PARA_V64');
+  }
+  var investigacao = buscarInvestigacaoV62_({ investigacao_id: investigacaoId });
+  if (!investigacao) throw new Error('INVESTIGACAO_V62_NAO_ENCONTRADA: ' + investigacaoId);
+  var informacoes = inserirEstadoInvestigacaoV64EmInformacoes_(investigacao.informacoes, estado);
+  return atualizarInvestigacaoV62_(investigacaoId, { informacoes: informacoes });
+}
