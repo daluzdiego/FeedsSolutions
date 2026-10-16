@@ -131,8 +131,32 @@ function mapearResultadoMotorV64ParaAnaliseLegada_(resultado) {
   };
 }
 
+function reconciliarPerguntaPendenteV64_(estado, perguntaDoHistorico) {
+  var textoHistorico = String(perguntaDoHistorico || '').trim();
+  var textoEstado = String(estado && estado.perguntaPendente && estado.perguntaPendente.texto || '').trim();
+  if (!textoHistorico) {
+    if (estado) estado.perguntaPendente = null;
+    return estado;
+  }
+  if (normalizarPerguntaInvestigacaoV64_(textoHistorico) !== normalizarPerguntaInvestigacaoV64_(textoEstado)) {
+    var jaRegistrada = (estado.perguntasFeitas || []).some(function(p) {
+      return normalizarPerguntaInvestigacaoV64_(typeof p === 'string' ? p : p.texto) === normalizarPerguntaInvestigacaoV64_(textoHistorico);
+    });
+    if (!jaRegistrada) {
+      registrarPerguntaFeitaV64_(estado, textoHistorico, inferirDimensaoPerguntaV64_(textoHistorico));
+    }
+    definirPerguntaPendenteV64_(estado, {
+      id: 'PENDENTE_RECONCILIADO_V64_' + new Date().getTime(),
+      dimensao: inferirDimensaoPerguntaV64_(textoHistorico),
+      texto: textoHistorico
+    });
+  }
+  return estado;
+}
+
 function processarTurnoPersistidoV64_(diagnostico, contexto, mensagem) {
   var carregado = obterOuCriarEstadoInvestigacaoV64_(diagnostico, contexto);
+  reconciliarPerguntaPendenteV64_(carregado.estado, contexto && contexto.pergunta_pendente);
   var resultado = processarTurnoInvestigacaoV64_(carregado.estado, mensagem);
   var persistencia = persistirEstadoInvestigacaoV64_(carregado.investigacao.investigacao_id, resultado.estado);
   return {
