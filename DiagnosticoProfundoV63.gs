@@ -417,6 +417,21 @@ function FEEDS_PROFUNDO_V63_casosDeterministicos_() {
       }
     },
     {
+      tipo: 'deterministico', grupo: 'CONTINUIDADE', nome: 'Resposta numérica a pergunta de quantidade avança sem repetir a pergunta',
+      fn: function(ctx) {
+        var pergunta = 'Quantas câmeras você precisa adicionar por semana?';
+        var r = ajustarContinuidadeDiagnostico_({
+          volume: '',
+          frequencia: '',
+          informacao_faltante: 'quantidade de câmeras',
+          proxima_pergunta: pergunta
+        }, pergunta, '12');
+        FEEDS_PROFUNDO_V63_assert_(ctx, 'reconhece 12 como resposta à pergunta de volume', r.respondeu_pergunta_pendente === true, JSON.stringify(r));
+        FEEDS_PROFUNDO_V63_assert_(ctx, 'preserva quantidade informada', !!r.volume && /12/.test(r.volume), 'volume=' + r.volume);
+        FEEDS_PROFUNDO_V63_assert_(ctx, 'não repete pergunta de volume', normalizarTextoDiagnostico_(r.proxima_pergunta || '') !== normalizarTextoDiagnostico_(pergunta), 'próxima=' + r.proxima_pergunta);
+      }
+    },
+    {
       tipo: 'deterministico', grupo: 'CONTINUIDADE', nome: 'Não inventa resposta quando não há pergunta pendente',
       fn: function(ctx) {
         var r = ajustarContinuidadeDiagnostico_({ proxima_pergunta: 'Pergunta original?' }, '', 'resposta');
