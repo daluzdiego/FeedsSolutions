@@ -185,7 +185,6 @@ function verificarPrecedenciaPerguntaV64_(estado, dimensao) {
     var fato = estado && estado.fatos && estado.fatos[dim];
     return !fato ||
       (fato.certeza !== CERTEZA_V64.CONFIRMADO &&
-       fato.certeza !== CERTEZA_V64.ESTIMADO &&
        fato.certeza !== CERTEZA_V64.NEGADO);
   });
   return faltantes.length
