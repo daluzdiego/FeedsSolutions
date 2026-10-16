@@ -2004,7 +2004,6 @@ function ajustarContinuidadeDiagnostico_(
 
   const perguntaNorm = normalizarTextoDiagnostico_(pergunta);
   const dimensao = classificarDimensaoPerguntaDiagnostico_(perguntaNorm);
-  const jaNegada = (arguments.length > 3 && arguments[3]) || [];
   let respondeu = false;
   let negativa = false;
 
