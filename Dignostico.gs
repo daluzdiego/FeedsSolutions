@@ -1436,7 +1436,7 @@ function construirEntradaDiagnosticoIA_(
     '',
     'MENSAGEM ATUAL DO EMPRESÁRIO:',
     mensagem
-  ].join('\\n');
+  ].join('\n');
 }
 
 function construirContextoDiagnostico_(
