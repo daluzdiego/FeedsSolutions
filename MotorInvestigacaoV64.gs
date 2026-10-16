@@ -44,7 +44,7 @@ function construirPromptInterpretacaoTurnoV64_(mensagem, estado) {
     'Se a resposta for ambígua, não preencha a dimensão por conveniência; indique ambiguidade e explique o que precisa ser esclarecido.',
     'Uma correção do empresário deve ser registrada como fato novo e não deve apagar silenciosamente a informação anterior.',
     'Classifique cada atualização como NOVO, EXTENSAO, CORRECAO ou CONFIRMACAO. EXTENSAO acrescenta detalhe compatível sem contradizer o fato anterior; CORRECAO contradiz/corrige informação anterior e deve gerar conflito para esclarecimento.', 
-    'Retorne somente JSON com o formato: {"fatos":[{"dimensao":"processo|dor_causa|escala|impacto|excecoes|objetivo|restricoes|aceitacao","valor":"...","evidencia":"...","certeza":"CONFIRMADO|ESTIMADO|NEGADO|DESCONHECIDO","certezaDetalhe":"NAO_SEI|NAO_SE_APLICA|NAO_EXISTE|APROXIMADO|","tipoAtualizacao":"NOVO|EXTENSAO|CORRECAO|CONFIRMACAO"}],"respondeuPerguntaPendente":true,"ambiguidade":false,"explicacaoAmbiguidade":""}.',
+    'Retorne somente JSON com o formato: {"fatos":[{"dimensao":"processo|dor_causa|escala|frequencia|impacto|excecoes|objetivo|restricoes|aceitacao","valor":"...","evidencia":"...","certeza":"CONFIRMADO|ESTIMADO|NEGADO|DESCONHECIDO","certezaDetalhe":"NAO_SEI|NAO_SE_APLICA|NAO_EXISTE|APROXIMADO|","tipoAtualizacao":"NOVO|EXTENSAO|CORRECAO|CONFIRMACAO"}],"respondeuPerguntaPendente":true,"ambiguidade":false,"explicacaoAmbiguidade":""}.',
     '',
     'ESTADO ATUAL:',
     JSON.stringify(resumoEstadoInvestigacaoV64_(estado)),
@@ -67,7 +67,7 @@ function construirPromptProximaPerguntaV64_(estado, ultimaMensagem, motivoRejeic
     'Se a última resposta for ambígua, faça uma pergunta de esclarecimento estreita, ligada ao que foi dito.',
     'Pergunte uma coisa por turno, em linguagem simples, sem múltiplas perguntas unidas.',
     'Não transforme estimativas em fatos confirmados. Não invente respostas.',
-    'Retorne somente JSON: {"proximaPergunta":"...","dimensaoAlvo":"processo|dor_causa|escala|impacto|excecoes|objetivo|restricoes|aceitacao","justificativa":"...","lacunaQueReduz":"..."}.',
+    'Retorne somente JSON: {"proximaPergunta":"...","dimensaoAlvo":"processo|dor_causa|escala|frequencia|impacto|excecoes|objetivo|restricoes|aceitacao","justificativa":"...","lacunaQueReduz":"..."}.',
     '',
     'ESTADO CONSOLIDADO:',
     JSON.stringify(resumo),
@@ -171,6 +171,7 @@ function verificarPrecedenciaPerguntaV64_(estado, dimensao) {
     processo: [],
     dor_causa: ['processo'],
     escala: ['processo'],
+    frequencia: ['processo'],
     impacto: ['processo', 'dor_causa'],
     excecoes: ['processo'],
     objetivo: ['processo', 'dor_causa'],
@@ -275,7 +276,7 @@ function validarPerguntaInvestigativaV64_(estado, candidata, adaptadorSemantico)
 }
 
 function podeConcluirDiagnosticoV64_(estado) {
-  var essenciais = ['processo', 'dor_causa', 'impacto', 'objetivo'];
+  var essenciais = ['processo', 'dor_causa', 'escala', 'frequencia', 'impacto', 'objetivo'];
   for (var i = 0; i < essenciais.length; i++) {
     var dim = essenciais[i];
     var fato = estado && estado.fatos && estado.fatos[dim];
