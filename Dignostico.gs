@@ -2041,8 +2041,10 @@ function ajustarContinuidadeDiagnostico_(
       resultado.impacto = mensagemOriginal;
     }
   } else if (dimensao === 'OBJETIVO') {
-    respondeu = mensagem.length >= 4 &&
-      !/^(nao sei|não sei|nao sei dizer|não sei dizer|nao tenho certeza|não tenho certeza|n sei|nao|não)$/.test(mensagem);
+    const respostaSemConteudo = /^(nao sei|não sei|nao sei dizer|não sei dizer|nao tenho certeza|não tenho certeza|n sei|nao|não|depende|talvez)$/.test(mensagem);
+    const respostaConcreta = /\b(quero|queremos|gostaria|gostariamos|preciso|precisamos|pretendo|pretendemos|objetivo|reduzir|diminuir|aumentar|melhorar|economizar|agilizar|evitar|eliminar|acabar com|parar de|menos|mais|automatizar|organizar|ganhar tempo)\b/.test(mensagem) ||
+      /\b(retrabalho|erros?|atrasos?|tempo|custos?|vendas?|clientes?|produtividade|eficiencia|eficiência)\b/.test(mensagem);
+    respondeu = mensagem.length >= 4 && !respostaSemConteudo && respostaConcreta;
     if (respondeu && !resultado.objetivo) resultado.objetivo = mensagemOriginal;
   } else {
     // Para uma pergunta não reconhecida, só consideramos respondida se a IA
