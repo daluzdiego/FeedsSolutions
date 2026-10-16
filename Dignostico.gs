@@ -418,21 +418,30 @@ function processarMensagemDiagnostico(dados) {
    * ==========================================================
    */
 
-  const analise =
-    analisarMensagemDiagnostico_(
-      entradaIA
+  let analise;
+
+  try {
+    analise = analisarMensagemDiagnostico_(entradaIA);
+    if (!analise || !analise.dados) {
+      throw new Error('ANALISE_IA_INVALIDA');
+    }
+  } catch (erroAnalise) {
+    // Falha de IA não deve aparecer como erro técnico na interface.
+    // A mensagem do usuário já foi persistida; diagnóstico e pergunta pendente ficam intactos.
+    Logger.log(
+      'DIAGNOSTICO_PAUSADO_POR_INDISPONIBILIDADE_IA: ' +
+      (erroAnalise && erroAnalise.message ? erroAnalise.message : 'falha não identificada')
     );
-
-
-  if (
-    !analise ||
-    !analise.dados
-  ) {
-
-    throw new Error(
-      'A IA não retornou uma análise válida.'
-    );
-
+    return {
+      sucesso: true,
+      recuperacao_pendente: true,
+      resposta: 'Estou com uma instabilidade temporária ao analisar sua resposta. Sua mensagem foi registrada e seu diagnóstico continua salvo. Por favor, envie uma nova mensagem em alguns instantes para continuarmos.',
+      estado: diagnostico.status_diagnostico || DIAGNOSTICO_ESTADOS.DESCOBERTA,
+      diagnostico: diagnostico,
+      empresa_id: empresaId,
+      conversa_id: conversaId,
+      diagnostico_id: diagnostico.diagnostico_id || dados.diagnostico_id || ''
+    };
   }
 
 
