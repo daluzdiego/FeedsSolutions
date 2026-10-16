@@ -74,7 +74,7 @@ function TESTAR_CONVERSACIONAL_V64() {
       var e = estadoBase();
       var r = processarTurnoInvestigacaoV64_(e, item.texto, adaptadores({
         interpretar: function() { return { fatos: [fato('impacto', item.texto, item.texto, item.certeza, item.detalhe)], respondeuPerguntaPendente: true, ambiguidade: false }; },
-        selecionarPergunta: function() { return { proximaPergunta: 'Qual consequência isso traz para o processo?', dimensaoAlvo: 'impacto', justificativa: 'Detalhar a consequência.', lacunaQueReduz: 'impacto' }; }
+        selecionarPergunta: function() { return { proximaPergunta: 'Quantos pedidos são processados por dia?', dimensaoAlvo: 'escala', justificativa: 'Dimensionar o volume.', lacunaQueReduz: 'volume' }; }
       }));
       if (r.estado.fatos.impacto.certeza === 'CONFIRMADO') naoConfirmouTodas = false;
     });
@@ -97,7 +97,7 @@ function TESTAR_CONVERSACIONAL_V64() {
         fato('impacto', 'Duas horas por dia', 'perdemos duas horas por dia', 'CONFIRMADO'),
         fato('objetivo', 'Reduzir a conferência', 'queremos reduzir a conferência', 'CONFIRMADO')
       ], respondeuPerguntaPendente: true, ambiguidade: false }; },
-      selecionarPergunta: function() { return { proximaPergunta: 'Quais erros acontecem durante a conferência?', dimensaoAlvo: 'dor_causa', justificativa: 'Detalhar a dor.', lacunaQueReduz: 'causa dos erros' }; }
+      selecionarPergunta: function() { return { proximaPergunta: 'Como vocês verificariam que a melhoria funcionou?', dimensaoAlvo: 'aceitacao', justificativa: 'Definir critério observável.', lacunaQueReduz: 'critérios de aceitação' }; }
     }));
     assert('5. múltiplas dimensões da mesma resposta são registradas',
       r5.estado.fatos.processo.certeza === 'CONFIRMADO' &&
@@ -153,11 +153,15 @@ function TESTAR_CONVERSACIONAL_V64() {
     // 10. Sistemas e canais mencionados permanecem no fato de processo.
     var e10 = estadoBase();
     var r10 = processarTurnoInvestigacaoV64_(e10, 'Recebemos pelo WhatsApp e lançamos no ERP e na planilha.', adaptadores({
-      interpretar: function() { return { fatos: [fato('processo', 'Recebimento pelo WhatsApp; lançamento no ERP e na planilha', 'WhatsApp; ERP; planilha', 'CONFIRMADO')], respondeuPerguntaPendente: true, ambiguidade: false }; },
+      interpretar: function() { return { fatos: [Object.assign(fato('processo', 'Recebimento pelo WhatsApp; lançamento no ERP e na planilha', 'WhatsApp; ERP; planilha', 'CONFIRMADO'), { tipoAtualizacao: 'EXTENSAO' })], respondeuPerguntaPendente: true, ambiguidade: false }; },
       selecionarPergunta: function() { return { proximaPergunta: 'Em qual etapa surgem os erros?', dimensaoAlvo: 'dor_causa', justificativa: 'Localizar a falha.', lacunaQueReduz: 'etapa da falha' }; }
     }));
-    assert('10. múltiplos sistemas e canais são registrados no processo',
-      /WhatsApp/.test(r10.estado.fatos.processo.valor) && /ERP/.test(r10.estado.fatos.processo.valor) && /planilha/.test(r10.estado.fatos.processo.valor));
+    assert('10. múltiplos sistemas e canais são registrados sem apagar o fato anterior',
+      r10.estado.fatos.processo.valor === 'Lançamento manual de pedidos' &&
+      r10.estado.fatos.processo.detalhes.length === 1 &&
+      /WhatsApp/.test(r10.estado.fatos.processo.detalhes[0].valor) &&
+      /ERP/.test(r10.estado.fatos.processo.detalhes[0].valor) &&
+      /planilha/.test(r10.estado.fatos.processo.detalhes[0].valor));
 
     // 11. O gate bloqueia conclusão quando processo ou objetivo essencial é desconhecido.
     var e11 = criarEstadoInvestigacaoVazioV64_();
