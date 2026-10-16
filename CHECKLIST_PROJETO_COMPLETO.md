@@ -379,3 +379,46 @@ E a primeira pergunta que o projeto precisa responder agora é:
 > **Como o usuário final entra no FeedsSolutions, conversa com o sistema, recebe o diagnóstico, acompanha a oportunidade, recebe uma solução/proposta e como nós administramos tudo isso?**
 
 Esse é o próximo grande bloco do produto.
+
+
+---
+
+# 14. V6.4 — INVESTIGAÇÃO CONVERSACIONAL ORIENTADA A EVIDÊNCIAS
+
+**Status da fase:** EM IMPLEMENTAÇÃO — NÃO ACEITA PARA PRODUÇÃO  
+**Branch:** `v6.4-investigacao-adaptativa`  
+**Ativação:** desativada por padrão; baseline V6.3 preservado.
+
+## Estado estruturado
+- [x] Fatos com valor, evidência, certeza e origem
+- [x] Dimensões explícitas: processo, dor/causa, escala, frequência, impacto, exceções, objetivo, restrições e aceitação
+- [x] Preservação de fatos confirmados
+- [x] Registro de conflitos e resolução explícita
+- [x] Persistência versionada no campo existente `INVESTIGACOES.informacoes`
+- [x] Preservação dos itens legados de `informacoes`
+- [ ] Persistência validada no runtime do Google Apps Script
+
+## Motor adaptativo
+- [x] Interpretação factual separada da escolha da próxima pergunta
+- [x] Seleção da pergunta baseada no estado e nas lacunas
+- [x] Validação de pergunta investigativa
+- [x] Proteção contra repetição semântica
+- [x] Matriz de precedência
+- [x] Gate de conclusão com bloqueio de desconhecidos e conflitos
+- [x] Fallback para o caminho V6.3
+- [ ] Ativação validada no Apps Script
+- [ ] Teste com Gemini real aprovado
+
+## Validação separada
+- [x] Teste unitário determinístico criado — execução isolada: 19/19
+- [x] Teste conversacional determinístico criado — execução isolada: 12/12
+- [x] Teste do adaptador criado — execução isolada: 4/4
+- [x] Teste de integração determinístico criado — execução isolada: 12/12
+- [x] Função de teste ponta a ponta com Gemini real criada
+- [ ] Suítes V6.4 executadas no Google Apps Script
+- [ ] Teste ponta a ponta com Gemini executado e aprovado
+- [ ] Regressão V6.3 executada depois das alterações
+- [ ] 3–5 diálogos revisados manualmente
+- [ ] Aceite humano da V6.4 registrado
+
+**Regra de aceite:** resultados de execução isolada não substituem execução no Apps Script, teste com Gemini real ou revisão humana. Consulte `GUIA_TESTES_V64.md`.
