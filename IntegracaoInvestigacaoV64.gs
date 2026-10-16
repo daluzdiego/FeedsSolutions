@@ -58,6 +58,9 @@ function obterOuCriarEstadoInvestigacaoV64_(diagnostico, contexto) {
       atualizarFatoV64_(estado, par[0], par[1], null, CERTEZA_V64.ESTIMADO, 'baseline-v6.3');
     }
   });
+  if (Array.isArray(investigacao.excecoes) && investigacao.excecoes.length) {
+    atualizarFatoV64_(estado, 'excecoes', investigacao.excecoes.join('; '), null, CERTEZA_V64.ESTIMADO, 'baseline-v6.3');
+  }
 
   var historico = Array.isArray(contexto.historico) ? contexto.historico : [];
   var perguntaMaisRecente = null;
