@@ -11,7 +11,7 @@ function TESTAR_ESTADO_INVESTIGACAO_V64() {
 
   try {
     var estado = novo();
-    verificar('cria as oito dimensões obrigatórias', Object.keys(estado.fatos).length === 8, Object.keys(estado.fatos).join(','));
+    verificar('cria as oito dimensões contratuais mais frequência separada', Object.keys(estado.fatos).length === 9, Object.keys(estado.fatos).join(','));
     verificar('todas começam como desconhecidas e lacuna aberta',
       Object.keys(estado.fatos).every(function(d) {
         return estado.fatos[d].certeza === CERTEZA_V64.DESCONHECIDO && estado.lacunas[d] === true;
