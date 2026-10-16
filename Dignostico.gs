@@ -2058,6 +2058,10 @@ function ajustarContinuidadeDiagnostico_(
         resultado.informacao_faltante = 'quantidade aproximada de itens em um período típico';
         resultado.proxima_pergunta = 'Entendi que isso acontece ocasionalmente. Em uma semana típica, aproximadamente quantas divulgações vocês fazem?';
       }
+      // A nova pergunta continua na dimensão VOLUME por desenho; não a deixe
+      // ser descartada pela proteção que impede repetir a mesma dimensão.
+      resultado.respondeu_pergunta_pendente = true;
+      return resultado;
     } else {
       respondeu = /\b\d+(?:[.,]\d+)?\b/.test(mensagem) ||
       /\b(nenhum|nenhuma|zero|um|uma|dois|duas|tres|quatro|cinco|seis|sete|oito|nove|dez)\b/.test(mensagem);
