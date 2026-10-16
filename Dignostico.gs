@@ -2123,10 +2123,25 @@ function ajustarContinuidadeDiagnostico_(
 
 function classificarDimensaoPerguntaDiagnostico_(perguntaNormalizada) {
   const p = normalizarTextoDiagnostico_(perguntaNormalizada || '');
+
+  // Contagem de itens é VOLUME, mesmo quando a pergunta menciona um período.
+  // "Quantas câmeras por semana?" = quantidade; "quantas vezes por semana?" = frequência.
+  const perguntaContaItens =
+    /\bquantos?\b|\bquantas\b/.test(p) &&
+    !/\bquantas? vezes\b|\bfrequencia\b|\bperiodicidade\b/.test(p);
+
+  if (perguntaContaItens &&
+      /\b(pedidos?|vendas?|clientes?|cameras?|publicacoes?|divulgacoes?|postagens?|ordens?|orcamentos?|atendimentos?|pecas?|itens?|unidades?|tarefas?|arquivos?|documentos?|produtos?|chamados?|solicitacoes?)\b/.test(p)) {
+    return 'VOLUME';
+  }
+
+  if (/\bquantos? vezes\b|\bquantas vezes\b|frequencia|periodicidade|com que frequencia|diariamente|diaria|semanalmente|semanal|mensalmente|mensal|todo dia|todos os dias|toda semana|todas as semanas|uma vez por|vezes por|\bpor dia\b|\bpor semana\b|\bpor mes\b/.test(p)) {
+    return 'FREQUENCIA';
+  }
+
   if (/qual o objetivo|objetivo|alcancar|melhorar|resultado desejado|ganhar|reduzir|aumentar|o que voce gostaria/.test(p)) return 'OBJETIVO';
-  if (/impacto|consequencia|efeito|afeta|prejuizo|perda/.test(p)) return 'IMPACTO';
-  if (/erro|retrabalho|atraso|revisao|conferencia/.test(p)) return 'ERROS';
-  if (/frequencia|periodicidade|quantas vezes|por dia|por semana|por mes|ao dia|ao mes|diariamente|diaria|semanalmente|semanal|mensalmente|mensal|todo dia|todos os dias|toda semana|todas as semanas|divulgacoes.*semana|publicacoes.*semana|postagens.*semana|com que frequencia|quantas vezes por|publica|posta|vezes por/.test(p)) return 'FREQUENCIA';
+  if (/impacto|consequencia|efeito|afeta|prejuizo|perda|quanto tempo|quanto custa/.test(p)) return 'IMPACTO';
+  if (/erro|retrabalho|atraso|revisao|conferencia|falha/.test(p)) return 'ERROS';
   if (/quantos|quantidade|volume|numero de clientes|numero de pedidos|quantas vendas/.test(p)) return 'VOLUME';
   return 'OUTRA';
 }
