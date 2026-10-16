@@ -347,6 +347,8 @@ function processarTurnoInvestigacaoV64_(estado, mensagem, adaptadores) {
   var validacao = null;
   var motivoRejeicao = '';
   var tentativas = 0;
+  var naoRespondeuPerguntaPendente = !!estado.perguntaPendente &&
+    interpretacao.respondeuPerguntaPendente !== true;
 
   // Conflito factual exige esclarecimento antes de continuar a investigação ampla.
   if (conflitos.length) {
@@ -360,10 +362,13 @@ function processarTurnoInvestigacaoV64_(estado, mensagem, adaptadores) {
       lacunaQueReduz: 'conflito factual não resolvido'
     };
     validacao = { valida: true, motivo: '', perguntaAjustada: perguntaCandidata.proximaPergunta, dimensaoAlvo: dimensaoConflito };
-  } else if (interpretacao.ambiguidade === true) {
+  } else if (interpretacao.ambiguidade === true || naoRespondeuPerguntaPendente) {
+    var motivoEsclarecimento = naoRespondeuPerguntaPendente
+      ? 'RESPOSTA_NAO_RESPONDEU_PERGUNTA_PENDENTE'
+      : String(interpretacao.explicacaoAmbiguidade || 'RESPOSTA_AMBIGUA');
     while (tentativas < 3) {
       perguntaCandidata = selecionarProximaPerguntaInvestigacaoV64_(
-        estado, texto, motivoRejeicao || String(interpretacao.explicacaoAmbiguidade || 'RESPOSTA_AMBIGUA'),
+        estado, texto, motivoRejeicao || motivoEsclarecimento,
         adaptadores.selecionarPergunta
       );
       validacao = validarPerguntaInvestigativaV64_(estado, perguntaCandidata, adaptadores.verificarRepeticao);
