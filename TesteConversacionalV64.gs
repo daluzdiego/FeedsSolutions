@@ -203,37 +203,80 @@ function TESTAR_CONVERSACIONAL_V64() {
  * estiver configurada e o serviço disponível. Registra apenas metadados sanitizados.
  */
 function TESTAR_GEMINI_REAL_INVESTIGACAO_V64() {
-  var mensagemSintetica = 'Recebemos cerca de 100 pedidos por dia pelo WhatsApp, lançamos manualmente no sistema e gastamos duas horas conferindo os dados.';
+  var estado = criarEstadoInvestigacaoVazioV64_();
+  var mensagens = [];
+  var turnosProcessados = 0;
+  var perguntas = [];
+  var falha = '';
+  var respostaPorDimensao = {
+    processo: 'Recebemos pedidos pelo WhatsApp, lançamos em uma planilha e depois conferimos os dados.',
+    dor_causa: 'Ocorrem erros de digitação e retrabalho durante a conferência.',
+    escala: 'São cerca de 100 pedidos por dia.',
+    frequencia: 'Isso acontece diariamente.',
+    impacto: 'A conferência consome cerca de duas horas por dia.',
+    excecoes: 'Pedidos urgentes às vezes pulam a conferência.',
+    objetivo: 'Queremos reduzir o retrabalho e liberar tempo da equipe.',
+    restricoes: 'Precisamos manter as ferramentas atuais e proteger os dados.',
+    aceitacao: 'Consideraremos sucesso reduzir o retrabalho pela metade.'
+  };
   try {
-    var interpretacao = interpretarTurnoInvestigacaoV64_(
-      mensagemSintetica,
-      criarEstadoInvestigacaoVazioV64_()
-    );
-    var dimensoes = (interpretacao.fatos || []).map(function(f) {
-      return { dimensao: f.dimensao, certeza: f.certeza, possuiEvidencia: !!String(f.evidencia || '').trim() };
+    mensagens.push('Recebemos cerca de 100 pedidos por dia pelo WhatsApp, lançamos manualmente em planilha e gastamos duas horas conferindo.');
+    for (var turno = 0; turno < 4; turno++) {
+      if (turno > 0) {
+        var pendente = estado.perguntaPendente;
+        if (!pendente || !pendente.dimensao) break;
+        mensagens.push(respostaPorDimensao[pendente.dimensao] || 'Preciso esclarecer esse ponto antes de responder.');
+      }
+      var resultado = processarTurnoInvestigacaoV64_(estado, mensagens[mensagens.length - 1]);
+      estado = resultado.estado;
+      turnosProcessados++;
+      if (!resultado.sucesso) {
+        falha = String(resultado.motivo || resultado.erro || 'MOTOR_SEM_PERGUNTA_VALIDA');
+        break;
+      }
+      if (resultado.proxima_pergunta) perguntas.push(normalizarPerguntaInvestigacaoV64_(resultado.proxima_pergunta));
+      if (resultado.status_diagnostico === 'CONCLUIDO') break;
+    }
+
+    var fatosConfirmados = Object.keys(estado.fatos || {}).filter(function(dim) {
+      return estado.fatos[dim] && estado.fatos[dim].certeza === CERTEZA_V64.CONFIRMADO;
     });
-    var resultado = {
+    var semEvidencia = fatosConfirmados.filter(function(dim) {
+      return !String(estado.fatos[dim].evidencia || '').trim();
+    });
+    var semRepeticaoLiteral = perguntas.every(function(p, i) { return perguntas.indexOf(p) === i; });
+    var gate = podeConcluirDiagnosticoV64_(estado);
+    var sucesso = turnosProcessados > 0 &&
+      !falha &&
+      semEvidencia.length === 0 &&
+      semRepeticaoLiteral &&
+      (gate.pode || estado.perguntaPendente !== null);
+
+    var resumo = {
       versao: 'V6.4',
-      teste: 'GEMINI_REAL',
-      sucesso: Array.isArray(interpretacao.fatos) &&
-        interpretacao.fatos.length > 0 &&
-        dimensoes.every(function(f) { return f.possuiEvidencia; }),
-      totalFatos: dimensoes.length,
-      dimensoes: dimensoes,
-      ambiguidade: interpretacao.ambiguidade === true,
-      sanitizado: true
+      teste: 'GEMINI_REAL_PONTA_A_PONTA',
+      sucesso: sucesso,
+      turnosProcessados: turnosProcessados,
+      quantidadePerguntasGeradas: perguntas.length,
+      dimensoesConfirmadas: fatosConfirmados,
+      nenhumFatoConfirmadoSemEvidencia: semEvidencia.length === 0,
+      nenhumaRepeticaoLiteral: semRepeticaoLiteral,
+      gateConcluiuSomenteComCondicoesSatisfeitas: gate.pode || !/CONCLUIDO/.test(String(resultado && resultado.status_diagnostico || '')),
+      conclusao: gate.pode ? 'CONCLUIDO' : 'INVESTIGACAO',
+      sanitizado: true,
+      falha: falha ? falha.slice(0, 180) : ''
     };
-    Logger.log('FEEDS SOLUTIONS V6.4 — GEMINI REAL (SANITIZADO): ' + JSON.stringify(resultado));
-    return resultado;
+    Logger.log('FEEDS SOLUTIONS V6.4 — GEMINI REAL (SANITIZADO): ' + JSON.stringify(resumo));
+    return resumo;
   } catch (erro) {
-    var falha = {
+    var falhaFinal = {
       versao: 'V6.4',
-      teste: 'GEMINI_REAL',
+      teste: 'GEMINI_REAL_PONTA_A_PONTA',
       sucesso: false,
       erro: String(erro && erro.message || erro).slice(0, 180),
       sanitizado: true
     };
-    Logger.log('FEEDS SOLUTIONS V6.4 — GEMINI REAL (SANITIZADO): ' + JSON.stringify(falha));
-    return falha;
+    Logger.log('FEEDS SOLUTIONS V6.4 — GEMINI REAL (SANITIZADO): ' + JSON.stringify(falhaFinal));
+    return falhaFinal;
   }
 }
