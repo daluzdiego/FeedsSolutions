@@ -382,6 +382,52 @@ function podeConcluirDiagnosticoV64_(estado) {
   }) };
 }
 
+
+/**
+ * Plano de contingência determinístico: se o Gemini não produzir uma pergunta
+ * válida após as tentativas limitadas, tenta uma lacuna ainda aberta que não
+ * tenha sido perguntada antes. Não altera fatos nem conclui o diagnóstico.
+ */
+function selecionarFallbackDeterministicoInvestigacaoV64_(estado) {
+  var candidatas = [
+    { dimensaoAlvo: 'dor_causa', proximaPergunta: 'Em qual etapa do processo surge a principal dificuldade?', justificativa: 'Localizar a etapa problemática sem presumir sua causa.', lacunaQueReduz: 'etapa da dificuldade' },
+    { dimensaoAlvo: 'escala', proximaPergunta: 'Quantos pedidos são processados em um dia comum?', justificativa: 'Dimensionar o volume de trabalho.', lacunaQueReduz: 'quantidade de pedidos' },
+    { dimensaoAlvo: 'frequencia', proximaPergunta: 'Em quais horários os pedidos costumam chegar?', justificativa: 'Entender a distribuição temporal do processo.', lacunaQueReduz: 'horários de chegada' },
+    { dimensaoAlvo: 'impacto', proximaPergunta: 'Quanto tempo a equipe gasta conferindo os pedidos por dia?', justificativa: 'Dimensionar o esforço operacional.', lacunaQueReduz: 'tempo de conferência' },
+    { dimensaoAlvo: 'objetivo', proximaPergunta: 'Qual é o principal resultado que vocês querem alcançar com a melhoria?', justificativa: 'Definir o resultado esperado pelo empresário.', lacunaQueReduz: 'resultado esperado' },
+    { dimensaoAlvo: 'excecoes', proximaPergunta: 'Existe alguma situação em que o processo funciona de maneira diferente?', justificativa: 'Identificar exceções que afetem o desenho da solução.', lacunaQueReduz: 'exceções do processo' },
+    { dimensaoAlvo: 'restricoes', proximaPergunta: 'Há alguma limitação de prazo, orçamento ou ferramenta que precisamos respeitar?', justificativa: 'Identificar restrições relevantes para a solução.', lacunaQueReduz: 'restrições do projeto' },
+    { dimensaoAlvo: 'aceitacao', proximaPergunta: 'Que resultado observável faria vocês considerar a melhoria bem-sucedida?', justificativa: 'Definir um critério verificável de sucesso.', lacunaQueReduz: 'critério de sucesso' }
+  ];
+  var historico = estado && Array.isArray(estado.perguntasFeitas) ? estado.perguntasFeitas : [];
+  var dimensoesJaPerguntadas = {};
+  historico.forEach(function(registro) {
+    var texto = typeof registro === 'string' ? registro : registro && registro.texto;
+    var dimensao = registro && registro.dimensao;
+    dimensao = dimensao || classificarDimensaoPerguntaV64_(texto, estado);
+    if (dimensao) dimensoesJaPerguntadas[dimensao] = true;
+  });
+
+  for (var i = 0; i < candidatas.length; i++) {
+    var candidata = candidatas[i];
+    var dimensao = candidata.dimensaoAlvo;
+    if (dimensoesJaPerguntadas[dimensao]) continue;
+    if (estado && estado.lacunas && estado.lacunas[dimensao] === false) continue;
+
+    var validacao = validarPerguntaInvestigativaV64_(
+      estado,
+      candidata,
+      // O fallback só tenta dimensões ainda não perguntadas; a validação lexical
+      // continua ativa, mas a contingência não depende de uma nova chamada Gemini.
+      function() { return { equivalente: false, indice: -1, motivo: 'FALLBACK_DIMENSAO_NAO_PERGUNTADA' }; }
+    );
+    if (validacao.valida) {
+      return { candidata: candidata, validacao: validacao };
+    }
+  }
+  return null;
+}
+
 function processarTurnoInvestigacaoV64_(estado, mensagem, adaptadores) {
   adaptadores = adaptadores || {};
   if (!estado) estado = criarEstadoInvestigacaoVazioV64_();
@@ -502,6 +548,16 @@ function processarTurnoInvestigacaoV64_(estado, mensagem, adaptadores) {
     }
   }
 
+  var usouFallbackDeterministico = false;
+  if (!validacao || !validacao.valida) {
+    var fallback = selecionarFallbackDeterministicoInvestigacaoV64_(estado);
+    if (fallback) {
+      perguntaCandidata = fallback.candidata;
+      validacao = fallback.validacao;
+      usouFallbackDeterministico = true;
+    }
+  }
+
   if (!validacao || !validacao.valida) {
     return {
       sucesso: false,
@@ -540,7 +596,8 @@ function processarTurnoInvestigacaoV64_(estado, mensagem, adaptadores) {
       dimensaoAlvo: validacao.dimensaoAlvo || perguntaCandidata.dimensaoAlvo,
       justificativa: perguntaCandidata.justificativa || '',
       lacunaQueReduz: perguntaCandidata.lacunaQueReduz || '',
-      tentativas: tentativas + 1
+      tentativas: tentativas + 1,
+      fallbackDeterministico: usouFallbackDeterministico
     }
   };
 }
