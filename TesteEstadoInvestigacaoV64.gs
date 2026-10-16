@@ -84,6 +84,29 @@ function TESTAR_ESTADO_INVESTIGACAO_V64() {
     catch (e) { errosInvalidos = /DIMENSAO_INVESTIGACAO_V64_INVALIDA/.test(String(e)); }
     verificar('dimensão inválida é rejeitada explicitamente', errosInvalidos);
 
+    var estadoPersistencia = novo();
+    atualizarFatoV64_(estadoPersistencia, DIMENSOES_V64.DOR_CAUSA,
+      'Retrabalho', 'Precisamos conferir tudo novamente', CERTEZA_V64.CONFIRMADO, 'turno-8');
+    var serializado = serializarEstadoInvestigacaoV64_(estadoPersistencia);
+    var desserializado = desserializarEstadoInvestigacaoV64_(serializado);
+    verificar('serialização preserva fatos e evidências',
+      !!desserializado && desserializado.fatos.dor_causa.valor === 'Retrabalho' &&
+      desserializado.fatos.dor_causa.evidencia === 'Precisamos conferir tudo novamente');
+
+    var informacoesLegadas = [{ tipo: 'NOTA_LEGADA', texto: 'não apagar' }];
+    var informacoesComEstado = inserirEstadoInvestigacaoV64EmInformacoes_(informacoesLegadas, estadoPersistencia);
+    verificar('persistência mantém informações legadas',
+      informacoesComEstado.length === 2 && informacoesComEstado[0].texto === 'não apagar');
+
+    var informacoesAtualizadas = inserirEstadoInvestigacaoV64EmInformacoes_(informacoesComEstado, estadoPersistencia);
+    verificar('atualização substitui envelope V6.4 sem duplicá-lo',
+      informacoesAtualizadas.length === 2 &&
+      informacoesAtualizadas.filter(function(item) { return item.tipo === 'ESTADO_INVESTIGACAO_V64'; }).length === 1);
+
+    var recuperado = extrairEstadoInvestigacaoV64DeInformacoes_(informacoesAtualizadas);
+    verificar('recuperação localiza o estado persistido',
+      !!recuperado && recuperado.fatos.dor_causa.valor === 'Retrabalho');
+
   } catch (erro) {
     resultados.push({ teste: 'execução da suíte', passou: false, detalhe: erro && erro.stack ? erro.stack : String(erro) });
   }
