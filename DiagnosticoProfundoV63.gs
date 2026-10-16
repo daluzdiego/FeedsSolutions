@@ -420,7 +420,7 @@ function FEEDS_PROFUNDO_V63_casosDeterministicos_() {
       tipo: 'deterministico', grupo: 'CONTINUIDADE', nome: 'Resposta numérica a pergunta de quantidade avança sem repetir a pergunta',
       fn: function(ctx) {
         var pergunta = 'Quantas câmeras você precisa adicionar por semana?';
-        var r = ajustarContinuidadeDiagnostico_({
+        var r = ajustarContinuidadeDiagnosticoLegado_({
           volume: '',
           frequencia: '',
           informacao_faltante: 'quantidade de câmeras',
@@ -434,7 +434,7 @@ function FEEDS_PROFUNDO_V63_casosDeterministicos_() {
     {
       tipo: 'deterministico', grupo: 'CONTINUIDADE', nome: 'Não inventa resposta quando não há pergunta pendente',
       fn: function(ctx) {
-        var r = ajustarContinuidadeDiagnostico_({ proxima_pergunta: 'Pergunta original?' }, '', 'resposta');
+        var r = ajustarContinuidadeDiagnosticoLegado_({ proxima_pergunta: 'Pergunta original?' }, '', 'resposta');
         FEEDS_PROFUNDO_V63_assert_(ctx, 'sem pergunta pendente não marca resposta pendente', r.respondeu_pergunta_pendente === false, JSON.stringify(r));
       }
     },
@@ -442,7 +442,7 @@ function FEEDS_PROFUNDO_V63_casosDeterministicos_() {
       tipo: 'deterministico', grupo: 'CONTINUIDADE', nome: 'Resposta numérica avança da pergunta de volume',
       fn: function(ctx) {
         var pergunta = 'Quantas divulgações vocês costumam fazer por semana?';
-        var r = ajustarContinuidadeDiagnostico_({ proxima_pergunta: pergunta, informacao_faltante: pergunta }, pergunta, '20');
+        var r = ajustarContinuidadeDiagnosticoLegado_({ proxima_pergunta: pergunta, informacao_faltante: pergunta }, pergunta, '20');
         FEEDS_PROFUNDO_V63_assert_(ctx, 'reconhece o número como resposta', r.respondeu_pergunta_pendente === true, JSON.stringify(r));
         FEEDS_PROFUNDO_V63_assert_(ctx, 'não repete a pergunta de volume', r.proxima_pergunta !== pergunta, 'próxima=' + r.proxima_pergunta);
         FEEDS_PROFUNDO_V63_assert_(ctx, 'preserva o número como evidência de volume', String(r.volume || '') === '20', 'volume=' + r.volume);
@@ -453,7 +453,7 @@ function FEEDS_PROFUNDO_V63_casosDeterministicos_() {
       fn: function(ctx) {
         var pergunta = 'Quantas divulgações vocês costumam fazer por semana?';
         ['uma por mês', '20 por dia', '~50 por semana', 'diariamente', 'eventualmente'].forEach(function(resposta) {
-          var r = ajustarContinuidadeDiagnostico_({ proxima_pergunta: pergunta, informacao_faltante: pergunta }, pergunta, resposta);
+          var r = ajustarContinuidadeDiagnosticoLegado_({ proxima_pergunta: pergunta, informacao_faltante: pergunta }, pergunta, resposta);
           FEEDS_PROFUNDO_V63_assert_(ctx, 'resposta "' + resposta + '" é reconhecida', r.respondeu_pergunta_pendente === true, 'obtido=' + JSON.stringify(r));
           FEEDS_PROFUNDO_V63_assert_(ctx, 'resposta "' + resposta + '" avança', r.proxima_pergunta !== pergunta, 'próxima=' + r.proxima_pergunta);
         });
@@ -464,7 +464,7 @@ function FEEDS_PROFUNDO_V63_casosDeterministicos_() {
       fn: function(ctx) {
         var pergunta = 'Esse processo costuma gerar erros, retrabalho ou atrasos?';
         ['diariamente', 'não sei dizer', 'sim', 'não'].forEach(function(resposta) {
-          var r = ajustarContinuidadeDiagnostico_({ proxima_pergunta: pergunta, informacao_faltante: pergunta }, pergunta, resposta);
+          var r = ajustarContinuidadeDiagnosticoLegado_({ proxima_pergunta: pergunta, informacao_faltante: pergunta }, pergunta, resposta);
           FEEDS_PROFUNDO_V63_assert_(ctx, 'resposta "' + resposta + '" é reconhecida', r.respondeu_pergunta_pendente === true, JSON.stringify(r));
           FEEDS_PROFUNDO_V63_assert_(ctx, 'resposta "' + resposta + '" não repete pergunta', r.proxima_pergunta !== pergunta, 'próxima=' + r.proxima_pergunta);
         });
@@ -474,7 +474,7 @@ function FEEDS_PROFUNDO_V63_casosDeterministicos_() {
       tipo: 'deterministico', grupo: 'CONTINUIDADE', nome: 'Mensagem vazia não é tratada como resposta válida',
       fn: function(ctx) {
         var pergunta = 'Esse processo costuma gerar erros, retrabalho ou atrasos?';
-        var r = ajustarContinuidadeDiagnostico_({ proxima_pergunta: pergunta, informacao_faltante: pergunta }, pergunta, ' ');
+        var r = ajustarContinuidadeDiagnosticoLegado_({ proxima_pergunta: pergunta, informacao_faltante: pergunta }, pergunta, ' ');
         FEEDS_PROFUNDO_V63_assert_(ctx, 'mensagem vazia não marca pergunta respondida', r.respondeu_pergunta_pendente !== true, JSON.stringify(r));
       }
     },
@@ -483,7 +483,7 @@ function FEEDS_PROFUNDO_V63_casosDeterministicos_() {
       fn: function(ctx) {
         var pergunta = 'Qual o impacto disso no seu negócio?';
         var resposta = 'Perdemos vendas quando os pedidos atrasam.';
-        var r = ajustarContinuidadeDiagnostico_({ proxima_pergunta: pergunta, informacao_faltante: pergunta }, pergunta, resposta);
+        var r = ajustarContinuidadeDiagnosticoLegado_({ proxima_pergunta: pergunta, informacao_faltante: pergunta }, pergunta, resposta);
         FEEDS_PROFUNDO_V63_assert_(ctx, 'reconhece a resposta de impacto', r.respondeu_pergunta_pendente === true, JSON.stringify(r));
         FEEDS_PROFUNDO_V63_assert_(ctx, 'preserva o texto original como evidência', r.impacto === resposta, 'impacto=' + r.impacto);
         FEEDS_PROFUNDO_V63_assert_(ctx, 'avança para outra pergunta', r.proxima_pergunta !== pergunta, 'próxima=' + r.proxima_pergunta);
