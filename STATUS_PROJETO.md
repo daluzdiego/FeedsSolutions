@@ -171,3 +171,14 @@ O runner passou em 4/5 suítes; a única falha foi o teste Gemini real estrito. 
 O log Apps Script de 14:52 confirmou as cinco suítes determinísticas aprovadas (65/65 na versão anterior), mas a chamada real ao Gemini falhou com HTTP 429. A causa operacional observável foi uma pergunta sobre dias/horários contendo “volume de pedidos”, rejeitada repetidamente como se fosse escala; seis tentativas de seleção consumiram chamadas antes do fallback. Corrigida a precedência da classificação temporal em `MotorInvestigacaoV64.gs`, mantendo perguntas explicitamente quantitativas como escala. A suíte conversacional agora testa a frase do log e a distinção “quantos pedidos no pico”; a resposta sintética de impacto também foi tornada exata.
 
 Validação V8 isolada atualizada: **67/67 testes determinísticos aprovados** (19 estado, 18 conversacional, 4 adaptador, 18 integração, 8 adversarial). O E2E real ainda não passou: aguarda nova execução após a janela de cota. V6.4 permanece desativada; V6.3 intacta.
+
+
+## Log de 19/10/2026 às 16:22 — diagnóstico e correção
+
+As cinco suítes determinísticas passaram (67/67 antes da nova regressão), mas o teste Gemini real não concluiu devido a HTTP 429. O conteúdo detalhado revelou que a resposta sintética de impacto era aproximada e que o modelo a classificou como frequência, causando tentativas repetidas na lacuna impacto.
+
+Alterações publicadas:
+- `MotorInvestigacaoV64.gs`: classifica como impacto a duração explicitamente descrita quando a pergunta pendente é impacto; limita a duas tentativas de seleção antes do fallback.
+- `TesteConversacionalV64.gs`: fixture de impacto agora é explícita e exata; adicionada regressão específica. O esperado da suíte conversacional passa a 19/19.
+
+Estado de aceite: **Gemini real ainda reprovado por cota; V6.4 continua desativada.** Sincronizar os dois arquivos, executar a suíte conversacional determinística e depois o teste Gemini real separadamente após a janela de cota. Não executar `TESTAR_ACEITACAO_FINAL_V63_RESETAR()`.
