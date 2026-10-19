@@ -461,3 +461,14 @@ Atualização 19/10: as quatro suítes determinísticas foram reexecutadas em V8
 - [ ] Manter `FEEDS_MOTOR_INVESTIGACAO_V64_ATIVO = false` até regressão V6.3 e revisão humana.
 
 A execução real registrada em `TESTES` não passou: 3/5 suítes aprovadas, conversacional falhou por referência de schema ausente naquele momento e Gemini real terminou com `REPETICAO_SEMANTICA`, frequência não confirmada e pergunta pendente. A correção está publicada, mas o teste real ainda precisa ser repetido no Apps Script.
+
+
+### Atualização após o log real das 12:09 — 19/10/2026
+
+- [x] Analisado o novo log: 4/5 suítes passaram; a falha restante era o Gemini real terminar com `escala` estimada apesar de a considerar dimensão crítica.
+- [x] Causa: o cenário diz “cerca de 100 pedidos por dia”; o modelo preservou corretamente `ESTIMADO`, mas `podeConcluirDiagnosticoV64_` liberava conclusão com ressalva.
+- [x] Gate corrigido para bloquear conclusão se qualquer dimensão essencial estiver `ESTIMADO`.
+- [x] Acrescentada regressão de integração e alterada a resposta sintética de escala para confirmação explícita quando a pergunta solicitar precisão.
+- [x] Revalidação isolada após correção: estado 19/19, conversacional 16/16, adaptador 4/4, integração 18/18; oito fontes verificadas sem erro sintático.
+- [ ] Executar novamente `TESTAR_SUITE_COMPLETA_INVESTIGACAO_V64()` no Apps Script e confirmar Gemini real `sucesso: true`.
+- [ ] Manter `FEEDS_MOTOR_INVESTIGACAO_V64_ATIVO = false` até o E2E real, regressão V6.3 sem reset e revisão humana.
