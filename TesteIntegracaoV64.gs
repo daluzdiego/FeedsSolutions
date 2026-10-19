@@ -114,10 +114,15 @@ function TESTAR_INTEGRACAO_V64() {
       });
       textoDepoisRepeticao = resultadoRepeticao.motivo || '';
     }
-    assert('repetição de pergunta não fecha silenciosamente a lacuna',
+    assert('repetição de pergunta não fecha silenciosamente a lacuna e aciona fallback distinto',
       estadoNaoPerdeLacuna.lacunas.frequencia === true &&
       estadoNaoPerdeLacuna.fatos.frequencia.certeza === 'DESCONHECIDO' &&
-      /REPETICAO_SEMANTICA/.test(textoDepoisRepeticao));
+      resultadoRepeticao.sucesso === true &&
+      resultadoRepeticao.proxima_pergunta !== 'Quais são os horários de pico?' &&
+      resultadoRepeticao.decisao_pergunta &&
+      resultadoRepeticao.decisao_pergunta.fallbackDeterministico === true &&
+      estadoNaoPerdeLacuna.perguntaPendente &&
+      estadoNaoPerdeLacuna.perguntaPendente.texto !== 'Quais são os horários de pico?');
 
     var escalaEfrequencia = criarEstadoInvestigacaoVazioV64_();
     atualizarFatoV64_(escalaEfrequencia, 'processo', 'Recebimento de pedidos', 'Recebemos pedidos', 'CONFIRMADO', 'turno-1');
