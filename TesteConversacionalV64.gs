@@ -208,7 +208,7 @@ function TESTAR_CONVERSACIONAL_V64() {
     var resultadoE2E = null;
     var mensagemE2E = 'Recebemos 100 pedidos por dia, lançamos manualmente, há erros de digitação, a conferência consome duas horas e queremos reduzir o retrabalho.';
     var respostasE2E = {
-      frequencia: 'Os pedidos chegam principalmente entre 10h e meio-dia.',
+      frequencia: 'O maior movimento acontece no intervalo entre 10h e meio-dia; não estou falando da quantidade, mas dos horários em que chegam.',
       aceitacao: 'Consideraremos sucesso reduzir o retrabalho pela metade.'
     };
     for (var passoE2E = 0; passoE2E < 4; passoE2E++) {
