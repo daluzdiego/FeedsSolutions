@@ -86,3 +86,13 @@ O registro `TESTES` da execução das 11:30–11:35 apontou duas falhas: a funç
 ## Resultado real atualizado — 19/10/2026, 12:09
 
 A execução do runner passou em 4/5 suítes: estado 19/19, conversacional 16/16, adaptador 4/4 e integração 17/17. O Gemini real processou 7 turnos, confirmou processo, dor/causa, frequência, impacto, exceções, objetivo, restrições e aceitação, mas manteve escala como `ESTIMADO` porque o cenário dizia “cerca de 100 pedidos por dia”. Apesar de a lacuna estimada permanecer aberta no estado, o gate permitia concluir com ressalva; o teste estrito reprovou corretamente porque escala é crítica e precisava ser confirmada. Corrigido o gate para bloquear conclusão quando uma dimensão essencial estiver `ESTIMADO`, incluído teste de regressão e alterada a resposta sintética de escala para uma confirmação explícita (“exatamente 100 pedidos por dia”). Após as mudanças, as suítes isoladas passaram: estado 19/19, conversacional 16/16, adaptador 4/4 e integração 18/18. A nova execução com Gemini real no Apps Script ainda é obrigatória.
+
+## Próxima etapa — validação adversarial (19/10/2026)
+
+Foi adicionado `TesteAdversarialV64.gs`, com a função `TESTAR_ADVERSARIAL_INVESTIGACAO_V64()`. Ela cobre oito invariantes sob entradas adversariais: resposta vaga/estimada, contradição, múltiplos fatos na mesma mensagem, ausência de resposta, objetivo sem critério de aceitação, escala estimada, separação entre frequência e escala e conflito não resolvido.
+
+A suíte foi executada em JavaScript V8 isolado com as dependências atuais do repositório e passou **8/8**. Isso é uma validação local do código, não substitui a execução no Apps Script.
+
+O runner `TESTAR_SUITE_COMPLETA_INVESTIGACAO_V64()` foi atualizado para executar seis suítes, incluindo a adversarial antes do Gemini real. Sincronize no projeto Apps Script os arquivos `TesteAdversarialV64.gs` e a versão atualizada de `TesteConversacionalV64.gs`, depois execute o runner completo. Resultado esperado: seis suítes aprovadas; a suíte adversarial deve mostrar 8/8. A chamada ao Gemini pode sofrer limite de cota (HTTP 429); se isso acontecer, aguarde a janela de cota e repita, sem tratar a falha como aprovação.
+
+A ativação continua desligada (`FEEDS_MOTOR_INVESTIGACAO_V64_ATIVO = false`) e a baseline V6.3 deve permanecer intacta. Não executar `TESTAR_ACEITACAO_FINAL_V63_RESETAR()`.
