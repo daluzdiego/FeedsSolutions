@@ -394,3 +394,56 @@ function TESTAR_GEMINI_REAL_INVESTIGACAO_V64() {
     return falhaFinal;
   }
 }
+
+
+/**
+ * Executa a bateria V6.4 em uma única execução do Apps Script.
+ * Não reseta a baseline V6.3 nem grava dados de produção.
+ * O último teste chama Gemini real com dados sintéticos.
+ */
+function TESTAR_SUITE_COMPLETA_INVESTIGACAO_V64() {
+  var suites = [];
+  function executar(nome, fn) {
+    try {
+      var r = fn();
+      suites.push({
+        suite: nome,
+        sucesso: !!(r && r.sucesso === true),
+        total: r && r.total !== undefined ? r.total : null,
+        aprovados: r && r.aprovados !== undefined ? r.aprovados : null,
+        falhas: r && r.falhas !== undefined ? r.falhas : null,
+        turnosProcessados: r && r.turnosProcessados !== undefined ? r.turnosProcessados : null,
+        dimensoesCriticasNaoConfirmadas: r && r.dimensoesCriticasNaoConfirmadas || [],
+        erro: r && (r.falha || r.erro) ? String(r.falha || r.erro).slice(0, 180) : ''
+      });
+    } catch (e) {
+      suites.push({
+        suite: nome,
+        sucesso: false,
+        total: null,
+        aprovados: null,
+        falhas: null,
+        erro: String(e && e.message || e).slice(0, 180)
+      });
+    }
+  }
+
+  executar('ESTADO_EXPLICITO', TESTAR_ESTADO_INVESTIGACAO_V64);
+  executar('CONVERSACIONAL_DETERMINISTICA', TESTAR_CONVERSACIONAL_V64);
+  executar('ADAPTADOR', TESTAR_ADAPTADOR_INVESTIGACAO_V64);
+  executar('INTEGRACAO_DETERMINISTICA', TESTAR_INTEGRACAO_V64);
+  executar('GEMINI_REAL_PONTA_A_PONTA', TESTAR_GEMINI_REAL_INVESTIGACAO_V64);
+
+  var resumo = {
+    versao: 'V6.4',
+    suite: 'SUITE_COMPLETA_INVESTIGACAO',
+    sucesso: suites.length === 5 && suites.every(function(s) { return s.sucesso; }),
+    totalSuites: suites.length,
+    suitesAprovadas: suites.filter(function(s) { return s.sucesso; }).length,
+    suitesFalhas: suites.filter(function(s) { return !s.sucesso; }).length,
+    ativacaoMantidaDesligada: motorInvestigacaoV64Ativo_() === false,
+    resultados: suites
+  };
+  Logger.log('FEEDS SOLUTIONS V6.4 — SUÍTE COMPLETA: ' + JSON.stringify(resumo));
+  return resumo;
+}
