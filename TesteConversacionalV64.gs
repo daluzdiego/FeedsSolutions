@@ -199,6 +199,66 @@ function TESTAR_CONVERSACIONAL_V64() {
       !!e12Recuperado && e12Recuperado.perguntaPendente.texto === e12.perguntaPendente.texto &&
       envelope[0].tipo === 'LEGADO');
 
+    // 14. Fluxo completo determinístico: fatos essenciais, frequência e aceitação
+    // precisam ser coletados antes de o gate permitir conclusão.
+    var e2e = criarEstadoInvestigacaoVazioV64_();
+    var resultadoE2E = null;
+    var mensagemE2E = 'Recebemos 100 pedidos por dia, lançamos manualmente, há erros de digitação, a conferência consome duas horas e queremos reduzir o retrabalho.';
+    var respostasE2E = {
+      frequencia: 'Os pedidos chegam principalmente entre 10h e meio-dia.',
+      aceitacao: 'Consideraremos sucesso reduzir o retrabalho pela metade.'
+    };
+    for (var passoE2E = 0; passoE2E < 4; passoE2E++) {
+      resultadoE2E = processarTurnoInvestigacaoV64_(e2e, mensagemE2E, adaptadores({
+        interpretar: function(mensagem, estado) {
+          if (!estado.perguntaPendente) {
+            return {
+              fatos: [
+                fato('processo', 'Lançamento manual de pedidos', 'lançamos manualmente', 'CONFIRMADO'),
+                fato('dor_causa', 'Erros de digitação e retrabalho', 'há erros de digitação', 'CONFIRMADO'),
+                fato('escala', '100 pedidos por dia', '100 pedidos por dia', 'CONFIRMADO'),
+                fato('impacto', 'Duas horas de conferência por dia', 'consome duas horas', 'CONFIRMADO'),
+                fato('objetivo', 'Reduzir retrabalho', 'queremos reduzir o retrabalho', 'CONFIRMADO')
+              ],
+              respondeuPerguntaPendente: true,
+              ambiguidade: false
+            };
+          }
+          var dim = estado.perguntaPendente.dimensao;
+          return {
+            fatos: [fato(dim, respostasE2E[dim], mensagem, 'CONFIRMADO')],
+            respondeuPerguntaPendente: true,
+            ambiguidade: false
+          };
+        },
+        selecionarPergunta: function(estado) {
+          if (estado.lacunas.frequencia) {
+            return { proximaPergunta: 'Em quais horários os pedidos costumam chegar?', dimensaoAlvo: 'frequencia', justificativa: 'Identificar distribuição temporal.', lacunaQueReduz: 'horários' };
+          }
+          if (estado.lacunas.aceitacao) {
+            return { proximaPergunta: 'Como vamos medir o sucesso da melhoria?', dimensaoAlvo: 'aceitacao', justificativa: 'Definir critério verificável.', lacunaQueReduz: 'critério de sucesso' };
+          }
+          return { proximaPergunta: 'Como vamos medir o sucesso da melhoria?', dimensaoAlvo: 'aceitacao', justificativa: 'Definir critério verificável.', lacunaQueReduz: 'critério de sucesso' };
+        }
+      }));
+      e2e = resultadoE2E.estado;
+      if (resultadoE2E.status_diagnostico === 'CONCLUIDO') break;
+      if (e2e.perguntaPendente && respostasE2E[e2e.perguntaPendente.dimensao]) {
+        mensagemE2E = respostasE2E[e2e.perguntaPendente.dimensao];
+      } else if (e2e.perguntaPendente) {
+        mensagemE2E = 'Resposta sintética para a dimensão pendente.';
+      }
+    }
+    assert('14. fluxo completo só conclui após confirmar frequência e critério de aceitação',
+      !!resultadoE2E &&
+      resultadoE2E.sucesso === true &&
+      resultadoE2E.status_diagnostico === 'CONCLUIDO' &&
+      resultadoE2E.gate && resultadoE2E.gate.pode === true &&
+      e2e.perguntaPendente === null &&
+      ['processo','dor_causa','escala','frequencia','impacto','objetivo','aceitacao'].every(function(dim) {
+        return e2e.fatos[dim].certeza === CERTEZA_V64.CONFIRMADO;
+      }));
+
     // 13. O fallback determinístico recupera a investigação sem preencher lacunas.
     var e13 = estadoBase();
     var fallback13 = selecionarFallbackDeterministicoInvestigacaoV64_(e13);
@@ -217,7 +277,7 @@ function TESTAR_CONVERSACIONAL_V64() {
   var resumo = {
     versao: 'V6.4',
     suite: 'CONVERSACIONAL_DETERMINISTICA',
-    sucesso: resultados.length === 14 && aprovados === resultados.length,
+    sucesso: resultados.length === 15 && aprovados === resultados.length,
     total: resultados.length,
     aprovados: aprovados,
     falhas: resultados.length - aprovados,
