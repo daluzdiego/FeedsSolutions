@@ -157,11 +157,23 @@ function TESTAR_INTEGRACAO_V64() {
     assert('classifica horários como frequência e quantidade em pico como escala',
       classPico === 'frequencia' && classQuantidadePico === 'escala');
 
+    var esperaRetryGemini = extrairEsperaRetryGeminiMs_(JSON.stringify({
+      error: {
+        details: [{
+          '@type': 'type.googleapis.com/google.rpc.RetryInfo',
+          retryDelay: '35.542506408s'
+        }]
+      }
+    }));
+    assert('retry do Gemini respeita o atraso RetryInfo da API',
+      esperaRetryGemini === 35543,
+      'Atraso calculado: ' + esperaRetryGemini + ' ms');
+
   } catch (e) {
     resultados.push({ teste: 'execução da suíte', passou: false, detalhe: String(e && e.stack || e) });
   }
   var aprovados = resultados.filter(function(r) { return r.passou; }).length;
-  var resumo = { versao: 'V6.4', suite: 'INTEGRACAO_DETERMINISTICA', sucesso: resultados.length === 18 && aprovados === resultados.length, total: resultados.length, aprovados: aprovados, falhas: resultados.length - aprovados, resultados: resultados };
+  var resumo = { versao: 'V6.4', suite: 'INTEGRACAO_DETERMINISTICA', sucesso: resultados.length === 19 && aprovados === resultados.length, total: resultados.length, aprovados: aprovados, falhas: resultados.length - aprovados, resultados: resultados };
   Logger.log('FEEDS SOLUTIONS V6.4 — INTEGRAÇÃO DETERMINÍSTICA: ' + JSON.stringify(resumo));
   return resumo;
 }
