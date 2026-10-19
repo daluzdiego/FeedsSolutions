@@ -28,8 +28,8 @@ O teste 5 chama o Gemini real, usa somente uma conversa sintética e registra ap
 
 Depois que os testes V6.4 acima passarem:
 
-1. No arquivo `TesteAceitacaoFinalV63.gs`, execute `TESTAR_ACEITACAO_FINAL_V63_RESETAR()`.
-2. Em seguida, no mesmo arquivo, execute `TESTAR_ACEITACAO_FINAL_V63_CONTINUAR()`.
+1. **Não execute** `TESTAR_ACEITACAO_FINAL_V63_RESETAR()`, pois ela reseta a baseline V6.3.
+2. Execute somente `TESTAR_ACEITACAO_FINAL_V63_CONTINUAR()` no arquivo `TesteAceitacaoFinalV63.gs`, depois de confirmar que o cenário não depende de reset.
 3. Confira as assertivas e registre o resultado; “executou sem exceção” não é suficiente.
 4. No arquivo `DiagnosticoProfundoV63.gs`, execute `TESTAR_DIAGNOSTICO_PROFUNDO_V63_FULL()` e confirme que o cenário de periodicidade/volume não falha.
 5. Não ative o motor V6.4 se houver regressão.
@@ -104,3 +104,14 @@ O log real mostrou cinco suítes determinísticas aprovadas (19/19 estado, 16/16
 Correção publicada em `MotorInvestigacaoV64.gs`: marcadores temporais prevalecem quando a pergunta procura saber quando ocorre o pico; somente um pedido quantitativo explícito (como “Quantos pedidos chegam no horário de pico?”) é classificado como escala. Adicionados dois testes de regressão, incluindo a frase exata do log, e ajustada a resposta sintética de impacto para confirmar exatamente duas horas, evitando que o cenário de teste introduza nova estimativa.
 
 Validação V8 isolada após a correção: estado 19/19, conversacional 18/18, adaptador 4/4, integração 18/18 e adversarial 8/8 — **67/67 aprovados**. Isso não comprova o E2E real. Sincronizar `MotorInvestigacaoV64.gs` e `TesteConversacionalV64.gs` no Apps Script; após a janela de cota informada pelo Gemini, executar novamente a suíte completa uma única vez. O resultado real continua pendente até `GEMINI_REAL_PONTA_A_PONTA` passar sem 429.
+
+
+## Correção após execução de 19/10/2026 às 16:22
+
+O log voltou a aprovar as cinco suítes determinísticas (19/19, 18/18, 4/4, 18/18 e 8/8), mas o Gemini real falhou por HTTP 429. Além da cota, o log demonstrou uma falha de classificação: a resposta sobre tempo consumido na conferência foi atribuída a frequência, embora a pergunta pendente fosse impacto. Isso fez o motor insistir na mesma lacuna.
+
+Correções publicadas:
+- `MotorInvestigacaoV64.gs`: nova normalização conservadora de duração para impacto quando a pergunta pendente é impacto; limite de duas tentativas de seleção por turno antes do fallback determinístico.
+- `TesteConversacionalV64.gs`: resposta sintética de impacto agora descreve explicitamente a consequência e confirma exatamente duas horas; acrescentado teste de regressão da classificação duração → impacto. A suíte conversacional agora exige 19/19.
+
+**Próxima validação no Apps Script:** sincronize os dois arquivos acima. Execute primeiro `TESTAR_CONVERSACIONAL_V64()` (esperado 19/19) e as suítes determinísticas restantes. Só depois da janela de cota, execute `TESTAR_GEMINI_REAL_INVESTIGACAO_V64()` isoladamente. Não use a falha HTTP 429 como aprovação e mantenha `FEEDS_MOTOR_INVESTIGACAO_V64_ATIVO = false`.
