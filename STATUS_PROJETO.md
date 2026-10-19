@@ -147,3 +147,8 @@ Reexecução isolada após o teste de fluxo completo (19/10/2026): estado 19/19,
 
 
 Runner de validação acelerada publicado: TESTAR_SUITE_COMPLETA_INVESTIGACAO_V64() em TesteConversacionalV64.gs. Executa as quatro suítes determinísticas e o teste Gemini real estrito em sequência, não reseta a baseline V6.3 e reprova se a flag de ativação não estiver desligada.
+
+
+## Atualização após execução real do runner — 19/10/2026
+
+A execução mais recente em Apps Script falhou em 2 de 5 suítes. Estado explícito: 19/19; adaptador: 4/4; integração determinística: 17/17. Conversacional determinístico falhou no acesso à função de schema durante aquela execução. Gemini ponta a ponta chegou ao limite de 10 turnos, não confirmou frequência e entrou em repetição semântica. Foram publicadas correções para classificação temporal, fallback de frequência e redução de comparações redundantes com Gemini. Validação Apps Script após essas mudanças ainda pendente. A V6.4 permanece desativada; V6.3 não deve ser resetada.
