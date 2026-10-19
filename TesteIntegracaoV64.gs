@@ -18,6 +18,13 @@ function TESTAR_INTEGRACAO_V64() {
     var g1 = podeConcluirDiagnosticoV64_(e1);
     assert('bloqueia conclusão com dimensões essenciais desconhecidas', g1.pode === false);
 
+    var eEstimado = criarEstadoInvestigacaoVazioV64_();
+    preencherEssenciais(eEstimado);
+    atualizarFatoV64_(eEstimado, 'escala', 'Cerca de 100 pedidos por dia', 'Recebemos cerca de 100 pedidos por dia', 'ESTIMADO', 'turno-1');
+    var gateEstimado = podeConcluirDiagnosticoV64_(eEstimado);
+    assert('estimativa em dimensão essencial mantém conclusão bloqueada',
+      gateEstimado.pode === false && gateEstimado.motivo === 'DIMENSAO_ESSENCIAL_ESTIMADA:escala');
+
     var e2 = criarEstadoInvestigacaoVazioV64_();
     preencherEssenciais(e2);
     var g2 = podeConcluirDiagnosticoV64_(e2);
@@ -150,7 +157,7 @@ function TESTAR_INTEGRACAO_V64() {
     resultados.push({ teste: 'execução da suíte', passou: false, detalhe: String(e && e.stack || e) });
   }
   var aprovados = resultados.filter(function(r) { return r.passou; }).length;
-  var resumo = { versao: 'V6.4', suite: 'INTEGRACAO_DETERMINISTICA', sucesso: resultados.length === 17 && aprovados === resultados.length, total: resultados.length, aprovados: aprovados, falhas: resultados.length - aprovados, resultados: resultados };
+  var resumo = { versao: 'V6.4', suite: 'INTEGRACAO_DETERMINISTICA', sucesso: resultados.length === 18 && aprovados === resultados.length, total: resultados.length, aprovados: aprovados, falhas: resultados.length - aprovados, resultados: resultados };
   Logger.log('FEEDS SOLUTIONS V6.4 — INTEGRAÇÃO DETERMINÍSTICA: ' + JSON.stringify(resumo));
   return resumo;
 }
