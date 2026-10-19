@@ -447,3 +447,17 @@ Atualização 19/10: as quatro suítes determinísticas foram reexecutadas em V8
 
 - [x] Criado runner único TESTAR_SUITE_COMPLETA_INVESTIGACAO_V64() para executar as quatro suítes determinísticas e o teste Gemini real sem resetar V6.3.
 - [ ] Executar o runner único no Apps Script e revisar o resumo final.
+
+
+### Revalidação pós-falha real — 19/10/2026
+
+- [x] Reprodução isolada do bug: a resposta temporal “entre 10h e meio-dia” podia ser absorvida como `escala`, deixando `frequencia` em aberto.
+- [x] Corrigida a interpretação para reclassificar esse caso somente quando há marcador temporal explícito e evidência na mensagem; prompt e fallback de frequência também foram ajustados.
+- [x] Reduzidas chamadas de comparação semântica redundantes quando as perguntas claramente medem dimensões diferentes.
+- [x] Acrescentada regressão determinística da classificação de frequência.
+- [x] Validação atual das suítes determinísticas em V8 isolado: estado 19/19, conversacional 16/16, adaptador 4/4, integração 17/17; arquivos alterados passaram na análise sintática.
+- [ ] Sincronizar `MotorInvestigacaoV64.gs` e `TesteConversacionalV64.gs` no projeto Google Apps Script e executar novamente `TESTAR_SUITE_COMPLETA_INVESTIGACAO_V64()`.
+- [ ] Confirmar `GEMINI_REAL_PONTA_A_PONTA` com sucesso verdadeiro e sem HTTP 429/repetição.
+- [ ] Manter `FEEDS_MOTOR_INVESTIGACAO_V64_ATIVO = false` até regressão V6.3 e revisão humana.
+
+A execução real registrada em `TESTES` não passou: 3/5 suítes aprovadas, conversacional falhou por referência de schema ausente naquele momento e Gemini real terminou com `REPETICAO_SEMANTICA`, frequência não confirmada e pergunta pendente. A correção está publicada, mas o teste real ainda precisa ser repetido no Apps Script.
