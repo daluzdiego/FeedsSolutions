@@ -71,6 +71,18 @@ function TESTAR_CONVERSACIONAL_V64() {
       interpretacaoFrequencia.fatos[0].dimensao === 'frequencia' &&
       interpretacaoFrequencia.fatos[0].evidencia === 'Os pedidos chegam principalmente entre 10h e meio-dia');
 
+    // Resposta de duração à pergunta pendente de impacto não pode virar frequência.
+    var estadoImpacto = estadoBase();
+    definirPerguntaPendenteV64_(estadoImpacto, { id: 'q-impacto', dimensao: 'impacto', texto: 'Qual é o impacto do tempo gasto na conferência?' });
+    var interpretacaoImpacto = {
+      fatos: [fato('frequencia', 'A conferência consome exatamente duas horas de trabalho por dia', 'A conferência consome exatamente duas horas de trabalho por dia', 'CONFIRMADO')],
+      respondeuPerguntaPendente: true,
+      ambiguidade: false
+    };
+    corrigirImpactoMalClassificadoV64_(interpretacaoImpacto, 'A conferência consome exatamente duas horas de trabalho por dia.', estadoImpacto);
+    assert('duração de trabalho na pergunta pendente de impacto é classificada como impacto',
+      interpretacaoImpacto.fatos[0].dimensao === 'impacto');
+
     // Regressão reproduzida no log Gemini real: a palavra "volume" aparece
     // dentro de uma pergunta temporal, mas não transforma a intenção em escala.
     var perguntaTemporalComVolume = classificarDimensaoPerguntaV64_(
@@ -305,7 +317,7 @@ function TESTAR_CONVERSACIONAL_V64() {
   var resumo = {
     versao: 'V6.4',
     suite: 'CONVERSACIONAL_DETERMINISTICA',
-    sucesso: resultados.length === 18 && aprovados === resultados.length,
+    sucesso: resultados.length === 19 && aprovados === resultados.length,
     total: resultados.length,
     aprovados: aprovados,
     falhas: resultados.length - aprovados,
@@ -333,7 +345,7 @@ function TESTAR_GEMINI_REAL_INVESTIGACAO_V64() {
     dor_causa: 'Ocorrem erros de digitação e retrabalho durante a conferência.',
     escala: 'São exatamente 100 pedidos por dia.',
     frequencia: 'Os pedidos chegam principalmente entre 10h e meio-dia.',
-    impacto: 'A conferência consome cerca de duas horas por dia.',
+    impacto: 'A consequência é perder exatamente duas horas de trabalho por dia na conferência, reduzindo o tempo disponível para atender pedidos.',
     excecoes: 'Pedidos urgentes às vezes pulam a conferência.',
     objetivo: 'Queremos reduzir o retrabalho e liberar tempo da equipe.',
     restricoes: 'Precisamos manter as ferramentas atuais e proteger os dados.',
