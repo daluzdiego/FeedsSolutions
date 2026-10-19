@@ -333,7 +333,7 @@ function classificarDimensaoPerguntaV64_(pergunta, estado) {
   // Primeiro identifica a variável que a pergunta realmente mede.
   // "Quantos pedidos chegam nos horários de pico?" continua sendo escala;
   // só perguntas sobre quando/horários são frequência.
-  if (/horario|horarios|pico|maior movimento|distribuicao ao longo do dia|em que periodo|em que horario|turno de maior|horas de pico|distribuicao temporal|dias e horarios|quando chegam|em quais dias/.test(p) &&
+  if (/horario|horarios|pico|maior movimento|distribuicao ao longo do dia|em que periodo|em que periodos|em que horario|turno de maior|horas de pico|distribuicao temporal|dias e horarios|quando chegam|em quais dias|periodo do dia|periodos do dia/.test(p) &&
       !/quantos|quantas|quantidade|volume|media de pedidos|itens por dia|pedidos por dia|pedidos por semana|pedidos por mes|quantidade diaria|quantidade semanal/.test(p)) {
     return 'frequencia';
   }
@@ -400,7 +400,7 @@ function selecionarFallbackDeterministicoInvestigacaoV64_(estado) {
   var candidatas = [
     { dimensaoAlvo: 'dor_causa', proximaPergunta: 'Em qual etapa do processo surge a principal dificuldade?', justificativa: 'Localizar a etapa problemática sem presumir sua causa.', lacunaQueReduz: 'etapa da dificuldade' },
     { dimensaoAlvo: 'escala', proximaPergunta: 'Quantos pedidos são processados em um dia comum?', justificativa: 'Dimensionar o volume de trabalho.', lacunaQueReduz: 'quantidade de pedidos' },
-    { dimensaoAlvo: 'frequencia', proximaPergunta: 'Em quais horários os pedidos costumam chegar?', justificativa: 'Entender a distribuição temporal do processo.', lacunaQueReduz: 'horários de chegada' },
+    { dimensaoAlvo: 'frequencia', proximaPergunta: 'Em que períodos do dia o movimento aumenta, independentemente do total de pedidos?', justificativa: 'Entender a distribuição temporal do processo sem voltar a medir volume.', lacunaQueReduz: 'distribuição temporal' },
     { dimensaoAlvo: 'impacto', proximaPergunta: 'Quanto tempo a equipe gasta conferindo os pedidos por dia?', justificativa: 'Dimensionar o esforço operacional.', lacunaQueReduz: 'tempo de conferência' },
     { dimensaoAlvo: 'objetivo', proximaPergunta: 'Qual é o principal resultado que vocês querem alcançar com a melhoria?', justificativa: 'Definir o resultado esperado pelo empresário.', lacunaQueReduz: 'resultado esperado' },
     { dimensaoAlvo: 'excecoes', proximaPergunta: 'Existe alguma situação em que o processo funciona de maneira diferente?', justificativa: 'Identificar exceções que afetem o desenho da solução.', lacunaQueReduz: 'exceções do processo' },
