@@ -57,6 +57,20 @@ function TESTAR_CONVERSACIONAL_V64() {
       dimensoesContrato.every(function(dim) { return dimensoesSchema.indexOf(dim) !== -1; }),
       'Contrato=' + dimensoesContrato.join(',') + '; schema=' + dimensoesSchema.join(','));
 
+    // A resposta temporal não pode ser absorvida pelo fato de escala diário.
+    var estadoFrequencia = estadoBase();
+    atualizarFatoV64_(estadoFrequencia, 'escala', '100 pedidos por dia', '100 pedidos por dia', CERTEZA_V64.CONFIRMADO, 'baseline');
+    definirPerguntaPendenteV64_(estadoFrequencia, { id: 'q-frequencia', dimensao: 'frequencia', texto: 'Em quais horários os pedidos costumam chegar?' });
+    var interpretacaoFrequencia = {
+      fatos: [fato('escala', 'Os pedidos chegam principalmente entre 10h e meio-dia', 'Os pedidos chegam principalmente entre 10h e meio-dia', 'CONFIRMADO')],
+      respondeuPerguntaPendente: true,
+      ambiguidade: false
+    };
+    corrigirFrequenciaMalClassificadaV64_(interpretacaoFrequencia, 'Os pedidos chegam principalmente entre 10h e meio-dia.', estadoFrequencia);
+    assert('resposta de horário à pergunta de frequência não é classificada como escala',
+      interpretacaoFrequencia.fatos[0].dimensao === 'frequencia' &&
+      interpretacaoFrequencia.fatos[0].evidencia === 'Os pedidos chegam principalmente entre 10h e meio-dia');
+
     // 1. Resposta numérica à pergunta de escala é guardada como fato confirmado.
     var e1 = estadoBase();
     var r1 = processarTurnoInvestigacaoV64_(e1, 'São 100 pedidos por dia.', adaptadores({
@@ -280,7 +294,7 @@ function TESTAR_CONVERSACIONAL_V64() {
   var resumo = {
     versao: 'V6.4',
     suite: 'CONVERSACIONAL_DETERMINISTICA',
-    sucesso: resultados.length === 15 && aprovados === resultados.length,
+    sucesso: resultados.length === 16 && aprovados === resultados.length,
     total: resultados.length,
     aprovados: aprovados,
     falhas: resultados.length - aprovados,
