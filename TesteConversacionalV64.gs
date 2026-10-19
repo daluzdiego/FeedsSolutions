@@ -304,35 +304,6 @@ function TESTAR_CONVERSACIONAL_V64() {
   return resumo;
 }
 
-function schemaInterpretacaoTurnoInvestigacaoV64_() {
-  // Este schema é a fonte única do contrato de dimensões da interpretação.
-  // O teste conversacional compara-o com DIMENSOES_V64 para evitar que uma
-  // dimensão exista no estado/prompt, mas seja proibida pelo JSON Schema.
-  return {
-    type: 'object',
-    properties: {
-      fatos: {
-        type: 'array',
-        items: {
-          type: 'object',
-          properties: {
-            dimensao: { type: 'string', enum: ['processo','dor_causa','escala','frequencia','impacto','excecoes','objetivo','restricoes','aceitacao'] },
-            valor: { type: 'string' },
-            evidencia: { type: 'string' },
-            certeza: { type: 'string', enum: ['CONFIRMADO','ESTIMADO','NEGADO','DESCONHECIDO'] },
-            certezaDetalhe: { type: 'string' },
-            tipoAtualizacao: { type: 'string', enum: ['NOVO','EXTENSAO','CORRECAO','CONFIRMACAO'] }
-          },
-          required: ['dimensao','valor','evidencia','certeza','certezaDetalhe','tipoAtualizacao']
-        }
-      },
-      respondeuPerguntaPendente: { type: 'boolean' },
-      ambiguidade: { type: 'boolean' },
-      explicacaoAmbiguidade: { type: 'string' }
-    },
-    required: ['fatos','respondeuPerguntaPendente','ambiguidade','explicacaoAmbiguidade']
-  };
-}
 
 /**
  * Teste real e separado com Gemini. Executar somente quando a chave Gemini
