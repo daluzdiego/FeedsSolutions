@@ -117,3 +117,16 @@ InterpretacaoIA_V63.gs, InterpretacaoV63.gs, SolucoesV63.gs, DecisãoV63.gs, Res
 - Testes V6.4 separados dos resultados de aceitação V6.3.
 
 Consulte `GUIA_TESTES_V64.md` para a ordem exata de execução, arquivos, funções e resultados esperados.
+
+
+## Atualização de auditoria V6.4 — 19/10/2026
+
+A auditoria da versão no main encontrou e corrigiu uma lacuna no JSON Schema de interpretação: a dimensão frequencia constava no estado e no prompt, mas não era permitida em fatos[].dimensao. Isso impedia o modelo de devolver esse fato estruturado de forma contratual.
+
+- Correção publicada em MotorInvestigacaoV64.gs — commit 6bd2ae632732a041fa1fafe5c6da945f9ec9424b.
+- Teste de contrato do schema e E2E mais rigoroso publicados em TesteConversacionalV64.gs — commit 51a50fb7fd5597a632eb98231eef8dec1cb8037c.
+- A suíte conversacional passa a exigir 14/14.
+- O teste Gemini real deixa de aceitar como sucesso apenas quatro turnos sem falha imediata; agora exige as dimensões críticas confirmadas, conclusão aprovada pelo gate e nenhuma pergunta pendente.
+- O registro antigo em TESTES é histórico e não valida a versão atualizada do teste real.
+
+Status V6.4: correção de código publicada; validação atualizada no Apps Script pendente. Ativação continua desabilitada. Não executar TESTAR_ACEITACAO_FINAL_V63_RESETAR(), pois a baseline V6.3 já foi aceita e deve ser preservada.
