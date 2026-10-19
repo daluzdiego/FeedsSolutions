@@ -48,3 +48,10 @@ Commits:
 - Teste de contrato do schema e aceitação ponta a ponta mais rigorosa: 51a50fb7fd5597a632eb98231eef8dec1cb8037c.
 
 Estado: correções publicadas; ainda é necessário executar as suítes atualizadas no Google Apps Script. O motor permanece desativado.
+
+
+### Teste determinístico de conversa completa — 19/10/2026
+
+Foi adicionado à suíte conversacional um cenário de ponta a ponta determinístico que fornece fatos iniciais de processo, dor, escala, impacto e objetivo; em seguida responde frequência e critério de aceitação. O teste exige que o motor só conclua com as sete dimensões críticas confirmadas, gate aprovado e pergunta pendente removida.
+
+Resultado reexecutado em V8 isolado: estado 19/19, conversacional 15/15, adaptador 4/4 e integração 17/17. Isso testa a lógica determinística do fluxo, não a chamada real ao Gemini nem os serviços do Google Apps Script.
