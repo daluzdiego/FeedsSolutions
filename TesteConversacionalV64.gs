@@ -43,6 +43,17 @@ function TESTAR_CONVERSACIONAL_V64() {
   }
 
   try {
+    // O contrato do JSON Schema precisa acompanhar todas as dimensões do estado.
+    // Esta regressão detecta dimensões declaradas no prompt/estado, mas proibidas
+    // pelo schema enviado ao Gemini (como ocorreu com FREQUENCIA).
+    var schemaInterpretacao = schemaInterpretacaoTurnoInvestigacaoV64_();
+    var dimensoesSchema = schemaInterpretacao.properties.fatos.items.properties.dimensao.enum;
+    var dimensoesContrato = Object.keys(DIMENSOES_V64).map(function(chave) { return DIMENSOES_V64[chave]; });
+    assert('schema de interpretação aceita todas as dimensões contratuais, inclusive frequência',
+      dimensoesSchema.length === dimensoesContrato.length &&
+      dimensoesContrato.every(function(dim) { return dimensoesSchema.indexOf(dim) !== -1; }),
+      'Contrato=' + dimensoesContrato.join(',') + '; schema=' + dimensoesSchema.join(','));
+
     // 1. Resposta numérica à pergunta de escala é guardada como fato confirmado.
     var e1 = estadoBase();
     var r1 = processarTurnoInvestigacaoV64_(e1, 'São 100 pedidos por dia.', adaptadores({
@@ -206,7 +217,7 @@ function TESTAR_CONVERSACIONAL_V64() {
   var resumo = {
     versao: 'V6.4',
     suite: 'CONVERSACIONAL_DETERMINISTICA',
-    sucesso: resultados.length === 13 && aprovados === resultados.length,
+    sucesso: resultados.length === 14 && aprovados === resultados.length,
     total: resultados.length,
     aprovados: aprovados,
     falhas: resultados.length - aprovados,
@@ -241,7 +252,7 @@ function TESTAR_GEMINI_REAL_INVESTIGACAO_V64() {
   };
   try {
     mensagens.push('Recebemos cerca de 100 pedidos por dia pelo WhatsApp, lançamos manualmente em planilha e gastamos duas horas conferindo.');
-    for (var turno = 0; turno < 4; turno++) {
+    for (var turno = 0; turno < 10; turno++) {
       if (turno > 0) {
         var pendente = estado.perguntaPendente;
         if (!pendente || !pendente.dimensao) break;
@@ -265,24 +276,47 @@ function TESTAR_GEMINI_REAL_INVESTIGACAO_V64() {
       return !String(estado.fatos[dim].evidencia || '').trim();
     });
     var semRepeticaoLiteral = perguntas.every(function(p, i) { return perguntas.indexOf(p) === i; });
+    var indicesComRepeticaoSemantica = [];
+    perguntas.forEach(function(pergunta, indice) {
+      if (indice === 0) return;
+      var anteriores = perguntas.slice(0, indice);
+      var comparacao = compararPerguntaSemanticamenteV64_(anteriores, pergunta, function() {
+        return { equivalente: false, indice: -1, motivo: 'COMPARACAO_LEXICAL_DE_TESTE' };
+      });
+      if (comparacao.equivalente) indicesComRepeticaoSemantica.push(indice);
+    });
+    var semRepeticaoSemantica = indicesComRepeticaoSemantica.length === 0;
+    var dimensoesCriticas = ['processo','dor_causa','escala','frequencia','impacto','objetivo','aceitacao'];
+    var dimensoesCriticasNaoConfirmadas = dimensoesCriticas.filter(function(dim) {
+      return !estado.fatos[dim] || estado.fatos[dim].certeza !== CERTEZA_V64.CONFIRMADO;
+    });
     var gate = podeConcluirDiagnosticoV64_(estado);
+    var semPerguntaPendente = estado.perguntaPendente === null;
     var sucesso = turnosProcessados > 0 &&
       !falha &&
       semEvidencia.length === 0 &&
       semRepeticaoLiteral &&
-      (gate.pode || estado.perguntaPendente !== null);
+      semRepeticaoSemantica &&
+      dimensoesCriticasNaoConfirmadas.length === 0 &&
+      gate.pode === true &&
+      semPerguntaPendente &&
+      resultado.status_diagnostico === 'CONCLUIDO';
 
     var resumo = {
       versao: 'V6.4',
       teste: 'GEMINI_REAL_PONTA_A_PONTA',
       sucesso: sucesso,
       turnosProcessados: turnosProcessados,
+      limiteTurnos: 10,
       quantidadePerguntasGeradas: perguntas.length,
       dimensoesConfirmadas: fatosConfirmados,
+      dimensoesCriticasNaoConfirmadas: dimensoesCriticasNaoConfirmadas,
       nenhumFatoConfirmadoSemEvidencia: semEvidencia.length === 0,
       nenhumaRepeticaoLiteral: semRepeticaoLiteral,
-      gateConcluiuSomenteComCondicoesSatisfeitas: gate.pode || !/CONCLUIDO/.test(String(resultado && resultado.status_diagnostico || '')),
-      conclusao: gate.pode ? 'CONCLUIDO' : 'INVESTIGACAO',
+      nenhumaRepeticaoSemanticaLexical: semRepeticaoSemantica,
+      gateConcluiuSomenteComCondicoesSatisfeitas: gate.pode === true && resultado.status_diagnostico === 'CONCLUIDO',
+      perguntaPendenteAoFinal: !semPerguntaPendente,
+      conclusao: resultado.status_diagnostico || 'INVESTIGACAO',
       sanitizado: true,
       falha: falha ? falha.slice(0, 180) : ''
     };
