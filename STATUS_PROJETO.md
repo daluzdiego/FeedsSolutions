@@ -165,3 +165,9 @@ O runner passou em 4/5 suítes; a única falha foi o teste Gemini real estrito. 
 - `TESTAR_SUITE_COMPLETA_INVESTIGACAO_V64()` atualizado de cinco para seis suítes, incluindo a bateria adversarial antes da chamada Gemini real.
 - Próximo bloqueio: sincronizar os dois arquivos atualizados no Apps Script e executar a suíte completa real; depois, revisão humana de 3–5 diálogos com foco na profundidade das perguntas e investigação da causa-raiz.
 - A V6.4 permanece desativada e a baseline aceita V6.3 não deve ser alterada nem resetada.
+
+## Atualização — regressão de classificação temporal no Gemini real (19/10/2026)
+
+O log Apps Script de 14:52 confirmou as cinco suítes determinísticas aprovadas (65/65 na versão anterior), mas a chamada real ao Gemini falhou com HTTP 429. A causa operacional observável foi uma pergunta sobre dias/horários contendo “volume de pedidos”, rejeitada repetidamente como se fosse escala; seis tentativas de seleção consumiram chamadas antes do fallback. Corrigida a precedência da classificação temporal em `MotorInvestigacaoV64.gs`, mantendo perguntas explicitamente quantitativas como escala. A suíte conversacional agora testa a frase do log e a distinção “quantos pedidos no pico”; a resposta sintética de impacto também foi tornada exata.
+
+Validação V8 isolada atualizada: **67/67 testes determinísticos aprovados** (19 estado, 18 conversacional, 4 adaptador, 18 integração, 8 adversarial). O E2E real ainda não passou: aguarda nova execução após a janela de cota. V6.4 permanece desativada; V6.3 intacta.
