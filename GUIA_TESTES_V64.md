@@ -54,3 +54,15 @@ A ativação só deve ocorrer depois de registrar os resultados dos testes reais
 - O estado V6.4 é serializado como envelope `ESTADO_INVESTIGACAO_V64` no campo existente `INVESTIGACOES.informacoes`, preservando outros itens legados.
 - Para rollback imediato após ativação, definir `FEEDS_MOTOR_INVESTIGACAO_V64_ATIVO = false`; o caminho legado continua disponível.
 - Não houve alteração de `Admin.html`, `Index.html` ou `Styles.html`, nem exclusão de dados históricos.
+
+
+## Verificações executadas nesta auditoria — 19/10/2026
+
+Verificação sintática JavaScript em V8 isolado: 33/33 arquivos .gs passaram. Os scripts inline de Index.html e Admin.html também passaram. As suítes determinísticas executadas em V8 isolado, com Logger simulado e os módulos necessários carregados, retornaram:
+
+- Estado explícito: 19/19.
+- Conversacional determinístico atualizado: 14/14.
+- Adaptador: 4/4.
+- Integração determinística: 17/17.
+
+**Limite importante:** esta execução não é o runtime do Google Apps Script. Não valida SpreadsheetApp, PropertiesService, implantação do Web App nem a chamada real ao Gemini. O teste E2E estrito atualizado ainda precisa ser executado no Apps Script; não considerar a execução antiga de 4 turnos como aceite.
