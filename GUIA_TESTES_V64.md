@@ -17,12 +17,12 @@ Execute cada função no editor do Google Apps Script. Os testes determinístico
 | Ordem | Arquivo exato | Função | Resultado esperado |
 |---|---|---|---|
 | 1 | `TesteEstadoInvestigacaoV64.gs` | `TESTAR_ESTADO_INVESTIGACAO_V64()` | 19/19 aprovados |
-| 2 | `TesteConversacionalV64.gs` | `TESTAR_CONVERSACIONAL_V64()` | 14/14 aprovados |
+| 2 | `TesteConversacionalV64.gs` | `TESTAR_CONVERSACIONAL_V64()` | 13/13 aprovados (confirmar no Apps Script após atualizar) |
 | 3 | `IntegracaoInvestigacaoV64.gs` | `TESTAR_ADAPTADOR_INVESTIGACAO_V64()` | 4/4 aprovados |
-| 4 | `TesteIntegracaoV64.gs` | `TESTAR_INTEGRACAO_V64()` | 12/12 aprovados |
+| 4 | `TesteIntegracaoV64.gs` | `TESTAR_INTEGRACAO_V64()` | 17/17 aprovados (inclui regressão de fallback em lacuna aberta) |
 | 5 | `TesteConversacionalV64.gs` | `TESTAR_GEMINI_REAL_INVESTIGACAO_V64()` | `sucesso: true`; resultado sanitizado |
 
-O teste 5 chama o Gemini real, usa somente uma conversa sintética e registra apenas dimensões, certezas e indicadores. Pode falhar por indisponibilidade, limite de chamadas ou uma pergunta inválida; isso deve ser tratado como falha real, não como aprovação.
+O teste 5 chama o Gemini real, usa somente uma conversa sintética e registra apenas dimensões, certezas e indicadores. A última execução registrada em `TESTES` falhou com `REPETICAO_SEMANTICA` após 4 turnos. A correção de fallback foi enviada à `main`, mas ainda precisa ser validada executando novamente as suítes 1–5 no Apps Script. Falha por indisponibilidade, limite de chamadas ou pergunta repetida deve ser tratada como falha real, não como aprovação.
 
 ## Regressão da V6.3
 
@@ -47,7 +47,10 @@ A ativação só deve ocorrer depois de registrar os resultados dos testes reais
 
 ## Implementação e rollback
 
-- A implementação foi incorporada à `main` no commit `0a1b8358dc6b998a4574b51aef415b8e0791577f`; o motor segue desativado por padrão.
+- A implementação inicial foi incorporada à `main` no commit `0a1b8358dc6b998a4574b51aef415b8e0791577f`.
+- Correção de fallback para manter dimensões ainda abertas elegíveis, mesmo após pergunta anterior: commit `b52f7db5e74181c7cabc7c2e9130b021f8040ab8`.
+- Regressão para cobrir esse caso: commit `e5796df770dfc0b404c3796c7ee526c67e5c988b`.
+- O motor segue desativado por padrão.
 - O estado V6.4 é serializado como envelope `ESTADO_INVESTIGACAO_V64` no campo existente `INVESTIGACOES.informacoes`, preservando outros itens legados.
 - Para rollback imediato após ativação, definir `FEEDS_MOTOR_INVESTIGACAO_V64_ATIVO = false`; o caminho legado continua disponível.
 - Não houve alteração de `Admin.html`, `Index.html` ou `Styles.html`, nem exclusão de dados históricos.
