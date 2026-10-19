@@ -697,6 +697,36 @@ function listarModelosGemini() {
  * EXECUTAR CHAMADA GEMINI
  * ------------------------------------------------------------
  */
+function extrairEsperaRetryGeminiMs_(textoResposta) {
+  var segundos = null;
+  try {
+    var corpo = JSON.parse(String(textoResposta || ''));
+    var detalhes = corpo && corpo.error && corpo.error.details;
+    if (Array.isArray(detalhes)) {
+      for (var i = 0; i < detalhes.length; i++) {
+        var detalhe = detalhes[i];
+        if (detalhe && /RetryInfo$/.test(String(detalhe['@type'] || '')) && detalhe.retryDelay) {
+          var valor = String(detalhe.retryDelay).match(/^(\d+(?:\.\d+)?)s$/);
+          if (valor) {
+            segundos = Number(valor[1]);
+            break;
+          }
+        }
+      }
+    }
+  } catch (e) {
+    // Usa o texto de erro abaixo como fallback quando o corpo não é JSON.
+  }
+  if (segundos === null) {
+    var texto = String(textoResposta || '');
+    var match = texto.match(/Please retry in\s+(\d+(?:\.\d+)?)s/i);
+    if (match) segundos = Number(match[1]);
+  }
+  if (segundos === null || !isFinite(segundos) || segundos < 0) return null;
+  // Utilities.sleep aceita no máximo 5 minutos no Apps Script.
+  return Math.min(Math.ceil(segundos * 1000), 300000);
+}
+
 function executarGemini_(
   url,
   payload,
@@ -740,6 +770,10 @@ function executarGemini_(
     3000
   ];
 
+  // Em HTTP 429, respeita RetryInfo informado pelo Gemini em vez de
+  // insistir após poucos segundos e ampliar a cota excedida.
+  let esperaDinamicaMs = null;
+
 
   const options = {
 
@@ -778,14 +812,13 @@ function executarGemini_(
     tentativa++
   ) {
 
-    if (
-      ESPERAS_MS[tentativa - 1] > 0
-    ) {
-
-      sleepGemini(
-        ESPERAS_MS[tentativa - 1]
-      );
-
+    const esperaAtualMs = esperaDinamicaMs !== null
+      ? esperaDinamicaMs
+      : ESPERAS_MS[tentativa - 1];
+    esperaDinamicaMs = null;
+    if (esperaAtualMs > 0) {
+      Logger.log('GEMINI - AGUARDANDO ' + esperaAtualMs + ' ms antes da tentativa ' + tentativa);
+      sleepGemini(esperaAtualMs);
     }
 
 
@@ -952,12 +985,17 @@ function executarGemini_(
       tentativa < MAX_TENTATIVAS
     ) {
 
+      if (statusCode === 429) {
+        esperaDinamicaMs = extrairEsperaRetryGeminiMs_(texto);
+      }
+
       Logger.log(
         'GEMINI - ERRO TRANSITÓRIO HTTP ' +
         statusCode +
-        '. Nova tentativa será realizada.'
+        (esperaDinamicaMs !== null
+          ? '. Nova tentativa após ' + esperaDinamicaMs + ' ms conforme orientação da API.'
+          : '. Nova tentativa será realizada.')
       );
-
       continue;
 
     }
