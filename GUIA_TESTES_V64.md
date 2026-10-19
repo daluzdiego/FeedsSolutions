@@ -16,13 +16,13 @@ Execute cada função no editor do Google Apps Script. Os testes determinístico
 
 | Ordem | Arquivo exato | Função | Resultado esperado |
 |---|---|---|---|
-| 1 | `TesteEstadoInvestigacaoV64.gs` | `TESTAR_ESTADO_INVESTIGACAO_V64()` | 19/19 aprovados |
+| 1 | `TesteEstadoInvestigacaoV64.gs` | `TESTAR_ESTADO_INVESTIGACAO_V64()` | 19/19 esperados; confirmar no registro atualizado |
 | 2 | `TesteConversacionalV64.gs` | `TESTAR_CONVERSACIONAL_V64()` | 13/13 aprovados (confirmar no Apps Script após atualizar) |
 | 3 | `IntegracaoInvestigacaoV64.gs` | `TESTAR_ADAPTADOR_INVESTIGACAO_V64()` | 4/4 aprovados |
 | 4 | `TesteIntegracaoV64.gs` | `TESTAR_INTEGRACAO_V64()` | 17/17 aprovados (inclui regressão de fallback em lacuna aberta) |
 | 5 | `TesteConversacionalV64.gs` | `TESTAR_GEMINI_REAL_INVESTIGACAO_V64()` | `sucesso: true`; resultado sanitizado |
 
-O teste 5 chama o Gemini real, usa somente uma conversa sintética e registra apenas dimensões, certezas e indicadores. A última execução registrada em `TESTES` falhou com `REPETICAO_SEMANTICA` após 4 turnos. A correção de fallback foi enviada à `main`, mas ainda precisa ser validada executando novamente as suítes 1–5 no Apps Script. Falha por indisponibilidade, limite de chamadas ou pergunta repetida deve ser tratada como falha real, não como aprovação.
+O teste 5 chama o Gemini real, usa somente uma conversa sintética e registra apenas dimensões, certezas e indicadores. Na atualização de `TESTES` de 19/10/2026, a suíte de integração determinística passou com 17/17, a suíte conversacional determinística passou com 13/13 e o teste Gemini real passou com `sucesso: true` após 4 turnos. O teste real confirmou processo, dor/causa, escala e impacto; ainda não demonstrou a coleta das dimensões frequência, objetivo e critérios de aceitação. Portanto, a aprovação confirma continuidade sem falha imediata, mas não a conclusão de uma investigação completa. Execute ainda o teste de estado explícito e o adaptador, depois a regressão V6.3 e a revisão humana descrita abaixo. Falha por indisponibilidade, limite de chamadas ou pergunta repetida deve ser tratada como falha real, não como aprovação.
 
 ## Regressão da V6.3
 
