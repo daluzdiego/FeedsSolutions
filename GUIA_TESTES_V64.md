@@ -76,3 +76,8 @@ Atualização adicional: em 19/10/2026, após adicionar o teste de fluxo complet
 Para executar todas as suítes V6.4 em uma só rodada, no editor do Google Apps Script selecione o arquivo TesteConversacionalV64.gs e execute a função TESTAR_SUITE_COMPLETA_INVESTIGACAO_V64(). Ela executa estado explícito, conversacional determinístico, adaptador, integração determinística e, por último, o teste Gemini real atualizado. O resumo final indica cada suíte, o número de aprovações e as dimensões críticas que faltaram.
 
 O runner usa apenas dados sintéticos no teste Gemini, não reseta a baseline V6.3 e exige que FEEDS_MOTOR_INVESTIGACAO_V64_ATIVO permaneça false. A execução real pode levar mais tempo porque chama o Gemini várias vezes. Se falhar, examine a suíte específica no resumo final; não ative o motor.
+
+
+## Correção após execução real — 19/10/2026
+
+O registro `TESTES` da execução das 11:30–11:35 apontou duas falhas: a função de contrato do schema não estava visível no contexto daquela execução, e a conversa real repetiu perguntas de frequência sem confirmar essa dimensão. A correção publicada acrescenta uma correção determinística e conservadora para respostas explicitamente temporais que o Gemini classifique equivocadamente como escala, melhora o fallback de frequência e evita chamadas semânticas ao Gemini quando as dimensões comparadas são claramente distintas. Foi incluído um teste determinístico específico para essa regressão; a suíte conversacional agora exige 16/16. Estas mudanças ainda precisam ser executadas no Apps Script; não são declaradas aprovadas só por estarem publicadas.
