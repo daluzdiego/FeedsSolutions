@@ -423,3 +423,21 @@ Esse é o próximo grande bloco do produto.
 - [ ] Aceite humano da V6.4 registrado
 
 **Regra de aceite:** resultados de execução isolada não substituem execução no Apps Script, teste com Gemini real ou revisão humana. Consulte `GUIA_TESTES_V64.md`.
+
+
+---
+
+## Auditoria de código V6.4 — 19/10/2026
+
+- [x] Detectado o schema de interpretação que omitia a dimensão frequencia.
+- [x] Corrigido o schema e criado teste que compara todas as dimensões contratuais.
+- [x] Endurecido o teste Gemini ponta a ponta para exigir as sete dimensões críticas, gate de conclusão e nenhuma pergunta pendente.
+- [ ] Reexecutar no Apps Script a suíte de estado explícito.
+- [ ] Reexecutar no Apps Script a suíte conversacional atualizada (14/14).
+- [ ] Reexecutar no Apps Script o adaptador (4/4) e integração determinística (17/17).
+- [ ] Reexecutar o teste Gemini real rigoroso e confirmar sucesso: true.
+- [ ] Executar regressão V6.3 sem resetar a baseline.
+- [ ] Revisar de 3 a 5 conversas controladas.
+- [ ] Registrar aceite humano antes de ativar V6.4.
+
+A execução real anterior com quatro turnos não é considerada aceite, pois não demonstrou todas as dimensões críticas. FEEDS_MOTOR_INVESTIGACAO_V64_ATIVO permanece false.
