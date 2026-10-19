@@ -60,3 +60,8 @@ Resultado reexecutado em V8 isolado: estado 19/19, conversacional 15/15, adaptad
 ### Runner único de validação — 19/10/2026
 
 Foi criada a função TESTAR_SUITE_COMPLETA_INVESTIGACAO_V64() em TesteConversacionalV64.gs para executar as quatro suítes determinísticas e o teste Gemini real estrito em uma única rodada. Ela não reseta a baseline V6.3 e falha se a flag V6.4 estiver ativa. O runner está publicado; ainda precisa ser executado no Apps Script.
+
+
+### Correções pós-execução de 19/10/2026
+
+O log real `TESTES` mostrou que o Gemini interpretou a resposta temporal “entre 10h e meio-dia” como extensão de escala, mantendo frequência desconhecida. Também repetiu perguntas equivalentes até encerrar em `REPETICAO_SEMANTICA`; duas chamadas Gemini excederam a quota por minuto (HTTP 429) durante a rodada. A correção publicada em `MotorInvestigacaoV64.gs` acrescenta prompt dimensional explícito, reclassificação conservadora de fatos temporais quando evidenciados pela mensagem, pergunta de fallback que diferencia distribuição temporal de quantidade diária e evita chamadas semânticas redundantes entre dimensões claramente diferentes. `TesteConversacionalV64.gs` agora inclui regressão para esta classificação e exige 16 testes. A suíte conversacional no Apps Script acusou `schemaInterpretacaoTurnoInvestigacaoV64_ is not defined` no momento daquela execução; a função existe no arquivo-fonte do motor no repositório, mas precisa ser confirmada no projeto Apps Script salvo/executado. Nenhuma dessas alterações é considerada aprovada até nova execução real.
