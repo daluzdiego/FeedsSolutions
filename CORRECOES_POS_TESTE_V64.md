@@ -55,3 +55,8 @@ Estado: correções publicadas; ainda é necessário executar as suítes atualiz
 Foi adicionado à suíte conversacional um cenário de ponta a ponta determinístico que fornece fatos iniciais de processo, dor, escala, impacto e objetivo; em seguida responde frequência e critério de aceitação. O teste exige que o motor só conclua com as sete dimensões críticas confirmadas, gate aprovado e pergunta pendente removida.
 
 Resultado reexecutado em V8 isolado: estado 19/19, conversacional 15/15, adaptador 4/4 e integração 17/17. Isso testa a lógica determinística do fluxo, não a chamada real ao Gemini nem os serviços do Google Apps Script.
+
+
+### Runner único de validação — 19/10/2026
+
+Foi criada a função TESTAR_SUITE_COMPLETA_INVESTIGACAO_V64() em TesteConversacionalV64.gs para executar as quatro suítes determinísticas e o teste Gemini real estrito em uma única rodada. Ela não reseta a baseline V6.3 e falha se a flag V6.4 estiver ativa. O runner está publicado; ainda precisa ser executado no Apps Script.
