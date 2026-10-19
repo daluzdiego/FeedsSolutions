@@ -42,6 +42,7 @@ function construirPromptInterpretacaoTurnoV64_(mensagem, estado) {
     'Para cada fato, inclua a evidência literal ou trecho fiel da mensagem atual.',
     'CONFIRMADO = dito explicitamente; ESTIMADO = aproximação declarada pelo empresário; NEGADO = explicitamente não se aplica/não existe ou o empresário declara que não sabe responder, sempre detalhando qual dos casos; DESCONHECIDO = sem evidência.',
     'Se a resposta for ambígua, não preencha a dimensão por conveniência; indique ambiguidade e explique o que precisa ser esclarecido.',
+    'Classifique pela variável efetivamente informada. Se a pergunta pendente for FREQUENCIA e a resposta mencionar horários, faixa do dia, pico ou dias da semana, registre frequencia, não escala. O fato de já existir “100 pedidos por dia” não transforma uma resposta sobre “entre 10h e meio-dia” em extensão de escala. Quantidade por período é escala; momento/distribuição temporal é frequência.',
     'Uma correção do empresário deve ser registrada como fato novo e não deve apagar silenciosamente a informação anterior.',
     'Classifique cada atualização como NOVO, EXTENSAO, CORRECAO ou CONFIRMACAO. EXTENSAO acrescenta detalhe compatível sem contradizer o fato anterior; CORRECAO contradiz/corrige informação anterior e deve gerar conflito para esclarecimento.', 
     'Retorne somente JSON com o formato: {"fatos":[{"dimensao":"processo|dor_causa|escala|frequencia|impacto|excecoes|objetivo|restricoes|aceitacao","valor":"...","evidencia":"...","certeza":"CONFIRMADO|ESTIMADO|NEGADO|DESCONHECIDO","certezaDetalhe":"NAO_SEI|NAO_SE_APLICA|NAO_EXISTE|APROXIMADO|","tipoAtualizacao":"NOVO|EXTENSAO|CORRECAO|CONFIRMACAO"}],"respondeuPerguntaPendente":true,"ambiguidade":false,"explicacaoAmbiguidade":""}.',
@@ -152,6 +153,35 @@ function interpretarTurnoInvestigacaoV64_(mensagem, estado, adaptador) {
   );
 }
 
+/**
+ * Corrige uma confusão dimensional objetiva: uma resposta temporal à pergunta
+ * pendente de frequência pode ser rotulada pelo modelo como extensão de escala
+ * só porque o fato de escala contém “por dia”. A correção só ocorre quando a
+ * mensagem tem marcador temporal e o fato escala não descreve quantidade.
+ * Evidência/certeza são preservadas; nenhuma informação é inventada.
+ */
+function corrigirFrequenciaMalClassificadaV64_(interpretacao, mensagem, estado) {
+  if (!interpretacao || !Array.isArray(interpretacao.fatos) || !estado) return interpretacao;
+  var texto = normalizarPerguntaInvestigacaoV64_(mensagem);
+  var pendenteFrequencia = estado.perguntaPendente && estado.perguntaPendente.dimensao === 'frequencia';
+  var marcadorTemporal = /horario|horarios|\bpico\b|maior movimento|entre \d{1,2} ?h|\b\d{1,2} ?h(?:\d{0,2})?\b|manha|tarde|noite|madrugada|dias uteis|finais de semana|segunda feira|terca feira|quarta feira|quinta feira|sexta feira|sabado|domingo|periodo do dia|periodos do dia/.test(texto);
+  if (!marcadorTemporal) return interpretacao;
+
+  interpretacao.fatos = interpretacao.fatos.map(function(fato) {
+    if (!fato || fato.dimensao !== 'escala') return fato;
+    var conteudo = normalizarPerguntaInvestigacaoV64_(String(fato.valor || '') + ' ' + String(fato.evidencia || ''));
+    var descreveQuantidade = /\b\d+\b.*(pedido|item|ordem|registro|unidade)|\b(cem|duzentos|trezentos) pedidos\b|quantidade|volume|media de pedidos|pedidos por dia|pedidos por semana|pedidos por mes/.test(conteudo);
+    var fatoTemporal = /horario|horarios|\bpico\b|maior movimento|entre \d{1,2} ?h|\b\d{1,2} ?h(?:\d{0,2})?\b|manha|tarde|noite|madrugada|dias uteis|finais de semana|segunda feira|terca feira|quarta feira|quinta feira|sexta feira|sabado|domingo|periodo do dia|periodos do dia/.test(conteudo);
+    if (fatoTemporal && !descreveQuantidade && (pendenteFrequencia || !/pedido|item|ordem|registro|unidade/.test(conteudo))) {
+      fato.dimensao = 'frequencia';
+      if (!fato.valor) fato.valor = String(mensagem || '').trim();
+      if (!fato.evidencia) fato.evidencia = String(mensagem || '').trim();
+    }
+    return fato;
+  });
+  return interpretacao;
+}
+
 function selecionarProximaPerguntaInvestigacaoV64_(estado, ultimaMensagem, motivoRejeicao, adaptador) {
   if (typeof adaptador === 'function') return adaptador(estado, ultimaMensagem, motivoRejeicao);
   return chamarGeminiJsonInvestigacaoV64_(
@@ -217,6 +247,7 @@ function compararPerguntaSemanticamenteV64_(perguntasFeitas, candidata, adaptado
     return t.length > 2 && !/^(qual|quais|como|quando|onde|voce|voces|para|pela|pelo|isso|esse|essa|sobre|entre|mais|menos|uma|uns|dos|das|por|dia|dias|que|com|tem|ser|sao|estao|acontece)$/.test(t);
   });
   var dimNova = classificarDimensaoPerguntaV64_(texto, null);
+  var existeDimensaoComparavel = false;
   for (var i = 0; i < perguntas.length; i++) {
     var registro = perguntas[i];
     var existente = typeof registro === 'string' ? registro : registro.texto;
@@ -233,9 +264,16 @@ function compararPerguntaSemanticamenteV64_(perguntasFeitas, candidata, adaptado
     var jaccard = uniao.length ? intersecao.length / uniao.length : 0;
     var dimAntiga = (registro && registro.dimensao) ||
       classificarDimensaoPerguntaV64_(existente, null);
+    if (dimNova && dimAntiga && dimNova !== dimAntiga) continue;
+    if (dimNova && dimAntiga && dimNova === dimAntiga) existeDimensaoComparavel = true;
     if (jaccard >= 0.72 && (!dimNova || !dimAntiga || dimNova === dimAntiga)) {
       return { equivalente: true, indice: i, motivo: 'alto grau de sobreposição lexical (' + jaccard.toFixed(2) + ')', metodo: 'SIMILARIDADE_LEXICAL' };
     }
+  }
+  // Se as perguntas anteriores medem dimensões explicitamente diferentes,
+  // não consuma uma chamada Gemini apenas para confirmar que não são repetidas.
+  if (dimNova && !existeDimensaoComparavel) {
+    return { equivalente: false, indice: -1, motivo: 'DIMENSAO_DISTINTA_DO_HISTORICO', metodo: 'DIMENSAO' };
   }
   if (typeof adaptador === 'function') return adaptador(perguntas, texto);
   var retorno = chamarGeminiJsonInvestigacaoV64_([
@@ -448,6 +486,7 @@ function processarTurnoInvestigacaoV64_(estado, mensagem, adaptadores) {
   var interpretacao = interpretarTurnoInvestigacaoV64_(
     texto, estado, adaptadores.interpretar
   );
+  interpretacao = corrigirFrequenciaMalClassificadaV64_(interpretacao, texto, estado);
   if (!interpretacao || !Array.isArray(interpretacao.fatos)) {
     throw new Error('INTERPRETACAO_TURNO_V64_INVALIDA');
   }
