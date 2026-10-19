@@ -17,7 +17,7 @@ Execute cada função no editor do Google Apps Script. Os testes determinístico
 | Ordem | Arquivo exato | Função | Resultado esperado |
 |---|---|---|---|
 | 1 | `TesteEstadoInvestigacaoV64.gs` | `TESTAR_ESTADO_INVESTIGACAO_V64()` | 19/19 esperados; confirmar no registro atualizado |
-| 2 | `TesteConversacionalV64.gs` | `TESTAR_CONVERSACIONAL_V64()` | 14/14 aprovados (inclui contrato de dimensões do schema) |
+| 2 | `TesteConversacionalV64.gs` | `TESTAR_CONVERSACIONAL_V64()` | 15/15 aprovados (inclui contrato do schema e fluxo completo determinístico) |
 | 3 | `IntegracaoInvestigacaoV64.gs` | `TESTAR_ADAPTADOR_INVESTIGACAO_V64()` | 4/4 aprovados |
 | 4 | `TesteIntegracaoV64.gs` | `TESTAR_INTEGRACAO_V64()` | 17/17 aprovados (inclui regressão de fallback em lacuna aberta) |
 | 5 | `TesteConversacionalV64.gs` | `TESTAR_GEMINI_REAL_INVESTIGACAO_V64()` | `sucesso: true`; resultado sanitizado |
@@ -61,8 +61,11 @@ A ativação só deve ocorrer depois de registrar os resultados dos testes reais
 Verificação sintática JavaScript em V8 isolado: 33/33 arquivos .gs passaram. Os scripts inline de Index.html e Admin.html também passaram. As suítes determinísticas executadas em V8 isolado, com Logger simulado e os módulos necessários carregados, retornaram:
 
 - Estado explícito: 19/19.
-- Conversacional determinístico atualizado: 14/14.
+- Conversacional determinístico atualizado: 15/15 (inclui teste de conversa completa antes da conclusão).
 - Adaptador: 4/4.
 - Integração determinística: 17/17.
 
 **Limite importante:** esta execução não é o runtime do Google Apps Script. Não valida SpreadsheetApp, PropertiesService, implantação do Web App nem a chamada real ao Gemini. O teste E2E estrito atualizado ainda precisa ser executado no Apps Script; não considerar a execução antiga de 4 turnos como aceite.
+
+
+Atualização adicional: em 19/10/2026, após adicionar o teste de fluxo completo com adaptadores determinísticos, as suítes foram reexecutadas em V8 isolado: estado 19/19, conversacional 15/15, adaptador 4/4 e integração 17/17. O arquivo atualizado TesteConversacionalV64.gs passou também pela análise sintática. Isso ainda não substitui a execução no Apps Script nem o teste Gemini real com o critério mais rigoroso.
