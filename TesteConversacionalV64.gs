@@ -437,7 +437,7 @@ function TESTAR_SUITE_COMPLETA_INVESTIGACAO_V64() {
   var resumo = {
     versao: 'V6.4',
     suite: 'SUITE_COMPLETA_INVESTIGACAO',
-    sucesso: suites.length === 5 && suites.every(function(s) { return s.sucesso; }),
+    sucesso: suites.length === 5 && suites.every(function(s) { return s.sucesso; }) && motorInvestigacaoV64Ativo_() === false,
     totalSuites: suites.length,
     suitesAprovadas: suites.filter(function(s) { return s.sucesso; }).length,
     suitesFalhas: suites.filter(function(s) { return !s.sucesso; }).length,
