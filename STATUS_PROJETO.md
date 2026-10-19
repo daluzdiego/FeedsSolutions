@@ -157,3 +157,11 @@ A execução mais recente em Apps Script falhou em 2 de 5 suítes. Estado explí
 ## Resultado real atualizado — 19/10/2026, 12:09
 
 O runner passou em 4/5 suítes; a única falha foi o teste Gemini real estrito. A conversa concluiu em 7 turnos, mas `escala` permaneceu `ESTIMADO` porque o cenário dizia “cerca de 100 pedidos por dia”. O gate permitia conclusão com ressalva, contrariando o critério estrito de que dimensões críticas estejam confirmadas. Corrigido `podeConcluirDiagnosticoV64_` para bloquear conclusão quando uma dimensão essencial está estimada; adicionada regressão de integração e ajustada a resposta sintética de escala para confirmação exata. Validação isolada posterior: estado 19/19, conversacional 16/16, adaptador 4/4, integração 18/18; oito fontes verificadas sem erro sintático. A execução Apps Script/Gemini real permanece pendente; ativação false.
+
+## Atualização — validação adversarial V6.4 (19/10/2026)
+
+- Adicionado `TesteAdversarialV64.gs` com oito cenários para respostas vagas, contradição, múltiplos fatos, ausência de resposta, aceitação ausente, dimensão essencial estimada, distinção escala/frequência e conflito aberto.
+- Resultado V8 isolado: **8/8 aprovados**.
+- `TESTAR_SUITE_COMPLETA_INVESTIGACAO_V64()` atualizado de cinco para seis suítes, incluindo a bateria adversarial antes da chamada Gemini real.
+- Próximo bloqueio: sincronizar os dois arquivos atualizados no Apps Script e executar a suíte completa real; depois, revisão humana de 3–5 diálogos com foco na profundidade das perguntas e investigação da causa-raiz.
+- A V6.4 permanece desativada e a baseline aceita V6.3 não deve ser alterada nem resetada.
