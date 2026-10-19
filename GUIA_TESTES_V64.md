@@ -69,3 +69,10 @@ Verificação sintática JavaScript em V8 isolado: 33/33 arquivos .gs passaram. 
 
 
 Atualização adicional: em 19/10/2026, após adicionar o teste de fluxo completo com adaptadores determinísticos, as suítes foram reexecutadas em V8 isolado: estado 19/19, conversacional 15/15, adaptador 4/4 e integração 17/17. O arquivo atualizado TesteConversacionalV64.gs passou também pela análise sintática. Isso ainda não substitui a execução no Apps Script nem o teste Gemini real com o critério mais rigoroso.
+
+
+## Execução única acelerada
+
+Para executar todas as suítes V6.4 em uma só rodada, no editor do Google Apps Script selecione o arquivo TesteConversacionalV64.gs e execute a função TESTAR_SUITE_COMPLETA_INVESTIGACAO_V64(). Ela executa estado explícito, conversacional determinístico, adaptador, integração determinística e, por último, o teste Gemini real atualizado. O resumo final indica cada suíte, o número de aprovações e as dimensões críticas que faltaram.
+
+O runner usa apenas dados sintéticos no teste Gemini, não reseta a baseline V6.3 e exige que FEEDS_MOTOR_INVESTIGACAO_V64_ATIVO permaneça false. A execução real pode levar mais tempo porque chama o Gemini várias vezes. Se falhar, examine a suíte específica no resumo final; não ative o motor.
