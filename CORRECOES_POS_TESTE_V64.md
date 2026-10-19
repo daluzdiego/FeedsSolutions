@@ -30,3 +30,21 @@ Execução isolada em JavaScript:
 - Integração determinística: 16/16.
 
 Esses números não significam que o teste real com Gemini passou. O teste real precisa ser repetido no Apps Script, e a aceitação fica pendente até ele concluir sem repetir perguntas e sem marcar lacunas como resolvidas sem evidências.
+
+
+## Auditoria complementar — 19/10/2026
+
+A inspeção do contrato enviado ao Gemini encontrou um defeito adicional: o prompt de interpretação listava frequência, mas o responseSchema não permitia frequencia no enum de fatos[].dimensao. Isso explicava por que a dimensão não aparecia como fato confirmado mesmo quando o diálogo tratava de horários/picos.
+
+Correções:
+- Criada a função schemaInterpretacaoTurnoInvestigacaoV64_() como fonte única do schema de interpretação.
+- Incluída frequencia no enum e teste de contrato que compara todas as dimensões do schema com DIMENSOES_V64.
+- A suíte conversacional foi ampliada de 13 para 14 testes.
+- O teste Gemini real foi fortalecido: agora executa até 10 turnos sintéticos e só retorna sucesso se confirmar as dimensões críticas, incluindo frequência e aceitação, passar pelo gate de conclusão, terminar sem pergunta pendente e não repetir perguntas literal ou lexicalmente equivalentes.
+- A aprovação real anterior (4 turnos) é considerada insuficiente e não deve ser usada como aceite da V6.4.
+
+Commits:
+- Schema de interpretação com frequência: 6bd2ae632732a041fa1fafe5c6da945f9ec9424b.
+- Teste de contrato do schema e aceitação ponta a ponta mais rigorosa: 51a50fb7fd5597a632eb98231eef8dec1cb8037c.
+
+Estado: correções publicadas; ainda é necessário executar as suítes atualizadas no Google Apps Script. O motor permanece desativado.
