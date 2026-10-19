@@ -70,3 +70,7 @@ O log real `TESTES` mostrou que o Gemini interpretou a resposta temporal “entr
 ### Resultado real de 12:09 e correção do gate
 
 O runner passou nas quatro suítes determinísticas, mas o E2E real falhou apenas porque `escala` continuou estimada: o teste começou com “cerca de 100 pedidos por dia”, o Gemini corretamente preservou a incerteza, e o gate mesmo assim permitiu concluir com ressalva. Como o contrato do estado mantém estimativas como lacunas abertas e o E2E exige escala crítica confirmada, o gate foi corrigido para bloquear conclusão com dimensão essencial estimada. Foi acrescentado teste de regressão e a resposta sintética de escala agora confirma “exatamente 100 pedidos por dia” quando a pergunta pede esclarecimento. Testes isolados após a correção: estado 19/19, conversacional 16/16, adaptador 4/4 e integração 18/18. O resultado real ainda precisa ser repetido no Apps Script; não declarar aceite antes disso.
+
+### Bateria adversarial adicionada — 19/10/2026
+
+Criado `TesteAdversarialV64.gs` com oito testes determinísticos. A execução isolada em V8 passou 8/8. O runner completo agora inclui a suíte adversarial, totalizando seis suítes antes de considerar a rodada aprovada. A execução Apps Script após sincronizar o novo arquivo e a versão atualizada de `TesteConversacionalV64.gs` continua pendente. Não ativar V6.4 nem alterar/resetar a baseline V6.3.
