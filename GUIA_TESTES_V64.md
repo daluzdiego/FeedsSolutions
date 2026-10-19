@@ -17,7 +17,7 @@ Execute cada função no editor do Google Apps Script. Os testes determinístico
 | Ordem | Arquivo exato | Função | Resultado esperado |
 |---|---|---|---|
 | 1 | `TesteEstadoInvestigacaoV64.gs` | `TESTAR_ESTADO_INVESTIGACAO_V64()` | 19/19 esperados; confirmar no registro atualizado |
-| 2 | `TesteConversacionalV64.gs` | `TESTAR_CONVERSACIONAL_V64()` | 13/13 aprovados (confirmar no Apps Script após atualizar) |
+| 2 | `TesteConversacionalV64.gs` | `TESTAR_CONVERSACIONAL_V64()` | 14/14 aprovados (inclui contrato de dimensões do schema) |
 | 3 | `IntegracaoInvestigacaoV64.gs` | `TESTAR_ADAPTADOR_INVESTIGACAO_V64()` | 4/4 aprovados |
 | 4 | `TesteIntegracaoV64.gs` | `TESTAR_INTEGRACAO_V64()` | 17/17 aprovados (inclui regressão de fallback em lacuna aberta) |
 | 5 | `TesteConversacionalV64.gs` | `TESTAR_GEMINI_REAL_INVESTIGACAO_V64()` | `sucesso: true`; resultado sanitizado |
