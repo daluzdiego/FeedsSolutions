@@ -74,3 +74,7 @@ O runner passou nas quatro suítes determinísticas, mas o E2E real falhou apena
 ### Bateria adversarial adicionada — 19/10/2026
 
 Criado `TesteAdversarialV64.gs` com oito testes determinísticos. A execução isolada em V8 passou 8/8. O runner completo agora inclui a suíte adversarial, totalizando seis suítes antes de considerar a rodada aprovada. A execução Apps Script após sincronizar o novo arquivo e a versão atualizada de `TesteConversacionalV64.gs` continua pendente. Não ativar V6.4 nem alterar/resetar a baseline V6.3.
+
+### Correção da classificação de pergunta temporal — log 14:52 de 19/10/2026
+
+O E2E real produziu repetidas tentativas de pergunta porque “Em quais dias da semana ou horários o volume de pedidos costuma ser maior?” era classificada como escala devido ao termo “volume”. Isso consumiu chamadas Gemini e culminou em HTTP 429 antes da conclusão. A classificação foi corrigida: marcadores temporais vencem palavras incidentais como “volume”; perguntas com quantificação explícita, como “Quantos pedidos chegam no horário de pico?”, continuam sendo escala. Incluídos dois testes de regressão e ajustado o fixture sintético de impacto para resposta exata. Validação isolada: 67/67 testes determinísticos aprovados. A nova execução Apps Script/Gemini continua pendente; não ativar V6.4.
