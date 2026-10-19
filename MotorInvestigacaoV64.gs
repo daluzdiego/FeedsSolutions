@@ -411,6 +411,11 @@ function podeConcluirDiagnosticoV64_(estado) {
     if (!fato || fato.certeza === CERTEZA_V64.DESCONHECIDO) {
       return { pode: false, motivo: 'DIMENSAO_ESSENCIAL_DESCONHECIDA:' + dim };
     }
+    // Estimativa mantém a lacuna aberta no contrato do estado. Uma dimensão
+    // essencial estimada não pode liberar conclusão; é necessário confirmá-la.
+    if (fato.certeza === CERTEZA_V64.ESTIMADO) {
+      return { pode: false, motivo: 'DIMENSAO_ESSENCIAL_ESTIMADA:' + dim };
+    }
     if (fato.conflitos && fato.conflitos.some(function(c) { return !c.resolvido; })) {
       return { pode: false, motivo: 'CONFLITO_NAO_RESOLVIDO:' + dim };
     }
