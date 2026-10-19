@@ -320,7 +320,7 @@ function TESTAR_GEMINI_REAL_INVESTIGACAO_V64() {
   var respostaPorDimensao = {
     processo: 'Recebemos pedidos pelo WhatsApp, lançamos em uma planilha e depois conferimos os dados.',
     dor_causa: 'Ocorrem erros de digitação e retrabalho durante a conferência.',
-    escala: 'São cerca de 100 pedidos por dia.',
+    escala: 'São exatamente 100 pedidos por dia.',
     frequencia: 'Os pedidos chegam principalmente entre 10h e meio-dia.',
     impacto: 'A conferência consome cerca de duas horas por dia.',
     excecoes: 'Pedidos urgentes às vezes pulam a conferência.',
