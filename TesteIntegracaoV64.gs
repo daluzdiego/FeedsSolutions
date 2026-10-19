@@ -19,8 +19,12 @@ function TESTAR_INTEGRACAO_V64() {
     assert('bloqueia conclusão com dimensões essenciais desconhecidas', g1.pode === false);
 
     var eEstimado = criarEstadoInvestigacaoVazioV64_();
-    preencherEssenciais(eEstimado);
+    atualizarFatoV64_(eEstimado, 'processo', 'Lançamento manual', 'Lançamos manualmente', 'CONFIRMADO', 'turno-1');
+    atualizarFatoV64_(eEstimado, 'dor_causa', 'Retrabalho', 'Precisamos conferir tudo novamente', 'CONFIRMADO', 'turno-1');
     atualizarFatoV64_(eEstimado, 'escala', 'Cerca de 100 pedidos por dia', 'Recebemos cerca de 100 pedidos por dia', 'ESTIMADO', 'turno-1');
+    atualizarFatoV64_(eEstimado, 'frequencia', 'Diária', 'Todos os dias', 'CONFIRMADO', 'turno-2');
+    atualizarFatoV64_(eEstimado, 'impacto', 'Duas horas por dia', 'Perdemos duas horas por dia', 'CONFIRMADO', 'turno-3');
+    atualizarFatoV64_(eEstimado, 'objetivo', 'Reduzir retrabalho', 'Queremos reduzir retrabalho', 'CONFIRMADO', 'turno-3');
     var gateEstimado = podeConcluirDiagnosticoV64_(eEstimado);
     assert('estimativa em dimensão essencial mantém conclusão bloqueada',
       gateEstimado.pode === false && gateEstimado.motivo === 'DIMENSAO_ESSENCIAL_ESTIMADA:escala');
