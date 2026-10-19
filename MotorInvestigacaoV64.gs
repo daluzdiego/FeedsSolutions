@@ -378,8 +378,15 @@ function classificarDimensaoPerguntaV64_(pergunta, estado) {
   // só perguntas sobre quando/horários são frequência.
   // Duração/tempo consumido é impacto, mesmo quando a frase começa por “quantas horas”.
   if (/quanto tempo|quantas horas|quantos minutos|quantas horas sao gastas|horas por dia|minutos por dia|tempo gasto|tempo consumido|tempo leva|demora|duracao/.test(p)) return 'impacto';
+  // Marcadores temporais têm precedência quando a pergunta procura saber QUANDO
+  // ocorre o pico. Só tratamos como escala quando há uma solicitação quantitativa
+  // explícita (por exemplo, "quantos pedidos chegam no horário de pico?").
+  // A palavra "volume" isolada não torna quantitativa uma pergunta sobre dias/horários.
+  var perguntaQuantitativaExplicita =
+    /(^|\\s)(quantos|quantas)\\b/.test(p) ||
+    /\\b(qual a quantidade|qual o volume|quantidade de pedidos|media de pedidos)\\b/.test(p);
   if (/horario|horarios|pico|maior movimento|distribuicao ao longo do dia|em que periodo|em que periodos|em que horario|turno de maior|horas de pico|distribuicao temporal|dias e horarios|quando chegam|em quais dias|periodo do dia|periodos do dia/.test(p) &&
-      !/quantos|quantas|quantidade|volume|media de pedidos|itens por dia|pedidos por dia|pedidos por semana|pedidos por mes|quantidade diaria|quantidade semanal/.test(p)) {
+      !perguntaQuantitativaExplicita) {
     return 'frequencia';
   }
   if (/quantos|quantas|quantidade|volume|media de pedidos|itens por dia|pedidos por dia|pedidos por semana|pedidos por mes|quantidade diaria|quantidade semanal|cem pedidos|100 pedidos/.test(p)) {
