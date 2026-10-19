@@ -152,3 +152,8 @@ Runner de validação acelerada publicado: TESTAR_SUITE_COMPLETA_INVESTIGACAO_V6
 ## Atualização após execução real do runner — 19/10/2026
 
 A execução mais recente em Apps Script falhou em 2 de 5 suítes. Estado explícito: 19/19; adaptador: 4/4; integração determinística: 17/17. Conversacional determinístico falhou no acesso à função de schema durante aquela execução. Gemini ponta a ponta chegou ao limite de 10 turnos, não confirmou frequência e entrou em repetição semântica. Foram publicadas correções para classificação temporal, fallback de frequência e redução de comparações redundantes com Gemini. Validação Apps Script após essas mudanças ainda pendente. A V6.4 permanece desativada; V6.3 não deve ser resetada.
+
+
+## Resultado real atualizado — 19/10/2026, 12:09
+
+O runner passou em 4/5 suítes; a única falha foi o teste Gemini real estrito. A conversa concluiu em 7 turnos, mas `escala` permaneceu `ESTIMADO` porque o cenário dizia “cerca de 100 pedidos por dia”. O gate permitia conclusão com ressalva, contrariando o critério estrito de que dimensões críticas estejam confirmadas. Corrigido `podeConcluirDiagnosticoV64_` para bloquear conclusão quando uma dimensão essencial está estimada; adicionada regressão de integração e ajustada a resposta sintética de escala para confirmação exata. Validação isolada posterior: estado 19/19, conversacional 16/16, adaptador 4/4, integração 18/18; oito fontes verificadas sem erro sintático. A execução Apps Script/Gemini real permanece pendente; ativação false.
