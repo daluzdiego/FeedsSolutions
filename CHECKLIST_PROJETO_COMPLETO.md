@@ -444,3 +444,6 @@ A execução real anterior com quatro turnos não é considerada aceite, pois n�
 
 
 Atualização 19/10: as quatro suítes determinísticas foram reexecutadas em V8 isolado após a inclusão do cenário de conversa completa: estado 19/19, conversacional 15/15, adaptador 4/4 e integração 17/17. Resultados aprovados no ambiente isolado; execução Apps Script e Gemini real ainda pendentes.
+
+- [x] Criado runner único TESTAR_SUITE_COMPLETA_INVESTIGACAO_V64() para executar as quatro suítes determinísticas e o teste Gemini real sem resetar V6.3.
+- [ ] Executar o runner único no Apps Script e revisar o resumo final.
