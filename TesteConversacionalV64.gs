@@ -46,7 +46,10 @@ function TESTAR_CONVERSACIONAL_V64() {
     // O contrato do JSON Schema precisa acompanhar todas as dimensões do estado.
     // Esta regressão detecta dimensões declaradas no prompt/estado, mas proibidas
     // pelo schema enviado ao Gemini (como ocorreu com FREQUENCIA).
-    var schemaInterpretacao = schemaInterpretacaoTurnoInvestigacaoV64_();
+    // Verifica a dependência global antes de acessar o schema, com erro legível.
+    var schemaFn = (typeof schemaInterpretacaoTurnoInvestigacaoV64_ === 'function') ? schemaInterpretacaoTurnoInvestigacaoV64_ : null;
+    if (!schemaFn) throw new Error('DEPENDENCIA_SCHEMA_V64_AUSENTE: confirme que MotorInvestigacaoV64.gs está salvo no mesmo projeto Apps Script.');
+    var schemaInterpretacao = schemaFn();
     var dimensoesSchema = schemaInterpretacao.properties.fatos.items.properties.dimensao.enum;
     var dimensoesContrato = Object.keys(DIMENSOES_V64).map(function(chave) { return DIMENSOES_V64[chave]; });
     assert('schema de interpretação aceita todas as dimensões contratuais, inclusive frequência',
@@ -285,6 +288,36 @@ function TESTAR_CONVERSACIONAL_V64() {
   };
   Logger.log('FEEDS SOLUTIONS V6.4 — TESTES CONVERSACIONAIS DETERMINÍSTICOS: ' + JSON.stringify(resumo));
   return resumo;
+}
+
+function schemaInterpretacaoTurnoInvestigacaoV64_() {
+  // Este schema é a fonte única do contrato de dimensões da interpretação.
+  // O teste conversacional compara-o com DIMENSOES_V64 para evitar que uma
+  // dimensão exista no estado/prompt, mas seja proibida pelo JSON Schema.
+  return {
+    type: 'object',
+    properties: {
+      fatos: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            dimensao: { type: 'string', enum: ['processo','dor_causa','escala','frequencia','impacto','excecoes','objetivo','restricoes','aceitacao'] },
+            valor: { type: 'string' },
+            evidencia: { type: 'string' },
+            certeza: { type: 'string', enum: ['CONFIRMADO','ESTIMADO','NEGADO','DESCONHECIDO'] },
+            certezaDetalhe: { type: 'string' },
+            tipoAtualizacao: { type: 'string', enum: ['NOVO','EXTENSAO','CORRECAO','CONFIRMACAO'] }
+          },
+          required: ['dimensao','valor','evidencia','certeza','certezaDetalhe','tipoAtualizacao']
+        }
+      },
+      respondeuPerguntaPendente: { type: 'boolean' },
+      ambiguidade: { type: 'boolean' },
+      explicacaoAmbiguidade: { type: 'string' }
+    },
+    required: ['fatos','respondeuPerguntaPendente','ambiguidade','explicacaoAmbiguidade']
+  };
 }
 
 /**
