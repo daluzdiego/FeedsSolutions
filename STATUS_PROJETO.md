@@ -182,3 +182,15 @@ Alterações publicadas:
 - `TesteConversacionalV64.gs`: fixture de impacto agora é explícita e exata; adicionada regressão específica. O esperado da suíte conversacional passa a 19/19.
 
 Estado de aceite: **Gemini real ainda reprovado por cota; V6.4 continua desativada.** Sincronizar os dois arquivos, executar a suíte conversacional determinística e depois o teste Gemini real separadamente após a janela de cota. Não executar `TESTAR_ACEITACAO_FINAL_V63_RESETAR()`.
+
+
+## Correção adicional de cota — 19/10/2026
+
+O log mostrou que, apesar de o Gemini informar `retryDelay` de 35 s, 30 s e valores semelhantes, `IA.gs` repetia a chamada após apenas 1,5 s e 3 s. Isso contrariava a orientação explícita da API e aumentava as respostas HTTP 429.
+
+Alterações publicadas:
+- `IA.gs`: nova função `extrairEsperaRetryGeminiMs_` lê `RetryInfo.retryDelay` (com fallback para a mensagem textual) e usa esse atraso antes da próxima tentativa em HTTP 429.
+- `TesteIntegracaoV64.gs`: regressão determinística que verifica `35.542506408s` → `35543 ms`; a suíte de integração agora exige 19/19.
+- `MotorInvestigacaoV64.gs` e `TesteConversacionalV64.gs`: correção da classificação duração → impacto, fixture de impacto explícita e duas tentativas de seleção antes do fallback; a suíte conversacional agora exige 19/19.
+
+**Sincronize estes quatro arquivos no Apps Script:** `IA.gs`, `MotorInvestigacaoV64.gs`, `TesteConversacionalV64.gs` e `TesteIntegracaoV64.gs`. Execute primeiro as suítes determinísticas. Só então, depois da janela de cota, execute `TESTAR_GEMINI_REAL_INVESTIGACAO_V64()` isoladamente. A correção de retry evita insistência prematura, mas não garante que uma execução que exceda a cota consiga concluir; o resultado real continua pendente. V6.4 permanece desativada.
