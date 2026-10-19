@@ -182,6 +182,35 @@ function corrigirFrequenciaMalClassificadaV64_(interpretacao, mensagem, estado) 
   return interpretacao;
 }
 
+
+/**
+ * Corrige duração operacional classificada na dimensão errada quando a pergunta
+ * pendente é impacto. Duração de trabalho gasto/consumido é impacto, não frequência.
+ * A regra só reclassifica um fato cuja própria descrição contenha duração explícita.
+ */
+function corrigirImpactoMalClassificadoV64_(interpretacao, mensagem, estado) {
+  if (!interpretacao || !Array.isArray(interpretacao.fatos) || !estado) return interpretacao;
+  var pendenteImpacto = estado.perguntaPendente && estado.perguntaPendente.dimensao === 'impacto';
+  if (!pendenteImpacto) return interpretacao;
+
+  var possuiDuracao = function(texto) {
+    var t = normalizarPerguntaInvestigacaoV64_(texto);
+    var unidadeTempo = /\\b(hora|horas|minuto|minutos)\\b/.test(t);
+    var quantidadeTempo = /\\b(\\d+|uma|um|duas|dois|tres|quatro|cinco|seis|sete|oito|nove|dez|meia)\\b/.test(t);
+    var descreveEsforco = /gasta|gastamos|gasto|consome|consumimos|consumido|leva|demora|perdemos|perda de tempo|tempo de conferencia|conferencia manual/.test(t);
+    return unidadeTempo && quantidadeTempo && descreveEsforco;
+  };
+
+  interpretacao.fatos = interpretacao.fatos.map(function(fato) {
+    if (!fato || fato.dimensao === 'impacto') return fato;
+    if (possuiDuracao(fato.valor || '') || possuiDuracao(fato.evidencia || '')) {
+      fato.dimensao = 'impacto';
+    }
+    return fato;
+  });
+  return interpretacao;
+}
+
 function selecionarProximaPerguntaInvestigacaoV64_(estado, ultimaMensagem, motivoRejeicao, adaptador) {
   if (typeof adaptador === 'function') return adaptador(estado, ultimaMensagem, motivoRejeicao);
   return chamarGeminiJsonInvestigacaoV64_(
@@ -549,7 +578,7 @@ function processarTurnoInvestigacaoV64_(estado, mensagem, adaptadores) {
     var motivoEsclarecimento = naoRespondeuPerguntaPendente
       ? 'RESPOSTA_NAO_RESPONDEU_PERGUNTA_PENDENTE'
       : String(interpretacao.explicacaoAmbiguidade || 'RESPOSTA_AMBIGUA');
-    while (tentativas < 6) {
+    while (tentativas < 2) {
       perguntaCandidata = selecionarProximaPerguntaInvestigacaoV64_(
         estado, texto, motivoRejeicao || motivoEsclarecimento,
         adaptadores.selecionarPergunta
@@ -587,7 +616,7 @@ function processarTurnoInvestigacaoV64_(estado, mensagem, adaptadores) {
         proxima_pergunta: ''
       };
     }
-    while (tentativas < 6) {
+    while (tentativas < 2) {
       perguntaCandidata = selecionarProximaPerguntaInvestigacaoV64_(
         estado, texto, motivoRejeicao, adaptadores.selecionarPergunta
       );
