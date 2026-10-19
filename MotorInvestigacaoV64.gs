@@ -376,6 +376,8 @@ function classificarDimensaoPerguntaV64_(pergunta, estado) {
   // Primeiro identifica a variável que a pergunta realmente mede.
   // "Quantos pedidos chegam nos horários de pico?" continua sendo escala;
   // só perguntas sobre quando/horários são frequência.
+  // Duração/tempo consumido é impacto, mesmo quando a frase começa por “quantas horas”.
+  if (/quanto tempo|quantas horas|quantos minutos|quantas horas sao gastas|horas por dia|minutos por dia|tempo gasto|tempo consumido|tempo leva|demora|duracao/.test(p)) return 'impacto';
   if (/horario|horarios|pico|maior movimento|distribuicao ao longo do dia|em que periodo|em que periodos|em que horario|turno de maior|horas de pico|distribuicao temporal|dias e horarios|quando chegam|em quais dias|periodo do dia|periodos do dia/.test(p) &&
       !/quantos|quantas|quantidade|volume|media de pedidos|itens por dia|pedidos por dia|pedidos por semana|pedidos por mes|quantidade diaria|quantidade semanal/.test(p)) {
     return 'frequencia';
