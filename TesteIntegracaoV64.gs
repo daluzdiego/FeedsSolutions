@@ -124,6 +124,21 @@ function TESTAR_INTEGRACAO_V64() {
       estadoNaoPerdeLacuna.perguntaPendente &&
       estadoNaoPerdeLacuna.perguntaPendente.texto !== 'Quais são os horários de pico?');
 
+    // Uma dimensão já perguntada, mas ainda aberta, deve continuar elegível
+    // para uma formulação realmente diferente no fallback.
+    var e17 = criarEstadoInvestigacaoVazioV64_();
+    atualizarFatoV64_(e17, 'processo', 'Recebimento de pedidos', 'Recebemos pedidos', 'CONFIRMADO', 'turno-1');
+    atualizarFatoV64_(e17, 'dor_causa', 'Retrabalho', 'Precisamos refazer conferências', 'CONFIRMADO', 'turno-1');
+    Object.keys(e17.lacunas).forEach(function(dim) { e17.lacunas[dim] = false; });
+    e17.lacunas.frequencia = true;
+    registrarPerguntaFeitaV64_(e17, 'Quais são os horários de pico?', 'frequencia', 'freq-antiga');
+    var fallbackMesmaLacuna = selecionarFallbackDeterministicoInvestigacaoV64_(e17);
+    assert('fallback pode reformular dimensão já perguntada quando a lacuna continua aberta',
+      !!fallbackMesmaLacuna &&
+      fallbackMesmaLacuna.candidata.dimensaoAlvo === 'frequencia' &&
+      fallbackMesmaLacuna.candidata.proximaPergunta !== 'Quais são os horários de pico?' &&
+      fallbackMesmaLacuna.validacao.valida === true);
+
     var escalaEfrequencia = criarEstadoInvestigacaoVazioV64_();
     atualizarFatoV64_(escalaEfrequencia, 'processo', 'Recebimento de pedidos', 'Recebemos pedidos', 'CONFIRMADO', 'turno-1');
     var classPico = classificarDimensaoPerguntaV64_('Quais são os dias e horários de pico?', escalaEfrequencia);
@@ -135,7 +150,7 @@ function TESTAR_INTEGRACAO_V64() {
     resultados.push({ teste: 'execução da suíte', passou: false, detalhe: String(e && e.stack || e) });
   }
   var aprovados = resultados.filter(function(r) { return r.passou; }).length;
-  var resumo = { versao: 'V6.4', suite: 'INTEGRACAO_DETERMINISTICA', sucesso: resultados.length === 16 && aprovados === resultados.length, total: resultados.length, aprovados: aprovados, falhas: resultados.length - aprovados, resultados: resultados };
+  var resumo = { versao: 'V6.4', suite: 'INTEGRACAO_DETERMINISTICA', sucesso: resultados.length === 17 && aprovados === resultados.length, total: resultados.length, aprovados: aprovados, falhas: resultados.length - aprovados, resultados: resultados };
   Logger.log('FEEDS SOLUTIONS V6.4 — INTEGRAÇÃO DETERMINÍSTICA: ' + JSON.stringify(resumo));
   return resumo;
 }
