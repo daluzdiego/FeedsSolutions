@@ -450,12 +450,13 @@ function TESTAR_SUITE_COMPLETA_INVESTIGACAO_V64() {
   executar('CONVERSACIONAL_DETERMINISTICA', TESTAR_CONVERSACIONAL_V64);
   executar('ADAPTADOR', TESTAR_ADAPTADOR_INVESTIGACAO_V64);
   executar('INTEGRACAO_DETERMINISTICA', TESTAR_INTEGRACAO_V64);
+  executar('ADVERSARIAL_DETERMINISTICA', TESTAR_ADVERSARIAL_INVESTIGACAO_V64);
   executar('GEMINI_REAL_PONTA_A_PONTA', TESTAR_GEMINI_REAL_INVESTIGACAO_V64);
 
   var resumo = {
     versao: 'V6.4',
     suite: 'SUITE_COMPLETA_INVESTIGACAO',
-    sucesso: suites.length === 5 && suites.every(function(s) { return s.sucesso; }) && motorInvestigacaoV64Ativo_() === false,
+    sucesso: suites.length === 6 && suites.every(function(s) { return s.sucesso; }) && motorInvestigacaoV64Ativo_() === false,
     totalSuites: suites.length,
     suitesAprovadas: suites.filter(function(s) { return s.sucesso; }).length,
     suitesFalhas: suites.filter(function(s) { return !s.sucesso; }).length,
