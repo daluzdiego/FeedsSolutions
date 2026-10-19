@@ -73,9 +73,9 @@ A prioridade agora é **estabilizar, observar e evoluir sem quebrar o baseline**
 Não reabrir desnecessariamente.
 
 ### V6.4
-⚪ **NÃO INICIADA**
+🟡 **EM IMPLEMENTAÇÃO — NÃO ACEITA PARA PRODUÇÃO**
 
-Será aberta com escopo e critérios de sucesso explícitos.
+A investigação orientada a evidências foi incorporada à main, mas permanece desativada por padrão até a validação do Gemini real, regressão V6.3 e revisão humana.
 
 ## ARQUIVOS CENTRAIS V6.3
 
@@ -130,3 +130,14 @@ A auditoria da versão no main encontrou e corrigiu uma lacuna no JSON Schema de
 - O registro antigo em TESTES é histórico e não valida a versão atualizada do teste real.
 
 Status V6.4: correção de código publicada; validação atualizada no Apps Script pendente. Ativação continua desabilitada. Não executar TESTAR_ACEITACAO_FINAL_V63_RESETAR(), pois a baseline V6.3 já foi aceita e deve ser preservada.
+
+
+### Resultados de auditoria estática e testes isolados — 19/10/2026
+
+- 33/33 arquivos .gs passaram pela análise sintática em V8 isolado.
+- Scripts inline de Index.html e Admin.html passaram pela análise sintática.
+- Testes determinísticos isolados: estado 19/19, conversacional 14/14, adaptador 4/4, integração 17/17.
+- A interface HTML existe e suas chamadas de servidor principais foram encontradas no backend; a issue #2 foi atualizada para remover a afirmação obsoleta de que os HTMLs não existiam.
+- Não há execuções de GitHub Actions registradas. Os testes isolados não substituem Apps Script/Gemini real nem teste E2E da implantação.
+
+Pendência bloqueadora: executar o teste Gemini real fortalecido no Apps Script e concluir a regressão V6.3 sem resetar a baseline aceita. A flag de ativação permanece false.
