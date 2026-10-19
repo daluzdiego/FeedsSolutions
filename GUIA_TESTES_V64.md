@@ -96,3 +96,11 @@ A suíte foi executada em JavaScript V8 isolado com as dependências atuais do r
 O runner `TESTAR_SUITE_COMPLETA_INVESTIGACAO_V64()` foi atualizado para executar seis suítes, incluindo a adversarial antes do Gemini real. Sincronize no projeto Apps Script os arquivos `TesteAdversarialV64.gs` e a versão atualizada de `TesteConversacionalV64.gs`, depois execute o runner completo. Resultado esperado: seis suítes aprovadas; a suíte adversarial deve mostrar 8/8. A chamada ao Gemini pode sofrer limite de cota (HTTP 429); se isso acontecer, aguarde a janela de cota e repita, sem tratar a falha como aprovação.
 
 A ativação continua desligada (`FEEDS_MOTOR_INVESTIGACAO_V64_ATIVO = false`) e a baseline V6.3 deve permanecer intacta. Não executar `TESTAR_ACEITACAO_FINAL_V63_RESETAR()`.
+
+## Correção após execução de 19/10/2026 às 14:52
+
+O log real mostrou cinco suítes determinísticas aprovadas (19/19 estado, 16/16 conversacional, 4/4 adaptador, 18/18 integração, 8/8 adversarial), mas o E2E com Gemini falhou por HTTP 429. A investigação do log identificou uma causa concreta para consumo excessivo: a pergunta temporal “Em quais dias da semana ou horários o volume de pedidos costuma ser maior?” continha a palavra “volume” e era classificada como escala; o motor tentava gerar novas perguntas até cair no fallback de escala.
+
+Correção publicada em `MotorInvestigacaoV64.gs`: marcadores temporais prevalecem quando a pergunta procura saber quando ocorre o pico; somente um pedido quantitativo explícito (como “Quantos pedidos chegam no horário de pico?”) é classificado como escala. Adicionados dois testes de regressão, incluindo a frase exata do log, e ajustada a resposta sintética de impacto para confirmar exatamente duas horas, evitando que o cenário de teste introduza nova estimativa.
+
+Validação V8 isolada após a correção: estado 19/19, conversacional 18/18, adaptador 4/4, integração 18/18 e adversarial 8/8 — **67/67 aprovados**. Isso não comprova o E2E real. Sincronizar `MotorInvestigacaoV64.gs` e `TesteConversacionalV64.gs` no Apps Script; após a janela de cota informada pelo Gemini, executar novamente a suíte completa uma única vez. O resultado real continua pendente até `GEMINI_REAL_PONTA_A_PONTA` passar sem 429.
