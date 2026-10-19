@@ -195,8 +195,8 @@ function corrigirImpactoMalClassificadoV64_(interpretacao, mensagem, estado) {
 
   var possuiDuracao = function(texto) {
     var t = normalizarPerguntaInvestigacaoV64_(texto);
-    var unidadeTempo = /\\b(hora|horas|minuto|minutos)\\b/.test(t);
-    var quantidadeTempo = /\\b(\\d+|uma|um|duas|dois|tres|quatro|cinco|seis|sete|oito|nove|dez|meia)\\b/.test(t);
+    var unidadeTempo = /\b(hora|horas|minuto|minutos)\b/.test(t);
+    var quantidadeTempo = /\b(\d+|uma|um|duas|dois|tres|quatro|cinco|seis|sete|oito|nove|dez|meia)\b/.test(t);
     var descreveEsforco = /gasta|gastamos|gasto|consome|consumimos|consumido|leva|demora|perdemos|perda de tempo|tempo de conferencia|conferencia manual/.test(t);
     return unidadeTempo && quantidadeTempo && descreveEsforco;
   };
@@ -535,6 +535,7 @@ function processarTurnoInvestigacaoV64_(estado, mensagem, adaptadores) {
     texto, estado, adaptadores.interpretar
   );
   interpretacao = corrigirFrequenciaMalClassificadaV64_(interpretacao, texto, estado);
+  interpretacao = corrigirImpactoMalClassificadoV64_(interpretacao, texto, estado);
   if (!interpretacao || !Array.isArray(interpretacao.fatos)) {
     throw new Error('INTERPRETACAO_TURNO_V64_INVALIDA');
   }
