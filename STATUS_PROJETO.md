@@ -125,7 +125,7 @@ A auditoria da versão no main encontrou e corrigiu uma lacuna no JSON Schema de
 
 - Correção publicada em MotorInvestigacaoV64.gs — commit 6bd2ae632732a041fa1fafe5c6da945f9ec9424b.
 - Teste de contrato do schema e E2E mais rigoroso publicados em TesteConversacionalV64.gs — commit 51a50fb7fd5597a632eb98231eef8dec1cb8037c.
-- A suíte conversacional passa a exigir 14/14.
+- A suíte conversacional passou a exigir 15/15, incluindo contrato de schema e fluxo completo determinístico.
 - O teste Gemini real deixa de aceitar como sucesso apenas quatro turnos sem falha imediata; agora exige as dimensões críticas confirmadas, conclusão aprovada pelo gate e nenhuma pergunta pendente.
 - O registro antigo em TESTES é histórico e não valida a versão atualizada do teste real.
 
@@ -141,3 +141,6 @@ Status V6.4: correção de código publicada; validação atualizada no Apps Scr
 - Não há execuções de GitHub Actions registradas. Os testes isolados não substituem Apps Script/Gemini real nem teste E2E da implantação.
 
 Pendência bloqueadora: executar o teste Gemini real fortalecido no Apps Script e concluir a regressão V6.3 sem resetar a baseline aceita. A flag de ativação permanece false.
+
+
+Reexecução isolada após o teste de fluxo completo (19/10/2026): estado 19/19, conversacional 15/15, adaptador 4/4 e integração 17/17 aprovados em V8 isolado. A sintaxe do teste conversacional atualizado passou. O teste Gemini real rigoroso no Apps Script continua pendente.
