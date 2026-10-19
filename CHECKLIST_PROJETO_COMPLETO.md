@@ -412,9 +412,9 @@ Esse é o próximo grande bloco do produto.
 
 ## Validação separada
 - [x] Teste unitário determinístico criado — execução isolada: 19/19
-- [x] Teste conversacional determinístico criado — execução isolada: 12/12
+- [x] Teste conversacional determinístico criado — execução isolada anterior: 12/12; atualizado em 19/10 para 14/14
 - [x] Teste do adaptador criado — execução isolada: 4/4
-- [x] Teste de integração determinístico criado — execução isolada: 14/14
+- [x] Teste de integração determinístico criado — execução isolada anterior: 14/14; atualizado em 19/10 para 17/17
 - [x] Função de teste ponta a ponta com Gemini real criada
 - [ ] Suítes V6.4 executadas no Google Apps Script
 - [ ] Teste ponta a ponta com Gemini executado e aprovado
