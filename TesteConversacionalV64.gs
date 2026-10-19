@@ -71,6 +71,17 @@ function TESTAR_CONVERSACIONAL_V64() {
       interpretacaoFrequencia.fatos[0].dimensao === 'frequencia' &&
       interpretacaoFrequencia.fatos[0].evidencia === 'Os pedidos chegam principalmente entre 10h e meio-dia');
 
+    // Regressão reproduzida no log Gemini real: a palavra "volume" aparece
+    // dentro de uma pergunta temporal, mas não transforma a intenção em escala.
+    var perguntaTemporalComVolume = classificarDimensaoPerguntaV64_(
+      'Em quais dias da semana ou horários o volume de pedidos costuma ser maior?', null);
+    var perguntaQuantitativaNoPico = classificarDimensaoPerguntaV64_(
+      'Quantos pedidos chegam no horário de pico?', null);
+    assert('pergunta sobre dias/horários com a palavra volume continua sendo frequência',
+      perguntaTemporalComVolume === 'frequencia');
+    assert('pergunta explícita sobre quantos pedidos no pico continua sendo escala',
+      perguntaQuantitativaNoPico === 'escala');
+
     // 1. Resposta numérica à pergunta de escala é guardada como fato confirmado.
     var e1 = estadoBase();
     var r1 = processarTurnoInvestigacaoV64_(e1, 'São 100 pedidos por dia.', adaptadores({
@@ -294,7 +305,7 @@ function TESTAR_CONVERSACIONAL_V64() {
   var resumo = {
     versao: 'V6.4',
     suite: 'CONVERSACIONAL_DETERMINISTICA',
-    sucesso: resultados.length === 16 && aprovados === resultados.length,
+    sucesso: resultados.length === 18 && aprovados === resultados.length,
     total: resultados.length,
     aprovados: aprovados,
     falhas: resultados.length - aprovados,
