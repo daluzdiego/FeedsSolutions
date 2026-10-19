@@ -78,3 +78,14 @@ Criado `TesteAdversarialV64.gs` com oito testes determinísticos. A execução i
 ### Correção da classificação de pergunta temporal — log 14:52 de 19/10/2026
 
 O E2E real produziu repetidas tentativas de pergunta porque “Em quais dias da semana ou horários o volume de pedidos costuma ser maior?” era classificada como escala devido ao termo “volume”. Isso consumiu chamadas Gemini e culminou em HTTP 429 antes da conclusão. A classificação foi corrigida: marcadores temporais vencem palavras incidentais como “volume”; perguntas com quantificação explícita, como “Quantos pedidos chegam no horário de pico?”, continuam sendo escala. Incluídos dois testes de regressão e ajustado o fixture sintético de impacto para resposta exata. Validação isolada: 67/67 testes determinísticos aprovados. A nova execução Apps Script/Gemini continua pendente; não ativar V6.4.
+
+
+## 19/10/2026 — duração classificada como frequência e consumo de chamadas
+
+O log de 16:22 confirmou cinco suítes determinísticas aprovadas e falha no Gemini real por HTTP 429. A resposta sintética para impacto dizia “cerca de duas horas por dia”, não confirmava o fato e foi classificada como frequência, mantendo a pergunta de impacto aberta. O motor então gerava várias alternativas e consumia chamadas adicionais.
+
+Correção publicada:
+- `MotorInvestigacaoV64.gs`: função `corrigirImpactoMalClassificadoV64_` para reclassificar uma descrição explícita de duração como impacto quando essa dimensão está pendente; máximo de duas tentativas de seleção antes do fallback determinístico.
+- `TesteConversacionalV64.gs`: resposta sintética de impacto explicita a consequência e confirma exatamente duas horas; regressão adicionada; esperado 19/19.
+
+A cota continua sendo uma falha real do teste, não um defeito corrigido por documentação. V6.4 permanece desligada até passar no Gemini real, na regressão não destrutiva V6.3 e na revisão humana.
