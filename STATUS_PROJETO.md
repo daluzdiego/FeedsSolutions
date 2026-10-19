@@ -161,7 +161,7 @@ O runner passou em 4/5 suítes; a única falha foi o teste Gemini real estrito. 
 ## Atualização — validação adversarial V6.4 (19/10/2026)
 
 - Adicionado `TesteAdversarialV64.gs` com oito cenários para respostas vagas, contradição, múltiplos fatos, ausência de resposta, aceitação ausente, dimensão essencial estimada, distinção escala/frequência e conflito aberto.
-- Resultado V8 isolado: **8/8 aprovados**.
+- Resultado V8 isolado: **8/8 testes adversariais aprovados**. Reexecução conjunta de todas as suítes determinísticas no conjunto atualizado: estado 19/19, conversacional 16/16, adaptador 4/4, integração 18/18 e adversarial 8/8 — **65/65 aprovados**, zero falhas. Foram carregadas as dependências relevantes do repositório, incluindo `Dignostico.gs`; isso ainda não equivale ao runtime do Apps Script.
 - `TESTAR_SUITE_COMPLETA_INVESTIGACAO_V64()` atualizado de cinco para seis suítes, incluindo a bateria adversarial antes da chamada Gemini real.
 - Próximo bloqueio: sincronizar os dois arquivos atualizados no Apps Script e executar a suíte completa real; depois, revisão humana de 3–5 diálogos com foco na profundidade das perguntas e investigação da causa-raiz.
 - A V6.4 permanece desativada e a baseline aceita V6.3 não deve ser alterada nem resetada.
