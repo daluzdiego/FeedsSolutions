@@ -144,3 +144,6 @@ Pendência bloqueadora: executar o teste Gemini real fortalecido no Apps Script 
 
 
 Reexecução isolada após o teste de fluxo completo (19/10/2026): estado 19/19, conversacional 15/15, adaptador 4/4 e integração 17/17 aprovados em V8 isolado. A sintaxe do teste conversacional atualizado passou. O teste Gemini real rigoroso no Apps Script continua pendente.
+
+
+Runner de validação acelerada publicado: TESTAR_SUITE_COMPLETA_INVESTIGACAO_V64() em TesteConversacionalV64.gs. Executa as quatro suítes determinísticas e o teste Gemini real estrito em sequência, não reseta a baseline V6.3 e reprova se a flag de ativação não estiver desligada.
