@@ -306,7 +306,7 @@ function compararPerguntaSemanticamenteV64_(perguntasFeitas, candidata, adaptado
     return (registro && registro.dimensao) || classificarDimensaoPerguntaV64_(textoPergunta, null);
   }).filter(function(dim) { return !!dim; });
   var dimensaoHistoricoNaoComparavel = dimNova && dimensoesHistorico.length > 0 && dimensoesHistorico.every(function(dim) { return dim !== dimNova; });
-  if (dimensaoHistoricoNaoComparavel || (dimNova && !existeDimensaoComparavel && dimensoesHistorico.length === 0)) {
+  if (dimensaoHistoricoNaoComparavel) {
     return { equivalente: false, indice: -1, motivo: 'DIMENSAO_DISTINTA_DO_HISTORICO', metodo: 'DIMENSAO' };
   }
   if (typeof adaptador === 'function') return adaptador(perguntas, texto);
