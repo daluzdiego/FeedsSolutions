@@ -426,6 +426,11 @@ function validarPerguntaInvestigativaV64_(estado, candidata, adaptadorSemantico)
 function classificarDimensaoPerguntaV64_(pergunta, estado) {
   var p = normalizarPerguntaInvestigacaoV64_(pergunta);
 
+  // Critérios e indicadores de sucesso devem prevalecer sobre marcadores genéricos
+  // de processo ("fluxo") ou de dor ("erros", "chamados", "retrabalho").
+  // Ex.: "Qual indicador comprovará que o novo fluxo reduziu chamados reabertos?"
+  if (/aceitacao|criterio de sucesso|considerar concluido|medir o sucesso|funcionou|como sera medido|medido que|qual indicador|indicador comprovara|indicador demonstrara|demonstrara a reducao|demonstrar[a-z]* a reducao|comprovar[a-z]* que|criterio verificavel|resultado observavel|reduziu chamados|reduziu erros|melhorou/.test(p)) return 'aceitacao';
+
   // Primeiro identifica intenção de processo e causa quando a pergunta pede
   // fluxo, caminho, verificação, rastreabilidade, etapa ou causa-raiz.
   // Esses marcadores específicos prevalecem sobre palavras como erro, atraso e retrabalho.
@@ -448,13 +453,15 @@ function classificarDimensaoPerguntaV64_(pergunta, estado) {
       !perguntaQuantitativaExplicita) {
     return 'frequencia';
   }
+  // Quantidade de horas gastas/consumidas em trabalho operacional é impacto,
+  // não escala. Esta regra precisa preceder o marcador genérico "quantas".
+  if (/\bquantas? horas\b/.test(p) &&
+      /gasta|gastamos|gasto|consome|consumimos|demora|perdemos|perda de tempo|conferencia|trabalho|tempo/.test(p)) {
+    return 'impacto';
+  }
   if (/quantos|quantas|quantidade|volume|media de pedidos|itens por dia|pedidos por dia|pedidos por semana|pedidos por mes|quantidade diaria|quantidade semanal|cem pedidos|100 pedidos/.test(p)) {
     return 'escala';
   }
-  // Critérios e indicadores de sucesso devem prevalecer sobre marcadores genéricos
-  // de processo ("fluxo") ou de dor ("erros", "chamados", "retrabalho").
-  // Ex.: "Qual indicador comprovará que o novo fluxo reduziu chamados reabertos?"
-  if (/aceitacao|criterio de sucesso|considerar concluido|medir o sucesso|funcionou|como sera medido|medido que|qual indicador|indicador comprovara|indicador demonstrara|demonstrara a reducao|demonstrar[a-z]* a reducao|comprovar[a-z]* que|criterio verificavel|resultado observavel|reduziu chamados|reduziu erros|melhorou/.test(p)) return 'aceitacao';
   if (/objetivo|resultado deseja|resultado deve ser alcancado|qual resultado|resultado esperado|alcancar|melhorar|conseguir ao final|para reduzir mudanças|para reduzir mudancas/.test(p)) return 'objetivo';
   if (/excecao|excecoes|situacoes .* tratamento excepcional|tratamento excepcional|fora do padrao|regra especial/.test(p)) return 'excecoes';
   // "Prazo" pode significar restrição do projeto ou consequência operacional.
