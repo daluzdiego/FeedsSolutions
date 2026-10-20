@@ -1,10 +1,10 @@
 /**
- * FEEDS SOLUTIONS V6.4 — STRESS TEST EXTREMO DE 20 EMPRESAS
+ * FEEDS SOLUTIONS V6.4 — STRESS TEST EXTREMO DE 40 EMPRESAS
  *
- * Executar: TESTAR_STRESS_20_EMPRESAS_V64()
+ * Executar: TESTAR_STRESS_40_EMPRESAS_V64()
  *
  * Escopo:
- * - 20 empresas fictícias, 20 contextos operacionais distintos e de alta complexidade.
+ * - 40 empresas fictícias, 40 contextos operacionais distintos e de alta complexidade.
  * - Exercita o estado real, evidências, certeza, conflitos, lacunas, classificador,
  *   gate de conclusão, validação estrutural, serialização e envelope legado.
  * - Não chama Gemini, não acessa planilhas, não grava dados, não altera produção.
@@ -14,7 +14,7 @@
  * Este é um teste de estresse determinístico do núcleo. Não substitui o teste Gemini
  * real nem uma revisão de perguntas aceitas em conversas reais.
  */
-function TESTAR_STRESS_20_EMPRESAS_V64() {
+function TESTAR_STRESS_40_EMPRESAS_V64() {
   var inicio = new Date().getTime();
   var resultados = [];
   var falhas = [];
@@ -38,7 +38,27 @@ function TESTAR_STRESS_20_EMPRESAS_V64() {
     { id:'E17', setor:'Empresa de crédito', problema:'documentação, análise de risco, exceções e auditoria', valor:'Analistas copiam dados entre sistemas de avaliação', evidencia:'Analistas copiam dados entre sistemas de avaliação.', pergunta:'Que restrições regulatórias e de auditoria o sistema deve respeitar?', dimensao:'restricoes' },
     { id:'E18', setor:'Assistência técnica de TI', problema:'prioridade, SLA, ativos, chamados reabertos e plantão', valor:'Chamados classificados manualmente em múltiplas filas', evidencia:'Os chamados são classificados manualmente em múltiplas filas.', pergunta:'Qual indicador comprovará que o novo fluxo reduziu chamados reabertos?', dimensao:'aceitacao' },
     { id:'E19', setor:'Confecção têxtil', problema:'grade de tamanhos, lotes, defeitos e terceirização', valor:'Apontamentos de defeitos agregados manualmente por lote', evidencia:'Os apontamentos de defeitos são agregados manualmente por lote.', pergunta:'Quantas peças por lote precisam de retrabalho?', dimensao:'escala' },
-    { id:'E20', setor:'Gestora de condomínios', problema:'inadimplência, ocorrências, fornecedores e aprovação de despesas', valor:'Solicitações de moradores encaminhadas por e-mail e aplicativo', evidencia:'As solicitações de moradores chegam por e-mail e aplicativo.', pergunta:'Como será medido que o tempo de resolução das solicitações melhorou?', dimensao:'aceitacao' }
+    { id:'E20', setor:'Gestora de condomínios', problema:'inadimplência, ocorrências, fornecedores e aprovação de despesas', valor:'Solicitações de moradores encaminhadas por e-mail e aplicativo', evidencia:'As solicitações de moradores chegam por e-mail e aplicativo.', pergunta:'Como será medido que o tempo de resolução das solicitações melhorou?', dimensao:'aceitacao' },
+    {id:'E21',setor:'Usina de reciclagem',problema:'pesagem, composição de resíduos, contaminação e repasses por fornecedor',valor:'Pesagens são anotadas em fichas e digitadas no fechamento',evidencia:'As pesagens são anotadas em fichas e digitadas no fechamento.',pergunta:'Como são verificadas as divergências entre peso recebido e peso faturado?',dimensao:'processo'},
+    {id:'E22',setor:'Rede de escolas',problema:'matrículas, frequência, autorizações e sincronização entre unidades',valor:'Secretarias conciliam matrículas em planilhas locais',evidencia:'As secretarias conciliam matrículas em planilhas locais.',pergunta:'Qual etapa gera mais retrabalho ao transferir um aluno entre unidades?',dimensao:'dor_causa'},
+    {id:'E23',setor:'Distribuidora de bebidas',problema:'vasilhames retornáveis, crédito de clientes, rotas e sazonalidade',valor:'Vasilhames retornáveis são conferidos manualmente na entrega',evidencia:'Os vasilhames retornáveis são conferidos manualmente na entrega.',pergunta:'Quantos vasilhames retornáveis são movimentados por dia?',dimensao:'escala'},
+    {id:'E24',setor:'Operador portuário',problema:'janelas de atracação, documentação, equipamentos e multas',valor:'Janelas operacionais são atualizadas em quadros e mensagens',evidencia:'As janelas operacionais são atualizadas em quadros e mensagens.',pergunta:'Em quais períodos se concentram os atrasos de atracação?',dimensao:'frequencia'},
+    {id:'E25',setor:'Rede de farmácias',problema:'receitas, substituições autorizadas, estoque e auditoria',valor:'Solicitações de reposição são conferidas em relatórios separados',evidencia:'As solicitações de reposição são conferidas em relatórios separados.',pergunta:'Quanto tempo a equipe perde por semana conciliando reposições?',dimensao:'impacto'},
+    {id:'E26',setor:'Fábrica de móveis',problema:'cortes, desperdício, medidas customizadas e capacidade de máquinas',valor:'Ordens customizadas são redigitadas antes do corte',evidencia:'Ordens customizadas são redigitadas antes do corte.',pergunta:'Qual resultado operacional deve melhorar primeiro com a automação?',dimensao:'objetivo'},
+    {id:'E27',setor:'Seguradora regional',problema:'sinistros, documentos faltantes, fraude e prazos contratuais',valor:'Documentos de sinistros são distribuídos por e-mail',evidencia:'Documentos de sinistros são distribuídos por e-mail.',pergunta:'Que exceções permitem encaminhar um sinistro para análise especial?',dimensao:'excecoes'},
+    {id:'E28',setor:'Clínica veterinária',problema:'prontuários, exames, medicação, estoque e emergência',valor:'Equipe registra procedimentos em sistemas diferentes',evidencia:'A equipe registra procedimentos em sistemas diferentes.',pergunta:'Quais limitações de integração e privacidade precisamos respeitar?',dimensao:'restricoes'},
+    {id:'E29',setor:'Indústria química',problema:'lotes, fichas de segurança, dosagem e bloqueios de qualidade',valor:'Resultados de inspeção são transcritos para liberar lotes',evidencia:'Os resultados de inspeção são transcritos para liberar lotes.',pergunta:'Qual critério verificável autoriza considerar a liberação automatizada segura?',dimensao:'aceitacao'},
+    {id:'E30',setor:'Rede de lavanderias',problema:'identificação de peças, manchas, perdas e cobrança por contrato',valor:'Volumes recebidos são separados por cliente com etiquetas manuais',evidencia:'Os volumes recebidos são separados por cliente com etiquetas manuais.',pergunta:'Descreva o caminho de uma peça desde o recebimento até a expedição.',dimensao:'processo'},
+    {id:'E31',setor:'Transportadora escolar',problema:'rotas, autorizações, presença, substituição de veículos e segurança',valor:'Ausências e substituições de veículos são tratadas por telefone',evidencia:'Ausências e substituições de veículos são tratadas por telefone.',pergunta:'Qual é a principal causa dos atrasos quando um veículo é substituído?',dimensao:'dor_causa'},
+    {id:'E32',setor:'Rede de hotéis',problema:'overbooking, tarifas, manutenção e reservas multicanal',valor:'Reservas de canais diferentes são conciliadas em planilha',evidencia:'Reservas de canais diferentes são conciliadas em planilha.',pergunta:'Quantas reservas por canal precisam ser conciliadas diariamente?',dimensao:'escala'},
+    {id:'E33',setor:'Exportadora de grãos',problema:'documentos aduaneiros, câmbio, qualidade e datas de embarque',valor:'Datas de documentação são controladas em calendários separados',evidencia:'As datas de documentação são controladas em calendários separados.',pergunta:'Em quais épocas do embarque as pendências documentais se acumulam?',dimensao:'frequencia'},
+    {id:'E34',setor:'Laboratório industrial',problema:'calibração, certificados, instrumentos vencidos e auditorias',valor:'Certificados de calibração são localizados manualmente',evidencia:'Os certificados de calibração são localizados manualmente.',pergunta:'Qual é o impacto de localizar um certificado vencido após a auditoria?',dimensao:'impacto'},
+    {id:'E35',setor:'Empresa de eventos',problema:'mudanças de escopo, fornecedores, montagem e pagamentos',valor:'Alterações de escopo são aprovadas por mensagens dispersas',evidencia:'As alterações de escopo são aprovadas por mensagens dispersas.',pergunta:'Qual resultado deve ser alcançado para reduzir mudanças não autorizadas?',dimensao:'objetivo'},
+    {id:'E36',setor:'Rede de postos de combustível',problema:'tanques, aferição, perdas, turnos e conciliação fiscal',valor:'Leituras de tanques são comparadas manualmente ao fechamento',evidencia:'As leituras de tanques são comparadas manualmente ao fechamento.',pergunta:'Em que situações uma divergência de estoque exige tratamento excepcional?',dimensao:'excecoes'},
+    {id:'E37',setor:'Empresa de telecomunicações',problema:'ordens de campo, sinal, materiais, SLA e terceirizadas',valor:'Ordens de campo são redistribuídas manualmente entre equipes',evidencia:'As ordens de campo são redistribuídas manualmente entre equipes.',pergunta:'Quais limites de acesso, segurança e integração se aplicam às ordens de campo?',dimensao:'restricoes'},
+    {id:'E38',setor:'Cooperativa de saúde',problema:'autorizações, rede credenciada, glosas e reembolsos',valor:'Pedidos de autorização são conferidos em filas separadas',evidencia:'Os pedidos de autorização são conferidos em filas separadas.',pergunta:'Que indicador demonstrará a redução de glosas após a mudança?',dimensao:'aceitacao'},
+    {id:'E39',setor:'Fábrica de autopeças',problema:'rastreabilidade serial, defeitos, recall e fornecedores críticos',valor:'Lotes e números de série são conciliados em arquivos diferentes',evidencia:'Lotes e números de série são conciliados em arquivos diferentes.',pergunta:'Como o lote é rastreado desde o recebimento até o envio ao cliente?',dimensao:'processo'},
+    {id:'E40',setor:'Empresa de saneamento',problema:'vazamentos, ordens de reparo, peças, equipes e fiscalização',valor:'Ocorrências são priorizadas manualmente por região',evidencia:'As ocorrências são priorizadas manualmente por região.',pergunta:'Qual é a causa mais frequente dos reparos que precisam ser refeitos?',dimensao:'dor_causa'}
   ];
 
   function registrar(empresa, etapa, nome, passou, esperado, observado, detalhe) {
@@ -182,9 +202,9 @@ function TESTAR_STRESS_20_EMPRESAS_V64() {
   });
   var resumo = {
     versao:'V6.4',
-    suite:'STRESS_EXTREMO_20_EMPRESAS',
+    suite:'STRESS_EXTREMO_40_EMPRESAS',
     sucesso:falhas.length === 0 && resultados.length === empresas.length * 12,
-    empresasPlanejadas:20,
+    empresasPlanejadas:40,
     empresasExecutadas:empresas.length,
     etapasPorEmpresa:12,
     totalTestes:resultados.length,
