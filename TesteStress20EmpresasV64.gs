@@ -125,24 +125,44 @@ function TESTAR_STRESS_20_EMPRESAS_V64() {
     registrar(emp,'09_CLASSIFICACAO','Pergunta do cenário é classificada na dimensão esperada',
       perguntaClassificada === emp.dimensao, emp.dimensao, perguntaClassificada, emp.pergunta);
 
+    // Contexto isolado para validar pergunta: todas as dimensões precedentes são
+    // preenchidas de forma sintética, deixando aberta a dimensão que a pergunta mira.
+    // Isso evita confundir rejeição por pré-requisito com rejeição por incoerência.
+    var estadoPergunta = criarEstadoInvestigacaoVazioV64_();
+    Object.keys(DIMENSOES_V64).forEach(function(k) {
+      var d = DIMENSOES_V64[k];
+      if (d === emp.dimensao) return;
+      atualizarFatoV64_(estadoPergunta,d,'Fato sintético '+d+' para '+emp.id,
+        'Evidência sintética registrada para '+d+' na empresa '+emp.id,
+        CERTEZA_V64.CONFIRMADO,'fixture-'+emp.id);
+    });
     var candidato = {
       proximaPergunta: emp.pergunta,
       dimensaoAlvo: emp.dimensao,
       justificativa:'Stress test '+emp.id+': '+emp.problema,
       lacunaQueReduz: emp.dimensao
     };
-    var validacaoPergunta = validarPerguntaInvestigativaV64_(estado,candidato,function(){return {equivalente:false,indice:-1,motivo:''};});
+    var validacaoPergunta = validarPerguntaInvestigativaV64_(estadoPergunta,candidato,function(){return {equivalente:false,indice:-1,motivo:''};});
     registrar(emp,'10_VALIDACAO_PERGUNTA','Validador aceita candidata coerente e estruturada',
       validacaoPergunta.valida === true, true, validacaoPergunta.valida,
       JSON.stringify({motivo:validacaoPergunta.motivo || '',dimensaoDetectada:validacaoPergunta.dimensaoDetectada || null,dimensaoAlvo:validacaoPergunta.dimensaoAlvo || null}));
 
+    var dimensaoErrada = emp.dimensao === 'escala' ? 'frequencia' : 'escala';
     var candidatoIncoerente = {
       proximaPergunta: emp.pergunta,
-      dimensaoAlvo: emp.dimensao === 'escala' ? 'frequencia' : 'escala',
+      dimensaoAlvo: dimensaoErrada,
       justificativa:'Candidata propositalmente adulterada para teste adversarial',
-      lacunaQueReduz: emp.dimensao === 'escala' ? 'frequencia' : 'escala'
+      lacunaQueReduz: dimensaoErrada
     };
-    var rejeicao = validarPerguntaInvestigativaV64_(estado,candidatoIncoerente,function(){return {equivalente:false,indice:-1,motivo:''};});
+    var estadoAdversarial = criarEstadoInvestigacaoVazioV64_();
+    Object.keys(DIMENSOES_V64).forEach(function(k) {
+      var d = DIMENSOES_V64[k];
+      if (d === emp.dimensao || d === dimensaoErrada) return;
+      atualizarFatoV64_(estadoAdversarial,d,'Fato sintético '+d+' para '+emp.id,
+        'Evidência sintética registrada para '+d+' na empresa '+emp.id,
+        CERTEZA_V64.CONFIRMADO,'fixture-adversarial-'+emp.id);
+    });
+    var rejeicao = validarPerguntaInvestigativaV64_(estadoAdversarial,candidatoIncoerente,function(){return {equivalente:false,indice:-1,motivo:''};});
     registrar(emp,'11_ADVERSARIAL','Validador rejeita candidata com dimensão adulterada',
       rejeicao.valida === false, false, rejeicao.valida,
       JSON.stringify({motivo:rejeicao.motivo || '',dimensaoDetectada:rejeicao.dimensaoDetectada || null,dimensaoAlvo:candidatoIncoerente.dimensaoAlvo}));
