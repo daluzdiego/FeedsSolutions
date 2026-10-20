@@ -68,6 +68,23 @@ function TESTAR_FULL_V64() {
     Logger.log('[FULL][SUITE ' + (indice + 1) + '/' + suites.length + '][INICIO] ' +
       JSON.stringify({ nome: suite.nome, funcao: suite.funcao, tipo: suite.tipo }));
 
+    // Economia de tempo/cota: o E2E real só roda se todas as suítes determinísticas anteriores passaram.
+    if (suite.tipo === 'gemini' && resultados.some(function(r) {
+      return r.tipo === 'deterministico' && r.sucesso !== true;
+    })) {
+      var pulada = {
+        suite: suite.nome,
+        funcao: suite.funcao,
+        tipo: suite.tipo,
+        sucesso: false,
+        ignorada: true,
+        erro: 'GEMINI_NAO_EXECUTADO: corrigir/sincronizar as suítes determinísticas antes de consumir cota.'
+      };
+      resultados.push(pulada);
+      Logger.log('[FULL][SUITE ' + (indice + 1) + '][IGNORADA] ' + JSON.stringify(pulada));
+      return;
+    }
+
     var fn = null;
     try {
       switch (suite.funcao) {
