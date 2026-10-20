@@ -426,11 +426,17 @@ function validarPerguntaInvestigativaV64_(estado, candidata, adaptadorSemantico)
 function classificarDimensaoPerguntaV64_(pergunta, estado) {
   var p = normalizarPerguntaInvestigacaoV64_(pergunta);
 
+  // Primeiro identifica intenção de processo e causa quando a pergunta pede
+  // fluxo, caminho, verificação, rastreabilidade, etapa ou causa-raiz.
+  // Esses marcadores específicos prevalecem sobre palavras como erro, atraso e retrabalho.
+  if (/\\b(descreva|descrever|caminho|fluxo|passo a passo|como funciona|como acontece|como sao verificadas|como e verificado|como o lote e rastreado|desde o recebimento ate|do recebimento ate|rastreado desde)\\b/.test(p)) return 'processo';
+  if (/\\b(causa|causa raiz|principal causa|qual etapa|em qual etapa|que etapa|etapa gera|etapa provoca)\\b/.test(p) &&
+      /\\b(atraso|atrasos|retrabalho|erro|erros|falha|falhas|reparo|reparos|refeito|refeitos)\\b/.test(p)) return 'dor_causa';
+
   // Primeiro identifica a variável que a pergunta realmente mede.
   // "Quantos pedidos chegam nos horários de pico?" continua sendo escala;
   // só perguntas sobre quando/horários são frequência.
   // Duração/tempo consumido é impacto, mesmo quando a frase começa por “quantas horas”.
-  if (/quanto tempo|quantas horas|quantos minutos|quantas horas sao gastas|horas por dia|minutos por dia|tempo gasto|tempo consumido|tempo leva|demora|duracao/.test(p)) return 'impacto';
   // Marcadores temporais têm precedência quando a pergunta procura saber QUANDO
   // ocorre o pico. Só tratamos como escala quando há uma solicitação quantitativa
   // explícita (por exemplo, "quantos pedidos chegam no horário de pico?").
@@ -445,12 +451,12 @@ function classificarDimensaoPerguntaV64_(pergunta, estado) {
   if (/quantos|quantas|quantidade|volume|media de pedidos|itens por dia|pedidos por dia|pedidos por semana|pedidos por mes|quantidade diaria|quantidade semanal|cem pedidos|100 pedidos/.test(p)) {
     return 'escala';
   }
-  if (/objetivo|resultado deseja|alcancar|melhorar|conseguir ao final/.test(p)) return 'objetivo';
+  if (/objetivo|resultado deseja|resultado deve ser alcancado|qual resultado|resultado esperado|alcancar|melhorar|conseguir ao final|para reduzir mudanças|para reduzir mudancas/.test(p)) return 'objetivo';
   // Critério verificável do resultado é aceitação, mesmo quando a pergunta menciona
   // redução de erros, chamados ou tempo. Diferenciar "qual o impacto atual" de
   // "qual indicador comprova que a solução melhorou".
-  if (/aceitacao|criterio de sucesso|considerar concluido|medir o sucesso|funcionou|como sera medido|medido que|qual indicador|indicador comprovara|comprovar[a-z]* que|criterio verificavel|resultado observavel|reduziu chamados|reduziu erros|melhorou/.test(p)) return 'aceitacao';
-  if (/excecao|fora do padrao|regra especial/.test(p)) return 'excecoes';
+  if (/aceitacao|criterio de sucesso|considerar concluido|medir o sucesso|funcionou|como sera medido|medido que|qual indicador|indicador comprovara|indicador demonstrara|indicador demonstrara|demonstrara a reducao|demonstrar[a-z]* a reducao|comprovar[a-z]* que|criterio verificavel|resultado observavel|reduziu chamados|reduziu erros|melhorou/.test(p)) return 'aceitacao';
+  if (/excecao|excecoes|situacoes .* tratamento excepcional|tratamento excepcional|fora do padrao|regra especial/.test(p)) return 'excecoes';
   // "Prazo" pode significar restrição do projeto ou consequência operacional.
   // Quando a pergunta fala explicitamente de impacto/erro/atraso/perda, classifique
   // pela consequência antes de aplicar o marcador genérico de restrição.
