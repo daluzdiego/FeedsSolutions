@@ -469,12 +469,33 @@ function TESTAR_SUITE_COMPLETA_INVESTIGACAO_V64() {
     }
   }
 
-  executar('ESTADO_EXPLICITO', TESTAR_ESTADO_INVESTIGACAO_V64);
-  executar('CONVERSACIONAL_DETERMINISTICA', TESTAR_CONVERSACIONAL_V64);
-  executar('ADAPTADOR', TESTAR_ADAPTADOR_INVESTIGACAO_V64);
-  executar('INTEGRACAO_DETERMINISTICA', TESTAR_INTEGRACAO_V64);
-  executar('ADVERSARIAL_DETERMINISTICA', TESTAR_ADVERSARIAL_INVESTIGACAO_V64);
-  executar('GEMINI_REAL_PONTA_A_PONTA', TESTAR_GEMINI_REAL_INVESTIGACAO_V64);
+  // Resolver cada teste dentro de uma função evita que um ReferenceError
+  // na avaliação dos argumentos interrompa o runner antes do tratamento de erro.
+  function executarSeDisponivel(nomeSuite, nomeFuncao) {
+    executar(nomeSuite, function() {
+      var funcoes = {
+        TESTAR_ESTADO_INVESTIGACAO_V64: typeof TESTAR_ESTADO_INVESTIGACAO_V64 === 'function' ? TESTAR_ESTADO_INVESTIGACAO_V64 : null,
+        TESTAR_CONVERSACIONAL_V64: typeof TESTAR_CONVERSACIONAL_V64 === 'function' ? TESTAR_CONVERSACIONAL_V64 : null,
+        TESTAR_ADAPTADOR_INVESTIGACAO_V64: typeof TESTAR_ADAPTADOR_INVESTIGACAO_V64 === 'function' ? TESTAR_ADAPTADOR_INVESTIGACAO_V64 : null,
+        TESTAR_INTEGRACAO_V64: typeof TESTAR_INTEGRACAO_V64 === 'function' ? TESTAR_INTEGRACAO_V64 : null,
+        TESTAR_ADVERSARIAL_INVESTIGACAO_V64: typeof TESTAR_ADVERSARIAL_INVESTIGACAO_V64 === 'function' ? TESTAR_ADVERSARIAL_INVESTIGACAO_V64 : null,
+        TESTAR_GEMINI_REAL_INVESTIGACAO_V64: typeof TESTAR_GEMINI_REAL_INVESTIGACAO_V64 === 'function' ? TESTAR_GEMINI_REAL_INVESTIGACAO_V64 : null
+      };
+      var fn = funcoes[nomeFuncao];
+      if (typeof fn !== 'function') {
+        throw new Error('FUNCAO_TESTE_AUSENTE: ' + nomeFuncao +
+          '. Sincronize o arquivo .gs que declara essa função a partir do GitHub.');
+      }
+      return fn();
+    });
+  }
+
+  executarSeDisponivel('ESTADO_EXPLICITO', 'TESTAR_ESTADO_INVESTIGACAO_V64');
+  executarSeDisponivel('CONVERSACIONAL_DETERMINISTICA', 'TESTAR_CONVERSACIONAL_V64');
+  executarSeDisponivel('ADAPTADOR', 'TESTAR_ADAPTADOR_INVESTIGACAO_V64');
+  executarSeDisponivel('INTEGRACAO_DETERMINISTICA', 'TESTAR_INTEGRACAO_V64');
+  executarSeDisponivel('ADVERSARIAL_DETERMINISTICA', 'TESTAR_ADVERSARIAL_INVESTIGACAO_V64');
+  executarSeDisponivel('GEMINI_REAL_PONTA_A_PONTA', 'TESTAR_GEMINI_REAL_INVESTIGACAO_V64');
 
   var resumo = {
     versao: 'V6.4',
