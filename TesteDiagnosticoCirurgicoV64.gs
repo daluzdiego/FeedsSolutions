@@ -90,8 +90,7 @@ function TESTAR_DIAGNOSTICO_CIRURGICO_PERGUNTAS_V64() {
         validacaoDivergente.motivo === 'DIMENSAO_ALVO_NAO_CORRESPONDE_A_PERGUNTA',
       JSON.stringify(candidataDivergente));
 
-    // Caso 05: verifica a lacuna declarada separadamente — é a inconsistência do log real:
-    // dimensão-alvo frequência, mas lacunaQueReduz escala.
+    // Caso 05: a validação de produção deve rejeitar a lacuna declarada em dimensão divergente.
     var candidataLacunaDivergente = {
       proximaPergunta: 'Existe algum horário específico do dia em que o volume de pedidos é maior?',
       dimensaoAlvo: 'frequencia',
@@ -99,18 +98,19 @@ function TESTAR_DIAGNOSTICO_CIRURGICO_PERGUNTAS_V64() {
       lacunaQueReduz: 'escala'
     };
     var dimensaoDetectada05 = classificarDimensaoPerguntaV64_(candidataLacunaDivergente.proximaPergunta, null);
-    var lacunaNormalizada05 = normalizarPerguntaInvestigacaoV64_(candidataLacunaDivergente.lacunaQueReduz);
-    var lacunaDeclaraDimensao05 = /\\b(escala|volume|quantidade)\\b/.test(lacunaNormalizada05) ? 'escala' :
-      (/\\b(frequencia|horario|horarios|distribuicao temporal|periodo do dia|pico)\\b/.test(lacunaNormalizada05) ? 'frequencia' : null);
-    registrar('05', 'Lacuna declarada corresponde à dimensão que a pergunta realmente investiga',
-      'dimensaoAlvo=frequencia e lacunaQueReduz=frequencia/distribuição temporal',
-      { dimensaoAlvo: candidataLacunaDivergente.dimensaoAlvo,
+    var dimensaoLacuna05 = inferirDimensaoLacunaV64_(candidataLacunaDivergente.lacunaQueReduz);
+    var validacao05 = validarPerguntaInvestigativaV64_(novoEstadoBase(), candidataLacunaDivergente,
+      function() { return { equivalente: false, indice: -1, motivo: 'fixture sem repetição' }; });
+    registrar('05', 'Validador rejeita lacuna declarada incompatível com a dimensão-alvo',
+      'valida=false; motivo=LACUNA_QUE_REDuz_DIVERGE_DA_DIMENSAO_ALVO; lacuna=escala',
+      { valida: validacao05.valida, motivo: validacao05.motivo,
+        dimensaoAlvo: candidataLacunaDivergente.dimensaoAlvo,
         dimensaoDetectada: dimensaoDetectada05,
-        lacunaQueReduz: candidataLacunaDivergente.lacunaQueReduz,
-        dimensaoInferidaDaLacuna: lacunaDeclaraDimensao05 },
-      candidataLacunaDivergente.dimensaoAlvo === dimensaoDetectada05 &&
-        (!lacunaDeclaraDimensao05 || lacunaDeclaraDimensao05 === candidataLacunaDivergente.dimensaoAlvo),
-      'Reprodução da inconsistência observada no log Gemini real: a pergunta é temporal, mas lacunaQueReduz informa escala.');
+        dimensaoLacunaDetectada: dimensaoLacuna05 },
+      validacao05.valida === false &&
+        validacao05.motivo === 'LACUNA_QUE_REDuz_DIVERGE_DA_DIMENSAO_ALVO' &&
+        dimensaoLacuna05 === 'escala',
+      'Reproduz a divergência observada no E2E real e exige rejeição explícita pelo validador de produção.');
 
     // Caso 06: pergunta de frequência não pode fechar escala nem substituir a evidência da escala.
     var e6 = novoEstadoBase();
