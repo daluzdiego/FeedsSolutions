@@ -336,6 +336,18 @@ function compararPerguntaSemanticamenteV64_(perguntasFeitas, candidata, adaptado
   };
 }
 
+function inferirDimensaoLacunaV64_(lacuna) {
+  var texto = normalizarPerguntaInvestigacaoV64_(lacuna);
+  if (!texto) return null;
+
+  // Só infere quando há marcador explícito; descrições ambíguas ficam sem classificação.
+  var escala = /(^| )(escala|volume|quantidade|quantitativo|numero de pedidos|pedidos por dia|pedidos por semana|pedidos por mes)( |$)/.test(texto);
+  var frequencia = /(^| )(frequencia|horario|horarios|distribuicao temporal|periodo do dia|periodos do dia|pico|dias da semana|dias de pico)( |$)/.test(texto);
+  if (escala && !frequencia) return 'escala';
+  if (frequencia && !escala) return 'frequencia';
+  return null;
+}
+
 function validarPerguntaInvestigativaV64_(estado, candidata, adaptadorSemantico) {
   var pergunta = String(candidata && candidata.proximaPergunta || candidata && candidata.texto || '').trim();
   var dimensao = String(candidata && candidata.dimensaoAlvo || candidata && candidata.dimensao || '').trim();
@@ -358,6 +370,18 @@ function validarPerguntaInvestigativaV64_(estado, candidata, adaptadorSemantico)
       valida: false,
       motivo: 'DIMENSAO_ALVO_NAO_CORRESPONDE_A_PERGUNTA',
       dimensaoDetectada: dimensaoDetectada,
+      perguntaAjustada: ''
+    };
+  }
+
+  var dimensaoLacunaDetectada = inferirDimensaoLacunaV64_(candidata && candidata.lacunaQueReduz);
+  if (dimensaoLacunaDetectada && dimensaoLacunaDetectada !== dimensao) {
+    return {
+      valida: false,
+      motivo: 'LACUNA_QUE_REDUZ_DIVERGE_DA_DIMENSAO_ALVO',
+      dimensaoDetectada: dimensaoDetectada || null,
+      dimensaoLacunaDetectada: dimensaoLacunaDetectada,
+      dimensaoAlvo: dimensao,
       perguntaAjustada: ''
     };
   }
