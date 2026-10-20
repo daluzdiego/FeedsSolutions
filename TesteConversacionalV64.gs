@@ -309,6 +309,27 @@ function TESTAR_CONVERSACIONAL_V64() {
         return (p.dimensao || classificarDimensaoPerguntaV64_(p.texto || p, e13)) === fallback13.candidata.dimensaoAlvo;
       }));
 
+    // 20. Gate já satisfeito tem precedência sobre uma pergunta pendente
+    // cuja resposta não foi reconhecida: não manter a investigação aberta artificialmente.
+    var e20 = estadoBase();
+    atualizarFatoV64_(e20, 'escala', '100 pedidos por dia', 'São 100 pedidos por dia', CERTEZA_V64.CONFIRMADO, 'fixture');
+    atualizarFatoV64_(e20, 'frequencia', 'Pico entre 10h e meio-dia', 'Os pedidos chegam entre 10h e meio-dia', CERTEZA_V64.CONFIRMADO, 'fixture');
+    atualizarFatoV64_(e20, 'impacto', 'Duas horas por dia', 'A conferência consome duas horas por dia', CERTEZA_V64.CONFIRMADO, 'fixture');
+    atualizarFatoV64_(e20, 'objetivo', 'Reduzir retrabalho', 'Queremos reduzir o retrabalho', CERTEZA_V64.CONFIRMADO, 'fixture');
+    atualizarFatoV64_(e20, 'aceitacao', 'Reduzir retrabalho pela metade', 'Consideraremos sucesso reduzir o retrabalho pela metade', CERTEZA_V64.CONFIRMADO, 'fixture');
+    definirPerguntaPendenteV64_(e20, { id: 'q-pendente-20', dimensao: 'restricoes', texto: 'Há alguma restrição adicional?' });
+    var r20 = processarTurnoInvestigacaoV64_(e20, 'Precisamos manter as ferramentas atuais.', adaptadores({
+      interpretar: function() {
+        return { fatos: [], respondeuPerguntaPendente: false, ambiguidade: true, explicacaoAmbiguidade: 'Resposta não reconhecida para a pergunta pendente.' };
+      }
+    }));
+    assert('20. gate satisfeito encerra diagnóstico mesmo se a resposta à última pergunta não foi reconhecida',
+      r20.sucesso === true &&
+      r20.status_diagnostico === 'CONCLUIDO' &&
+      r20.gate && r20.gate.pode === true &&
+      r20.estado.perguntaPendente === null &&
+      r20.proxima_pergunta === '');
+
   } catch (erro) {
     resultados.push({ teste: 'execução da suíte', passou: false, detalhe: erro && erro.stack ? erro.stack : String(erro) });
   }
@@ -317,7 +338,7 @@ function TESTAR_CONVERSACIONAL_V64() {
   var resumo = {
     versao: 'V6.4',
     suite: 'CONVERSACIONAL_DETERMINISTICA',
-    sucesso: resultados.length === 19 && aprovados === resultados.length,
+    sucesso: resultados.length === 20 && aprovados === resultados.length,
     total: resultados.length,
     aprovados: aprovados,
     falhas: resultados.length - aprovados,
