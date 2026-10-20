@@ -199,7 +199,9 @@ function TESTAR_CONVERSACIONAL_V64() {
       'Quantas horas são gastas conferindo os pedidos?',
       function() { return { equivalente: true, indice: 0, motivo: 'mesma informação sobre duração' }; }
     );
-    assert('8. paráfrase semanticamente equivalente é detectada', cmp.equivalente === true && cmp.indice === 0);
+    assert('8. paráfrase semanticamente equivalente é detectada',
+      cmp.equivalente === true && cmp.indice === 0,
+      JSON.stringify(cmp));
 
     // 9. Exceções e regras especiais são persistidas no campo próprio.
     var e9 = estadoBase();
