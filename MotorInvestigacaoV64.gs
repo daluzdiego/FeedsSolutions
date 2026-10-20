@@ -429,9 +429,9 @@ function classificarDimensaoPerguntaV64_(pergunta, estado) {
   // Primeiro identifica intenção de processo e causa quando a pergunta pede
   // fluxo, caminho, verificação, rastreabilidade, etapa ou causa-raiz.
   // Esses marcadores específicos prevalecem sobre palavras como erro, atraso e retrabalho.
-  if (/\\b(descreva|descrever|caminho|fluxo|passo a passo|como funciona|como acontece|como sao verificadas|como e verificado|como o lote e rastreado|desde o recebimento ate|do recebimento ate|rastreado desde)\\b/.test(p)) return 'processo';
-  if (/\\b(causa|causa raiz|principal causa|qual etapa|em qual etapa|que etapa|etapa gera|etapa provoca)\\b/.test(p) &&
-      /\\b(atraso|atrasos|retrabalho|erro|erros|falha|falhas|reparo|reparos|refeito|refeitos)\\b/.test(p)) return 'dor_causa';
+  if (/\b(descreva|descrever|caminho|fluxo|passo a passo|como funciona|como acontece|como sao verificadas|como e verificado|como o lote e rastreado|desde o recebimento ate|do recebimento ate|rastreado desde)\b/.test(p)) return 'processo';
+  if (/\b(causa|causa raiz|principal causa|qual etapa|em qual etapa|que etapa|etapa gera|etapa provoca)\b/.test(p) &&
+      /\b(atraso|atrasos|retrabalho|erro|erros|falha|falhas|reparo|reparos|refeito|refeitos)\b/.test(p)) return 'dor_causa';
 
   // Primeiro identifica a variável que a pergunta realmente mede.
   // "Quantos pedidos chegam nos horários de pico?" continua sendo escala;
