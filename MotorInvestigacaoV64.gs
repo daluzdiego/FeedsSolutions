@@ -599,6 +599,21 @@ function processarTurnoInvestigacaoV64_(estado, mensagem, adaptadores) {
       lacunaQueReduz: 'conflito factual não resolvido'
     };
     validacao = { valida: true, motivo: '', perguntaAjustada: perguntaCandidata.proximaPergunta, dimensaoAlvo: dimensaoConflito };
+  } else if (podeConcluirDiagnosticoV64_(estado).pode) {
+    // A conclusão é avaliada depois de incorporar os fatos deste turno e antes
+    // de tentar esclarecer uma pergunta pendente. Se todas as condições do gate
+    // já foram satisfeitas, uma interpretação que não reconheceu a resposta à
+    // última pergunta não deve manter o diagnóstico aberto artificialmente.
+    var gatePosInterpretacao = podeConcluirDiagnosticoV64_(estado);
+    estado.perguntaPendente = null;
+    return {
+      sucesso: true,
+      estado: estado,
+      interpretacao: interpretacao,
+      status_diagnostico: 'CONCLUIDO',
+      gate: gatePosInterpretacao,
+      proxima_pergunta: ''
+    };
   } else if (interpretacao.ambiguidade === true || naoRespondeuPerguntaPendente) {
     var motivoEsclarecimento = naoRespondeuPerguntaPendente
       ? 'RESPOSTA_NAO_RESPONDEU_PERGUNTA_PENDENTE'
