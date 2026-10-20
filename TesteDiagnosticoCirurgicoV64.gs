@@ -102,7 +102,7 @@ function TESTAR_DIAGNOSTICO_CIRURGICO_PERGUNTAS_V64() {
     var validacao05 = validarPerguntaInvestigativaV64_(novoEstadoBase(), candidataLacunaDivergente,
       function() { return { equivalente: false, indice: -1, motivo: 'fixture sem repetição' }; });
     registrar('05', 'Validador rejeita lacuna declarada incompatível com a dimensão-alvo',
-      'valida=false; motivo=LACUNA_QUE_REDuz_DIVERGE_DA_DIMENSAO_ALVO; lacuna=escala',
+      'valida=false; motivo=LACUNA_QUE_REDUZ_DIVERGE_DA_DIMENSAO_ALVO; lacuna=escala',
       { valida: validacao05.valida, motivo: validacao05.motivo,
         dimensaoAlvo: candidataLacunaDivergente.dimensaoAlvo,
         dimensaoDetectada: dimensaoDetectada05,
