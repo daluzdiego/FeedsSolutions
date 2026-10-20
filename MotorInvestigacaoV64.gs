@@ -451,11 +451,11 @@ function classificarDimensaoPerguntaV64_(pergunta, estado) {
   if (/quantos|quantas|quantidade|volume|media de pedidos|itens por dia|pedidos por dia|pedidos por semana|pedidos por mes|quantidade diaria|quantidade semanal|cem pedidos|100 pedidos/.test(p)) {
     return 'escala';
   }
+  // Critérios e indicadores de sucesso devem prevalecer sobre marcadores genéricos
+  // de processo ("fluxo") ou de dor ("erros", "chamados", "retrabalho").
+  // Ex.: "Qual indicador comprovará que o novo fluxo reduziu chamados reabertos?"
+  if (/aceitacao|criterio de sucesso|considerar concluido|medir o sucesso|funcionou|como sera medido|medido que|qual indicador|indicador comprovara|indicador demonstrara|demonstrara a reducao|demonstrar[a-z]* a reducao|comprovar[a-z]* que|criterio verificavel|resultado observavel|reduziu chamados|reduziu erros|melhorou/.test(p)) return 'aceitacao';
   if (/objetivo|resultado deseja|resultado deve ser alcancado|qual resultado|resultado esperado|alcancar|melhorar|conseguir ao final|para reduzir mudanças|para reduzir mudancas/.test(p)) return 'objetivo';
-  // Critério verificável do resultado é aceitação, mesmo quando a pergunta menciona
-  // redução de erros, chamados ou tempo. Diferenciar "qual o impacto atual" de
-  // "qual indicador comprova que a solução melhorou".
-  if (/aceitacao|criterio de sucesso|considerar concluido|medir o sucesso|funcionou|como sera medido|medido que|qual indicador|indicador comprovara|indicador demonstrara|indicador demonstrara|demonstrara a reducao|demonstrar[a-z]* a reducao|comprovar[a-z]* que|criterio verificavel|resultado observavel|reduziu chamados|reduziu erros|melhorou/.test(p)) return 'aceitacao';
   if (/excecao|excecoes|situacoes .* tratamento excepcional|tratamento excepcional|fora do padrao|regra especial/.test(p)) return 'excecoes';
   // "Prazo" pode significar restrição do projeto ou consequência operacional.
   // Quando a pergunta fala explicitamente de impacto/erro/atraso/perda, classifique
