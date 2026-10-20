@@ -127,3 +127,19 @@ Alterações publicadas:
 - `MotorInvestigacaoV64.gs` e `TesteConversacionalV64.gs`: correção da classificação duração → impacto, fixture de impacto explícita e duas tentativas de seleção antes do fallback; a suíte conversacional agora exige 19/19.
 
 **Sincronize estes quatro arquivos no Apps Script:** `IA.gs`, `MotorInvestigacaoV64.gs`, `TesteConversacionalV64.gs` e `TesteIntegracaoV64.gs`. Execute primeiro as suítes determinísticas. Só então, depois da janela de cota, execute `TESTAR_GEMINI_REAL_INVESTIGACAO_V64()` isoladamente. A correção de retry evita insistência prematura, mas não garante que uma execução que exceda a cota consiga concluir; o resultado real continua pendente. V6.4 permanece desativada.
+
+## Correção do runner após ReferenceError — 20/10/2026
+
+O runner foi corrigido no arquivo `TesteConversacionalV64.gs` (commit `ac3625f29021fc5d51a1b7fea482d7ee3d64b33e`). Antes, passava referências de funções como argumentos diretamente; se uma função não existisse no projeto Apps Script, o `ReferenceError` acontecia antes de entrar no bloco de tratamento de erro e interrompia a bateria inteira. Agora cada suíte é resolvida e executada dentro do tratamento: uma função ausente aparece como falha identificável, e as demais suítes continuam a ser registradas.
+
+O log de 20/10/2026 apontou `TESTAR_SUITE_COMPLETA_INVESTIGACAO_V64 @ TesteEstadoInvestigacaoV64.gs:472`, mas no repositório atual essa função coordenadora está em `TesteConversacionalV64.gs`, enquanto `TesteEstadoInvestigacaoV64.gs` declara `TESTAR_ESTADO_INVESTIGACAO_V64()`. Essa divergência é evidência de que o projeto Apps Script não está sincronizado com os arquivos atuais do GitHub (ou contém uma cópia antiga/duplicada do runner).
+
+**Procedimento antes de tentar a suíte completa novamente:**
+1. No Apps Script, abra `TesteEstadoInvestigacaoV64.gs` e confirme que existe a declaração `function TESTAR_ESTADO_INVESTIGACAO_V64()`.
+2. Substitua/sincronize o conteúdo local com o arquivo atual do repositório: https://github.com/daluzdiego/FeedsSolutions/blob/main/TesteEstadoInvestigacaoV64.gs
+3. Sincronize o runner atualizado: https://github.com/daluzdiego/FeedsSolutions/blob/main/TesteConversacionalV64.gs
+4. Confirme também a presença das suítes `TesteAdaptadorInvestigacaoV64.gs`, `TesteIntegracaoV64.gs` e `TesteAdversarialV64.gs`, além de `IA.gs` e `MotorInvestigacaoV64.gs` atualizados.
+5. Salve os arquivos. Execute primeiro `TESTAR_ESTADO_INVESTIGACAO_V64()` isoladamente; depois `TESTAR_CONVERSACIONAL_V64()`, `TESTAR_ADAPTADOR_INVESTIGACAO_V64()`, `TESTAR_INTEGRACAO_V64()` e `TESTAR_ADVERSARIAL_INVESTIGACAO_V64()`. Só execute o runner completo depois que todas as funções determinísticas existirem e passarem.
+6. O runner completo inclui a chamada real ao Gemini e pode consumir cota. Mantenha `FEEDS_MOTOR_INVESTIGACAO_V64_ATIVO = false`. Não execute `TESTAR_ACEITACAO_FINAL_V63_RESETAR()`.
+
+Não interpretar uma falha de sincronização como falha do motor de investigação; registrar como `FUNCAO_TESTE_AUSENTE` e corrigir a composição do projeto antes de avaliar a lógica.
