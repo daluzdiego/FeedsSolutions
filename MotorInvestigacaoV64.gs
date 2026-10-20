@@ -438,7 +438,7 @@ function classificarDimensaoPerguntaV64_(pergunta, estado) {
   var perguntaQuantitativaExplicita =
     /(^|\s)(quantos|quantas)\b/.test(p) ||
     /\b(qual a quantidade|qual o volume|quantidade de pedidos|media de pedidos)\b/.test(p);
-  if (/horario|horarios|pico|maior movimento|distribuicao ao longo do dia|em que periodo|em que periodos|em que horario|turno de maior|horas de pico|distribuicao temporal|dias e horarios|quando chegam|em quais dias|periodo do dia|periodos do dia/.test(p) &&
+  if (/horario|horarios|pico|maior movimento|distribuicao ao longo do dia|em que periodo|em que periodos|em quais periodos|em que epoca|em quais epocas|epoca do semestre|epocas do semestre|periodo da safra|periodos da safra|em que horario|turno de maior|horas de pico|distribuicao temporal|dias e horarios|quando chegam|em quais dias|periodo do dia|periodos do dia/.test(p) &&
       !perguntaQuantitativaExplicita) {
     return 'frequencia';
   }
@@ -446,10 +446,16 @@ function classificarDimensaoPerguntaV64_(pergunta, estado) {
     return 'escala';
   }
   if (/objetivo|resultado deseja|alcancar|melhorar|conseguir ao final/.test(p)) return 'objetivo';
-  if (/aceitacao|criterio de sucesso|considerar concluido|medir o sucesso|funcionou/.test(p)) return 'aceitacao';
-  if (/restricao|orcamento|prazo|permissao|seguranca|integracao|ferramenta|sistema|canal/.test(p)) return 'restricoes';
+  // Critério verificável do resultado é aceitação, mesmo quando a pergunta menciona
+  // redução de erros, chamados ou tempo. Diferenciar "qual o impacto atual" de
+  // "qual indicador comprova que a solução melhorou".
+  if (/aceitacao|criterio de sucesso|considerar concluido|medir o sucesso|funcionou|como sera medido|medido que|qual indicador|indicador comprovara|comprovar[a-z]* que|criterio verificavel|resultado observavel|reduziu chamados|reduziu erros|melhorou/.test(p)) return 'aceitacao';
   if (/excecao|fora do padrao|regra especial/.test(p)) return 'excecoes';
+  // "Prazo" pode significar restrição do projeto ou consequência operacional.
+  // Quando a pergunta fala explicitamente de impacto/erro/atraso/perda, classifique
+  // pela consequência antes de aplicar o marcador genérico de restrição.
   if (/tempo|custo|impacto|atraso|retrabalho|consequencia|erro|perda|prejuizo/.test(p)) return 'impacto';
+  if (/restricao|orcamento|prazo|permissao|seguranca|integracao|ferramenta|sistema|canal/.test(p)) return 'restricoes';
   if (/dor|problema|falha|etapa|causa/.test(p)) return 'dor_causa';
   if (/como acontece|como funciona|descreva o processo|primeiro passo|passo a passo/.test(p)) return 'processo';
   return null;
