@@ -108,7 +108,7 @@ function TESTAR_DIAGNOSTICO_CIRURGICO_PERGUNTAS_V64() {
         dimensaoDetectada: dimensaoDetectada05,
         dimensaoLacunaDetectada: dimensaoLacuna05 },
       validacao05.valida === false &&
-        validacao05.motivo === 'LACUNA_QUE_REDuz_DIVERGE_DA_DIMENSAO_ALVO' &&
+        validacao05.motivo === 'LACUNA_QUE_REDUZ_DIVERGE_DA_DIMENSAO_ALVO' &&
         dimensaoLacuna05 === 'escala',
       'Reproduz a divergência observada no E2E real e exige rejeição explícita pelo validador de produção.');
 
