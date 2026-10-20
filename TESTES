@@ -1,5 +1,693 @@
-08:10:46	Notificação	Execução iniciada
-08:10:51	Informação	FEEDS SOLUTIONS V6.4 — ESTADO EXPLÍCITO: {"versao":"V6.4","suite":"ESTADO_EXPLICITO","sucesso":true,"total":19,"aprovados":19,"falhas":0,"resultados":[{"teste":"cria as oito dimensões contratuais mais frequência separada","passou":true,"detalhe":"processo,dor_causa,escala,frequencia,impacto,excecoes,objetivo,restricoes,aceitacao"},{"teste":"todas começam como desconhecidas e lacuna aberta","passou":true,"detalhe":""},{"teste":"registra fato confirmado com evidência e origem","passou":true,"detalhe":""},{"teste":"contradição não apaga fato confirmado e registra conflito","passou":true,"detalhe":""},{"teste":"mesmo fato confirmado preserva valor e acumula evidência adicional","passou":true,"detalhe":""},{"teste":"conflito não resolvido mantém lacuna aberta","passou":true,"detalhe":""},{"teste":"conflito só é resolvido mediante confirmação explícita","passou":true,"detalhe":""},{"teste":"estimativa mantém lacuna aberta para confirmação","passou":true,"detalhe":""},{"teste":"negação explícita fica registrada e encerra a lacuna","passou":true,"detalhe":""},{"teste":"desconhecimento posterior não substitui confirmação","passou":true,"detalhe":""},{"teste":"persiste perguntas, pergunta pendente tipada e histórico","passou":true,"detalhe":""},{"teste":"estado completo passa pela validação estrutural","passou":true,"detalhe":""},{"teste":"dimensão inválida é rejeitada explicitamente","passou":true,"detalhe":""},{"teste":"fato confirmado sem evidência é rejeitado","passou":true,"detalhe":""},{"teste":"estado persistido com confirmação sem evidência é inválido","passou":true,"detalhe":""},{"teste":"serialização preserva fatos e evidências","passou":true,"detalhe":""},{"teste":"persistência mantém informações legadas","passou":true,"detalhe":""},{"teste":"atualização substitui envelope V6.4 sem duplicá-lo","passou":true,"detalhe":""},{"teste":"recuperação localiza o estado persistido","passou":true,"detalhe":""}]}
-08:10:48	Notificação	Execução concluída
-
-
+Registro de execução
+09:50:55	Notificação	Execução iniciada
+09:50:59	Informação	========== FEEDS SOLUTIONS V6.4 — FULL TEST — INÍCIO ==========
+09:50:59	Informação	[FULL][AMBIENTE] {"versao":"V6.4","runner":"TESTAR_FULL_V64","suitesPlanejadas":7,"chamadasGemini":"somente na última suíte","escritaPlanilhas":false,"resetDados":false,"alteracaoAtivacao":false}
+09:50:59	Informação	[FULL][SUITE 1/7][INICIO] {"nome":"ESTADO_EXPLICITO","funcao":"TESTAR_ESTADO_INVESTIGACAO_V64","tipo":"deterministico"}
+09:50:59	Informação	FEEDS SOLUTIONS V6.4 — ESTADO EXPLÍCITO: {"versao":"V6.4","suite":"ESTADO_EXPLICITO","sucesso":true,"total":19,"aprovados":19,"falhas":0,"resultados":[{"teste":"cria as oito dimensões contratuais mais frequência separada","passou":true,"detalhe":"processo,dor_causa,escala,frequencia,impacto,excecoes,objetivo,restricoes,aceitacao"},{"teste":"todas começam como desconhecidas e lacuna aberta","passou":true,"detalhe":""},{"teste":"registra fato confirmado com evidência e origem","passou":true,"detalhe":""},{"teste":"contradição não apaga fato confirmado e registra conflito","passou":true,"detalhe":""},{"teste":"mesmo fato confirmado preserva valor e acumula evidência adicional","passou":true,"detalhe":""},{"teste":"conflito não resolvido mantém lacuna aberta","passou":true,"detalhe":""},{"teste":"conflito só é resolvido mediante confirmação explícita","passou":true,"detalhe":""},{"teste":"estimativa mantém lacuna aberta para confirmação","passou":true,"detalhe":""},{"teste":"negação explícita fica registrada e encerra a lacuna","passou":true,"detalhe":""},{"teste":"desconhecimento posterior não substitui confirmação","passou":true,"detalhe":""},{"teste":"persiste perguntas, pergunta pendente tipada e histórico","passou":true,"detalhe":""},{"teste":"estado completo passa pela validação estrutural","passou":true,"detalhe":""},{"teste":"dimensão inválida é rejeitada explicitamente","passou":true,"detalhe":""},{"teste":"fato confirmado sem evidência é rejeitado","passou":true,"detalhe":""},{"teste":"estado persistido com confirmação sem evidência é inválido","passou":true,"detalhe":""},{"teste":"serialização preserva fatos e evidências","passou":true,"detalhe":""},{"teste":"persistência mantém informações legadas","passou":true,"detalhe":""},{"teste":"atualização substitui envelope V6.4 sem duplicá-lo","passou":true,"detalhe":""},{"teste":"recuperação localiza o estado persistido","passou":true,"detalhe":""}]}
+09:50:59	Informação	[FULL][SUITE 1][RESULTADO] {"suite":"ESTADO_EXPLICITO","funcao":"TESTAR_ESTADO_INVESTIGACAO_V64","tipo":"deterministico","duracaoMs":8,"sucesso":true,"total":19,"aprovados":19,"falhas":0,"turnosProcessados":null,"quantidadePerguntasGeradas":null,"conclusao":null,"erro":""}
+09:50:59	Informação	[FULL][SUITE 2/7][INICIO] {"nome":"CONVERSACIONAL_DETERMINISTICA","funcao":"TESTAR_CONVERSACIONAL_V64","tipo":"deterministico"}
+09:50:59	Informação	FEEDS SOLUTIONS V6.4 — TESTES CONVERSACIONAIS DETERMINÍSTICOS: {"versao":"V6.4","suite":"CONVERSACIONAL_DETERMINISTICA","sucesso":true,"total":20,"aprovados":20,"falhas":0,"resultados":[{"teste":"schema de interpretação aceita todas as dimensões contratuais, inclusive frequência","passou":true,"detalhe":"Contrato=processo,dor_causa,escala,frequencia,impacto,excecoes,objetivo,restricoes,aceitacao; schema=processo,dor_causa,escala,frequencia,impacto,excecoes,objetivo,restricoes,aceitacao"},{"teste":"resposta de horário à pergunta de frequência não é classificada como escala","passou":true,"detalhe":""},{"teste":"duração de trabalho na pergunta pendente de impacto é classificada como impacto","passou":true,"detalhe":""},{"teste":"pergunta sobre dias/horários com a palavra volume continua sendo frequência","passou":true,"detalhe":""},{"teste":"pergunta explícita sobre quantos pedidos no pico continua sendo escala","passou":true,"detalhe":""},{"teste":"1. volume numérico fica confirmado com evidência","passou":true,"detalhe":""},{"teste":"2. periodicidade provoca esclarecimento estreito e não repete","passou":true,"detalhe":""},{"teste":"3. respostas incertas/negativas não são promovidas a confirmadas","passou":true,"detalhe":""},{"teste":"4. correção conflitante preserva histórico e abre conflito","passou":true,"detalhe":""},{"teste":"5. múltiplas dimensões da mesma resposta são registradas","passou":true,"detalhe":""},{"teste":"6. informação extra de outra dimensão não se perde","passou":true,"detalhe":""},{"teste":"7. repetição semântica ou dimensão já suficiente é substituída","passou":true,"detalhe":""},{"teste":"8. paráfrase semanticamente equivalente é detectada","passou":true,"detalhe":""},{"teste":"9. exceções ficam registradas separadamente","passou":true,"detalhe":""},{"teste":"10. múltiplos sistemas e canais são registrados sem apagar o fato anterior","passou":true,"detalhe":""},{"teste":"11. gate bloqueia dimensões essenciais desconhecidas","passou":true,"detalhe":""},{"teste":"12. persistência recupera pergunta pendente e preserva dados legados","passou":true,"detalhe":""},{"teste":"14. fluxo completo só conclui após confirmar frequência e critério de aceitação","passou":true,"detalhe":""},{"teste":"13. fallback seleciona uma pergunta válida para lacuna ainda aberta","passou":true,"detalhe":""},{"teste":"20. gate satisfeito encerra diagnóstico mesmo se a resposta à última pergunta não foi reconhecida","passou":true,"detalhe":""}]}
+09:50:59	Informação	[FULL][SUITE 2][RESULTADO] {"suite":"CONVERSACIONAL_DETERMINISTICA","funcao":"TESTAR_CONVERSACIONAL_V64","tipo":"deterministico","duracaoMs":11,"sucesso":true,"total":20,"aprovados":20,"falhas":0,"turnosProcessados":null,"quantidadePerguntasGeradas":null,"conclusao":null,"erro":""}
+09:50:59	Informação	[FULL][SUITE 3/7][INICIO] {"nome":"ADAPTADOR_LEGADO","funcao":"TESTAR_ADAPTADOR_INVESTIGACAO_V64","tipo":"deterministico"}
+09:50:59	Informação	FEEDS SOLUTIONS V6.4 — ADAPTADOR: {"versao":"V6.4","suite":"ADAPTADOR","sucesso":true,"total":4,"aprovados":4,"falhas":0,"resultados":[{"teste":"mapeia escala e frequência em campos distintos","passou":true,"detalhe":""},{"teste":"preserva a pergunta do motor V64","passou":true,"detalhe":""},{"teste":"não declara conclusão quando o gate bloqueia","passou":true,"detalhe":""},{"teste":"não expõe como fato confirmado uma dimensão desconhecida","passou":true,"detalhe":""}]}
+09:50:59	Informação	[FULL][SUITE 3][RESULTADO] {"suite":"ADAPTADOR_LEGADO","funcao":"TESTAR_ADAPTADOR_INVESTIGACAO_V64","tipo":"deterministico","duracaoMs":3,"sucesso":true,"total":4,"aprovados":4,"falhas":0,"turnosProcessados":null,"quantidadePerguntasGeradas":null,"conclusao":null,"erro":""}
+09:50:59	Informação	[FULL][SUITE 4/7][INICIO] {"nome":"INTEGRACAO_DETERMINISTICA","funcao":"TESTAR_INTEGRACAO_V64","tipo":"deterministico"}
+09:50:59	Informação	FEEDS SOLUTIONS V6.4 — INTEGRAÇÃO DETERMINÍSTICA: {"versao":"V6.4","suite":"INTEGRACAO_DETERMINISTICA","sucesso":true,"total":19,"aprovados":19,"falhas":0,"resultados":[{"teste":"bloqueia conclusão com dimensões essenciais desconhecidas","passou":true,"detalhe":""},{"teste":"estimativa em dimensão essencial mantém conclusão bloqueada","passou":true,"detalhe":""},{"teste":"objetivo confirmado sem critério de aceitação bloqueia conclusão","passou":true,"detalhe":""},{"teste":"critério explicitamente desconhecido permite concluir com ressalva","passou":true,"detalhe":""},{"teste":"impede pergunta prematura sobre aceitação","passou":true,"detalhe":""},{"teste":"reconcilia pergunta pendente do histórico sem duplicar texto idêntico","passou":true,"detalhe":""},{"teste":"reconciliação repetida é idempotente","passou":true,"detalhe":""},{"teste":"conflito não resolvido bloqueia conclusão","passou":true,"detalhe":""},{"teste":"adaptador não transforma dimensão desconhecida em fato legado","passou":true,"detalhe":""},{"teste":"adaptador mantém frequência separada de escala","passou":true,"detalhe":""},{"teste":"persistência aditiva preserva notas antigas","passou":true,"detalhe":""},{"teste":"ajustarContinuidadeDiagnostico_ retorna contrato de validação com pergunta e dimensão válidas","passou":true,"detalhe":"Retorno observado: {\"valida\":true,\"motivo\":\"\",\"perguntaAjustada\":\"Quantos pedidos são processados por dia?\"}"},{"teste":"continuidade rejeita mensagem genérica como pergunta pendente","passou":true,"detalhe":"Retorno observado: {\"valida\":false,\"motivo\":\"PERGUNTA_PENDENTE_INVALIDA\",\"perguntaAjustada\":\"\",\"detalhes\":{\"tipoRecebido\":\"MENSAGEM_SISTEMA\",\"textoRecebido\":\"Olá, tudo certo?\"}}"},{"teste":"não pergunta novamente uma dimensão já suficiente","passou":true,"detalhe":""},{"teste":"motor V6.4 permanece desativado até a aceitação real","passou":true,"detalhe":""},{"teste":"repetição de pergunta não fecha silenciosamente a lacuna e aciona fallback distinto","passou":true,"detalhe":""},{"teste":"fallback pode reformular dimensão já perguntada quando a lacuna continua aberta","passou":true,"detalhe":""},{"teste":"classifica horários como frequência e quantidade em pico como escala","passou":true,"detalhe":""},{"teste":"retry do Gemini respeita o atraso RetryInfo da API","passou":true,"detalhe":"Atraso calculado: 35543 ms"}]}
+09:50:59	Informação	[FULL][SUITE 4][RESULTADO] {"suite":"INTEGRACAO_DETERMINISTICA","funcao":"TESTAR_INTEGRACAO_V64","tipo":"deterministico","duracaoMs":5,"sucesso":true,"total":19,"aprovados":19,"falhas":0,"turnosProcessados":null,"quantidadePerguntasGeradas":null,"conclusao":null,"erro":""}
+09:50:59	Informação	[FULL][SUITE 5/7][INICIO] {"nome":"ADVERSARIAL_DETERMINISTICA","funcao":"TESTAR_ADVERSARIAL_INVESTIGACAO_V64","tipo":"deterministico"}
+09:50:59	Informação	FEEDS SOLUTIONS V6.4 — TESTE ADVERSARIAL: {"versao":"V6.4","suite":"ADVERSARIAL_DETERMINISTICA","sucesso":true,"total":8,"aprovados":8,"falhas":0,"resultados":[{"teste":"A. resposta vaga mantém escala estimada e lacuna aberta","passou":true,"detalhe":""},{"teste":"B. correção contraditória preserva original e abre conflito","passou":true,"detalhe":""},{"teste":"C. mensagem com múltiplos fatos preserva escala e impacto","passou":true,"detalhe":""},{"teste":"D. ausência de resposta mantém frequência desconhecida e pergunta pendente","passou":true,"detalhe":""},{"teste":"E. objetivo sem aceitação definida bloqueia conclusão","passou":true,"detalhe":""},{"teste":"F. escala estimada bloqueia conclusão sem depender das demais lacunas","passou":true,"detalhe":""},{"teste":"G. separa distribuição temporal de quantidade no pico","passou":true,"detalhe":""},{"teste":"H. conflito factual aberto bloqueia diagnóstico completo","passou":true,"detalhe":""}]}
+09:50:59	Informação	[FULL][SUITE 5][RESULTADO] {"suite":"ADVERSARIAL_DETERMINISTICA","funcao":"TESTAR_ADVERSARIAL_INVESTIGACAO_V64","tipo":"deterministico","duracaoMs":4,"sucesso":true,"total":8,"aprovados":8,"falhas":0,"turnosProcessados":null,"quantidadePerguntasGeradas":null,"conclusao":null,"erro":""}
+09:50:59	Informação	[FULL][SUITE 6/7][INICIO] {"nome":"DIAGNOSTICO_CIRURGICO","funcao":"TESTAR_DIAGNOSTICO_CIRURGICO_PERGUNTAS_V64","tipo":"deterministico"}
+09:50:59	Informação	========== INÍCIO DIAGNÓSTICO CIRÚRGICO V6.4 ==========
+09:50:59	Informação	[V64][DIAG][AMBIENTE] {"suite":"DIAGNOSTICO_CIRURGICO_PERGUNTAS","versao":"V6.4","chamadasGemini":0,"escritaPlanilhas":false,"alteracaoProducao":false,"objetivo":"detectar divergência entre pergunta, dimensão-alvo e lacuna declarada"}
+09:50:59	Informação	[V64][DIAG][CASO 01] {"id":"01","teste":"Pergunta sobre variação temporal em dias de pico é classificada como frequência","passou":true,"esperado":"frequencia","observado":"frequencia","evidencia":"Existe alguma variação significativa nesses 100 pedidos diários em dias de pico, como finais de semana ou feriados?"}
+09:50:59	Informação	[V64][DIAG][CASO 02] {"id":"02","teste":"Pergunta quantitativa sobre pico continua sendo escala","passou":true,"esperado":"escala","observado":"escala","evidencia":"Quantos pedidos chegam no horário de pico?"}
+09:50:59	Informação	[V64][DIAG][CASO 03] {"id":"03","teste":"Horário de pico não é confundido com volume já confirmado","passou":true,"esperado":"frequencia","observado":"frequencia","evidencia":"{\"pergunta\":\"Existe algum horário específico do dia em que o volume de pedidos é maior?\",\"escalaExistente\":{\"valor\":\"100 pedidos por dia\",\"evidencia\":\"São exatamente 100 pedidos por dia\",\"certeza\":\"CONFIRMADO\",\"origem\":\"fixture-escala\",\"certezaDetalhe\":null,\"conflitos\":[],\"atualizadoEm\":\"2026-10-20T12:50:59.744Z\"}}"}
+09:50:59	Informação	[V64][DIAG][CASO 04] {"id":"04","teste":"Validador rejeita pergunta temporal rotulada como escala","passou":true,"esperado":"valida=false; motivo=DIMENSAO_ALVO_NAO_CORRESPONDE_A_PERGUNTA","observado":{"valida":false,"motivo":"DIMENSAO_ALVO_NAO_CORRESPONDE_A_PERGUNTA","dimensaoDetectada":"frequencia"},"evidencia":"{\"proximaPergunta\":\"Existe algum horário específico do dia em que o volume de pedidos é maior?\",\"dimensaoAlvo\":\"escala\",\"justificativa\":\"Reproduz candidato inconsistente.\",\"lacunaQueReduz\":\"escala\"}"}
+09:50:59	Informação	[V64][DIAG][CASO 05] {"id":"05","teste":"Validador rejeita lacuna declarada incompatível com a dimensão-alvo","passou":true,"esperado":"valida=false; motivo=LACUNA_QUE_REDUZ_DIVERGE_DA_DIMENSAO_ALVO; lacuna=escala","observado":{"valida":false,"motivo":"LACUNA_QUE_REDUZ_DIVERGE_DA_DIMENSAO_ALVO","dimensaoAlvo":"frequencia","dimensaoDetectada":"frequencia","dimensaoLacunaDetectada":"escala"},"evidencia":"Reproduz a divergência observada no E2E real e exige rejeição explícita pelo validador de produção."}
+09:50:59	Informação	[V64][DIAG][CASO 06] {"id":"06","teste":"Investigação de frequência preserva fato de escala sem reclassificá-lo","passou":true,"esperado":{"escala":"100 pedidos por dia","dimensaoPergunta":"frequencia"},"observado":{"escala":"100 pedidos por dia","dimensaoPergunta":"frequencia"},"evidencia":"Verifica ausência de mutação no fato de escala durante classificação da pergunta."}
+09:50:59	Informação	[V64][DIAG][CASO 07] {"id":"07","teste":"Pergunta de frequência não é bloqueada como repetição de pergunta de escala","passou":true,"esperado":"valida=true","observado":{"valida":true,"motivo":"","dimensaoAlvo":"frequencia"},"evidencia":"{\"historico\":[{\"id\":\"q-escala\",\"dimensao\":\"escala\",\"texto\":\"Quantos pedidos vocês recebem por dia?\",\"dataHora\":\"2026-10-20T12:50:59.747Z\"}],\"candidata\":{\"proximaPergunta\":\"Em quais horários os pedidos costumam chegar?\",\"dimensaoAlvo\":\"frequencia\",\"justificativa\":\"Mapear distribuição temporal.\",\"lacunaQueReduz\":\"distribuição temporal\"}}"}
+09:50:59	Informação	[V64][DIAG][CASO 08] {"id":"08","teste":"Dimensão de frequência já suficiente não gera pergunta redundante","passou":true,"esperado":"valida=false; motivo=DIMENSAO_JA_SUFICIENTE","observado":{"valida":false,"motivo":"DIMENSAO_JA_SUFICIENTE"},"evidencia":"{\"lacuna\":false,\"fato\":{\"valor\":\"Pico entre 10h e meio-dia\",\"evidencia\":\"Os pedidos chegam principalmente entre 10h e meio-dia\",\"certeza\":\"CONFIRMADO\",\"origem\":\"fixture-frequencia\",\"certezaDetalhe\":null,\"conflitos\":[],\"atualizadoEm\":\"2026-10-20T12:50:59.748Z\"}}"}
+09:50:59	Informação	[V64][DIAG][CASO 09] {"id":"09","teste":"Contrato da candidata contém os quatro campos textuais obrigatórios e coerência dimensional","passou":true,"esperado":{"campos":["proximaPergunta","dimensaoAlvo","justificativa","lacunaQueReduz"],"dimensao":"frequencia"},"observado":{"camposAusentes":[],"dimensaoDetectada":"frequencia","dimensaoAlvo":"frequencia","lacunaQueReduz":"distribuição temporal"},"evidencia":"{\"proximaPergunta\":\"Em quais períodos do dia o movimento aumenta?\",\"dimensaoAlvo\":\"frequencia\",\"justificativa\":\"A escala diária está confirmada; falta a distribuição temporal.\",\"lacunaQueReduz\":\"distribuição temporal\"}"}
+09:50:59	Informação	========== RESUMO DIAGNÓSTICO CIRÚRGICO V6.4 ==========
+09:50:59	Informação	[V64][DIAG][RESUMO] {"versao":"V6.4","suite":"DIAGNOSTICO_CIRURGICO_PERGUNTAS","sucesso":true,"total":9,"aprovados":9,"falhas":0,"chamadasGemini":0,"escritaPlanilhas":false,"falhasDetalhadas":[],"resultados":[{"id":"01","teste":"Pergunta sobre variação temporal em dias de pico é classificada como frequência","passou":true,"esperado":"frequencia","observado":"frequencia","evidencia":"Existe alguma variação significativa nesses 100 pedidos diários em dias de pico, como finais de semana ou feriados?"},{"id":"02","teste":"Pergunta quantitativa sobre pico continua sendo escala","passou":true,"esperado":"escala","observado":"escala","evidencia":"Quantos pedidos chegam no horário de pico?"},{"id":"03","teste":"Horário de pico não é confundido com volume já confirmado","passou":true,"esperado":"frequencia","observado":"frequencia","evidencia":"{\"pergunta\":\"Existe algum horário específico do dia em que o volume de pedidos é maior?\",\"escalaExistente\":{\"valor\":\"100 pedidos por dia\",\"evidencia\":\"São exatamente 100 pedidos por dia\",\"certeza\":\"CONFIRMADO\",\"origem\":\"fixture-escala\",\"certezaDetalhe\":null,\"conflitos\":[],\"atualizadoEm\":\"2026-10-20T12:50:59.744Z\"}}"},{"id":"04","teste":"Validador rejeita pergunta temporal rotulada como escala","passou":true,"esperado":"valida=false; motivo=DIMENSAO_ALVO_NAO_CORRESPONDE_A_PERGUNTA","observado":{"valida":false,"motivo":"DIMENSAO_ALVO_NAO_CORRESPONDE_A_PERGUNTA","dimensaoDetectada":"frequencia"},"evidencia":"{\"proximaPergunta\":\"Existe algum horário específico do dia em que o volume de pedidos é maior?\",\"dimensaoAlvo\":\"escala\",\"justificativa\":\"Reproduz candidato inconsistente.\",\"lacunaQueReduz\":\"escala\"}"},{"id":"05","teste":"Validador rejeita lacuna declarada incompatível com a dimensão-alvo","passou":true,"esperado":"valida=false; motivo=LACUNA_QUE_REDUZ_DIVERGE_DA_DIMENSAO_ALVO; lacuna=escala","observado":{"valida":false,"motivo":"LACUNA_QUE_REDUZ_DIVERGE_DA_DIMENSAO_ALVO","dimensaoAlvo":"frequencia","dimensaoDetectada":"frequencia","dimensaoLacunaDetectada":"escala"},"evidencia":"Reproduz a divergência observada no E2E real e exige rejeição explícita pelo validador de produção."},{"id":"06","teste":"Investigação de frequência preserva fato de escala sem reclassificá-lo","passou":true,"esperado":{"escala":"100 pedidos por dia","dimensaoPergunta":"frequencia"},"observado":{"escala":"100 pedidos por dia","dimensaoPergunta":"frequencia"},"evidencia":"Verifica ausência de mutação no fato de escala durante classificação da pergunta."},{"id":"07","teste":"Pergunta de frequência não é bloqueada como repetição de pergunta de escala","passou":true,"esperado":"valida=true","observado":{"valida":true,"motivo":"","dimensaoAlvo":"frequencia"},"evidencia":"{\"historico\":[{\"id\":\"q-escala\",\"dimensao\":\"escala\",\"texto\":\"Quantos pedidos vocês recebem por dia?\",\"dataHora\":\"2026-10-20T12:50:59.747Z\"}],\"candidata\":{\"proximaPergunta\":\"Em quais horários os pedidos costumam chegar?\",\"dimensaoAlvo\":\"frequencia\",\"justificativa\":\"Mapear distribuição temporal.\",\"lacunaQueReduz\":\"distribuição temporal\"}}"},{"id":"08","teste":"Dimensão de frequência já suficiente não gera pergunta redundante","passou":true,"esperado":"valida=false; motivo=DIMENSAO_JA_SUFICIENTE","observado":{"valida":false,"motivo":"DIMENSAO_JA_SUFICIENTE"},"evidencia":"{\"lacuna\":false,\"fato\":{\"valor\":\"Pico entre 10h e meio-dia\",\"evidencia\":\"Os pedidos chegam principalmente entre 10h e meio-dia\",\"certeza\":\"CONFIRMADO\",\"origem\":\"fixture-frequencia\",\"certezaDetalhe\":null,\"conflitos\":[],\"atualizadoEm\":\"2026-10-20T12:50:59.748Z\"}}"},{"id":"09","teste":"Contrato da candidata contém os quatro campos textuais obrigatórios e coerência dimensional","passou":true,"esperado":{"campos":["proximaPergunta","dimensaoAlvo","justificativa","lacunaQueReduz"],"dimensao":"frequencia"},"observado":{"camposAusentes":[],"dimensaoDetectada":"frequencia","dimensaoAlvo":"frequencia","lacunaQueReduz":"distribuição temporal"},"evidencia":"{\"proximaPergunta\":\"Em quais períodos do dia o movimento aumenta?\",\"dimensaoAlvo\":\"frequencia\",\"justificativa\":\"A escala diária está confirmada; falta a distribuição temporal.\",\"lacunaQueReduz\":\"distribuição temporal\"}"}]}
+09:50:59	Informação	[FULL][SUITE 6][RESULTADO] {"suite":"DIAGNOSTICO_CIRURGICO","funcao":"TESTAR_DIAGNOSTICO_CIRURGICO_PERGUNTAS_V64","tipo":"deterministico","duracaoMs":16,"sucesso":true,"total":9,"aprovados":9,"falhas":0,"turnosProcessados":null,"quantidadePerguntasGeradas":null,"conclusao":null,"erro":""}
+09:50:59	Informação	[FULL][SUITE 7/7][INICIO] {"nome":"GEMINI_REAL_PONTA_A_PONTA","funcao":"TESTAR_GEMINI_REAL_INVESTIGACAO_V64","tipo":"gemini"}
+09:50:59	Informação	GEMINI - TENTATIVA 1/3
+09:51:01	Informação	HTTP STATUS: 200
+09:51:01	Informação	TEMPO: 1528 ms
+09:51:01	Informação	RESPOSTA GEMINI: {
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "{\n  \"fatos\": [\n    {\n      \"dimensao\": \"escala\",\n      \"valor\": \"100 pedidos por dia\",\n      \"evidencia\": \"100 pedidos por dia\",\n      \"certeza\": \"ESTIMADO\",\n      \"certezaDetalhe\": \"APROXIMADO\",\n      \"tipoAtualizacao\": \"NOVO\"\n    },\n    {\n      \"dimensao\": \"frequencia\",\n      \"valor\": \"diariamente\",\n      \"evidencia\": \"por dia\",\n      \"certeza\": \"CONFIRMADO\",\n      \"certezaDetalhe\": \"\",\n      \"tipoAtualizacao\": \"NOVO\"\n    },\n    {\n      \"dimensao\": \"processo\",\n      \"valor\": \"Recebimento de pedidos pelo WhatsApp, lançamento manual em planilha e conferência\",\n      \"evidencia\": \"Recebemos cerca de 100 pedidos por dia pelo WhatsApp, lançamos manualmente em planilha e gastamos duas horas conferindo.\",\n      \"certeza\": \"CONFIRMADO\",\n      \"certezaDetalhe\": \"\",\n      \"tipoAtualizacao\": \"NOVO\"\n    },\n    {\n      \"dimensao\": \"impacto\",\n      \"valor\": \"Gasto de duas horas conferindo os pedidos\",\n      \"evidencia\": \"gastamos duas horas conferindo\",\n      \"certeza\": \"CONFIRMADO\",\n      \"certezaDetalhe\": \"\",\n      \"tipoAtualizacao\": \"NOVO\"\n    }\n  ],\n  \"respondeuPerguntaPendente\": false,\n  \"ambiguidade\": false,\n  \"explicacaoAmbiguidade\": \"\"\n}",
+            "thoughtSignature": "EmAKXgFpFH0T/Y7jGaXSD66JfIul/+Y3GzVSTWrm7TnEriYdsMhGC83gIg1ttEW8a7Zjz8Xn48YXrNrQOcAQCriNfAnaMiWcpldMKeNDo7Mi28HWIX1dHVs8dXG+DY267xM="
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 939,
+    "candidatesTokenCount": 389,
+    "totalTokenCount": 1328,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 939
+      }
+    ],
+    "serviceTier": "standard"
+  },
+  "modelVersion": "gemini-3.5-flash-lite",
+  "responseId": "tGPXauWnAbaqytMPi9bK6QQ"
+}
+09:51:01	Informação	GEMINI - TENTATIVA 1/3
+09:51:02	Informação	HTTP STATUS: 200
+09:51:02	Informação	TEMPO: 898 ms
+09:51:02	Informação	RESPOSTA GEMINI: {
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "{\n  \"proximaPergunta\": \"Qual é a principal dificuldade ou erro que costuma acontecer durante esse lançamento manual dos pedidos?\",\n  \"dimensaoAlvo\": \"dor_causa\",\n  \"justificativa\": \"A dimensão de processo, impacto, frequência e escala já foram abordadas, mas a dor e a causa raiz do problema ainda estão desconhecidas.\",\n  \"lacunaQueReduz\": \"dor_causa\"\n}",
+            "thoughtSignature": "EmAKXgFpFH0T+tq4r+bIMXkYo1IDrKzx14/53erb3WhcFzOFN9aCZzBon8uHvbfBZDjzBEg/HskdQUKkr0FnE0wD7z9g+TzFNT3UqAMRIpCp5WE7lQNjjjRFN+Y6iJDbbWg="
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 1109,
+    "candidatesTokenCount": 98,
+    "totalTokenCount": 1207,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 1109
+      }
+    ],
+    "serviceTier": "standard"
+  },
+  "modelVersion": "gemini-3.5-flash-lite",
+  "responseId": "tWPXauCnKKyPytMP4-Tu8AM"
+}
+09:51:02	Informação	GEMINI - TENTATIVA 1/3
+09:51:03	Informação	HTTP STATUS: 200
+09:51:03	Informação	TEMPO: 873 ms
+09:51:03	Informação	RESPOSTA GEMINI: {
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "{\"proximaPergunta\":\"Quais são os principais erros ou gargalos que ocorrem durante o lançamento manual desses pedidos na planilha?\",\"dimensaoAlvo\":\"dor_causa\",\"justificativa\":\"A dimensão dor_causa está desconhecida e precisamos entender a causa raiz do problema no processo atual para especificar a solução.\",\"lacunaQueReduz\":\"dor_causa\"}",
+            "thoughtSignature": "EmAKXgFpFH0ToU08sVfZR/ctwhKHd5MiOxQ6Oq+IRwLxXTnNqXC5dUHR0OxEPR9VDgHauHfOiBGBqdq6tFpyovZLklGLFfchfEq2h5pRj6OsloYTUlocMVxAGtLac+d613I="
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 1137,
+    "candidatesTokenCount": 81,
+    "totalTokenCount": 1218,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 1137
+      }
+    ],
+    "serviceTier": "standard"
+  },
+  "modelVersion": "gemini-3.5-flash-lite",
+  "responseId": "tmPXaqfDJZGyytMP3-WpgAw"
+}
+09:51:03	Informação	GEMINI - TENTATIVA 1/3
+09:51:04	Informação	HTTP STATUS: 200
+09:51:04	Informação	TEMPO: 1107 ms
+09:51:04	Informação	RESPOSTA GEMINI: {
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "{\"fatos\":[{\"dimensao\":\"dor_causa\",\"valor\":\"Erros de digitação e retrabalho durante a conferência\",\"evidencia\":\"Ocorrem erros de digitação e retrabalho durante a conferência.\",\"certeza\":\"CONFIRMADO\",\"certezaDetalhe\":\"\",\"tipoAtualizacao\":\"NOVO\"}],\"respondeuPerguntaPendente\":true,\"ambiguidade\":false,\"explicacaoAmbiguidade\":\"\"}",
+            "thoughtSignature": "EmAKXgFpFH0TBhbhSA8wt0gBE2FZx2peYOkPgk72sN5yGtWRqJx8CWbC8I4BRNHAC2tW3ZAcwjfJMPkHx7XA9nzR6j5HG8dUyHb1ViPHoWCcX1CImJAo1h4rnnYEcobZ9hQ="
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 1215,
+    "candidatesTokenCount": 97,
+    "totalTokenCount": 1312,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 1215
+      }
+    ],
+    "serviceTier": "standard"
+  },
+  "modelVersion": "gemini-3.5-flash-lite",
+  "responseId": "t2PXarTYIorr1sgPrqrJiAQ"
+}
+09:51:04	Informação	GEMINI - TENTATIVA 1/3
+09:51:05	Informação	HTTP STATUS: 200
+09:51:05	Informação	TEMPO: 1027 ms
+09:51:05	Informação	RESPOSTA GEMINI: {
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "{\n  \"proximaPergunta\": \"Existe algum horário específico do dia em que esses 100 pedidos chegam em maior volume?\",\n  \"dimensaoAlvo\": \"frequencia\",\n  \"justificativa\": \"A escala de 100 pedidos por dia já é conhecida, mas precisamos entender melhor a distribuição temporal e os horários de pico.\",\n  \"lacunaQueReduz\": \"frequencia\"\n}",
+            "thoughtSignature": "EmAKXgFpFH0TDJD6fqED6w7f/hcEFoFK6rBB3iNV9I3tDk5lBiT79b5Dv6WK4Zn/QWNn2fWo7AJG/fyx/I1NaMuAl47p0HB1Ck2J5kyQnmpawXNhMNAY14d6U4sPDi0YFBk="
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 1236,
+    "candidatesTokenCount": 95,
+    "totalTokenCount": 1331,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 1236
+      }
+    ],
+    "serviceTier": "standard"
+  },
+  "modelVersion": "gemini-3.5-flash-lite",
+  "responseId": "uGPXarnAL5qOytMP7cHvsAU"
+}
+09:51:05	Informação	GEMINI - TENTATIVA 1/3
+09:51:06	Informação	HTTP STATUS: 200
+09:51:06	Informação	TEMPO: 952 ms
+09:51:06	Informação	RESPOSTA GEMINI: {
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "{\n  \"proximaPergunta\": \"Existe algum horário específico do dia em que o volume de pedidos pelo WhatsApp é maior?\",\n  \"dimensaoAlvo\": \"frequencia\",\n  \"justificativa\": \"A frequência tem apenas uma confirmação genérica e precisamos entender a distribuição temporal sem tocar na escala.\",\n  \"lacunaQueReduz\": \"frequencia\"\n}",
+            "thoughtSignature": "EmAKXgFpFH0TimxqtADhQgzCkufH3rqcYkVY++G5IDJ2PrTeRHYRl5l96DnLik54FD1Qt/WoBuCPMTsPxzzIWYR067WWD6QLjl4/J1+Y+KbI67ADMR/2FG+E+ZwDb7Cr1NA="
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 1244,
+    "candidatesTokenCount": 84,
+    "totalTokenCount": 1328,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 1244
+      }
+    ],
+    "serviceTier": "standard"
+  },
+  "modelVersion": "gemini-3.5-flash-lite",
+  "responseId": "uWPXapneNfSLytMPj7KpuAQ"
+}
+09:51:06	Informação	GEMINI - TENTATIVA 1/3
+09:51:07	Informação	HTTP STATUS: 200
+09:51:07	Informação	TEMPO: 801 ms
+09:51:07	Informação	RESPOSTA GEMINI: {
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "{\"fatos\":[{\"dimensao\":\"escala\",\"valor\":\"100 pedidos por dia\",\"evidencia\":\"São exatamente 100 pedidos por dia.\",\"certeza\":\"CONFIRMADO\",\"certezaDetalhe\":\"\",\"tipoAtualizacao\":\"CORRECAO\"}],\"respondeuPerguntaPendente\":true,\"ambiguidade\":false,\"explicacaoAmbiguidade\":\"\"}",
+            "thoughtSignature": "EmAKXgFpFH0TsMUbvwjRuf+3/vK3S1arKlNWkVQbT0r/MX6GObKSQE7+9uCmsfgPmi2KvxyjvbMRvMCuY/95y13JJOV/+yE/oYR8+K25A80T3J0oa7raWCucYw1cfC7Huu0="
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 1279,
+    "candidatesTokenCount": 82,
+    "totalTokenCount": 1361,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 1279
+      }
+    ],
+    "serviceTier": "standard"
+  },
+  "modelVersion": "gemini-3.5-flash-lite",
+  "responseId": "umPXatr7NqyxuMYPnOXGOA"
+}
+09:51:07	Informação	GEMINI - TENTATIVA 1/3
+09:51:08	Informação	HTTP STATUS: 200
+09:51:08	Informação	TEMPO: 1117 ms
+09:51:08	Informação	RESPOSTA GEMINI: {
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "{\n  \"proximaPergunta\": \"O que acontece quando chega um pedido fora do horário comercial ou incompleto?\",\n  \"dimensaoAlvo\": \"excecoes\",\n  \"justificativa\": \"As dimensoes de processo, dor, escala, frequencia e impacto ja estao confirmadas. A proxima lacuna logica sao as excecoes do processo.\",\n  \"lacunaQueReduz\": \"excecoes\"\n}",
+            "thoughtSignature": "EmAKXgFpFH0TTDYYWGXB6ZaSc/am05aogMCdPvdZaogYZewnyGmc4yEDVHBp+ZyodDf+c7VAgfPbHwrjNojVIcwmFA7eWn2V48mzm95vRc84TXibfxcNgPnQiBOMcDru2ds="
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 1238,
+    "candidatesTokenCount": 97,
+    "totalTokenCount": 1335,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 1238
+      }
+    ],
+    "serviceTier": "standard"
+  },
+  "modelVersion": "gemini-3.5-flash-lite",
+  "responseId": "u2PXao3XNtmKytMPnum_6Qs"
+}
+09:51:08	Informação	GEMINI - TENTATIVA 1/3
+09:51:09	Informação	HTTP STATUS: 200
+09:51:09	Informação	TEMPO: 1021 ms
+09:51:09	Informação	RESPOSTA GEMINI: {
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "{\n  \"proximaPergunta\": \"O que acontece quando o cliente envia um pedido fora do horário comercial ou há divergência de itens?\",\n  \"dimensaoAlvo\": \"excecoes\",\n  \"justificativa\": \"A escala, processo, impacto e frequência já estão confirmados. Precisamos entender como a operação lida com exceções e imprevistos.\",\n  \"lacunaQueReduz\": \"excecoes\"\n}",
+            "thoughtSignature": "EmAKXgFpFH0T8t9uZsCrOXVZcE3ZZ91Dcaz3QvhcF062EYmBl5vy3pthE6pNpGGGfC0WF5LVPNkbFFbcspG7txWN3bg1Ha1D7Av6GB5skfx1UNIIdiclF4I8+e92iKhhnhs="
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 1267,
+    "candidatesTokenCount": 97,
+    "totalTokenCount": 1364,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 1267
+      }
+    ],
+    "serviceTier": "standard"
+  },
+  "modelVersion": "gemini-3.5-flash-lite",
+  "responseId": "vWPXaqeKAuKPytMP8IPvsAQ"
+}
+09:51:09	Informação	GEMINI - TENTATIVA 1/3
+09:51:11	Informação	HTTP STATUS: 200
+09:51:11	Informação	TEMPO: 1218 ms
+09:51:11	Informação	RESPOSTA GEMINI: {
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "{\n  \"fatos\": [\n    {\n      \"dimensao\": \"objetivo\",\n      \"valor\": \"Reduzir o retrabalho e liberar tempo da equipe\",\n      \"evidencia\": \"Queremos reduzir o retrabalho e liberar tempo da equipe.\",\n      \"certeza\": \"CONFIRMADO\",\n      \"certezaDetalhe\": \"\",\n      \"tipoAtualizacao\": \"NOVO\"\n    }\n  ],\n  \"respondeuPerguntaPendente\": true,\n  \"ambiguidade\": false,\n  \"explicacaoAmbiguidade\": \"\"\n}",
+            "thoughtSignature": "EmAKXgFpFH0TM7mkovg2+UICV6rVcZSr3xZcHFbMGauf90v+uVNVSc9WV5swAsLAwOMwzk5dApxpQRIHaUZezADdx6oG/4w7KI8H2a5FgXiCKkfIOT3s5dWnvFH2lxSCFCU="
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 1297,
+    "candidatesTokenCount": 135,
+    "totalTokenCount": 1432,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 1297
+      }
+    ],
+    "serviceTier": "standard"
+  },
+  "modelVersion": "gemini-3.5-flash-lite",
+  "responseId": "vmPXarH-DKCFytMPo8rt4Qs"
+}
+09:51:11	Informação	GEMINI - TENTATIVA 1/3
+09:51:12	Informação	HTTP STATUS: 200
+09:51:12	Informação	TEMPO: 954 ms
+09:51:12	Informação	RESPOSTA GEMINI: {
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "{\n  \"proximaPergunta\": \"O que acontece quando um pedido chega com dados incompletos ou errados pelo WhatsApp?\",\n  \"dimensaoAlvo\": \"excecoes\",\n  \"justificativa\": \"As dimensoes de processo, dor, escala, frequencia, impacto e objetivo ja estao confirmadas. Precisamos entender as excecoes do processo para especificar corretamente o sistema.\",\n  \"lacunaQueReduz\": \"excecoes\"\n}",
+            "thoughtSignature": "EmAKXgFpFH0TYAssOxcHtT5m6poJ7hL8tPZgnjvVdvbp2JLGEZD5mkk0VqTUeF8yDvnW6WpOaraoQs3ei6qtR9mDh3kzOaAESGlQZgoZPXsb7RbFlC5Sd7jJRVCzabmlc+U="
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 1316,
+    "candidatesTokenCount": 102,
+    "totalTokenCount": 1418,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 1316
+      }
+    ],
+    "serviceTier": "standard"
+  },
+  "modelVersion": "gemini-3.5-flash-lite",
+  "responseId": "v2PXavGlHK-iytMP2ryW4As"
+}
+09:51:12	Informação	GEMINI - TENTATIVA 1/3
+09:51:13	Informação	HTTP STATUS: 200
+09:51:13	Informação	TEMPO: 811 ms
+09:51:13	Informação	RESPOSTA GEMINI: {
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "{\"equivalente\":false,\"indice\":0,\"motivo\":\"A pergunta candidata aborda uma exceção específica do processo de pedidos via WhatsApp, enquanto as perguntas anteriores tratam da principal dificuldade geral, volume diário e objetivo de melhoria.\"}",
+            "thoughtSignature": "EmAKXgFpFH0T+xaW19peyEYa8okOuVn6jKU5iehfTbmtVnkM3PgMUepx++wvCWWPifp3+6S/6EF4j51vegqr3zBXxklpOt2ShbdOto0AghnJIqBr523lciIp4IQF7I4nLvI="
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 296,
+    "candidatesTokenCount": 51,
+    "totalTokenCount": 347,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 296
+      }
+    ],
+    "serviceTier": "standard"
+  },
+  "modelVersion": "gemini-3.5-flash-lite",
+  "responseId": "wGPXatbJIYGwytMPpZv22AI"
+}
+09:51:13	Informação	GEMINI - TENTATIVA 1/3
+09:51:14	Informação	HTTP STATUS: 200
+09:51:14	Informação	TEMPO: 988 ms
+09:51:14	Informação	RESPOSTA GEMINI: {
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "{\n  \"fatos\": [\n    {\n      \"dimensao\": \"excecoes\",\n      \"valor\": \"Pedidos urgentes às vezes pulam a conferência\",\n      \"evidencia\": \"Pedidos urgentes às vezes pulam a conferência.\",\n      \"certeza\": \"CONFIRMADO\",\n      \"certezaDetalhe\": \"\",\n      \"tipoAtualizacao\": \"NOVO\"\n    }\n  ],\n  \"respondeuPerguntaPendente\": true,\n  \"ambiguidade\": false,\n  \"explicacaoAmbiguidade\": \"\"\n}",
+            "thoughtSignature": "EmAKXgFpFH0Tm3MzKr8xhM8aeLBMPwbyOYWjy6rpHrFCeBky2pCGvTvoLnlGptsgL3voa7dEyGO1/Zjgy5e4G3WwVeO+oIqgYFtlCjpuArKd+yTCFfcblQkEm+kBKkLiZHI="
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 1376,
+    "candidatesTokenCount": 132,
+    "totalTokenCount": 1508,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 1376
+      }
+    ],
+    "serviceTier": "standard"
+  },
+  "modelVersion": "gemini-3.5-flash-lite",
+  "responseId": "wWPXaoi-Gu2iytMPm5jmiAw"
+}
+09:51:14	Informação	GEMINI - TENTATIVA 1/3
+09:51:15	Informação	HTTP STATUS: 200
+09:51:15	Informação	TEMPO: 904 ms
+09:51:15	Informação	RESPOSTA GEMINI: {
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "{\n  \"proximaPergunta\": \"Existe algum orçamento máximo ou ferramenta específica que precisamos obrigatoriamente utilizar ou evitar no novo sistema?\",\n  \"dimensaoAlvo\": \"restricoes\",\n  \"justificativa\": \"As dimensões de processo, dor, escala, frequência, impacto, exceções e objetivo já estão confirmadas. A próxima lacuna prioritária são as restrições.\",\n  \"lacunaQueReduz\": \"restricoes\"\n}",
+            "thoughtSignature": "EmAKXgFpFH0Tf7cL++ilSfvz0pd/sppY+/TUK665PCl0OqKVlQyY5WZIWv+sZWFY60hgcEvIKwrjwCo9w0ytAfTUyUJa9ARiflEiLMBSnCKYhaJDo2BoUbu/+1Gx1B9G+ic="
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 1390,
+    "candidatesTokenCount": 102,
+    "totalTokenCount": 1492,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 1390
+      }
+    ],
+    "serviceTier": "standard"
+  },
+  "modelVersion": "gemini-3.5-flash-lite",
+  "responseId": "wmPXapyyHcm9ytMP0K6q6As"
+}
+09:51:15	Informação	GEMINI - TENTATIVA 1/3
+09:51:16	Informação	HTTP STATUS: 200
+09:51:16	Informação	TEMPO: 872 ms
+09:51:16	Informação	RESPOSTA GEMINI: {
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "{\"fatos\":[{\"dimensao\":\"restricoes\",\"valor\":\"Manter as ferramentas atuais e proteger os dados\",\"evidencia\":\"Precisamos manter as ferramentas atuais e proteger os dados.\",\"certeza\":\"CONFIRMADO\",\"certezaDetalhe\":\"\",\"tipoAtualizacao\":\"NOVO\"}],\"respondeuPerguntaPendente\":true,\"ambiguidade\":false,\"explicacaoAmbiguidade\":\"\"}",
+            "thoughtSignature": "EmAKXgFpFH0T7Nj38JeK6LCxkP87aNf81nn3AJJ/DwzNNdp8X9PPPnnaZc/GIKAQfQ/Jr13Ngs4eDtnFyzss2c0JLfTJ6iaTVZ/d2Y6iDV20qbU5SAcI6ESujhtcLyhJfsU="
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 1451,
+    "candidatesTokenCount": 86,
+    "totalTokenCount": 1537,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 1451
+      }
+    ],
+    "serviceTier": "standard"
+  },
+  "modelVersion": "gemini-3.5-flash-lite",
+  "responseId": "w2PXasKFH5StuMYP29iGmAQ"
+}
+09:51:16	Informação	GEMINI - TENTATIVA 1/3
+09:51:17	Informação	HTTP STATUS: 200
+09:51:17	Informação	TEMPO: 972 ms
+09:51:17	Informação	RESPOSTA GEMINI: {
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "{\n  \"proximaPergunta\": \"Como você saberia que o novo sistema resolveu o problema de erros de digitação e retrabalho?\",\n  \"dimensaoAlvo\": \"aceitacao\",\n  \"justificativa\": \"Processo, dor, escala, frequência, impacto, exceções, objetivo e restrições já estão confirmados. A única lacuna restante é a aceitação, para entender o critério de sucesso do sistema.\",\n  \"lacunaQueReduz\": \"aceitacao\"\n}",
+            "thoughtSignature": "EmAKXgFpFH0TNfOHpxFjqNJnSdsqi6JvsqxHVBoOz34zF7nX8S+lzWnbhS+CNeRMERU/UX6eOGzHkqadPTC2z6eWkRqrZ/BOpHpKJR/BuU+10/nhYmQ/bx4eFTkLYhOy7Pc="
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 1465,
+    "candidatesTokenCount": 114,
+    "totalTokenCount": 1579,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 1465
+      }
+    ],
+    "serviceTier": "standard"
+  },
+  "modelVersion": "gemini-3.5-flash-lite",
+  "responseId": "xGPXaqKMGqjeytMP5JCmyQs"
+}
+09:51:17	Informação	GEMINI - TENTATIVA 1/3
+09:51:17	Informação	HTTP STATUS: 429
+09:51:17	Informação	TEMPO: 177 ms
+09:51:17	Informação	RESPOSTA GEMINI: {
+  "error": {
+    "code": 429,
+    "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 15, model: gemini-3.5-flash-lite\nPlease retry in 42.480958901s.",
+    "status": "RESOURCE_EXHAUSTED",
+    "details": [
+      {
+        "@type": "type.googleapis.com/google.rpc.Help",
+        "links": [
+          {
+            "description": "Learn more about Gemini API quotas",
+            "url": "https://ai.google.dev/gemini-api/docs/rate-limits"
+          }
+        ]
+      },
+      {
+        "@type": "type.googleapis.com/google.rpc.QuotaFailure",
+        "violations": [
+          {
+            "quotaMetric": "generativelanguage.googleapis.com/generate_content_free_tier_requests",
+            "quotaId": "GenerateRequestsPerMinutePerProjectPerModel-FreeTier",
+            "quotaDimensions": {
+              "model": "gemini-3.5-flash-lite",
+              "location": "global"
+            },
+            "quotaValue": "15"
+          }
+        ]
+      },
+      {
+        "@type": "type.googleapis.com/google.rpc.RetryInfo",
+        "retryDelay": "42s"
+      }
+    ]
+  }
+}
+09:51:17	Informação	GEMINI - ERRO TRANSITÓRIO HTTP 429. Nova tentativa após 42000 ms conforme orientação da API.
+09:51:17	Informação	GEMINI - AGUARDANDO 42000 ms antes da tentativa 2
+09:51:59	Informação	GEMINI - TENTATIVA 2/3
+09:52:00	Informação	HTTP STATUS: 200
+09:52:00	Informação	TEMPO: 1347 ms
+09:52:00	Informação	RESPOSTA GEMINI: {
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "{\n  \"proximaPergunta\": \"Quais são os critérios de sucesso ou validação para considerar que o novo sistema resolveu o problema de digitação e retrabalho?\",\n  \"dimensaoAlvo\": \"aceitacao\",\n  \"justificativa\": \"Todas as outrasdimensoes estao confirmadas e a unica lacuna restante e aceitacao.\",\n  \"lacunaQueReduz\": \"aceitacao\"\n}",
+            "thoughtSignature": "EmAKXgFpFH0T4MFDXE7ttYV7ZxxhgbJTXS0W1+ZabR5x15ysZ0z6pJ31YL+TDTJJwtJnFBbk+R+uslAeaiSyAXqV2ObqYyV1VgTQK0IWodebkehi0li4CGIpQ8zvif0UYP4="
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 1494,
+    "candidatesTokenCount": 97,
+    "totalTokenCount": 1591,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 1494
+      }
+    ],
+    "serviceTier": "standard"
+  },
+  "modelVersion": "gemini-3.5-flash-lite",
+  "responseId": "72PXapSyK8iQytMPsPWW6Qs"
+}
+09:52:00	Informação	GEMINI - TENTATIVA 1/3
+09:52:02	Informação	HTTP STATUS: 200
+09:52:02	Informação	TEMPO: 1096 ms
+09:52:02	Informação	RESPOSTA GEMINI: {
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "{\n  \"fatos\": [\n    {\n      \"dimensao\": \"aceitacao\",\n      \"valor\": \"Reduzir o retrabalho pela metade\",\n      \"evidencia\": \"Consideraremos sucesso reduzir o retrabalho pela metade.\",\n      \"certeza\": \"CONFIRMADO\",\n      \"certezaDetalhe\": \"\",\n      \"tipoAtualizacao\": \"NOVO\"\n    }\n  ],\n  \"respondeuPerguntaPendente\": true,\n  \"ambiguidade\": false,\n  \"explicacaoAmbiguidade\": \"\"\n}",
+            "thoughtSignature": "EmAKXgFpFH0TYzjwUNyIoCkQ483GqCFLmjWtTzmRjKPVjKYIuTVTAkl4XnXTxCtpczSQDCM7eeOGZQF+beT1AYfwK0n+NjQ6WoP7H3cq8n4/hgA9phjP5OL01YXK440VhZ4="
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 1519,
+    "candidatesTokenCount": 131,
+    "totalTokenCount": 1650,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 1519
+      }
+    ],
+    "serviceTier": "standard"
+  },
+  "modelVersion": "gemini-3.5-flash-lite",
+  "responseId": "8WPXapKTC9HdytMP9P3J6AI"
+}
+09:52:02	Informação	FEEDS SOLUTIONS V6.4 — GEMINI REAL (SANITIZADO): {"versao":"V6.4","teste":"GEMINI_REAL_PONTA_A_PONTA","sucesso":true,"turnosProcessados":7,"limiteTurnos":10,"quantidadePerguntasGeradas":6,"dimensoesConfirmadas":["processo","dor_causa","escala","frequencia","impacto","excecoes","objetivo","restricoes","aceitacao"],"dimensoesCriticasNaoConfirmadas":[],"nenhumFatoConfirmadoSemEvidencia":true,"nenhumaRepeticaoLiteral":true,"nenhumaRepeticaoSemanticaLexical":true,"gateConcluiuSomenteComCondicoesSatisfeitas":true,"perguntaPendenteAoFinal":false,"conclusao":"CONCLUIDO","sanitizado":true,"falha":""}
+09:52:02	Informação	[FULL][SUITE 7][RESULTADO] {"suite":"GEMINI_REAL_PONTA_A_PONTA","funcao":"TESTAR_GEMINI_REAL_INVESTIGACAO_V64","tipo":"gemini","duracaoMs":62314,"sucesso":true,"total":null,"aprovados":null,"falhas":null,"turnosProcessados":7,"quantidadePerguntasGeradas":6,"conclusao":"CONCLUIDO","erro":""}
+09:52:02	Informação	========== FEEDS SOLUTIONS V6.4 — FULL TEST — RESUMO ==========
+09:52:02	Informação	[FULL][RESUMO_FINAL] {"versao":"V6.4","suite":"FULL_VALIDATION","sucesso":true,"totalSuites":7,"suitesExecutadas":7,"suitesAprovadas":7,"suitesFalhas":0,"ativacaoMantidaDesligada":true,"verificacaoAtivacaoDisponivel":true,"duracaoTotalMs":62389,"falhasDetalhadas":[],"resultados":[{"suite":"ESTADO_EXPLICITO","funcao":"TESTAR_ESTADO_INVESTIGACAO_V64","tipo":"deterministico","duracaoMs":8,"sucesso":true,"total":19,"aprovados":19,"falhas":0,"turnosProcessados":null,"quantidadePerguntasGeradas":null,"conclusao":null,"erro":""},{"suite":"CONVERSACIONAL_DETERMINISTICA","funcao":"TESTAR_CONVERSACIONAL_V64","tipo":"deterministico","duracaoMs":11,"sucesso":true,"total":20,"aprovados":20,"falhas":0,"turnosProcessados":null,"quantidadePerguntasGeradas":null,"conclusao":null,"erro":""},{"suite":"ADAPTADOR_LEGADO","funcao":"TESTAR_ADAPTADOR_INVESTIGACAO_V64","tipo":"deterministico","duracaoMs":3,"sucesso":true,"total":4,"aprovados":4,"falhas":0,"turnosProcessados":null,"quantidadePerguntasGeradas":null,"conclusao":null,"erro":""},{"suite":"INTEGRACAO_DETERMINISTICA","funcao":"TESTAR_INTEGRACAO_V64","tipo":"deterministico","duracaoMs":5,"sucesso":true,"total":19,"aprovados":19,"falhas":0,"turnosProcessados":null,"quantidadePerguntasGeradas":null,"conclusao":null,"erro":""},{"suite":"ADVERSARIAL_DETERMINISTICA","funcao":"TESTAR_ADVERSARIAL_INVESTIGACAO_V64","tipo":"deterministico","duracaoMs":4,"sucesso":true,"total":8,"aprovados":8,"falhas":0,"turnosProcessados":null,"quantidadePerguntasGeradas":null,"conclusao":null,"erro":""},{"suite":"DIAGNOSTICO_CIRURGICO","funcao":"TESTAR_DIAGNOSTICO_CIRURGICO_PERGUNTAS_V64","tipo":"deterministico","duracaoMs":16,"sucesso":true,"total":9,"aprovados":9,"falhas":0,"turnosProcessados":null,"quantidadePerguntasGeradas":null,"conclusao":null,"erro":""},{"suite":"GEMINI_REAL_PONTA_A_PONTA","funcao":"TESTAR_GEMINI_REAL_INVESTIGACAO_V64","tipo":"gemini","duracaoMs":62314,"sucesso":true,"total":null,"aprovados":null,"falhas":null,"turnosProcessados":7,"quantidadePerguntasGeradas":6,"conclusao":"CONCLUIDO","erro":""}]}
+09:51:59	Notificação	Execução concluída
