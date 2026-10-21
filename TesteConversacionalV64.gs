@@ -379,6 +379,66 @@ function TESTAR_CONVERSACIONAL_V64() {
       r20.estado.perguntaPendente === null &&
       r20.proxima_pergunta === '');
 
+    // 27. A flag do Gemini não basta: resposta só de escala não responde
+    // a pergunta cuja intenção textual é frequência/distribuição temporal.
+    var estadoRespostaInadequada = estadoBase();
+    atualizarFatoV64_(estadoRespostaInadequada, 'escala', '100 pedidos por dia', 'São exatamente 100 pedidos por dia', CERTEZA_V64.CONFIRMADO, 'fixture');
+    atualizarFatoV64_(estadoRespostaInadequada, 'frequencia', 'Pico entre 10h e meio-dia', 'Os pedidos chegam entre 10h e meio-dia', CERTEZA_V64.CONFIRMADO, 'fixture');
+    atualizarFatoV64_(estadoRespostaInadequada, 'impacto', 'Duas horas por dia', 'A conferência consome duas horas por dia', CERTEZA_V64.CONFIRMADO, 'fixture');
+    atualizarFatoV64_(estadoRespostaInadequada, 'objetivo', 'Reduzir retrabalho', 'Queremos reduzir retrabalho', CERTEZA_V64.CONFIRMADO, 'fixture');
+    atualizarFatoV64_(estadoRespostaInadequada, 'aceitacao', 'Reduzir retrabalho pela metade', 'Sucesso é reduzir retrabalho pela metade', CERTEZA_V64.CONFIRMADO, 'fixture');
+    registrarPerguntaFeitaV64_(estadoRespostaInadequada, 'Existe algum detalhe sobre esses 100 pedidos diários, como variação entre dias úteis e finais de semana?', 'escala', 'q-variação');
+    definirPerguntaPendenteV64_(estadoRespostaInadequada, {
+      id: 'q-variação',
+      dimensao: 'escala',
+      texto: 'Existe algum detalhe sobre esses 100 pedidos diários, como variação entre dias úteis e finais de semana?'
+    });
+    var validacaoRespostaInadequada = validarRespostaPerguntaPendenteV64_(estadoRespostaInadequada, {
+      fatos: [fato('escala', 'Exatamente 100 pedidos por dia', 'São exatamente 100 pedidos por dia', 'CONFIRMADO')],
+      respondeuPerguntaPendente: true,
+      ambiguidade: false
+    });
+    assert('27a. quantidade não responde pergunta cuja intenção textual é variação temporal',
+      validacaoRespostaInadequada.valida === false &&
+      validacaoRespostaInadequada.motivo === 'RESPOSTA_SEM_EVIDENCIA_NA_DIMENSAO_PERGUNTADA' &&
+      validacaoRespostaInadequada.dimensaoEsperada === 'frequencia',
+      JSON.stringify(validacaoRespostaInadequada));
+
+    var respostaTemporalValida = validarRespostaPerguntaPendenteV64_(estadoRespostaInadequada, {
+      fatos: [fato('frequencia', 'Não há variação relevante entre dias úteis e fins de semana', 'Não há variação relevante entre dias úteis e fins de semana', 'CONFIRMADO')],
+      respondeuPerguntaPendente: true,
+      ambiguidade: false
+    });
+    assert('27b. evidência de distribuição temporal responde à pergunta sobre variação entre dias',
+      respostaTemporalValida.valida === true &&
+      respostaTemporalValida.dimensaoEsperada === 'frequencia',
+      JSON.stringify(respostaTemporalValida));
+
+    var respostaInadequadaNoFluxo = processarTurnoInvestigacaoV64_(estadoRespostaInadequada, 'São exatamente 100 pedidos por dia.', adaptadores({
+      interpretar: function() {
+        return {
+          fatos: [fato('escala', 'Exatamente 100 pedidos por dia', 'São exatamente 100 pedidos por dia', 'CONFIRMADO')],
+          respondeuPerguntaPendente: true,
+          ambiguidade: false
+        };
+      },
+      selecionarPergunta: function() {
+        return {
+          proximaPergunta: 'A quantidade muda entre dias úteis e finais de semana, ou permanece igual?',
+          dimensaoAlvo: 'frequencia',
+          justificativa: 'A resposta anterior confirmou apenas a quantidade, não a distribuição temporal.',
+          lacunaQueReduz: 'frequencia'
+        };
+      }
+    }));
+    assert('27c. o fluxo não conclui quando a resposta não atende à pergunta pendente',
+      respostaInadequadaNoFluxo.status_diagnostico !== 'CONCLUIDO' &&
+      respostaInadequadaNoFluxo.estado.perguntaPendente !== null &&
+      respostaInadequadaNoFluxo.proxima_pergunta !== '',
+      'status=' + respostaInadequadaNoFluxo.status_diagnostico +
+      '; pendente=' + JSON.stringify(respostaInadequadaNoFluxo.estado.perguntaPendente) +
+      '; próxima=' + respostaInadequadaNoFluxo.proxima_pergunta);
+
   } catch (erro) {
     resultados.push({ teste: 'execução da suíte', passou: false, detalhe: erro && erro.stack ? erro.stack : String(erro) });
   }
@@ -387,7 +447,7 @@ function TESTAR_CONVERSACIONAL_V64() {
   var resumo = {
     versao: 'V6.4',
     suite: 'CONVERSACIONAL_DETERMINISTICA',
-    sucesso: resultados.length === 26 && aprovados === resultados.length,
+    sucesso: resultados.length === 29 && aprovados === resultados.length,
     total: resultados.length,
     aprovados: aprovados,
     falhas: resultados.length - aprovados,
