@@ -435,7 +435,7 @@ function TESTAR_CONVERSACIONAL_V64() {
       respostaInadequadaNoFluxo.status_diagnostico !== 'CONCLUIDO' &&
       respostaInadequadaNoFluxo.estado.perguntaPendente !== null &&
       respostaInadequadaNoFluxo.estado.perguntaPendente.dimensao === 'frequencia' &&
-      /quantidade muda entre dias úteis e finais de semana, ou permanece igual/.test(respostaInadequadaNoFluxo.proxima_pergunta),
+      /quantidade de pedidos varia conforme os dias ou horários, ou permanece semelhante/.test(respostaInadequadaNoFluxo.proxima_pergunta),
       'status=' + respostaInadequadaNoFluxo.status_diagnostico +
       '; pendente=' + JSON.stringify(respostaInadequadaNoFluxo.estado.perguntaPendente) +
       '; próxima=' + respostaInadequadaNoFluxo.proxima_pergunta);
