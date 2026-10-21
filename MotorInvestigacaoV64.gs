@@ -264,6 +264,14 @@ function verificarPrecedenciaPerguntaV64_(estado, dimensao) {
     : { valida: true, motivo: '' };
 }
 
+function assinaturaQualidadeDadosPerguntaV64_(texto) {
+  var p = normalizarPerguntaInvestigacaoV64_(texto);
+  var dados = /dados|informacoes|informacao|pedido|pedidos|cliente|whatsapp|mensagem/.test(p);
+  var qualidade = /incomplet|faltant|ausent|errad|incorret|problema|erro|falta|inconsistent/.test(p);
+  var entrada = /chega|receb|enviad|whatsapp|pedido/.test(p);
+  return dados && qualidade && entrada ? 'QUALIDADE_DADOS_ENTRADA' : '';
+}
+
 function compararPerguntaSemanticamenteV64_(perguntasFeitas, candidata, adaptador) {
   var texto = String(candidata || '').trim();
   var normalizada = normalizarPerguntaInvestigacaoV64_(texto);
@@ -276,6 +284,7 @@ function compararPerguntaSemanticamenteV64_(perguntasFeitas, candidata, adaptado
     return t.length > 2 && !/^(qual|quais|como|quando|onde|voce|voces|para|pela|pelo|isso|esse|essa|sobre|entre|mais|menos|uma|uns|dos|das|por|dia|dias|que|com|tem|ser|sao|estao|acontece)$/.test(t);
   });
   var dimNova = classificarDimensaoPerguntaV64_(texto, null);
+  var assinaturaNova = assinaturaQualidadeDadosPerguntaV64_(texto);
   var existeDimensaoComparavel = false;
   for (var i = 0; i < perguntas.length; i++) {
     var registro = perguntas[i];
@@ -283,6 +292,10 @@ function compararPerguntaSemanticamenteV64_(perguntasFeitas, candidata, adaptado
     var normalizadaExistente = normalizarPerguntaInvestigacaoV64_(existente);
     if (normalizadaExistente === normalizada) {
       return { equivalente: true, indice: i, motivo: 'mesma pergunta normalizada', metodo: 'NORMALIZACAO_LITERAL' };
+    }
+    var assinaturaExistente = assinaturaQualidadeDadosPerguntaV64_(existente);
+    if (assinaturaNova && assinaturaExistente === assinaturaNova) {
+      return { equivalente: true, indice: i, motivo: 'mesma intenção sobre dados incompletos ou incorretos', metodo: 'REGRA_SEMANTICA_QUALIDADE_DADOS' };
     }
     var tokensExistentes = normalizadaExistente.split(' ').filter(function(t) {
       return t.length > 2 && !/^(qual|quais|como|quando|onde|voce|voces|para|pela|pelo|isso|esse|essa|sobre|entre|mais|menos|uma|uns|dos|das|por|dia|dias|que|com|tem|ser|sao|estao|acontece)$/.test(t);
