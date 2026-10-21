@@ -445,11 +445,13 @@ function validarPerguntaInvestigativaV64_(estado, candidata, adaptadorSemantico)
       perguntaAjustada: ''
     };
   }
-  var comparacao = compararPerguntaSemanticamenteV64_(
-    estado && estado.perguntasFeitas || [],
-    pergunta,
-    adaptadorSemantico
-  );
+  var comparacao = (candidata && candidata.esclarecimentoRespostaInadequada === true)
+    ? { equivalente: false, indice: -1, motivo: 'ESCLARECIMENTO_DE_RESPOSTA_INADEQUADA' }
+    : compararPerguntaSemanticamenteV64_(
+        estado && estado.perguntasFeitas || [],
+        pergunta,
+        adaptadorSemantico
+      );
   if (comparacao.equivalente) {
     return {
       valida: false,
@@ -755,7 +757,8 @@ function processarTurnoInvestigacaoV64_(estado, mensagem, adaptadores) {
         dimensaoAlvo: 'frequencia',
         justificativa: 'A resposta anterior confirmou a quantidade, mas não esclareceu a distribuição temporal solicitada.',
         lacunaQueReduz: 'distribuição temporal',
-        forcarDetalhamento: true
+        forcarDetalhamento: true,
+        esclarecimentoRespostaInadequada: true
       };
       validacao = validarPerguntaInvestigativaV64_(
         estado, perguntaCandidata, adaptadores.verificarRepeticao
