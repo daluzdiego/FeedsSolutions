@@ -177,3 +177,69 @@ function TESTAR_FULL_V64() {
   Logger.log('[FULL][RESUMO_FINAL] ' + JSON.stringify(resumo));
   return resumo;
 }
+
+
+/**
+ * FEEDS SOLUTIONS V6.4 — PRÉ-VOO SEGURO PARA HOMOLOGAÇÃO
+ *
+ * Não chama Gemini, não grava planilhas, não altera a chave de ativação.
+ * Confirma que as dependências do caminho V6.4 estão carregadas no Apps Script.
+ * NÃO equivale ao E2E real do controlador.
+ */
+function TESTAR_PRE_VOO_ATIVACAO_V64() {
+  var verificacoes = [];
+  function verificar(nome, ok, detalhe) {
+    verificacoes.push({ teste: nome, passou: !!ok, detalhe: detalhe || '' });
+  }
+
+  var funcoesObrigatorias = [
+    'processarMensagemDiagnostico',
+    'motorInvestigacaoV64Ativo_',
+    'processarTurnoPersistidoV64_',
+    'obterOuCriarEstadoInvestigacaoV64_',
+    'processarTurnoInvestigacaoV64_',
+    'mapearResultadoMotorV64ParaAnaliseLegada_',
+    'persistirEstadoInvestigacaoV64_',
+    'serializarRetornoClienteDiagnosticoV63_'
+  ];
+
+  funcoesObrigatorias.forEach(function(nome) {
+    var existe = false;
+    try {
+      existe = typeof globalThis[nome] === 'function';
+    } catch (e) {
+      existe = false;
+    }
+    verificar('dependência carregada: ' + nome, existe, existe ? 'FUNÇÃO DISPONÍVEL' : 'FUNÇÃO AUSENTE NO PROJETO CARREGADO');
+  });
+
+  var ativacao = null;
+  try {
+    ativacao = typeof motorInvestigacaoV64Ativo_ === 'function'
+      ? motorInvestigacaoV64Ativo_()
+      : null;
+  } catch (e) {
+    ativacao = null;
+  }
+  verificar('chave de ativação permanece desligada', ativacao === false,
+    ativacao === false ? 'SEGURO: V6.4 ainda não atende tráfego real' : 'ESTADO INESPERADO: ' + String(ativacao));
+
+  var aprovados = verificacoes.filter(function(v) { return v.passou; }).length;
+  var resumo = {
+    versao: 'V6.4',
+    suite: 'PRE_VOO_ATIVACAO',
+    sucesso: aprovados === verificacoes.length,
+    total: verificacoes.length,
+    aprovados: aprovados,
+    falhas: verificacoes.length - aprovados,
+    prontoParaE2E: aprovados === verificacoes.length && ativacao === false,
+    prontoParaProducao: false,
+    motivoBloqueioProducao: 'O pré-voo verifica carregamento de funções, não valida uma transação real da interface, Gemini, persistência e retorno.',
+    chamadasGemini: 0,
+    escritaPlanilhas: false,
+    alteracaoAtivacao: false,
+    resultados: verificacoes
+  };
+  Logger.log('FEEDS SOLUTIONS V6.4 — PRÉ-VOO DE ATIVAÇÃO: ' + JSON.stringify(resumo));
+  return resumo;
+}
