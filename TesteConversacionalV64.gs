@@ -399,17 +399,10 @@ function TESTAR_GEMINI_REAL_INVESTIGACAO_V64() {
     var semEvidencia = fatosConfirmados.filter(function(dim) {
       return !String(estado.fatos[dim].evidencia || '').trim();
     });
+    // Este bloco verifica somente repeticao literal. Nao injeta um adaptador
+    // que sempre retorna "nao equivalente": isso mascarava a ausencia de uma
+    // validacao semantica real e produzia um resultado enganoso.
     var semRepeticaoLiteral = perguntas.every(function(p, i) { return perguntas.indexOf(p) === i; });
-    var indicesComRepeticaoSemantica = [];
-    perguntas.forEach(function(pergunta, indice) {
-      if (indice === 0) return;
-      var anteriores = perguntas.slice(0, indice);
-      var comparacao = compararPerguntaSemanticamenteV64_(anteriores, pergunta, function() {
-        return { equivalente: false, indice: -1, motivo: 'COMPARACAO_LEXICAL_DE_TESTE' };
-      });
-      if (comparacao.equivalente) indicesComRepeticaoSemantica.push(indice);
-    });
-    var semRepeticaoSemantica = indicesComRepeticaoSemantica.length === 0;
     var dimensoesCriticas = ['processo','dor_causa','escala','frequencia','impacto','objetivo','aceitacao'];
     var dimensoesCriticasNaoConfirmadas = dimensoesCriticas.filter(function(dim) {
       return !estado.fatos[dim] || estado.fatos[dim].certeza !== CERTEZA_V64.CONFIRMADO;
@@ -420,7 +413,6 @@ function TESTAR_GEMINI_REAL_INVESTIGACAO_V64() {
       !falha &&
       semEvidencia.length === 0 &&
       semRepeticaoLiteral &&
-      semRepeticaoSemantica &&
       dimensoesCriticasNaoConfirmadas.length === 0 &&
       gate.pode === true &&
       semPerguntaPendente &&
@@ -437,7 +429,8 @@ function TESTAR_GEMINI_REAL_INVESTIGACAO_V64() {
       dimensoesCriticasNaoConfirmadas: dimensoesCriticasNaoConfirmadas,
       nenhumFatoConfirmadoSemEvidencia: semEvidencia.length === 0,
       nenhumaRepeticaoLiteral: semRepeticaoLiteral,
-      nenhumaRepeticaoSemanticaLexical: semRepeticaoSemantica,
+      validacaoRepeticaoSemantica: 'NAO_EXECUTADA_NESTE_RESUMO',
+      observacao: 'O teste ponta a ponta nao deve declarar ausencia de repeticao semantica sem executar uma comparacao semantica valida.',
       gateConcluiuSomenteComCondicoesSatisfeitas: gate.pode === true && resultado.status_diagnostico === 'CONCLUIDO',
       perguntaPendenteAoFinal: !semPerguntaPendente,
       conclusao: resultado.status_diagnostico || 'INVESTIGACAO',
