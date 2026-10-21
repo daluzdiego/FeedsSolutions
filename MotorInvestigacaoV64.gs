@@ -272,6 +272,29 @@ function assinaturaQualidadeDadosPerguntaV64_(texto) {
   return dados && qualidade && entrada ? 'QUALIDADE_DADOS_ENTRADA' : '';
 }
 
+/**
+ * Assinaturas determinísticas específicas para bloquear paráfrases frequentes.
+ * Não considera toda pergunta da mesma dimensão automaticamente repetida.
+ */
+function assinaturaIntencaoPerguntaV64_(texto) {
+  var p = normalizarPerguntaInvestigacaoV64_(texto);
+  var dim = classificarDimensaoPerguntaV64_(texto, null);
+
+  if (assinaturaQualidadeDadosPerguntaV64_(texto)) return 'DADOS_ENTRADA_QUALIDADE';
+
+  if (/fora do horario|fora do expediente|fim de semana|final de semana|finais de semana/.test(p)) {
+    return 'EXCECOES_FORA_HORARIO';
+  }
+  if (dim === 'excecoes' && /urgente|urgencia|pula(m)? a conferencia|sem conferencia/.test(p)) {
+    return 'EXCECOES_PEDIDO_URGENTE_SEM_CONFERENCIA';
+  }
+  if (dim === 'aceitacao' &&
+      /sucesso|criterio|resultado observavel|reducao|reduzir/.test(p)) {
+    return 'ACEITACAO_CRITERIO_DE_SUCESSO';
+  }
+  return '';
+}
+
 function compararPerguntaSemanticamenteV64_(perguntasFeitas, candidata, adaptador) {
   var texto = String(candidata || '').trim();
   var normalizada = normalizarPerguntaInvestigacaoV64_(texto);
@@ -296,6 +319,16 @@ function compararPerguntaSemanticamenteV64_(perguntasFeitas, candidata, adaptado
     var assinaturaExistente = assinaturaQualidadeDadosPerguntaV64_(existente);
     if (assinaturaNova && assinaturaExistente === assinaturaNova) {
       return { equivalente: true, indice: i, motivo: 'mesma intenção sobre dados incompletos ou incorretos', metodo: 'REGRA_SEMANTICA_QUALIDADE_DADOS' };
+    }
+    var intencaoNova = assinaturaIntencaoPerguntaV64_(texto);
+    var intencaoExistente = assinaturaIntencaoPerguntaV64_(existente);
+    if (intencaoNova && intencaoExistente === intencaoNova) {
+      return {
+        equivalente: true,
+        indice: i,
+        motivo: 'mesma intenção investigativa (' + intencaoNova + ')',
+        metodo: 'REGRA_SEMANTICA_INTENCAO'
+      };
     }
     var tokensExistentes = normalizadaExistente.split(' ').filter(function(t) {
       return t.length > 2 && !/^(qual|quais|como|quando|onde|voce|voces|para|pela|pelo|isso|esse|essa|sobre|entre|mais|menos|uma|uns|dos|das|por|dia|dias|que|com|tem|ser|sao|estao|acontece)$/.test(t);
@@ -442,7 +475,7 @@ function classificarDimensaoPerguntaV64_(pergunta, estado) {
   // Critérios e indicadores de sucesso devem prevalecer sobre marcadores genéricos
   // de processo ("fluxo") ou de dor ("erros", "chamados", "retrabalho").
   // Ex.: "Qual indicador comprovará que o novo fluxo reduziu chamados reabertos?"
-  if (/aceitacao|criterio de sucesso|considerar concluido|medir o sucesso|funcionou|como sera medido|medido que|qual indicador|indicador comprovara|indicador demonstrara|demonstrara a reducao|demonstrar[a-z]* a reducao|comprovar[a-z]* que|criterio verificavel|resultado observavel|reduziu chamados|reduziu erros|melhorou/.test(p)) return 'aceitacao';
+  if (/aceitacao|criterio de sucesso|considerar concluido|considerar[a-z]*.*sucesso|sucesso completo|medir o sucesso|funcionou|como sera medido|medido que|qual indicador|indicador comprovara|indicador demonstrara|demonstrara a reducao|demonstrar[a-z]* a reducao|comprovar[a-z]* que|criterio verificavel|resultado observavel|reduziu chamados|reduziu erros|melhorou/.test(p)) return 'aceitacao';
 
   // Primeiro identifica intenção de processo e causa quando a pergunta pede
   // fluxo, caminho, verificação, rastreabilidade, etapa ou causa-raiz.
