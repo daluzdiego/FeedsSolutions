@@ -1361,7 +1361,7 @@ function TESTAR_ROBUSTEZ_GEMINI_V63() {
  */
 function TESTAR_RETRY_HTTP_GEMINI_V63() {
   Logger.log('============================================================');
-  Logger.log('INÍCIO — TESTAR_RETRY_HTTP_GEMINI_V63');
+  Logger.log('INÍCIO — RETRY HTTP GEMINI V6.4 (função legada V63)');
   Logger.log('============================================================');
 
   let aprovados = 0;
@@ -1371,10 +1371,10 @@ function TESTAR_RETRY_HTTP_GEMINI_V63() {
     if (condicao) {
       aprovados++;
       resultados.push(true);
-      Logger.log('✅ TESTE ' + numero + '/25 — ' + descricao);
+      Logger.log('✅ TESTE ' + numero + '/29 — ' + descricao);
     } else {
       resultados.push(false);
-      Logger.log('❌ TESTE ' + numero + '/25 — ' + descricao);
+      Logger.log('❌ TESTE ' + numero + '/29 — ' + descricao);
     }
   }
 
@@ -1481,7 +1481,7 @@ function TESTAR_RETRY_HTTP_GEMINI_V63() {
   Logger.log('APROVADOS: ' + aprovados + '/29');
   Logger.log('FALHAS: ' + (29 - aprovados));
   Logger.log('PERCENTUAL: ' + Math.round((aprovados / 29) * 100) + '%');
-  Logger.log(aprovados === 29 ? '🏆 TESTAR_RETRY_HTTP_GEMINI_V63: PASSOU' : '❌ TESTAR_RETRY_HTTP_GEMINI_V63: FALHOU');
+  Logger.log(aprovados === 29 ? '🏆 RETRY HTTP GEMINI V6.4: PASSOU' : '❌ RETRY HTTP GEMINI V6.4: FALHOU');
   Logger.log('============================================================');
 
   return { aprovados:aprovados, falhas:29-aprovados, percentual:Math.round((aprovados/29)*100), passou:aprovados===29, resultados:resultados };
