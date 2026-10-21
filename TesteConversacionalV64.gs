@@ -217,6 +217,24 @@ function TESTAR_CONVERSACIONAL_V64() {
     var v9c = validarPerguntaInvestigativaV64_(e9c, { proximaPergunta: perguntaExcecaoDistinta, dimensaoAlvo: 'excecoes', justificativa: 'Investigar exceção distinta.', lacunaQueReduz: 'pedidos urgentes' }, function() { return { equivalente: false, indice: -1, motivo: 'fixture' }; });
     assert('9c. exceção operacional diferente continua permitida', v9c.valida === true, JSON.stringify(v9c));
 
+    var cmpHorario = compararPerguntaSemanticamenteV64_(
+      ['O que acontece quando um pedido chega fora do horário comercial?'],
+      'O que acontece quando um pedido chega fora do horário comercial ou durante o fim de semana?',
+      function() { return { equivalente: false, indice: -1, motivo: 'fixture' }; }
+    );
+    assert('9d. paráfrase sobre pedidos fora do horário é detectada',
+      cmpHorario.equivalente === true && cmpHorario.metodo === 'REGRA_SEMANTICA_INTENCAO',
+      JSON.stringify(cmpHorario));
+
+    var cmpAceitacao = compararPerguntaSemanticamenteV64_(
+      ['Quais critérios definem o sucesso completo do sistema?'],
+      'Quais são os critérios exatos para considerar o sistema um sucesso?',
+      function() { return { equivalente: false, indice: -1, motivo: 'fixture' }; }
+    );
+    assert('9e. perguntas equivalentes sobre critério de sucesso são detectadas',
+      cmpAceitacao.equivalente === true && cmpAceitacao.metodo === 'REGRA_SEMANTICA_INTENCAO',
+      JSON.stringify(cmpAceitacao));
+
     // 9. Exceções e regras especiais são persistidas no campo próprio.
     var e9 = estadoBase();
     var r9 = processarTurnoInvestigacaoV64_(e9, 'Pedidos urgentes pulam a conferência.', adaptadores({
@@ -354,7 +372,7 @@ function TESTAR_CONVERSACIONAL_V64() {
   var resumo = {
     versao: 'V6.4',
     suite: 'CONVERSACIONAL_DETERMINISTICA',
-    sucesso: resultados.length === 23 && aprovados === resultados.length,
+    sucesso: resultados.length === 25 && aprovados === resultados.length,
     total: resultados.length,
     aprovados: aprovados,
     falhas: resultados.length - aprovados,
@@ -413,10 +431,31 @@ function TESTAR_GEMINI_REAL_INVESTIGACAO_V64() {
     var semEvidencia = fatosConfirmados.filter(function(dim) {
       return !String(estado.fatos[dim].evidencia || '').trim();
     });
-    // Este bloco verifica somente repeticao literal. Nao injeta um adaptador
-    // que sempre retorna "nao equivalente": isso mascarava a ausencia de uma
-    // validacao semantica real e produzia um resultado enganoso.
+    // Auditoria semântica determinística das perguntas reais geradas.
+    // Não faz chamadas extras ao Gemini: aplica normalização, assinaturas de
+    // intenção e similaridade lexical local ao histórico de perguntas.
+    var auditoriaRepeticao = [];
+    var historicoAuditoria = [];
+    perguntas.forEach(function(pergunta, indice) {
+      var comparacao = compararPerguntaSemanticamenteV64_(
+        historicoAuditoria,
+        pergunta,
+        function() {
+          return { equivalente: false, indice: -1, motivo: 'AUDITORIA_LOCAL_SEM_CHAMADA_GEMINI' };
+        }
+      );
+      if (comparacao.equivalente) {
+        auditoriaRepeticao.push({
+          indice: indice,
+          indiceAnterior: comparacao.indice,
+          metodo: comparacao.metodo || 'COMPARADOR',
+          motivo: comparacao.motivo || 'INTENCAO_EQUIVALENTE'
+        });
+      }
+      historicoAuditoria.push(pergunta);
+    });
     var semRepeticaoLiteral = perguntas.every(function(p, i) { return perguntas.indexOf(p) === i; });
+    var semRepeticaoSemantica = auditoriaRepeticao.length === 0;
     var dimensoesCriticas = ['processo','dor_causa','escala','frequencia','impacto','objetivo','aceitacao'];
     var dimensoesCriticasNaoConfirmadas = dimensoesCriticas.filter(function(dim) {
       return !estado.fatos[dim] || estado.fatos[dim].certeza !== CERTEZA_V64.CONFIRMADO;
@@ -427,6 +466,7 @@ function TESTAR_GEMINI_REAL_INVESTIGACAO_V64() {
       !falha &&
       semEvidencia.length === 0 &&
       semRepeticaoLiteral &&
+      semRepeticaoSemantica &&
       dimensoesCriticasNaoConfirmadas.length === 0 &&
       gate.pode === true &&
       semPerguntaPendente &&
@@ -443,8 +483,10 @@ function TESTAR_GEMINI_REAL_INVESTIGACAO_V64() {
       dimensoesCriticasNaoConfirmadas: dimensoesCriticasNaoConfirmadas,
       nenhumFatoConfirmadoSemEvidencia: semEvidencia.length === 0,
       nenhumaRepeticaoLiteral: semRepeticaoLiteral,
-      validacaoRepeticaoSemantica: 'NAO_EXECUTADA_NESTE_RESUMO',
-      observacao: 'O teste ponta a ponta nao deve declarar ausencia de repeticao semantica sem executar uma comparacao semantica valida.',
+      nenhumaRepeticaoSemantica: semRepeticaoSemantica,
+      repeticoesSemanticasDetectadas: auditoriaRepeticao,
+      validacaoRepeticaoSemantica: 'EXECUTADA_LOCALMENTE_SEM_CHAMADAS_ADICIONAIS_GEMINI',
+      perguntasSanitizadas: perguntas,
       gateConcluiuSomenteComCondicoesSatisfeitas: gate.pode === true && resultado.status_diagnostico === 'CONCLUIDO',
       perguntaPendenteAoFinal: !semPerguntaPendente,
       conclusao: resultado.status_diagnostico || 'INVESTIGACAO',
