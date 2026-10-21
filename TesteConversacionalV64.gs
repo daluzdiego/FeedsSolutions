@@ -209,11 +209,11 @@ function TESTAR_CONVERSACIONAL_V64() {
     var cmpDados = compararPerguntaSemanticamenteV64_([perguntaDadosA], perguntaDadosB, function() { return { equivalente: false, indice: -1, motivo: 'fixture' }; });
     assert('9a. paráfrases sobre dados incompletos/incorretos são detectadas', cmpDados.equivalente === true && cmpDados.indice === 0 && cmpDados.metodo === 'REGRA_SEMANTICA_QUALIDADE_DADOS', JSON.stringify(cmpDados));
     var e9b = estadoBase();
-    registrarPerguntaFeitaV64_(e9b, perguntaDadosA, 'excecoes', 'q-dados-anterior');
-    var v9b = validarPerguntaInvestigativaV64_(e9b, { proximaPergunta: perguntaDadosB, dimensaoAlvo: 'excecoes', justificativa: 'Investigar dados incompletos.', lacunaQueReduz: 'dados incompletos' }, function() { return { equivalente: false, indice: -1, motivo: 'fixture' }; });
+    registrarPerguntaFeitaV64_(e9b, perguntaDadosA, 'frequencia', 'q-dados-anterior');
+    var v9b = validarPerguntaInvestigativaV64_(e9b, { proximaPergunta: perguntaDadosB, dimensaoAlvo: 'frequencia', justificativa: 'Investigar dados incompletos.', lacunaQueReduz: 'horários de pico' }, function() { return { equivalente: false, indice: -1, motivo: 'fixture' }; });
     assert('9b. validador rejeita repetição semântica', v9b.valida === false && v9b.motivo === 'REPETICAO_SEMANTICA', JSON.stringify(v9b));
     var e9c = estadoBase();
-    registrarPerguntaFeitaV64_(e9c, perguntaDadosA, 'excecoes', 'q-dados-anterior');
+    registrarPerguntaFeitaV64_(e9c, perguntaDadosA, 'frequencia', 'q-dados-anterior');
     var v9c = validarPerguntaInvestigativaV64_(e9c, { proximaPergunta: perguntaExcecaoDistinta, dimensaoAlvo: 'excecoes', justificativa: 'Investigar exceção distinta.', lacunaQueReduz: 'pedidos urgentes' }, function() { return { equivalente: false, indice: -1, motivo: 'fixture' }; });
     assert('9c. exceção operacional diferente continua permitida', v9c.valida === true, JSON.stringify(v9c));
 
