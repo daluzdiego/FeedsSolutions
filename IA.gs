@@ -1449,18 +1449,42 @@ function TESTAR_RETRY_HTTP_GEMINI_V63() {
   registrar(24, 'HTTP 200 com JSON inválido é rejeitado sem retry', !r.sucesso && r.chamadas === 1 && r.erro.indexOf('não é JSON válido') !== -1);
 
   r = executarSequencia([{status:429},{status:500},{status:200, corpo:'{"fim":"ok"}'}]);
-  registrar(25, 'sequência de erros transitórios diferentes recupera na terceira tentativa', r.sucesso && r.chamadas === 3 && r.valor && r.valor.dados.fim === 'ok');
+  registrar(25, '429 genérico sem indicação de quota permite retry legado', r.sucesso && r.chamadas === 3 && r.valor && r.valor.dados.fim === 'ok');
+
+  const corpoQuota = JSON.stringify({
+    error: {
+      code: 429,
+      status: 'RESOURCE_EXHAUSTED',
+      message: 'Quota exceeded',
+      details: [{
+        '@type': 'type.googleapis.com/google.rpc.RetryInfo',
+        retryDelay: '60s'
+      }]
+    }
+  });
+  r = executarSequencia([
+    {status:429, corpo:corpoQuota},
+    {status:200, corpo:'{"nao_deveria_chamar":true}'}
+  ]);
+  registrar(26, '429 RESOURCE_EXHAUSTED encerra sem repetir chamada', !r.sucesso && r.chamadas === 1);
+  registrar(27, '429 de quota retorna mensagem de bloqueio explícita', !r.sucesso && /HTTP 429/.test(r.erro) && /60 s/.test(r.erro));
+  registrar(28, '429 de quota não espera nem executa retry', r.chamadas === 1 && r.esperas.length === 0);
+
+  r = executarSequencia([{
+    status:429,
+    corpo:JSON.stringify({error:{code:429,status:'RESOURCE_EXHAUSTED',message:'Quota exceeded'}})
+  }]);
+  registrar(29, 'RESOURCE_EXHAUSTED sem RetryInfo também encerra sem retry', !r.sucesso && r.chamadas === 1 && /HTTP 429/.test(r.erro));
 
   Logger.log('============================================================');
-  Logger.log('RESULTADO FINAL — RETRY HTTP GEMINI V6.3');
-  Logger.log('============================================================');
-  Logger.log('APROVADOS: ' + aprovados + '/25');
-  Logger.log('FALHAS: ' + (25 - aprovados));
-  Logger.log('PERCENTUAL: ' + Math.round((aprovados / 25) * 100) + '%');
-  Logger.log(aprovados === 25 ? '🏆 TESTAR_RETRY_HTTP_GEMINI_V63: PASSOU' : '❌ TESTAR_RETRY_HTTP_GEMINI_V63: FALHOU');
+  Logger.log('RESULTADO FINAL — RETRY HTTP GEMINI V6.4');
+  Logger.log('APROVADOS: ' + aprovados + '/29');
+  Logger.log('FALHAS: ' + (29 - aprovados));
+  Logger.log('PERCENTUAL: ' + Math.round((aprovados / 29) * 100) + '%');
+  Logger.log(aprovados === 29 ? '🏆 TESTAR_RETRY_HTTP_GEMINI_V63: PASSOU' : '❌ TESTAR_RETRY_HTTP_GEMINI_V63: FALHOU');
   Logger.log('============================================================');
 
-  return { aprovados:aprovados, falhas:25-aprovados, percentual:Math.round((aprovados/25)*100), passou:aprovados===25, resultados:resultados };
+  return { aprovados:aprovados, falhas:29-aprovados, percentual:Math.round((aprovados/29)*100), passou:aprovados===29, resultados:resultados };
 }
 
 
