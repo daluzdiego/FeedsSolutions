@@ -497,7 +497,7 @@ function classificarDimensaoPerguntaV64_(pergunta, estado) {
   var perguntaQuantitativaExplicita =
     /(^|\s)(quantos|quantas)\b/.test(p) ||
     /\b(qual a quantidade|qual o volume|quantidade de pedidos|media de pedidos)\b/.test(p);
-  if (/horario|horarios|pico|maior movimento|distribuicao ao longo do dia|em que periodo|em que periodos|em quais periodos|em que epoca|em quais epocas|epoca do semestre|epocas do semestre|periodo da safra|periodos da safra|em que horario|turno de maior|horas de pico|distribuicao temporal|dias e horarios|quando chegam|em quais dias|periodo do dia|periodos do dia/.test(p) &&
+  if (/horario|horarios|pico|maior movimento|distribuicao ao longo do dia|em que periodo|em que periodos|em quais periodos|em que epoca|em quais epocas|epoca do semestre|epocas do semestre|periodo da safra|periodos da safra|em que horario|turno de maior|horas de pico|distribuicao temporal|dias e horarios|quando chegam|em quais dias|periodo do dia|periodos do dia|variacao temporal|variacao entre dias|varia entre dias|dias uteis|dias da semana|finais de semana|fim de semana|permanece semelhante|distribuicao dos pedidos/.test(p) &&
       !perguntaQuantitativaExplicita) {
     return 'frequencia';
   }
