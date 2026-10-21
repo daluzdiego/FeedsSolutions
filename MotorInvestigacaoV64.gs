@@ -631,6 +631,40 @@ function removerFrequenciaDerivadaApenasDeEscalaV64_(interpretacao, mensagem) {
   return interpretacao;
 }
 
+/**
+ * Valida se os fatos extraídos respondem à intenção real da pergunta pendente.
+ * Não confia apenas em respondeuPerguntaPendente=true vindo do modelo.
+ * A dimensão é inferida pelo texto da pergunta; a resposta precisa conter
+ * evidência útil nessa dimensão para ser considerada respondida.
+ */
+function validarRespostaPerguntaPendenteV64_(estado, interpretacao) {
+  var pendente = estado && estado.perguntaPendente;
+  if (!pendente) return { valida: true, motivo: 'SEM_PERGUNTA_PENDENTE', dimensaoEsperada: null };
+
+  var dimensaoTexto = classificarDimensaoPerguntaV64_(pendente.texto || '', estado);
+  var dimensaoEsperada = dimensaoTexto || pendente.dimensao || null;
+  if (!dimensaoEsperada) {
+    return { valida: false, motivo: 'DIMENSAO_DA_PERGUNTA_PENDENTE_INDETERMINADA', dimensaoEsperada: null };
+  }
+
+  var fatos = interpretacao && Array.isArray(interpretacao.fatos) ? interpretacao.fatos : [];
+  var fatoRespondido = fatos.some(function(fato) {
+    return fato &&
+      fato.dimensao === dimensaoEsperada &&
+      String(fato.evidencia || '').trim() !== '' &&
+      String(fato.valor || '').trim() !== '' &&
+      fato.certeza !== CERTEZA_V64.DESCONHECIDO;
+  });
+
+  return {
+    valida: fatoRespondido,
+    motivo: fatoRespondido ? '' : 'RESPOSTA_SEM_EVIDENCIA_NA_DIMENSAO_PERGUNTADA',
+    dimensaoEsperada: dimensaoEsperada,
+    dimensaoDeclarada: pendente.dimensao || null,
+    dimensaoDeclaradaDivergeDoTexto: !!(dimensaoTexto && pendente.dimensao && dimensaoTexto !== pendente.dimensao)
+  };
+}
+
 function processarTurnoInvestigacaoV64_(estado, mensagem, adaptadores) {
   adaptadores = adaptadores || {};
   if (!estado) estado = criarEstadoInvestigacaoVazioV64_();
@@ -675,8 +709,9 @@ function processarTurnoInvestigacaoV64_(estado, mensagem, adaptadores) {
   var validacao = null;
   var motivoRejeicao = '';
   var tentativas = 0;
+  var validacaoRespostaPendente = validarRespostaPerguntaPendenteV64_(estado, interpretacao);
   var naoRespondeuPerguntaPendente = !!estado.perguntaPendente &&
-    interpretacao.respondeuPerguntaPendente !== true;
+    (interpretacao.respondeuPerguntaPendente !== true || !validacaoRespostaPendente.valida);
 
   // Conflito factual exige esclarecimento antes de continuar a investigação ampla.
   if (conflitos.length) {
@@ -690,11 +725,11 @@ function processarTurnoInvestigacaoV64_(estado, mensagem, adaptadores) {
       lacunaQueReduz: 'conflito factual não resolvido'
     };
     validacao = { valida: true, motivo: '', perguntaAjustada: perguntaCandidata.proximaPergunta, dimensaoAlvo: dimensaoConflito };
-  } else if (podeConcluirDiagnosticoV64_(estado).pode) {
-    // A conclusão é avaliada depois de incorporar os fatos deste turno e antes
-    // de tentar esclarecer uma pergunta pendente. Se todas as condições do gate
-    // já foram satisfeitas, uma interpretação que não reconheceu a resposta à
-    // última pergunta não deve manter o diagnóstico aberto artificialmente.
+  } else if (podeConcluirDiagnosticoV64_(estado).pode &&
+      (!estado.perguntaPendente || !naoRespondeuPerguntaPendente)) {
+    // Só encerra com pergunta pendente quando a resposta atual contém evidência
+    // compatível com a intenção dessa pergunta. O gate factual, isoladamente,
+    // não transforma uma resposta fora do assunto em resposta válida.
     var gatePosInterpretacao = podeConcluirDiagnosticoV64_(estado);
     estado.perguntaPendente = null;
     return {
