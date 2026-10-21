@@ -235,6 +235,21 @@ function TESTAR_CONVERSACIONAL_V64() {
       cmpAceitacao.equivalente === true && cmpAceitacao.metodo === 'REGRA_SEMANTICA_INTENCAO',
       JSON.stringify(cmpAceitacao));
 
+    var interpretacaoEscalaFrequencia = {
+      fatos: [
+        fato('escala', '100 pedidos por dia', 'Recebemos cerca de 100 pedidos por dia', 'ESTIMADO'),
+        fato('frequencia', 'Diaria', 'por dia', 'CONFIRMADO')
+      ]
+    };
+    removerFrequenciaDerivadaApenasDeEscalaV64_(
+      interpretacaoEscalaFrequencia,
+      'Recebemos cerca de 100 pedidos por dia pelo WhatsApp.'
+    );
+    assert('9f. quantidade diária não confirma frequência temporal',
+      interpretacaoEscalaFrequencia.fatos.length === 1 &&
+      interpretacaoEscalaFrequencia.fatos[0].dimensao === 'escala',
+      JSON.stringify(interpretacaoEscalaFrequencia));
+
     // 9. Exceções e regras especiais são persistidas no campo próprio.
     var e9 = estadoBase();
     var r9 = processarTurnoInvestigacaoV64_(e9, 'Pedidos urgentes pulam a conferência.', adaptadores({
@@ -372,7 +387,7 @@ function TESTAR_CONVERSACIONAL_V64() {
   var resumo = {
     versao: 'V6.4',
     suite: 'CONVERSACIONAL_DETERMINISTICA',
-    sucesso: resultados.length === 25 && aprovados === resultados.length,
+    sucesso: resultados.length === 26 && aprovados === resultados.length,
     total: resultados.length,
     aprovados: aprovados,
     falhas: resultados.length - aprovados,
