@@ -606,6 +606,31 @@ function selecionarFallbackDeterministicoInvestigacaoV64_(estado) {
   return null;
 }
 
+/**
+ * Impede que a quantidade por período seja confundida com distribuição temporal.
+ * "100 pedidos por dia" confirma escala; não confirma, por si só, horários/picos.
+ * Remove somente inferências diárias sem marcador temporal independente.
+ */
+function removerFrequenciaDerivadaApenasDeEscalaV64_(interpretacao, mensagem) {
+  if (!interpretacao || !Array.isArray(interpretacao.fatos)) return interpretacao;
+  var textoMensagem = normalizarPerguntaInvestigacaoV64_(mensagem);
+  var temMarcadorTemporalIndependente =
+    /horario|horarios|pico|maior movimento|manha|tarde|noite|madrugada|segunda feira|terca feira|quarta feira|quinta feira|sexta feira|sabado|domingo|dias uteis|fim de semana|final de semana|distribuicao temporal|periodo do dia/.test(textoMensagem);
+  if (temMarcadorTemporalIndependente) return interpretacao;
+
+  interpretacao.fatos = interpretacao.fatos.filter(function(fato) {
+    if (!fato || fato.dimensao !== 'frequencia') return true;
+    var valor = normalizarPerguntaInvestigacaoV64_(fato.valor || '');
+    var evidencia = normalizarPerguntaInvestigacaoV64_(fato.evidencia || '');
+    var frequenciaDerivadaDeQuantidade =
+      /^(diaria|diario|diariamente|todos os dias|por dia)$/.test(valor) &&
+      /(\d+|cem|duzentos|trezentos|quantidade|volume|pedidos por dia|pedido por dia)/.test(evidencia + ' ' + textoMensagem) &&
+      !/horario|horarios|pico|manha|tarde|noite|madrugada|segunda feira|terca feira|quarta feira|quinta feira|sexta feira|sabado|domingo|dias uteis|fim de semana|final de semana|distribuicao temporal|periodo do dia/.test(evidencia);
+    return !frequenciaDerivadaDeQuantidade;
+  });
+  return interpretacao;
+}
+
 function processarTurnoInvestigacaoV64_(estado, mensagem, adaptadores) {
   adaptadores = adaptadores || {};
   if (!estado) estado = criarEstadoInvestigacaoVazioV64_();
@@ -625,6 +650,7 @@ function processarTurnoInvestigacaoV64_(estado, mensagem, adaptadores) {
   );
   interpretacao = corrigirFrequenciaMalClassificadaV64_(interpretacao, texto, estado);
   interpretacao = corrigirImpactoMalClassificadoV64_(interpretacao, texto, estado);
+  interpretacao = removerFrequenciaDerivadaApenasDeEscalaV64_(interpretacao, texto);
   if (!interpretacao || !Array.isArray(interpretacao.fatos)) {
     throw new Error('INTERPRETACAO_TURNO_V64_INVALIDA');
   }
