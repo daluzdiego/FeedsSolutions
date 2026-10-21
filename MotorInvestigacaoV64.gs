@@ -742,9 +742,26 @@ function processarTurnoInvestigacaoV64_(estado, mensagem, adaptadores) {
     };
   } else if (interpretacao.ambiguidade === true || naoRespondeuPerguntaPendente) {
     var motivoEsclarecimento = naoRespondeuPerguntaPendente
-      ? 'RESPOSTA_NAO_RESPONDEU_PERGUNTA_PENDENTE'
+      ? 'RESPOSTA_NAO_RESPONDEU_PERGUNTA_PENDENTE:' +
+        (validacaoRespostaPendente.motivo || 'SEM_EVIDENCIA_COMPATIVEL')
       : String(interpretacao.explicacaoAmbiguidade || 'RESPOSTA_AMBIGUA');
-    while (tentativas < 2) {
+
+    // Se a resposta confirmou outra dimensão, esclarece diretamente a intenção
+    // original em vez de aceitar a flag do modelo ou saltar para conclusão.
+    if (naoRespondeuPerguntaPendente &&
+        validacaoRespostaPendente.dimensaoEsperada === 'frequencia') {
+      perguntaCandidata = {
+        proximaPergunta: 'A quantidade de pedidos varia conforme os dias ou horários, ou permanece semelhante?',
+        dimensaoAlvo: 'frequencia',
+        justificativa: 'A resposta anterior confirmou a quantidade, mas não esclareceu a distribuição temporal solicitada.',
+        lacunaQueReduz: 'distribuição temporal',
+        forcarDetalhamento: true
+      };
+      validacao = validarPerguntaInvestigativaV64_(
+        estado, perguntaCandidata, adaptadores.verificarRepeticao
+      );
+    }
+    while (tentativas < 2 && (!validacao || !validacao.valida)) {
       perguntaCandidata = selecionarProximaPerguntaInvestigacaoV64_(
         estado, texto, motivoRejeicao || motivoEsclarecimento,
         adaptadores.selecionarPergunta
