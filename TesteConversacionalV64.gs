@@ -203,6 +203,20 @@ function TESTAR_CONVERSACIONAL_V64() {
       cmp.equivalente === true && cmp.indice === 0,
       JSON.stringify(cmp));
 
+    var perguntaDadosA = 'O que acontece quando um pedido chega fora desse horário de pico ou há algum problema com as informações enviadas pelo cliente?';
+    var perguntaDadosB = 'O que acontece quando um pedido chega com dados incompletos ou errados no WhatsApp?';
+    var perguntaExcecaoDistinta = 'O que acontece quando um pedido urgente precisa pular a conferência?';
+    var cmpDados = compararPerguntaSemanticamenteV64_([perguntaDadosA], perguntaDadosB, function() { return { equivalente: false, indice: -1, motivo: 'fixture' }; });
+    assert('9a. paráfrases sobre dados incompletos/incorretos são detectadas', cmpDados.equivalente === true && cmpDados.indice === 0 && cmpDados.metodo === 'REGRA_SEMANTICA_QUALIDADE_DADOS', JSON.stringify(cmpDados));
+    var e9b = estadoBase();
+    registrarPerguntaFeitaV64_(e9b, perguntaDadosA, 'excecoes', 'q-dados-anterior');
+    var v9b = validarPerguntaInvestigativaV64_(e9b, { proximaPergunta: perguntaDadosB, dimensaoAlvo: 'excecoes', justificativa: 'Investigar dados incompletos.', lacunaQueReduz: 'dados incompletos' }, function() { return { equivalente: false, indice: -1, motivo: 'fixture' }; });
+    assert('9b. validador rejeita repetição semântica', v9b.valida === false && v9b.motivo === 'REPETICAO_SEMANTICA', JSON.stringify(v9b));
+    var e9c = estadoBase();
+    registrarPerguntaFeitaV64_(e9c, perguntaDadosA, 'excecoes', 'q-dados-anterior');
+    var v9c = validarPerguntaInvestigativaV64_(e9c, { proximaPergunta: perguntaExcecaoDistinta, dimensaoAlvo: 'excecoes', justificativa: 'Investigar exceção distinta.', lacunaQueReduz: 'pedidos urgentes' }, function() { return { equivalente: false, indice: -1, motivo: 'fixture' }; });
+    assert('9c. exceção operacional diferente continua permitida', v9c.valida === true, JSON.stringify(v9c));
+
     // 9. Exceções e regras especiais são persistidas no campo próprio.
     var e9 = estadoBase();
     var r9 = processarTurnoInvestigacaoV64_(e9, 'Pedidos urgentes pulam a conferência.', adaptadores({
@@ -340,7 +354,7 @@ function TESTAR_CONVERSACIONAL_V64() {
   var resumo = {
     versao: 'V6.4',
     suite: 'CONVERSACIONAL_DETERMINISTICA',
-    sucesso: resultados.length === 20 && aprovados === resultados.length,
+    sucesso: resultados.length === 23 && aprovados === resultados.length,
     total: resultados.length,
     aprovados: aprovados,
     falhas: resultados.length - aprovados,
