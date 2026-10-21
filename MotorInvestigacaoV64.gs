@@ -292,6 +292,18 @@ function assinaturaIntencaoPerguntaV64_(texto) {
       /sucesso|criterio|resultado observavel|reducao|reduzir/.test(p)) {
     return 'ACEITACAO_CRITERIO_DE_SUCESSO';
   }
+
+  // Detecta paráfrases que investigam a mesma variação do movimento entre dias.
+  // Ex.: "em quais dias da semana o volume costuma ser maior?" e
+  // "há variação significativa conforme o dia da semana?". Sem esta assinatura,
+  // o comparador lexical podia deixar passar a repetição por vocabulário diferente.
+  var mencionaDiaSemana =
+    /dia da semana|dias da semana|dias uteis|finais de semana|fim de semana|feriados/.test(p);
+  var investigaVariacao =
+    /variacao|varia conforme|varia entre|muda entre|maior movimento|volume .* maior|movimento .* maior|pico|se mantem|mantem constante|permanece semelhante|permanece igual/.test(p);
+  if (dim === 'frequencia' && mencionaDiaSemana && investigaVariacao) {
+    return 'FREQUENCIA_VARIACAO_ENTRE_DIAS';
+  }
   return '';
 }
 
