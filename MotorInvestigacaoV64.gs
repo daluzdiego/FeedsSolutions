@@ -301,7 +301,12 @@ function assinaturaIntencaoPerguntaV64_(texto) {
     /dia da semana|dias da semana|dias uteis|finais de semana|fim de semana|feriados/.test(p);
   var investigaVariacao =
     /variacao|varia conforme|varia entre|muda entre|maior movimento|volume .* maior|movimento .* maior|pico|se mantem|mantem constante|permanece semelhante|permanece igual/.test(p);
-  if (dim === 'frequencia' && mencionaDiaSemana && investigaVariacao) {
+  // A intenção temporal é reconhecida pelos marcadores semânticos, mesmo quando
+  // o classificador dimensional inicial é atraído por uma quantidade citada
+  // (ex.: “100 pedidos diários”). A dimensão divergente não deve impedir esta
+  // assinatura de detectar a repetição; perguntas puramente quantitativas não
+  // passam pelos dois marcadores temporais abaixo.
+  if (mencionaDiaSemana && investigaVariacao) {
     return 'FREQUENCIA_VARIACAO_ENTRE_DIAS';
   }
   return '';
