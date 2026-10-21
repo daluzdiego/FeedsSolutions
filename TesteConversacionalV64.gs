@@ -235,6 +235,21 @@ function TESTAR_CONVERSACIONAL_V64() {
       cmpAceitacao.equivalente === true && cmpAceitacao.metodo === 'REGRA_SEMANTICA_INTENCAO',
       JSON.stringify(cmpAceitacao));
 
+    // Regressão do E2E real: a pergunta sobre dias/horários de maior movimento
+    // não pode reaparecer depois como "variação significativa conforme o dia".
+    var perguntaMovimentoA = 'Em quais dias da semana ou horários o volume desses pedidos costuma ser maior?';
+    var perguntaMovimentoB = 'Existe alguma variação significativa nesses 100 pedidos diários dependendo do dia da semana?';
+    var cmpMovimento = compararPerguntaSemanticamenteV64_(
+      [perguntaMovimentoA],
+      perguntaMovimentoB,
+      function() { return { equivalente: false, indice: -1, motivo: 'fixture' }; }
+    );
+    assert('9g. paráfrase de variação do movimento entre dias é detectada como repetição',
+      cmpMovimento.equivalente === true &&
+      cmpMovimento.indice === 0 &&
+      cmpMovimento.metodo === 'REGRA_SEMANTICA_INTENCAO',
+      JSON.stringify(cmpMovimento));
+
     var interpretacaoEscalaFrequencia = {
       fatos: [
         fato('escala', '100 pedidos por dia', 'Recebemos cerca de 100 pedidos por dia', 'ESTIMADO'),
