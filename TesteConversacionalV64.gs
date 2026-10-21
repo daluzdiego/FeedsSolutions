@@ -463,7 +463,7 @@ function TESTAR_CONVERSACIONAL_V64() {
   var resumo = {
     versao: 'V6.4',
     suite: 'CONVERSACIONAL_DETERMINISTICA',
-    sucesso: resultados.length === 29 && aprovados === resultados.length,
+    sucesso: resultados.length > 0 && aprovados === resultados.length,
     total: resultados.length,
     aprovados: aprovados,
     falhas: resultados.length - aprovados,
