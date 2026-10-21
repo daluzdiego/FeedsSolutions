@@ -1003,18 +1003,23 @@ function executarGemini_(
 
     if (statusCode === 429) {
       const esperaApiMs = extrairEsperaRetryGeminiMs_(texto);
-      // Quota excedida não é erro transitório comum: não repetir nesta execução.
-      // Bloqueia chamadas futuras por pelo menos 60 s, ou mais se a API pedir.
-      const bloqueioMs = Math.max(60000, esperaApiMs || 0);
-      if (propriedades) {
-        propriedades.setProperty(CHAVE_BLOQUEIO_429, String(Date.now() + bloqueioMs));
+      const quotaEsgotada = esperaApiMs !== null || /RESOURCE_EXHAUSTED|quota exceeded|exceeded your current quota/i.test(texto);
+      if (quotaEsgotada) {
+        // Quota esgotada não é erro transitório comum: não repetir nesta execução.
+        // Bloqueia chamadas futuras por pelo menos 60 s, ou mais se a API pedir.
+        const bloqueioMs = Math.max(60000, esperaApiMs || 0);
+        if (propriedades) {
+          propriedades.setProperty(CHAVE_BLOQUEIO_429, String(Date.now() + bloqueioMs));
+        }
+        Logger.log('GEMINI - QUOTA 429: sem retry imediato; bloqueio de novas chamadas por ' + bloqueioMs + ' ms.');
+        throw new Error(
+          'Gemini retornou HTTP 429 (quota/rate limit). ' +
+          'Novas chamadas serão pausadas por ' + Math.ceil(bloqueioMs / 1000) +
+          ' s. Aguarde a janela de quota antes de executar novamente.'
+        );
       }
-      Logger.log('GEMINI - QUOTA 429: sem retry imediato; bloqueio de novas chamadas por ' + bloqueioMs + ' ms.');
-      throw new Error(
-        'Gemini retornou HTTP 429 (quota/rate limit). ' +
-        'Novas chamadas serão pausadas por ' + Math.ceil(bloqueioMs / 1000) +
-        ' s. Aguarde a janela de quota antes de executar novamente.'
-      );
+      // 429 sem sinal de quota esgotada pode ser um rate limit transitório simples;
+      // mantém o retry legado nesses cenários para compatibilidade.
     }
 
     if (
