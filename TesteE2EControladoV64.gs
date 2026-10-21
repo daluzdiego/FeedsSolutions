@@ -19,6 +19,8 @@ function TESTAR_E2E_CONTROLADO_V64() {
   var inicio = null;
   var retorno = null;
   var chamadaV64Observada = false;
+  var motorV64Sucesso = false;
+  var motorV64Detalhe = '';
   var chaveAnterior = FEEDS_MOTOR_INVESTIGACAO_V64_ATIVO;
   var funcaoMotorOriginal = processarTurnoPersistidoV64_;
   var erroExecucao = '';
@@ -76,7 +78,16 @@ function TESTAR_E2E_CONTROLADO_V64() {
         diagnostico_id: diagnostico && diagnostico.diagnostico_id,
         mensagemCaracteres: String(mensagem || '').length
       }));
-      return funcaoMotorOriginal(diagnostico, contexto, mensagem);
+      var resultadoMotor = funcaoMotorOriginal(diagnostico, contexto, mensagem);
+      motorV64Sucesso = !!(resultadoMotor && resultadoMotor.resultado && resultadoMotor.resultado.sucesso === true);
+      motorV64Detalhe = JSON.stringify({
+        sucesso: resultadoMotor && resultadoMotor.resultado && resultadoMotor.resultado.sucesso,
+        motivo: resultadoMotor && resultadoMotor.resultado && resultadoMotor.resultado.motivo,
+        pergunta: resultadoMotor && resultadoMotor.resultado && resultadoMotor.resultado.proxima_pergunta,
+        persistencia: resultadoMotor && resultadoMotor.persistencia
+      }).slice(0, 700);
+      Logger.log('[E2E][RETORNO_MOTOR] ' + motorV64Detalhe);
+      return resultadoMotor;
     };
 
     FEEDS_MOTOR_INVESTIGACAO_V64_ATIVO = true;
@@ -99,6 +110,9 @@ function TESTAR_E2E_CONTROLADO_V64() {
 
     verificar('controlador realmente chamou o motor V6.4', chamadaV64Observada,
       chamadaV64Observada ? 'processarTurnoPersistidoV64_ foi chamado' : 'o controlador não chamou o motor V6.4');
+
+    verificar('motor V6.4 concluiu o turno sem fallback por falha', motorV64Sucesso,
+      motorV64Detalhe || 'o motor não retornou resultado de sucesso');
 
     var investigacaoSalva = buscarInvestigacaoV62_({ diagnostico_id: inicio.diagnostico_id });
     verificar('investigação criada e recuperável pela persistência', !!investigacaoSalva,
@@ -138,12 +152,14 @@ function TESTAR_E2E_CONTROLADO_V64() {
   var resumo = {
     versao: 'V6.4',
     suite: 'E2E_CONTROLADO_CONTROLADOR_REAL',
-    sucesso: verificacoes.length === 5 && aprovados === 5 &&
+    sucesso: verificacoes.length === 6 && aprovados === 6 &&
       FEEDS_MOTOR_INVESTIGACAO_V64_ATIVO === false && !erroExecucao,
     total: verificacoes.length,
     aprovados: aprovados,
     falhas: verificacoes.length - aprovados,
     motorV64RealmenteChamado: chamadaV64Observada,
+    motorV64Sucesso: motorV64Sucesso,
+    motorV64Detalhe: motorV64Detalhe,
     chaveRestauradaDesligada: FEEDS_MOTOR_INVESTIGACAO_V64_ATIVO === false,
     duracaoMs: new Date().getTime() - inicioMs,
     registrosTesteMantidos: !!inicio,
