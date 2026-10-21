@@ -770,8 +770,16 @@ function executarGemini_(
     3000
   ];
 
-  // Em HTTP 429, respeita RetryInfo informado pelo Gemini em vez de
-  // insistir após poucos segundos e ampliar a cota excedida.
+  // Controle compartilhado entre chamadas do mesmo projeto Apps Script.
+  // Intervalo conservador de 4,5 s para reduzir rajadas na quota gratuita.
+  // Os testes com dependências injetadas não usam o throttle real.
+  const CHAVE_ULTIMA_CHAMADA = 'FEEDS_GEMINI_ULTIMA_CHAMADA_MS';
+  const CHAVE_BLOQUEIO_429 = 'FEEDS_GEMINI_BLOQUEIO_ATE_MS';
+  const INTERVALO_MINIMO_MS = 4500;
+  const propriedades = !dependenciasTeste && typeof PropertiesService !== 'undefined'
+    ? PropertiesService.getScriptProperties()
+    : null;
+
   let esperaDinamicaMs = null;
 
 
@@ -812,15 +820,28 @@ function executarGemini_(
     tentativa++
   ) {
 
-    const esperaAtualMs = esperaDinamicaMs !== null
+    let esperaAtualMs = esperaDinamicaMs !== null
       ? esperaDinamicaMs
       : ESPERAS_MS[tentativa - 1];
     esperaDinamicaMs = null;
+
+    if (propriedades && tentativa === 1) {
+      const agora = Date.now();
+      const bloqueioAte = Number(propriedades.getProperty(CHAVE_BLOQUEIO_429) || 0);
+      const ultimaChamada = Number(propriedades.getProperty(CHAVE_ULTIMA_CHAMADA) || 0);
+      const esperaBloqueio = Math.max(0, bloqueioAte - agora);
+      const esperaIntervalo = Math.max(0, INTERVALO_MINIMO_MS - (agora - ultimaChamada));
+      esperaAtualMs = Math.max(esperaAtualMs, esperaBloqueio, esperaIntervalo);
+    }
+
     if (esperaAtualMs > 0) {
       Logger.log('GEMINI - AGUARDANDO ' + esperaAtualMs + ' ms antes da tentativa ' + tentativa);
       sleepGemini(esperaAtualMs);
     }
 
+    if (propriedades) {
+      propriedades.setProperty(CHAVE_ULTIMA_CHAMADA, String(Date.now()));
+    }
 
     Logger.log(
       'GEMINI - TENTATIVA ' +
@@ -980,14 +1001,26 @@ function executarGemini_(
       );
 
 
+    if (statusCode === 429) {
+      const esperaApiMs = extrairEsperaRetryGeminiMs_(texto);
+      // Quota excedida não é erro transitório comum: não repetir nesta execução.
+      // Bloqueia chamadas futuras por pelo menos 60 s, ou mais se a API pedir.
+      const bloqueioMs = Math.max(60000, esperaApiMs || 0);
+      if (propriedades) {
+        propriedades.setProperty(CHAVE_BLOQUEIO_429, String(Date.now() + bloqueioMs));
+      }
+      Logger.log('GEMINI - QUOTA 429: sem retry imediato; bloqueio de novas chamadas por ' + bloqueioMs + ' ms.');
+      throw new Error(
+        'Gemini retornou HTTP 429 (quota/rate limit). ' +
+        'Novas chamadas serão pausadas por ' + Math.ceil(bloqueioMs / 1000) +
+        ' s. Aguarde a janela de quota antes de executar novamente.'
+      );
+    }
+
     if (
       erroTransitorio &&
       tentativa < MAX_TENTATIVAS
     ) {
-
-      if (statusCode === 429) {
-        esperaDinamicaMs = extrairEsperaRetryGeminiMs_(texto);
-      }
 
       Logger.log(
         'GEMINI - ERRO TRANSITÓRIO HTTP ' +
