@@ -163,6 +163,28 @@ function TESTAR_DIAGNOSTICO_CIRURGICO_PERGUNTAS_V64() {
       validacao08.valida === false && validacao08.motivo === 'DIMENSAO_JA_SUFICIENTE',
       JSON.stringify({ lacuna: e8.lacunas.frequencia, fato: e8.fatos.frequencia }));
 
+    // Caso 10: paráfrases sobre estabilidade da média diária são frequência,
+    // não uma nova pergunta de escala. Reproduz a duplicação observada no E2E Gemini.
+    var perguntaEstabilidadeMedia = 'Poderia confirmar se a média de 100 pedidos por dia se mantém em todos os dias da semana ou se há dias de maior movimento?';
+    var dimEstabilidadeMedia = classificarDimensaoPerguntaV64_(perguntaEstabilidadeMedia, null);
+    var e10 = novoEstadoBase();
+    atualizarFatoV64_(e10, 'escala', '100 pedidos por dia', 'São exatamente 100 pedidos por dia', 'CONFIRMADO', 'fixture-escala');
+    var candidataEscalaTemporal = {
+      proximaPergunta: perguntaEstabilidadeMedia,
+      dimensaoAlvo: 'escala',
+      justificativa: 'Fixture de regressão para confusão entre escala e frequência.',
+      lacunaQueReduz: 'quantidade de pedidos'
+    };
+    var validacao10 = validarPerguntaInvestigativaV64_(e10, candidataEscalaTemporal,
+      function() { return { equivalente: false, indice: -1, motivo: 'fixture sem repetição' }; });
+    registrar('10', 'Pergunta sobre estabilidade da média entre dias é frequência e não pode ser rotulada como escala',
+      { dimensaoDetectada: 'frequencia', validacao: false, motivo: 'DIMENSAO_ALVO_NAO_CORRESPONDE_A_PERGUNTA' },
+      { dimensaoDetectada: dimEstabilidadeMedia, validacao: validacao10.valida, motivo: validacao10.motivo },
+      dimEstabilidadeMedia === 'frequencia' &&
+        validacao10.valida === false &&
+        validacao10.motivo === 'DIMENSAO_ALVO_NAO_CORRESPONDE_A_PERGUNTA',
+      perguntaEstabilidadeMedia);
+
     // Caso 09: formato de saída da seleção deve incluir campos coerentes e auditáveis.
     var candidata09 = {
       proximaPergunta: 'Em quais períodos do dia o movimento aumenta?',
@@ -194,7 +216,7 @@ function TESTAR_DIAGNOSTICO_CIRURGICO_PERGUNTAS_V64() {
   var resumo = {
     versao: 'V6.4',
     suite: 'DIAGNOSTICO_CIRURGICO_PERGUNTAS',
-    sucesso: resultados.length === 9 && falhas === 0,
+    sucesso: resultados.length === 10 && falhas === 0,
     total: resultados.length,
     aprovados: aprovados,
     falhas: falhas,
