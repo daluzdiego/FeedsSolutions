@@ -372,25 +372,25 @@ function TESTAR_CONVERSACIONAL_V64() {
         return { fatos: [], respondeuPerguntaPendente: false, ambiguidade: true, explicacaoAmbiguidade: 'Resposta não reconhecida para a pergunta pendente.' };
       }
     }));
-    assert('20. gate satisfeito encerra diagnóstico mesmo se a resposta à última pergunta não foi reconhecida',
+    assert('20. gate factual não encerra diagnóstico enquanto a pergunta pendente não foi respondida',
       r20.sucesso === true &&
-      r20.status_diagnostico === 'CONCLUIDO' &&
+      r20.status_diagnostico !== 'CONCLUIDO' &&
       r20.gate && r20.gate.pode === true &&
-      r20.estado.perguntaPendente === null &&
-      r20.proxima_pergunta === '');
+      r20.estado.perguntaPendente !== null &&
+      r20.proxima_pergunta !== '');
 
     // 27. A flag do Gemini não basta: resposta só de escala não responde
     // a pergunta cuja intenção textual é frequência/distribuição temporal.
     var estadoRespostaInadequada = estadoBase();
-    atualizarFatoV64_(estadoRespostaInadequada, 'escala', '100 pedidos por dia', 'São exatamente 100 pedidos por dia', CERTEZA_V64.CONFIRMADO, 'fixture');
+    atualizarFatoV64_(estadoRespostaInadequada, 'escala', 'Exatamente 100 pedidos por dia', 'São exatamente 100 pedidos por dia', CERTEZA_V64.CONFIRMADO, 'fixture');
     atualizarFatoV64_(estadoRespostaInadequada, 'frequencia', 'Pico entre 10h e meio-dia', 'Os pedidos chegam entre 10h e meio-dia', CERTEZA_V64.CONFIRMADO, 'fixture');
     atualizarFatoV64_(estadoRespostaInadequada, 'impacto', 'Duas horas por dia', 'A conferência consome duas horas por dia', CERTEZA_V64.CONFIRMADO, 'fixture');
     atualizarFatoV64_(estadoRespostaInadequada, 'objetivo', 'Reduzir retrabalho', 'Queremos reduzir retrabalho', CERTEZA_V64.CONFIRMADO, 'fixture');
     atualizarFatoV64_(estadoRespostaInadequada, 'aceitacao', 'Reduzir retrabalho pela metade', 'Sucesso é reduzir retrabalho pela metade', CERTEZA_V64.CONFIRMADO, 'fixture');
-    registrarPerguntaFeitaV64_(estadoRespostaInadequada, 'Existe algum detalhe sobre esses 100 pedidos diários, como variação entre dias úteis e finais de semana?', 'escala', 'q-variação');
+    registrarPerguntaFeitaV64_(estadoRespostaInadequada, 'Existe algum detalhe sobre esses 100 pedidos diários, como variação entre dias úteis e finais de semana?', 'frequencia', 'q-variação');
     definirPerguntaPendenteV64_(estadoRespostaInadequada, {
       id: 'q-variação',
-      dimensao: 'escala',
+      dimensao: 'frequencia',
       texto: 'Existe algum detalhe sobre esses 100 pedidos diários, como variação entre dias úteis e finais de semana?'
     });
     var validacaoRespostaInadequada = validarRespostaPerguntaPendenteV64_(estadoRespostaInadequada, {
@@ -434,7 +434,8 @@ function TESTAR_CONVERSACIONAL_V64() {
     assert('27c. o fluxo não conclui quando a resposta não atende à pergunta pendente',
       respostaInadequadaNoFluxo.status_diagnostico !== 'CONCLUIDO' &&
       respostaInadequadaNoFluxo.estado.perguntaPendente !== null &&
-      respostaInadequadaNoFluxo.proxima_pergunta !== '',
+      respostaInadequadaNoFluxo.estado.perguntaPendente.dimensao === 'frequencia' &&
+      /varia conforme os dias ou horários/.test(respostaInadequadaNoFluxo.proxima_pergunta),
       'status=' + respostaInadequadaNoFluxo.status_diagnostico +
       '; pendente=' + JSON.stringify(respostaInadequadaNoFluxo.estado.perguntaPendente) +
       '; próxima=' + respostaInadequadaNoFluxo.proxima_pergunta);
