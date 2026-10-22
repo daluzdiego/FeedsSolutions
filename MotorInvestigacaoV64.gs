@@ -74,7 +74,10 @@ function construirPromptProximaPerguntaV64_(estado, ultimaMensagem, motivoRejeic
     'Se a última resposta for ambígua, faça uma pergunta de esclarecimento estreita, ligada ao que foi dito.',
     'Pergunte uma coisa por turno, em linguagem simples, sem múltiplas perguntas unidas.',
     'Não transforme estimativas em fatos confirmados. Não invente respostas.',
-    'Retorne somente JSON: {"proximaPergunta":"...","dimensaoAlvo":"processo|dor_causa|escala|frequencia|impacto|excecoes|objetivo|restricoes|aceitacao","justificativa":"...","lacunaQueReduz":"..."}.',
+    'REGRA DE PROGRESSÃO: investigue para tomar uma decisão, não para preencher um formulário. Se o empresário já declarou a meta, a dificuldade, a limitação e o que quer que a Feeds execute, não continue perguntando sobre preferências de conteúdo nem sobre como ele validará uma solução que ainda não foi proposta. Consolide o diagnóstico preliminar e avance para recomendação/escopo.',
+    'Quando o empresário disser explicitamente que não sabe fazer e pedir que a Feeds decida, crie ou execute algo (por exemplo, “quero que vocês façam as postagens”), trate isso como decisão explícita sobre o escopo desejado, registre a evidência e não repita perguntas para obter essa mesma decisão. Não confunda escopo solicitado com garantia de resultado.',
+    'Em um caso de captação de clientes por redes sociais, não exija frequência de postagem como pré-requisito para concluir o diagnóstico preliminar: ela pode ser proposta pela Feeds. A meta de clientes deve ser registrada como meta comercial, não como prova de que as postagens por si só a alcançarão.',
+    'Retorne somente JSON: {"proximaPergunta":"...","dimensaoAlvo":"processo|dor_causa|escala|frequencia|impacto|excecoes|objetivo|restricoes|aceitacao","justificativa":"...","lacunaQueReduz":"..."}.'
     '',
     'ESTADO CONSOLIDADO:',
     JSON.stringify(resumo),
@@ -549,8 +552,49 @@ function compararDimensaoPerguntaComHistoricoV64_(estado, indice) {
   return classificarDimensaoPerguntaV64_(registro.texto || registro, estado);
 }
 
+function detectarPerfilMarketingV64_(estado) {
+  var texto = (estado && Array.isArray(estado.historico) ? estado.historico : [])
+    .map(function(t) { return String(t && t.texto || ''); }).join(' ').toLowerCase()
+    .normalize('NFD').replace(/[\\u0300-\\u036f]/g, '');
+  return /capt(ar|acao|ando) clientes|captacao de clientes|novos clientes/.test(texto) &&
+    /redes sociais|instagram|postagens|postar|divulgacao|publicar/.test(texto);
+}
+
+function registrarEscopoDelegadoMarketingV64_(interpretacao, mensagem, estado) {
+  if (!interpretacao || !Array.isArray(interpretacao.fatos) || !estado) return interpretacao;
+  var contexto = (estado.historico || []).map(function(t) { return String(t && t.texto || ''); }).join(' ');
+  contexto += ' ' + String(mensagem || '');
+  var texto = normalizarPerguntaInvestigacaoV64_(contexto);
+  var eMarketing = /captar clientes|captacao de clientes|novos clientes/.test(texto) &&
+    /redes sociais|instagram|postagens|postar|divulgacao|publicar/.test(texto);
+  var delegouExecucao = /quero que voces facam|quero que voces decidam|voces facam as postagens|facam as postagens|facam por mim|fiquem responsaveis|quero que voces cuidem|nao sei fazer/.test(normalizarPerguntaInvestigacaoV64_(mensagem));
+  if (!eMarketing || !delegouExecucao) return interpretacao;
+
+  // Registra o escopo solicitado literalmente; não o apresenta como métrica de sucesso.
+  var evidencia = String(mensagem || '').trim();
+  var valor = 'Escopo solicitado: a Feeds deve definir o conteúdo e executar as postagens nas redes sociais; métrica de resultado ainda será proposta.';
+  var existente = interpretacao.fatos.some(function(f) {
+    return f && f.dimensao === 'aceitacao' &&
+      /escopo solicitado|executar as postagens/.test(normalizarPerguntaInvestigacaoV64_(f.valor || ''));
+  });
+  if (!existente) interpretacao.fatos.push({
+    dimensao: 'aceitacao',
+    valor: valor,
+    evidencia: evidencia,
+    certeza: 'CONFIRMADO',
+    certezaDetalhe: '',
+    tipoAtualizacao: 'NOVO'
+  });
+  return interpretacao;
+}
+
 function podeConcluirDiagnosticoV64_(estado) {
-  var essenciais = ['processo', 'dor_causa', 'escala', 'frequencia', 'impacto', 'objetivo'];
+  var perfilMarketing = detectarPerfilMarketingV64_(estado);
+  // Para captação por redes sociais, frequência e métrica final podem ser
+  // definidas na proposta; não devem bloquear o diagnóstico preliminar.
+  var essenciais = perfilMarketing
+    ? ['processo', 'dor_causa', 'escala', 'impacto', 'objetivo']
+    : ['processo', 'dor_causa', 'escala', 'frequencia', 'impacto', 'objetivo'];
   for (var i = 0; i < essenciais.length; i++) {
     var dim = essenciais[i];
     var fato = estado && estado.fatos && estado.fatos[dim];
@@ -569,7 +613,7 @@ function podeConcluirDiagnosticoV64_(estado) {
   var objetivo = estado.fatos.objetivo;
   var aceitacao = estado.fatos.aceitacao;
   if (objetivo.certeza === CERTEZA_V64.CONFIRMADO &&
-      (!aceitacao || aceitacao.certeza === CERTEZA_V64.DESCONHECIDO)) {
+      (!aceitacao || aceitacao.certeza === CERTEZA_V64.DESCONHECIDO) && !perfilMarketing) {
     return { pode: false, motivo: 'CRITERIOS_ACEITACAO_DESCONHECIDOS' };
   }
   if (estado && Array.isArray(estado.conflitos) &&
@@ -705,6 +749,7 @@ function processarTurnoInvestigacaoV64_(estado, mensagem, adaptadores) {
   );
   interpretacao = corrigirFrequenciaMalClassificadaV64_(interpretacao, texto, estado);
   interpretacao = corrigirImpactoMalClassificadoV64_(interpretacao, texto, estado);
+  interpretacao = registrarEscopoDelegadoMarketingV64_(interpretacao, texto, estado);
   interpretacao = removerFrequenciaDerivadaApenasDeEscalaV64_(interpretacao, texto);
   if (!interpretacao || !Array.isArray(interpretacao.fatos)) {
     throw new Error('INTERPRETACAO_TURNO_V64_INVALIDA');
