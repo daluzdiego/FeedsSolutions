@@ -203,3 +203,73 @@ function TESTAR_ADVERSARIAL_INVESTIGACAO_V64() {
   Logger.log('FEEDS SOLUTIONS V6.4 — TESTE ADVERSARIAL: ' + JSON.stringify(resumo));
   return resumo;
 }
+
+
+/**
+ * Regressão do caso real: empresário quer captar clientes via redes sociais,
+ * não sabe publicar e delega à Feeds a decisão e execução das postagens.
+ * A frequência de publicação e a métrica final podem ser definidas na proposta;
+ * não podem manter o diagnóstico preliminar em loop.
+ */
+function TESTAR_CASO_MARKETING_DELEGADO_V64() {
+  var resultados = [];
+  function assert(nome, ok, detalhe) {
+    resultados.push({ teste: nome, passou: !!ok, detalhe: detalhe || '' });
+  }
+  try {
+    var estado = criarEstadoInvestigacaoVazioV64_();
+    estado.historico = [
+      { papel: 'EMPRESARIO', texto: 'Estou precisando captar clientes para minha empresa de IA, mas nem divulgamos nas redes sociais.' },
+      { papel: 'SISTEMA', texto: 'Qual é a sua meta de captação de novos clientes por mês?' },
+      { papel: 'EMPRESARIO', texto: 'Pretendo ter 300 clientes por mês.' },
+      { papel: 'EMPRESARIO', texto: 'Eu nunca posto nada; ninguém sabe que a minha empresa existe.' },
+      { papel: 'EMPRESARIO', texto: 'Eu não sei fazer.' }
+    ];
+    atualizarFatoV64_(estado, 'processo', 'Não publica nas redes sociais', 'Eu nunca posto nada', 'CONFIRMADO', 'fixture');
+    atualizarFatoV64_(estado, 'dor_causa', 'Falta de divulgação impede captação', 'Nem divulgamos nas redes sociais', 'CONFIRMADO', 'fixture');
+    atualizarFatoV64_(estado, 'escala', 'Meta de 300 clientes por mês', 'Pretendo ter 300 clientes por mês', 'CONFIRMADO', 'fixture');
+    atualizarFatoV64_(estado, 'impacto', 'A empresa não é conhecida', 'Ninguém sabe que a minha empresa existe', 'CONFIRMADO', 'fixture');
+    atualizarFatoV64_(estado, 'objetivo', 'Captar clientes para a empresa de IA', 'Estou precisando captar clientes para minha empresa de IA', 'CONFIRMADO', 'fixture');
+    definirPerguntaPendenteV64_(estado, { dimensao: 'aceitacao', texto: 'Como você validará a solução de postagens automáticas?' });
+
+    var mensagem = 'Quero que vocês façam as postagens.';
+    var interpretacao = registrarEscopoDelegadoMarketingV64_({
+      fatos: [],
+      respondeuPerguntaPendente: false,
+      ambiguidade: false,
+      explicacaoAmbiguidade: ''
+    }, mensagem, estado);
+    interpretacao.fatos.forEach(function(fato) {
+      atualizarFatoV64_(estado, fato.dimensao, fato.valor, fato.evidencia, fato.certeza, 'turno-real-fixture', {
+        certezaDetalhe: fato.certezaDetalhe || null,
+        tipoAtualizacao: fato.tipoAtualizacao || ''
+      });
+    });
+    var gate = podeConcluirDiagnosticoV64_(estado);
+    assert('Reconhece que o caso é captação por redes sociais', detectarPerfilMarketingV64_(estado));
+    assert('Registra execução das postagens como escopo confirmado',
+      estado.fatos.aceitacao.certeza === 'CONFIRMADO' &&
+      /executar as postagens/.test(normalizarPerguntaInvestigacaoV64_(estado.fatos.aceitacao.valor)) &&
+      estado.fatos.aceitacao.evidencia === mensagem);
+    assert('Não exige frequência de publicação para diagnóstico preliminar',
+      estado.fatos.frequencia.certeza === 'DESCONHECIDO' && gate.pode,
+      JSON.stringify(gate));
+    assert('Mantém a meta de 300 clientes como evidência separada',
+      estado.fatos.escala.certeza === 'CONFIRMADO' &&
+      /300 clientes por mes/.test(normalizarPerguntaInvestigacaoV64_(estado.fatos.escala.valor)));
+  } catch (e) {
+    resultados.push({ teste: 'Exceção não prevista', passou: false, detalhe: String(e && e.stack || e) });
+  }
+  var aprovados = resultados.filter(function(r) { return r.passou; }).length;
+  var resumo = {
+    versao: 'V6.4',
+    suite: 'CASO_MARKETING_DELEGADO',
+    sucesso: aprovados === resultados.length && resultados.length === 4,
+    total: resultados.length,
+    aprovados: aprovados,
+    falhas: resultados.filter(function(r) { return !r.passou; }),
+    resultados: resultados
+  };
+  Logger.log('FEEDS SOLUTIONS V6.4 — CASO MARKETING DELEGADO: ' + JSON.stringify(resumo));
+  return resumo;
+}
