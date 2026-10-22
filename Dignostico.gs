@@ -444,8 +444,18 @@ function processarMensagemDiagnostico(dados) {
           dados: resultadoMotorV64.analise
         };
       } catch (erroMotorV64) {
-        Logger.log('V6.4 indisponível nesta rodada; usando fallback V6.3: ' +
-          String(erroMotorV64 && erroMotorV64.message || erroMotorV64));
+        var mensagemErroMotorV64 = String(erroMotorV64 && erroMotorV64.message || erroMotorV64);
+        Logger.log('V6.4 indisponível nesta rodada: ' + mensagemErroMotorV64);
+
+        // Não disparar uma segunda chamada ao Gemini quando a primeira falhou
+        // por quota/rate limit: isso prolonga a requisição e pode deixar a tela
+        // presa no indicador de análise. Propaga para a recuperação controlada.
+        if (/HTTP\\s*429|RESOURCE_EXHAUSTED|quota|rate.?limit|pausad[oa] por limite/i.test(mensagemErroMotorV64)) {
+          throw erroMotorV64;
+        }
+
+        // Fallback legado apenas para falhas do motor que não indiquem
+        // indisponibilidade/quota do próprio Gemini.
         usarMotorV64 = false;
         resultadoMotorV64 = null;
         analise = analisarMensagemDiagnostico_(entradaIA);
@@ -463,10 +473,14 @@ function processarMensagemDiagnostico(dados) {
       'DIAGNOSTICO_PAUSADO_POR_INDISPONIBILIDADE_IA: ' +
       (erroAnalise && erroAnalise.message ? erroAnalise.message : 'falha não identificada')
     );
+    var erroTextoRecuperacao = String(erroAnalise && erroAnalise.message || erroAnalise || '');
+    var respostaRecuperacao = /HTTP\\s*429|RESOURCE_EXHAUSTED|quota|rate.?limit|pausad[oa] por limite/i.test(erroTextoRecuperacao)
+      ? 'O serviço de IA atingiu temporariamente o limite de chamadas. Sua mensagem foi preservada. Aguarde a janela de limite passar e envie uma nova mensagem; não precisa reiniciar o diagnóstico.'
+      : 'O serviço de IA está temporariamente indisponível. Sua mensagem foi preservada e o diagnóstico continua salvo. Tente novamente em alguns instantes.';
     return {
       sucesso: true,
       recuperacao_pendente: true,
-      resposta: 'Estou com uma instabilidade temporária ao analisar sua resposta. Sua mensagem foi registrada e seu diagnóstico continua salvo. Por favor, envie uma nova mensagem em alguns instantes para continuarmos.',
+      resposta: respostaRecuperacao,
       estado: diagnostico.status_diagnostico || DIAGNOSTICO_ESTADOS.DESCOBERTA,
       diagnostico: diagnostico,
       empresa_id: empresaId,
