@@ -585,6 +585,13 @@ function registrarEscopoDelegadoMarketingV64_(interpretacao, mensagem, estado) {
     certezaDetalhe: '',
     tipoAtualizacao: 'NOVO'
   });
+  // Para diagnóstico preliminar, a delegação explícita responde ao escopo
+  // solicitado mesmo que a métrica de sucesso só possa ser definida na proposta.
+  if (estado.perguntaPendente &&
+      (estado.perguntaPendente.dimensao === 'aceitacao' ||
+       classificarDimensaoPerguntaV64_(estado.perguntaPendente.texto || '', estado) === 'aceitacao')) {
+    interpretacao.respondeuPerguntaPendente = true;
+  }
   return interpretacao;
 }
 
