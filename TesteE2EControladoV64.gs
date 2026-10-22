@@ -9,8 +9,8 @@
  * - Faz UMA rodada real com Gemini (consome quota).
  * - Cria registros de teste nas planilhas EMPRESAS/DIAGNOSTICOS/MENSAGENS/
  *   INVESTIGACOES; não apaga dados e não limpa os registros ao terminar.
- * - Ativa a chave V6.4 apenas temporariamente durante esta execução e restaura
- *   seu valor anterior em finally. Não altera o valor salvo no código.
+ * - Garante que a chave V6.4 esteja ligada durante esta execução e restaura
+ *   seu valor anterior em finally, seja ele true ou false.
  * - Execute somente após sincronizar os arquivos V6.4 atuais no Apps Script.
  */
 function TESTAR_E2E_CONTROLADO_V64() {
@@ -39,8 +39,8 @@ function TESTAR_E2E_CONTROLADO_V64() {
   }));
 
   try {
-    if (chaveAnterior !== false) {
-      throw new Error('PRECONDICAO_FALHOU: a chave V6.4 deveria estar desligada antes do teste.');
+    if (typeof chaveAnterior !== 'boolean') {
+      throw new Error('PRECONDICAO_FALHOU: a chave V6.4 precisa ser booleana.');
     }
     if (typeof iniciarDiagnostico !== 'function' ||
         typeof processarMensagemDiagnostico !== 'function' ||
@@ -153,14 +153,15 @@ function TESTAR_E2E_CONTROLADO_V64() {
     versao: 'V6.4',
     suite: 'E2E_CONTROLADO_CONTROLADOR_REAL',
     sucesso: verificacoes.length === 6 && aprovados === 6 &&
-      FEEDS_MOTOR_INVESTIGACAO_V64_ATIVO === false && !erroExecucao,
+      FEEDS_MOTOR_INVESTIGACAO_V64_ATIVO === chaveAnterior && !erroExecucao,
     total: verificacoes.length,
     aprovados: aprovados,
     falhas: verificacoes.length - aprovados,
     motorV64RealmenteChamado: chamadaV64Observada,
     motorV64Sucesso: motorV64Sucesso,
     motorV64Detalhe: motorV64Detalhe,
-    chaveRestauradaDesligada: FEEDS_MOTOR_INVESTIGACAO_V64_ATIVO === false,
+    chaveRestaurada: FEEDS_MOTOR_INVESTIGACAO_V64_ATIVO === chaveAnterior,
+    chaveRestauradaValor: FEEDS_MOTOR_INVESTIGACAO_V64_ATIVO,
     duracaoMs: new Date().getTime() - inicioMs,
     registrosTesteMantidos: !!inicio,
     erro: erroExecucao.slice(0, 1200),
