@@ -77,7 +77,7 @@ function construirPromptProximaPerguntaV64_(estado, ultimaMensagem, motivoRejeic
     'REGRA DE PROGRESSÃO: investigue para tomar uma decisão, não para preencher um formulário. Se o empresário já declarou a meta, a dificuldade, a limitação e o que quer que a Feeds execute, não continue perguntando sobre preferências de conteúdo nem sobre como ele validará uma solução que ainda não foi proposta. Consolide o diagnóstico preliminar e avance para recomendação/escopo.',
     'Quando o empresário disser explicitamente que não sabe fazer e pedir que a Feeds decida, crie ou execute algo (por exemplo, “quero que vocês façam as postagens”), trate isso como decisão explícita sobre o escopo desejado, registre a evidência e não repita perguntas para obter essa mesma decisão. Não confunda escopo solicitado com garantia de resultado.',
     'Em um caso de captação de clientes por redes sociais, não exija frequência de postagem como pré-requisito para concluir o diagnóstico preliminar: ela pode ser proposta pela Feeds. A meta de clientes deve ser registrada como meta comercial, não como prova de que as postagens por si só a alcançarão.',
-    'Retorne somente JSON: {"proximaPergunta":"...","dimensaoAlvo":"processo|dor_causa|escala|frequencia|impacto|excecoes|objetivo|restricoes|aceitacao","justificativa":"...","lacunaQueReduz":"..."}.'
+    'Retorne somente JSON: {"proximaPergunta":"...","dimensaoAlvo":"processo|dor_causa|escala|frequencia|impacto|excecoes|objetivo|restricoes|aceitacao","justificativa":"...","lacunaQueReduz":"..."}.',
     '',
     'ESTADO CONSOLIDADO:',
     JSON.stringify(resumo),
