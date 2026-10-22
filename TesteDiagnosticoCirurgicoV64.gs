@@ -185,6 +185,26 @@ function TESTAR_DIAGNOSTICO_CIRURGICO_PERGUNTAS_V64() {
         validacao10.motivo === 'DIMENSAO_ALVO_NAO_CORRESPONDE_A_PERGUNTA',
       perguntaEstabilidadeMedia);
 
+    // Caso 11: reproduz literalmente a pergunta que escapou no E2E real.
+    var perguntaVariacaoDiasEspecificos = 'Essa estimativa de 100 pedidos por dia varia muito em dias específicos da semana?';
+    var dimVariacaoDiasEspecificos = classificarDimensaoPerguntaV64_(perguntaVariacaoDiasEspecificos, null);
+    var candidataVariacaoDiasEspecificos = {
+      proximaPergunta: perguntaVariacaoDiasEspecificos,
+      dimensaoAlvo: 'escala',
+      justificativa: 'Reproduz a classificação incorreta observada no Gemini real.',
+      lacunaQueReduz: 'escala'
+    };
+    var validacaoVariacaoDiasEspecificos = validarPerguntaInvestigativaV64_(novoEstadoBase(), candidataVariacaoDiasEspecificos,
+      function() { return { equivalente: false, indice: -1, motivo: 'fixture sem repetição' }; });
+    registrar('11', 'Pergunta real sobre variação em dias específicos é frequência e rejeita rótulo escala',
+      { dimensaoDetectada: 'frequencia', valida: false, motivo: 'DIMENSAO_ALVO_NAO_CORRESPONDE_A_PERGUNTA' },
+      { dimensaoDetectada: dimVariacaoDiasEspecificos, valida: validacaoVariacaoDiasEspecificos.valida,
+        motivo: validacaoVariacaoDiasEspecificos.motivo },
+      dimVariacaoDiasEspecificos === 'frequencia' &&
+        validacaoVariacaoDiasEspecificos.valida === false &&
+        validacaoVariacaoDiasEspecificos.motivo === 'DIMENSAO_ALVO_NAO_CORRESPONDE_A_PERGUNTA',
+      perguntaVariacaoDiasEspecificos);
+
     // Caso 09: formato de saída da seleção deve incluir campos coerentes e auditáveis.
     var candidata09 = {
       proximaPergunta: 'Em quais períodos do dia o movimento aumenta?',
@@ -216,7 +236,7 @@ function TESTAR_DIAGNOSTICO_CIRURGICO_PERGUNTAS_V64() {
   var resumo = {
     versao: 'V6.4',
     suite: 'DIAGNOSTICO_CIRURGICO_PERGUNTAS',
-    sucesso: resultados.length === 10 && falhas === 0,
+    sucesso: resultados.length === 11 && falhas === 0,
     total: resultados.length,
     aprovados: aprovados,
     falhas: falhas,
