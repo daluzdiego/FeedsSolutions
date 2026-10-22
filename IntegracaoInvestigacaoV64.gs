@@ -5,7 +5,7 @@
  * os testes reais no Apps Script/Gemini sejam executados.
  * Não modifica interface nem esquema de colunas; usa INVESTIGACOES.informacoes.
  */
-var FEEDS_MOTOR_INVESTIGACAO_V64_ATIVO = true;
+var FEEDS_MOTOR_INVESTIGACAO_V64_ATIVO = false;
 
 function motorInvestigacaoV64Ativo_() {
   return FEEDS_MOTOR_INVESTIGACAO_V64_ATIVO === true;
