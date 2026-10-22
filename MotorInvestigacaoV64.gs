@@ -588,6 +588,23 @@ function registrarEscopoDelegadoMarketingV64_(interpretacao, mensagem, estado) {
   return interpretacao;
 }
 
+function construirResumoDiagnosticoConcluidoV64_(resultado) {
+  var estado = resultado && resultado.estado || {};
+  var fatos = estado.fatos || {};
+  function valor(dim, fallback) {
+    var fato = fatos[dim];
+    return fato && fato.certeza !== CERTEZA_V64.DESCONHECIDO &&
+      fato.certeza !== CERTEZA_V64.NEGADO && fato.valor
+      ? String(fato.valor) : fallback;
+  }
+  if (detectarPerfilMarketingV64_(estado)) {
+    return 'Já tenho informação suficiente para fechar o diagnóstico preliminar. Entendi que sua empresa de IA precisa captar clientes, hoje quase não tem divulgação nas redes sociais, e você quer que a Feeds defina o conteúdo e execute as postagens. Sua meta informada é ' +
+      valor('escala', 'captar mais clientes') +
+      '. O caminho recomendado é estruturar a presença digital, definir uma linha editorial, preparar e publicar conteúdo com chamadas para contato e acompanhar os leads gerados. Importante: 300 clientes por mês é uma meta a validar; não seria responsável prometer que as postagens, sozinhas, vão garanti-la. A frequência de publicação e os indicadores devem ser definidos na proposta de execução.';
+  }
+  return 'Já tenho informação suficiente para fechar o diagnóstico preliminar. Vou consolidar o que foi identificado e usar as lacunas restantes como premissas explícitas da proposta, em vez de continuar repetindo perguntas.';
+}
+
 function podeConcluirDiagnosticoV64_(estado) {
   var perfilMarketing = detectarPerfilMarketingV64_(estado);
   // Para captação por redes sociais, frequência e métrica final podem ser
