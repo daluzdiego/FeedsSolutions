@@ -673,8 +673,10 @@ const investigacaoV622 =
    */
 
   const respostaLegada = usarMotorV64
-    ? (String(resultadoMotorV64.resultado.proxima_pergunta || '').trim() ||
-       obterRespostaConversa_(analiseContinuidade, novoEstado))
+    ? (resultadoMotorV64.resultado.status_diagnostico === 'CONCLUIDO'
+        ? construirResumoDiagnosticoConcluidoV64_(resultadoMotorV64.resultado)
+        : (String(resultadoMotorV64.resultado.proxima_pergunta || '').trim() ||
+           obterRespostaConversa_(analiseContinuidade, novoEstado)))
     : obterRespostaConversa_(
         analiseContinuidade,
         novoEstado
