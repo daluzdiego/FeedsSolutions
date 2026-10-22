@@ -829,9 +829,20 @@ function executarGemini_(
       const agora = Date.now();
       const bloqueioAte = Number(propriedades.getProperty(CHAVE_BLOQUEIO_429) || 0);
       const ultimaChamada = Number(propriedades.getProperty(CHAVE_ULTIMA_CHAMADA) || 0);
-      const esperaBloqueio = Math.max(0, bloqueioAte - agora);
+
+      // Um bloqueio de quota deve encerrar a chamada rapidamente, não fazer
+      // a interface esperar 60+ segundos dentro de Utilities.sleep().
+      if (bloqueioAte > agora) {
+        const segundosRestantes = Math.ceil((bloqueioAte - agora) / 1000);
+        Logger.log('GEMINI - CHAMADA BLOQUEADA ANTES DO FETCH; faltam ' + segundosRestantes + ' s da janela de quota.');
+        throw new Error(
+          'Gemini temporariamente pausado por limite de chamadas. Aguarde aproximadamente ' +
+          segundosRestantes + ' segundos antes de tentar novamente.'
+        );
+      }
+
       const esperaIntervalo = Math.max(0, INTERVALO_MINIMO_MS - (agora - ultimaChamada));
-      esperaAtualMs = Math.max(esperaAtualMs, esperaBloqueio, esperaIntervalo);
+      esperaAtualMs = Math.max(esperaAtualMs, esperaIntervalo);
     }
 
     if (esperaAtualMs > 0) {
