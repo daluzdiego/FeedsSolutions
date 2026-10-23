@@ -4468,14 +4468,9 @@ function enviarResumoEmpresaConcluida_(empresaId, conversaId, diagnostico) {
     return { sucesso: true, duplicado: true, conversa_id: conversaId };
   }
 
-  // Destinatário comercial oficial informado pela Feeds Solutions.
-  // A propriedade do script permite alterar o destino sem editar o código.
-  let destinatario = String(
-    props.getProperty('FEEDS_EMAIL_COMERCIAL') || 'feedstecnologia@gmail.com'
-  ).trim();
-  if (!destinatario) {
-    destinatario = 'feedstecnologia@gmail.com';
-  }
+  // Destinatário fixo solicitado pela Feeds Solutions.
+  // Não permitir que uma propriedade antiga redirecione os relatórios.
+  const destinatario = 'feedstecnologia@gmail.com';
 
   function obterRegistroPorId(nomeAba, campoId, valorId) {
     const aba = obterAbaDiagnostico_([nomeAba]);
@@ -4556,6 +4551,44 @@ function enviarResumoEmpresaConcluida_(empresaId, conversaId, diagnostico) {
     conversa_id: conversaId,
     mensagens_incluidas: historico.length
   };
+}
+
+
+/**
+ * TESTE MANUAL DE ENTREGA DO E-MAIL COMERCIAL.
+ * Execute uma vez pelo editor do Apps Script para autorizar MailApp
+ * e confirmar a entrega ao endereço oficial, sem depender do fluxo do chat.
+ */
+function TESTAR_ENVIO_EMAIL_COMERCIAL_FEEDS() {
+  const destinatario = 'feedstecnologia@gmail.com';
+  const assunto = '[FEEDS SOLUTIONS] Teste de envio de relatório comercial';
+  const corpo = [
+    'Este é um teste de envio do Apps Script da Feeds Solutions.',
+    '',
+    'Destinatário configurado: ' + destinatario,
+    'Data/hora: ' + Utilities.formatDate(
+      new Date(),
+      Session.getScriptTimeZone(),
+      'dd/MM/yyyy HH:mm:ss'
+    ),
+    '',
+    'Se você recebeu esta mensagem, a autorização de envio está funcionando.'
+  ].join('\\n');
+
+  MailApp.sendEmail({
+    to: destinatario,
+    subject: assunto,
+    body: corpo,
+    name: 'Feeds Solutions'
+  });
+
+  const resultado = {
+    sucesso: true,
+    destinatario: destinatario,
+    quotaRestante: MailApp.getRemainingDailyQuota()
+  };
+  Logger.log('FEEDS_TESTE_EMAIL_COMERCIAL: ' + JSON.stringify(resultado));
+  return resultado;
 }
 
 function limparMensagemDiagnostico_(
