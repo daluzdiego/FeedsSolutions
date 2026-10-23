@@ -2172,6 +2172,26 @@ function ajustarContinuidadeDiagnosticoLegado_(
       }
 
       const frequenciaAtual = normalizarTextoDiagnostico_(resultado.frequencia || '');
+
+      // Se a pergunta anterior pediu esclarecer o período de um número já
+      // informado (ex.: empresário disse "5", depois "por dia"), complete o
+      // volume existente. Não volte a perguntar a quantidade já fornecida.
+      const volumeExistente = String(resultado.volume || '').trim();
+      if (/\d/.test(volumeExistente) &&
+          !volumeTemPeriodoExplicitoDiagnostico_(volumeExistente)) {
+        let sufixoPeriodo = '';
+        if (/diaria/.test(frequenciaAtual)) sufixoPeriodo = ' por dia';
+        else if (/semanal/.test(frequenciaAtual)) sufixoPeriodo = ' por semana';
+        else if (/mensal/.test(frequenciaAtual)) sufixoPeriodo = ' por mês';
+        if (sufixoPeriodo) {
+          resultado.volume = volumeExistente + sufixoPeriodo;
+          resultado.informacao_faltante = '';
+          resultado.proxima_pergunta = '';
+          resultado.respondeu_pergunta_pendente = true;
+          return resultado;
+        }
+      }
+
       if (/diaria/.test(frequenciaAtual)) {
         resultado.informacao_faltante = 'quantidade média de itens processados por dia';
         resultado.proxima_pergunta = 'Entendi que isso acontece diariamente. Em média, quantas divulgações vocês fazem por dia?';
