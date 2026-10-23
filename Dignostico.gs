@@ -801,7 +801,7 @@ const investigacaoV622 =
    * tiver sido realmente aprovada pelo adaptador.
    */
 
-  const resposta =
+  let resposta =
     novoEstado === DIAGNOSTICO_ESTADOS.PRONTO_PARA_ANALISE
       ? respostaLegada
       : (
@@ -814,6 +814,18 @@ const investigacaoV622 =
             ? integracaoV63.resposta_cliente
             : respostaLegada
         );
+
+  // Uma resposta vazia ou genérica não pode ser exibida como se fosse
+  // uma continuação válida. Gere uma pergunta contextual e acionável.
+  if (!String(resposta || '').trim() ||
+      /^obrigado[.!]?\s*vamos continuar[.!]?$/i.test(String(resposta || '').trim())) {
+    resposta = construirPerguntaContinuacaoDiagnostico_(
+      novoDiagnostico,
+      mensagem,
+      contexto && contexto.pergunta_pendente,
+      analiseContinuidade
+    );
+  }
 
 
   /*
@@ -921,6 +933,22 @@ const investigacaoV622 =
 
   }
 
+
+  // Ao concluir a triagem comercial, envie uma única ficha completa
+  // para o e-mail comercial configurado. Falha no e-mail não derruba a conversa.
+  if (novoEstado === DIAGNOSTICO_ESTADOS.PRONTO_PARA_ANALISE) {
+    try {
+      const envioResumo = enviarResumoEmpresaConcluida_(
+        empresaId,
+        conversaId,
+        novoDiagnostico
+      );
+      Logger.log('FEEDS_EMAIL_CONCLUSAO: ' + JSON.stringify(envioResumo));
+    } catch (erroEmailConclusao) {
+      Logger.log('FEEDS_EMAIL_CONCLUSAO_FALHOU: ' +
+        String(erroEmailConclusao && erroEmailConclusao.message || erroEmailConclusao));
+    }
+  }
 
   /*
    * ==========================================================
@@ -4376,6 +4404,162 @@ function obterRespostaConversa_(
  * LIMPAR MENSAGEM
  * ============================================================
  */
+
+
+/**
+ * Gera uma pergunta contextual quando a IA ou a integração segura
+ * não devolve uma pergunta útil. Nunca usa o fallback genérico da interface.
+ */
+function construirPerguntaContinuacaoDiagnostico_(
+  diagnostico,
+  mensagem,
+  perguntaPendente,
+  analise
+) {
+  const d = diagnostico || {};
+  const texto = String(mensagem || '').toLowerCase();
+  const pendente = String(perguntaPendente || '').trim();
+
+  if (/\b(n[aã]o entendi|nao entendi|n[aã]o compreendi|como assim|pode explicar)\b/i.test(texto)) {
+    if (pendente && !/obrigado.*vamos continuar/i.test(pendente)) {
+      return 'Claro, vou explicar de outra forma: ' + pendente;
+    }
+    return 'Vou reformular: o que acontece depois que você divulga seus serviços — alguém chama no direct/WhatsApp, pede orçamento ou não chega nenhum contato?';
+  }
+
+  if (/instagram|post|publica[cç][aã]o|seguidor|curtida|curtiram|direct/i.test(texto)) {
+    return 'Esse post gerou alguma mensagem no direct, clique no perfil ou pedido de orçamento, ou não houve nenhum contato? E o que você ofereceu nessa publicação?';
+  }
+
+  if (!String(d.processo_nome || d.processo_resumo || '').trim()) {
+    return 'Para entender como a captação funciona hoje: o que você publicou, qual serviço ofereceu e qual ação queria que o possível cliente tomasse?';
+  }
+
+  if (!String(d.dor_principal || '').trim()) {
+    return 'O que mais está impedindo a captação hoje: poucas pessoas veem suas publicações, elas veem mas não interagem, ou há interação mas ninguém pede orçamento?';
+  }
+
+  if (!String(d.impacto_nivel || '').trim()) {
+    return 'Além de ainda não conseguir clientes, qual é a consequência mais importante para a empresa neste momento?';
+  }
+
+  if (!String(d.objetivo || '').trim()) {
+    return 'Qual resultado concreto você gostaria de alcançar nos próximos 30 dias com a captação de clientes?';
+  }
+
+  if (analise && analise.informacao_faltante && analise.proxima_pergunta) {
+    return String(analise.proxima_pergunta).trim();
+  }
+
+  return 'Para eu avançar sem fazer perguntas repetidas: qual é a principal informação que ainda não expliquei ou não entendi sobre o problema da sua empresa?';
+}
+
+
+/**
+ * Envia ao comercial uma ficha com todos os campos da empresa,
+ * diagnóstico e histórico completo da conversa. Deduplicado por conversa.
+ * Destinatário: Script Property FEEDS_EMAIL_COMERCIAL; na ausência,
+ * usa o e-mail efetivo da conta proprietária do Web App, se disponível.
+ */
+function enviarResumoEmpresaConcluida_(empresaId, conversaId, diagnostico) {
+  const props = PropertiesService.getScriptProperties();
+  const chaveEnviado = 'FEEDS_RESUMO_CONCLUSAO_ENVIADO_' + String(conversaId || '');
+  if (props.getProperty(chaveEnviado)) {
+    return { sucesso: true, duplicado: true, conversa_id: conversaId };
+  }
+
+  let destinatario = String(props.getProperty('FEEDS_EMAIL_COMERCIAL') || '').trim();
+  if (!destinatario) {
+    try {
+      destinatario = String(Session.getEffectiveUser().getEmail() || '').trim();
+    } catch (e) {
+      destinatario = '';
+    }
+  }
+  if (!destinatario) {
+    throw new Error('Destinatário não configurado. Defina Script Property FEEDS_EMAIL_COMERCIAL.');
+  }
+
+  function obterRegistroPorId(nomeAba, campoId, valorId) {
+    const aba = obterAbaDiagnostico_([nomeAba]);
+    const valores = aba.getDataRange().getValues();
+    if (!valores || valores.length < 2) return null;
+    const cab = valores[0].map(function(v) { return String(v || '').trim(); });
+    const idxId = cab.indexOf(campoId);
+    if (idxId < 0) throw new Error('Coluna ' + campoId + ' ausente na aba ' + nomeAba);
+    for (let i = 1; i < valores.length; i++) {
+      if (String(valores[i][idxId]) === String(valorId)) {
+        const obj = {};
+        cab.forEach(function(k, j) {
+          if (k) obj[k] = valores[i][j] instanceof Date
+            ? Utilities.formatDate(valores[i][j], Session.getScriptTimeZone(), 'dd/MM/yyyy HH:mm:ss')
+            : valores[i][j];
+        });
+        return obj;
+      }
+    }
+    return null;
+  }
+
+  function formatarRegistro(titulo, obj) {
+    const linhas = ['=== ' + titulo + ' ==='];
+    if (!obj) return linhas.concat(['Registro não encontrado.']).join('\n');
+    Object.keys(obj).forEach(function(k) {
+      linhas.push(k + ': ' + String(obj[k] == null ? '' : obj[k]));
+    });
+    return linhas.join('\n');
+  }
+
+  const empresa = obterRegistroPorId('EMPRESAS', 'empresa_id', empresaId);
+  const diagnosticoRegistro = obterRegistroPorId(
+    'DIAGNOSTICOS', 'diagnostico_id', diagnostico && diagnostico.diagnostico_id
+  );
+  const abaConversas = obterAbaDiagnostico_(['CONVERSAS']);
+  const dadosConversas = abaConversas.getDataRange().getValues();
+  const cabConversas = (dadosConversas[0] || []).map(function(v) { return String(v || '').trim(); });
+  const idxConversa = cabConversas.indexOf('conversa_id');
+  const idxRemetente = cabConversas.indexOf('remetente');
+  const idxMensagem = cabConversas.indexOf('mensagem');
+  const idxTimestamp = cabConversas.indexOf('timestamp');
+  const historico = [];
+  if (idxConversa >= 0 && idxMensagem >= 0) {
+    for (let i = 1; i < dadosConversas.length; i++) {
+      if (String(dadosConversas[i][idxConversa]) === String(conversaId)) {
+        const quando = idxTimestamp >= 0 && dadosConversas[i][idxTimestamp] instanceof Date
+          ? Utilities.formatDate(dadosConversas[i][idxTimestamp], Session.getScriptTimeZone(), 'dd/MM/yyyy HH:mm:ss')
+          : (idxTimestamp >= 0 ? String(dadosConversas[i][idxTimestamp] || '') : '');
+        historico.push((quando ? '[' + quando + '] ' : '') +
+          (idxRemetente >= 0 ? String(dadosConversas[i][idxRemetente] || '') : 'MENSAGEM') +
+          ': ' + String(dadosConversas[i][idxMensagem] || ''));
+      }
+    }
+  }
+
+  const nomeEmpresa = String(empresa && (empresa.nome_empresa || empresa.nome_contato) || 'Empresa sem nome');
+  const assunto = '[FEEDS SOLUTIONS] Diagnóstico comercial concluído — ' + nomeEmpresa;
+  const corpo = [
+    'Uma empresa concluiu a coleta comercial no diagnóstico da Feeds Solutions.',
+    '',
+    formatarRegistro('DADOS COMPLETOS DA EMPRESA', empresa),
+    '',
+    formatarRegistro('DIAGNÓSTICO', diagnosticoRegistro || diagnostico || {}),
+    '',
+    '=== HISTÓRICO COMPLETO DA CONVERSA ===',
+    historico.length ? historico.join('\n') : 'Nenhuma mensagem encontrada.',
+    '',
+    'Próxima ação: revisar as informações e preparar contato/proposta personalizada.'
+  ].join('\n');
+
+  MailApp.sendEmail({ to: destinatario, subject: assunto, body: corpo });
+  props.setProperty(chaveEnviado, new Date().toISOString());
+  return {
+    sucesso: true,
+    destinatario: destinatario,
+    empresa_id: empresaId,
+    conversa_id: conversaId,
+    mensagens_incluidas: historico.length
+  };
+}
 
 function limparMensagemDiagnostico_(
   mensagem
