@@ -562,8 +562,25 @@ function processarMensagemDiagnostico(dados) {
   // abertas depois de processo, dor, impacto e objetivo estarem preenchidos.
   const novoEstado = determinarEstadoDiagnostico_(
     novoDiagnostico,
-    analiseContinuidade
+    analiseContinuidade,
+    contexto
   );
+
+  // Guardião de profundidade comercial: quando a análise ainda não reúne
+  // evidências mínimas, substitui perguntas genéricas por uma única pergunta
+  // contextual sobre a lacuna prioritária. Isso também impede conclusão após
+  // respostas curtas como "5" e "sim".
+  if (novoEstado !== DIAGNOSTICO_ESTADOS.PRONTO_PARA_ANALISE) {
+    const perguntaObrigatoria = selecionarPerguntaObrigatoriaDiagnostico_(
+      novoDiagnostico,
+      analiseContinuidade,
+      contexto
+    );
+    if (perguntaObrigatoria) {
+      analiseContinuidade.informacao_faltante = perguntaObrigatoria.lacuna;
+      analiseContinuidade.proxima_pergunta = perguntaObrigatoria.pergunta;
+    }
+  }
 
 
   novoDiagnostico.status_diagnostico =
@@ -4292,28 +4309,156 @@ function mensagemNegaTemaDiagnostico_(
 }
 
 
+function contarPerguntasRespondidasDiagnostico_(historico) {
+  const itens = Array.isArray(historico) ? historico : [];
+  const perguntasRespondidas = [];
+  const vistos = {};
+
+  for (let i = 0; i < itens.length; i++) {
+    const item = itens[i] || {};
+    const remetente = String(item.remetente || '').trim().toUpperCase();
+    const tipo = String(item.tipo || '').trim().toUpperCase();
+    const texto = String(item.mensagem || '').trim();
+    const ehPerguntaSistema = remetente === 'SISTEMA' &&
+      (/^(PERGUNTA_IA|PERGUNTA_DIAGNOSTICO|PERGUNTA_INVESTIGACAO|PERGUNTA_INVESTIGATIVA)$/.test(tipo) ||
+       (texto.indexOf('?') !== -1 && /\b(qual|quais|como|quando|onde|quant[oa]s?|quanto|por que|o que|existe|costuma|acontece)\b/i.test(texto)));
+    if (!ehPerguntaSistema || !texto) continue;
+
+    let respondida = false;
+    for (let j = i + 1; j < itens.length; j++) {
+      const posterior = itens[j] || {};
+      if (String(posterior.remetente || '').trim().toUpperCase() === 'EMPRESARIO' &&
+          String(posterior.mensagem || '').trim()) {
+        respondida = true;
+        break;
+      }
+    }
+    if (!respondida) continue;
+
+    const normalizada = normalizarTextoDiagnostico_(texto);
+    if (!vistos[normalizada]) {
+      vistos[normalizada] = true;
+      perguntasRespondidas.push({ texto: texto, normalizada: normalizada });
+    }
+  }
+  return perguntasRespondidas.length;
+}
+
+function volumeTemPeriodoExplicitoDiagnostico_(valor) {
+  const texto = normalizarTextoDiagnostico_(valor);
+  return /\b(por dia|ao dia|diario|diaria|diariamente|por semana|semanal|semanalmente|por mes|mensal|mensalmente|por hora|por turno|por atendimento|por cliente)\b/.test(texto);
+}
+
+function impactoEhEspecificoDiagnostico_(valor) {
+  const texto = normalizarTextoDiagnostico_(valor);
+  if (!texto || /^(sim|nao|não|erros retrabalho ou atrasos gerados pelo processo|erros, retrabalho ou atrasos gerados pelo processo)$/.test(texto)) return false;
+  const temConsequencia = /perdemos|perde|perda|atras|custo|dinheiro|hora|minuto|retrabalho|refazer|cliente insatisfeito|pedido perdido|venda perdida|parado|demora|impacta|prejudica|deixa de|tempo da equipe|tempo do dono/.test(texto);
+  const temMedida = /\b\d+(?:[.,]\d+)?\b|hora|horas|minuto|minutos|reais|r\$|por dia|por semana|por mes|por mês/.test(texto);
+  return temConsequencia && (temMedida || texto.length >= 55);
+}
+
+function selecionarPerguntaObrigatoriaDiagnostico_(diagnostico, analise, contexto) {
+  const d = diagnostico || {};
+  const a = analise || {};
+  const c = contexto || {};
+  const dc = c.diagnostico || {};
+  const historico = Array.isArray(c.historico) ? c.historico : [];
+  const volume = String(a.volume || dc.volume || '').trim();
+  const frequencia = String(d.frequencia || a.frequencia || dc.frequencia || '').trim();
+  const impacto = String(d.impacto_nivel || a.impacto || '').trim();
+  const perguntasRespondidas = contarPerguntasRespondidasDiagnostico_(historico);
+  const textoHistorico = historico.map(function(item) {
+    return normalizarTextoDiagnostico_(String(item && item.mensagem || ''));
+  }).join(' | ');
+
+  if (!volume) {
+    return {
+      lacuna: 'volume e período',
+      pergunta: 'Em um dia ou semana típica, aproximadamente quantos e-mails com dados de clientes vocês recebem?'
+    };
+  }
+  if (/^\d+(?:[.,]\d+)?$/.test(volume) && !volumeTemPeriodoExplicitoDiagnostico_(volume)) {
+    return {
+      lacuna: 'período correspondente ao volume informado',
+      pergunta: 'Você informou ' + volume + '. Esse número corresponde a quantos e-mails por dia, por semana ou por mês?'
+    };
+  }
+  if (!frequencia) {
+    return {
+      lacuna: 'frequência e distribuição do processo',
+      pergunta: 'Além da quantidade, esses e-mails chegam de forma distribuída ao longo do dia ou costumam se concentrar em horários específicos?'
+    };
+  }
+  if (!impactoEhEspecificoDiagnostico_(impacto)) {
+    return {
+      lacuna: 'consequência concreta do problema',
+      pergunta: 'Quando ocorre esse erro ou retrabalho, qual é a consequência concreta: quanto tempo a equipe perde, que atraso acontece ou que informação acaba sendo prejudicada?'
+    };
+  }
+  if (!/depois que .*e.?mail|apos .*e.?mail|ap[oó]s .*receb|etapas .*e.?mail|fluxo atual|como .*processo funciona/.test(textoHistorico)) {
+    return {
+      lacuna: 'etapas do processo atual',
+      pergunta: 'Depois que um e-mail com os dados de um cliente chega, quais etapas alguém executa até essas informações ficarem prontas para uso?'
+    };
+  }
+  if (!/planilha|crm|sistema|banco de dados|google sheets|excel|gmail|outlook|drive|software|ferramenta/.test(textoHistorico)) {
+    return {
+      lacuna: 'ferramentas e destino dos dados',
+      pergunta: 'Onde vocês consultam ou registram hoje os dados extraídos desses e-mails: planilha, CRM, banco de dados ou outra ferramenta?'
+    };
+  }
+  if (!/automaticamente|automatizar|cadastro|cadastrar|classificar|organizar|extrair|encaminhar|gerar .*relat|criar .*registro|integrar/.test(textoHistorico)) {
+    return {
+      lacuna: 'resultado operacional esperado',
+      pergunta: 'Depois de receber cada e-mail, o que exatamente você quer que o sistema faça sozinho com os dados do cliente?'
+    };
+  }
+  if (!/incomplet|faltant|fora do padr[aã]o|exce[cç][aã]o|urgente|duplicad|duplicidade|inv[aá]lid/.test(textoHistorico)) {
+    return {
+      lacuna: 'exceções e dados problemáticos',
+      pergunta: 'O que o sistema deve fazer quando um e-mail chegar com dados faltando, informações inválidas ou um cadastro duplicado?'
+    };
+  }
+  if (!/considerar.*sucesso|crit[eé]rio|resultado esperado|medir.*sucesso|como saber.*funcion/.test(textoHistorico)) {
+    return {
+      lacuna: 'critério de sucesso',
+      pergunta: 'Qual resultado observável mostraria que essa automação funcionou bem para vocês?'
+    };
+  }
+  if (perguntasRespondidas < 5) {
+    return {
+      lacuna: 'aprofundamento mínimo do diagnóstico',
+      pergunta: 'Há alguma regra importante, situação fora do padrão ou cuidado com os dados dos clientes que a automação precisa respeitar?'
+    };
+  }
+  return null;
+}
+
 function determinarEstadoDiagnostico_(
   diagnostico,
-  analise
+  analise,
+  contexto
 ) {
   const dados = diagnostico || {};
-  const possuiProcesso = !!String(dados.processo_nome || '').trim();
+  const a = analise || {};
+  const c = contexto || {};
+  const possuiProcesso = !!String(dados.processo_nome || dados.processo_resumo || '').trim();
   const possuiDor = !!String(dados.dor_principal || '').trim();
-  const possuiImpacto = !!String(dados.impacto_nivel || '').trim();
-  const possuiObjetivo = !!String(dados.objetivo || '').trim();
+  const possuiImpacto = impactoEhEspecificoDiagnostico_(dados.impacto_nivel || a.impacto || '');
+  const possuiObjetivo = !!String(dados.objetivo || a.objetivo || '').trim();
+  const volume = String(a.volume || (c.diagnostico && c.diagnostico.volume) || '').trim();
+  const possuiVolumeComPeriodo = !!volume && volumeTemPeriodoExplicitoDiagnostico_(volume);
+  const possuiFrequencia = !!String(dados.frequencia || a.frequencia || (c.diagnostico && c.diagnostico.frequencia) || '').trim();
+  const possuiPerguntasSuficientes = contarPerguntasRespondidasDiagnostico_(c.historico) >= 5;
 
-  if (!possuiProcesso && !possuiDor) {
-    return DIAGNOSTICO_ESTADOS.INICIO;
-  }
+  if (!possuiProcesso && !possuiDor) return DIAGNOSTICO_ESTADOS.INICIO;
+  if (!possuiProcesso || !possuiDor) return DIAGNOSTICO_ESTADOS.DESCOBERTA;
 
-  if (!possuiProcesso || !possuiDor) {
-    return DIAGNOSTICO_ESTADOS.DESCOBERTA;
-  }
-
-  // Objetivo desta etapa: coletar informação suficiente para o comercial.
-  // Não exigimos frequência, critérios de aceite ou métricas detalhadas
-  // para encaminhar um lead que já tem processo, dor, impacto e objetivo.
-  if (!possuiImpacto || !possuiObjetivo) {
+  // Não concluir somente porque processo/dor/impacto/objetivo têm texto.
+  // Exige volume com período, frequência, impacto concreto e pelo menos cinco
+  // perguntas investigativas distintas respondidas, além de processo e objetivo.
+  if (!possuiImpacto || !possuiObjetivo || !possuiVolumeComPeriodo ||
+      !possuiFrequencia || !possuiPerguntasSuficientes) {
     return DIAGNOSTICO_ESTADOS.INVESTIGACAO;
   }
 
@@ -4462,6 +4607,18 @@ function construirPerguntaContinuacaoDiagnostico_(
   if (!String(d.objetivo || '').trim()) {
     return 'Qual resultado concreto você gostaria de alcançar nos próximos 30 dias com a captação de clientes?';
   }
+
+  // Não deixar a ausência de pergunta produzida pela IA encerrar implicitamente
+  // a investigação: prioriza uma lacuna operacional concreta.
+  const perguntaObrigatoria = selecionarPerguntaObrigatoriaDiagnostico_(
+    d,
+    analise || {},
+    { historico: obterHistoricoConversaDiagnostico_(d.conversa_id, 20), diagnostico: {
+      volume: obterUltimoVolumeDiagnostico_(obterMedidasDiagnostico_(d.empresa_id, d.conversa_id)),
+      frequencia: d.frequencia || ''
+    } }
+  );
+  if (perguntaObrigatoria) return perguntaObrigatoria.pergunta;
 
   if (analise && analise.informacao_faltante && analise.proxima_pergunta) {
     return String(analise.proxima_pergunta).trim();
