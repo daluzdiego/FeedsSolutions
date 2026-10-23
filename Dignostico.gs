@@ -4367,7 +4367,11 @@ function selecionarPerguntaObrigatoriaDiagnostico_(diagnostico, analise, context
   const frequencia = String(d.frequencia || a.frequencia || dc.frequencia || '').trim();
   const impacto = String(d.impacto_nivel || a.impacto || '').trim();
   const perguntasRespondidas = contarPerguntasRespondidasDiagnostico_(historico);
-  const textoHistorico = historico.map(function(item) {
+  // Para decidir se uma dimensão foi realmente respondida, analisar apenas
+  // as mensagens do empresário. O texto da própria pergunta do sistema não é evidência.
+  const textoHistorico = historico.filter(function(item) {
+    return String(item && item.remetente || '').trim().toUpperCase() === 'EMPRESARIO';
+  }).map(function(item) {
     return normalizarTextoDiagnostico_(String(item && item.mensagem || ''));
   }).join(' | ');
 
@@ -4377,10 +4381,12 @@ function selecionarPerguntaObrigatoriaDiagnostico_(diagnostico, analise, context
       pergunta: 'Em um dia ou semana típica, aproximadamente quantos e-mails com dados de clientes vocês recebem?'
     };
   }
-  if (/^\d+(?:[.,]\d+)?$/.test(volume) && !volumeTemPeriodoExplicitoDiagnostico_(volume)) {
+  if (!volumeTemPeriodoExplicitoDiagnostico_(volume)) {
     return {
       lacuna: 'período correspondente ao volume informado',
-      pergunta: 'Você informou ' + volume + '. Esse número corresponde a quantos e-mails por dia, por semana ou por mês?'
+      pergunta: volume
+        ? 'Você informou "' + volume + '". Esse volume corresponde a quantos e-mails por dia, por semana ou por mês?'
+        : 'Em um dia ou semana típica, aproximadamente quantos e-mails com dados de clientes vocês recebem?'
     };
   }
   if (!frequencia) {
@@ -4407,7 +4413,7 @@ function selecionarPerguntaObrigatoriaDiagnostico_(diagnostico, analise, context
       pergunta: 'Onde vocês consultam ou registram hoje os dados extraídos desses e-mails: planilha, CRM, banco de dados ou outra ferramenta?'
     };
   }
-  if (!/automaticamente|automatizar|cadastro|cadastrar|classificar|organizar|extrair|encaminhar|gerar .*relat|criar .*registro|integrar/.test(textoHistorico)) {
+  if (!/extrair|cadastrar|classificar|organizar|encaminhar|gerar .*relat|criar .*registro|preencher|atualizar|salvar|integrar|notificar|validar|enriquecer/.test(textoHistorico)) {
     return {
       lacuna: 'resultado operacional esperado',
       pergunta: 'Depois de receber cada e-mail, o que exatamente você quer que o sistema faça sozinho com os dados do cliente?'
