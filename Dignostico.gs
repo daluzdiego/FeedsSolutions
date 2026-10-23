@@ -556,14 +556,14 @@ function processarMensagemDiagnostico(dados) {
    * ==========================================================
    */
 
-  const novoEstado = usarMotorV64
-    ? (resultadoMotorV64.resultado.status_diagnostico === 'CONCLUIDO'
-        ? DIAGNOSTICO_ESTADOS.PRONTO_PARA_ANALISE
-        : DIAGNOSTICO_ESTADOS.INVESTIGACAO)
-    : determinarEstadoDiagnostico_(
-        novoDiagnostico,
-        analiseContinuidade
-      );
+  // A regra determinística de suficiência comercial é a autoridade
+  // final para encerrar a coleta, inclusive quando o motor V6.4 está ativo.
+  // O motor pode aprofundar a investigação, mas não pode manter perguntas
+  // abertas depois de processo, dor, impacto e objetivo estarem preenchidos.
+  const novoEstado = determinarEstadoDiagnostico_(
+    novoDiagnostico,
+    analiseContinuidade
+  );
 
 
   novoDiagnostico.status_diagnostico =
@@ -686,15 +686,18 @@ const investigacaoV622 =
    * ==========================================================
    */
 
-  const respostaLegada = usarMotorV64
-    ? (resultadoMotorV64.resultado.status_diagnostico === 'CONCLUIDO'
-        ? construirResumoDiagnosticoConcluidoV64_(resultadoMotorV64.resultado)
-        : (String(resultadoMotorV64.resultado.proxima_pergunta || '').trim() ||
-           obterRespostaConversa_(analiseContinuidade, novoEstado)))
-    : obterRespostaConversa_(
-        analiseContinuidade,
-        novoEstado
-      );
+  const respostaLegada =
+    novoEstado === DIAGNOSTICO_ESTADOS.PRONTO_PARA_ANALISE
+      ? obterRespostaConversa_(analiseContinuidade, novoEstado)
+      : (usarMotorV64
+          ? (resultadoMotorV64.resultado.status_diagnostico === 'CONCLUIDO'
+              ? construirResumoDiagnosticoConcluidoV64_(resultadoMotorV64.resultado)
+              : (String(resultadoMotorV64.resultado.proxima_pergunta || '').trim() ||
+                 obterRespostaConversa_(analiseContinuidade, novoEstado)))
+          : obterRespostaConversa_(
+              analiseContinuidade,
+              novoEstado
+            ));
 
 
   const resultadoFluxoParaV63 = {
