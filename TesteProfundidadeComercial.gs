@@ -135,6 +135,17 @@ function TESTAR_PROFUNDIDADE_COMERCIAL_DIAGNOSTICO() {
     assert('não conclui com menos de cinco perguntas distintas respondidas, mesmo com campos centrais preenchidos',
       gateCompletoMasCurto !== DIAGNOSTICO_ESTADOS.PRONTO_PARA_ANALISE);
 
+    var esclarecimentoPeriodo = ajustarContinuidadeDiagnosticoLegado_(
+      { volume: '5', frequencia: '', informacao_faltante: 'período', proxima_pergunta: 'Você informou 5. Esse número corresponde a quantos e-mails por dia, por semana ou por mês?' },
+      'Você informou 5. Esse número corresponde a quantos e-mails por dia, por semana ou por mês?',
+      'por dia'
+    );
+    assert('anexa “por dia” ao volume já informado sem perguntar a quantidade novamente',
+      /5.*por dia/.test(String(esclarecimentoPeriodo.volume || '')) &&
+      /diaria/i.test(String(esclarecimentoPeriodo.frequencia || '')) &&
+      !String(esclarecimentoPeriodo.proxima_pergunta || '').trim(),
+      JSON.stringify(esclarecimentoPeriodo));
+
   } catch (e) {
     resultados.push({ teste: 'execução da suíte', passou: false, detalhe: e && e.stack ? e.stack : String(e) });
   }
@@ -143,7 +154,7 @@ function TESTAR_PROFUNDIDADE_COMERCIAL_DIAGNOSTICO() {
   var resumo = {
     versao: 'V6.4',
     suite: 'PROFUNDIDADE_COMERCIAL_DETERMINISTICA',
-    sucesso: resultados.length === 7 && aprovados === resultados.length,
+    sucesso: resultados.length === 8 && aprovados === resultados.length,
     total: resultados.length,
     aprovados: aprovados,
     falhas: resultados.length - aprovados,
