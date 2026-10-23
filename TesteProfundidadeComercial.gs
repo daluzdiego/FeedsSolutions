@@ -143,6 +143,24 @@ function TESTAR_PROFUNDIDADE_COMERCIAL_DIAGNOSTICO() {
     assert('não conclui com menos de cinco perguntas distintas respondidas, mesmo com campos centrais preenchidos',
       gateCompletoMasCurto !== DIAGNOSTICO_ESTADOS.PRONTO_PARA_ANALISE);
 
+    // Regressão do erro real: a pergunta contém "quantos e-mails por dia, por semana ou por mês".
+    // Ela precisa ser classificada como VOLUME, não como FREQUÊNCIA.
+    var perguntaPeriodoReal = 'Você informou "4". Esse volume corresponde a quantos e-mails por dia, por semana ou por mês?';
+    assert('classifica a pergunta de esclarecimento de e-mails como VOLUME',
+      classificarDimensaoPerguntaDiagnostico_(normalizarTextoDiagnostico_(perguntaPeriodoReal)) === 'VOLUME',
+      classificarDimensaoPerguntaDiagnostico_(normalizarTextoDiagnostico_(perguntaPeriodoReal)));
+
+    var esclarecimentoSemanaReal = ajustarContinuidadeDiagnosticoLegado_(
+      { volume: '4', frequencia: '', informacao_faltante: 'período', proxima_pergunta: perguntaPeriodoReal },
+      perguntaPeriodoReal,
+      'por semana'
+    );
+    assert('converte a resposta real “por semana” em “4 por semana” sem repetir a pergunta',
+      /4.*por semana/i.test(String(esclarecimentoSemanaReal.volume || '')) &&
+      /semanal/i.test(String(esclarecimentoSemanaReal.frequencia || '')) &&
+      !String(esclarecimentoSemanaReal.proxima_pergunta || '').trim(),
+      JSON.stringify(esclarecimentoSemanaReal));
+
     var esclarecimentoPeriodo = ajustarContinuidadeDiagnosticoLegado_(
       { volume: '5', frequencia: '', informacao_faltante: 'período', proxima_pergunta: 'Você informou 5. Esse número corresponde a quantos e-mails por dia, por semana ou por mês?' },
       'Você informou 5. Esse número corresponde a quantos e-mails por dia, por semana ou por mês?',
@@ -162,7 +180,7 @@ function TESTAR_PROFUNDIDADE_COMERCIAL_DIAGNOSTICO() {
   var resumo = {
     versao: 'V6.4',
     suite: 'PROFUNDIDADE_COMERCIAL_DETERMINISTICA',
-    sucesso: resultados.length === 10 && aprovados === resultados.length,
+    sucesso: resultados.length === 12 && aprovados === resultados.length,
     total: resultados.length,
     aprovados: aprovados,
     falhas: resultados.length - aprovados,
