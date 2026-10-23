@@ -154,7 +154,7 @@ function TESTAR_PROFUNDIDADE_COMERCIAL_DIAGNOSTICO() {
   var resumo = {
     versao: 'V6.4',
     suite: 'PROFUNDIDADE_COMERCIAL_DETERMINISTICA',
-    sucesso: resultados.length === 8 && aprovados === resultados.length,
+    sucesso: resultados.length === 9 && aprovados === resultados.length,
     total: resultados.length,
     aprovados: aprovados,
     falhas: resultados.length - aprovados,
