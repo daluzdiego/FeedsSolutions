@@ -4299,6 +4299,12 @@ function obterRespostaConversa_(
     return 'Obrigado por compartilhar essas informações. Já temos dados suficientes para encaminhar seu caso à equipe comercial da Feeds Solutions. Nossa equipe vai analisar o que você relatou e entrar em contato pelo e-mail informado com uma proposta personalizada para a sua empresa. Você não precisa continuar respondendo às perguntas.';
   }
 
+  // A conclusão comercial tem precedência sobre qualquer pergunta
+  // complementar sugerida pela IA.
+  if (estado === DIAGNOSTICO_ESTADOS.PRONTO_PARA_ANALISE) {
+    return 'Obrigado por compartilhar essas informações. Já temos dados suficientes para encaminhar seu caso à equipe comercial da Feeds Solutions. Nossa equipe vai analisar o que você relatou e entrar em contato pelo e-mail informado com uma proposta personalizada para a sua empresa. Você não precisa continuar respondendo às perguntas.';
+  }
+
   if (
     analise &&
     analise.informacao_faltante &&
