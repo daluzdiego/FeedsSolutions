@@ -157,7 +157,7 @@ Arquivos atualizados:
 
 1. Sincronize `Dignostico.gs` e `TesteProfundidadeComercial.gs` do GitHub para o projeto Google Apps Script.
 2. Execute `TESTAR_PROFUNDIDADE_COMERCIAL_DIAGNOSTICO()` no arquivo `TesteProfundidadeComercial.gs`.
-3. Resultado esperado: `sucesso: true`, `total: 9`, `aprovados: 9`, `falhas: 0`.
+3. Resultado esperado: `sucesso: true`, `total: 10`, `aprovados: 10`, `falhas: 0`.
 4. Se qualquer teste falhar, não execute o teste comercial público; envie o JSON completo do log para correção.
 5. Se passar, faça um novo diagnóstico sintético pela interface. Confirme que o sistema esclarece o período de “5”, não aceita “sim” como impacto específico e continua investigando as etapas e a ação automática esperada antes de enviar o e-mail comercial.
 
