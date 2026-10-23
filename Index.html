@@ -145,16 +145,21 @@
         <div class="form-grid">
           <div class="field">
             <label class="feeds-label" for="contato">Como podemos chamar você?</label>
-            <input id="contato" class="feeds-input" placeholder="Seu nome" autocomplete="name">
+            <input id="contato" class="feeds-input" placeholder="Seu nome" autocomplete="name" required>
           </div>
           <div class="field">
             <label class="feeds-label" for="empresa">Qual é o nome da sua empresa?</label>
-            <input id="empresa" class="feeds-input" placeholder="Nome da empresa" autocomplete="organization">
+            <input id="empresa" class="feeds-input" placeholder="Nome da empresa" autocomplete="organization" required>
+          </div>
+          <div class="field" style="grid-column:1/-1">
+            <label class="feeds-label" for="emailContato">Qual e-mail podemos usar para entrar em contato?</label>
+            <input id="emailContato" class="feeds-input" type="email" placeholder="voce@empresa.com.br" autocomplete="email" inputmode="email" required>
+            <small style="display:block;color:#94a3b8;line-height:1.5;margin-top:7px">A equipe comercial da Feeds usará este e-mail para retornar com uma proposta personalizada.</small>
           </div>
         </div>
         <div id="identityError" class="error" aria-live="polite"></div>
         <div class="form-actions">
-          <span class="form-hint">Apenas nome e empresa por enquanto.</span>
+          <span class="form-hint">Nome, empresa e e-mail de contato.</span>
           <button class="feeds-btn feeds-btn-primary" onclick="continueIdentity()">CONTINUAR →</button>
         </div>
       </section>
@@ -282,6 +287,7 @@
   const state={
     nome:'',
     empresa:'',
+    email:'',
     empresa_id:null,
     conversa_id:null,
     diagnostico_id:null,
@@ -319,13 +325,20 @@
   function continueIdentity(){
     const nome=$('contato').value.trim();
     const empresa=$('empresa').value.trim();
+    const email=$('emailContato').value.trim();
     setError('identityError','');
-    if(!nome||!empresa){
-      setError('identityError','Informe seu nome e o nome da empresa para continuar.');
+    if(!nome||!empresa||!email){
+      setError('identityError','Informe seu nome, o nome da empresa e o e-mail de contato para continuar.');
+      return;
+    }
+    if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)){
+      setError('identityError','Informe um endereço de e-mail válido para que nossa equipe possa entrar em contato.');
+      $('emailContato').focus();
       return;
     }
     state.nome=nome;
     state.empresa=empresa;
+    state.email=email;
     $('helloName').textContent=nome.split(' ')[0];
     $('companyGreeting').textContent='Vamos entender o que está acontecendo na '+empresa+'.';
     showScreen(3);
@@ -373,7 +386,7 @@
         nome_empresa:state.empresa,
         nome_contato:state.nome,
         whatsapp:'',
-        email:'',
+        email:state.email,
         segmento:'',
         cidade:''
       });
@@ -483,10 +496,27 @@
     const v=r.integracao_v63;
     if(v&&v.ativada===true&&v.resposta_cliente)return true;
     const estado=String(r.estado||'').toUpperCase();
-    return ['CONCLUIDO','CONCLUIDA','FINALIZADO','FINALIZADA','SOLUCAO_VALIDADA'].indexOf(estado)>=0;
+    return ['PRONTO_PARA_ANALISE','CONCLUIDO','CONCLUIDA','FINALIZADO','FINALIZADA','SOLUCAO_VALIDADA'].indexOf(estado)>=0;
   }
 
   function prepareResult(r){
+    const estadoFinal=String(r.estado||'').toUpperCase();
+    if(estadoFinal==='PRONTO_PARA_ANALISE'){
+      $('resultName').textContent=state.nome.split(' ')[0];
+      document.querySelector('.result-hero .eyebrow').textContent='Coleta de informações concluída';
+      document.querySelector('.result-hero h2').innerHTML='Obrigado, <span style="color:var(--feeds-cyan)"></span>.';
+      document.querySelector('.result-hero h2 span').textContent=state.nome.split(' ')[0];
+      document.querySelector('.result-hero p').textContent='Já reunimos informações importantes sobre o problema da sua empresa.';
+      document.querySelector('.opportunity-kicker').textContent='Próximo passo: equipe comercial';
+      $('opportunityTitle').textContent='Vamos preparar uma proposta personalizada';
+      $('opportunityCopy').textContent='A equipe comercial da Feeds Solutions vai analisar as informações enviadas e entrar em contato pelo e-mail ' + state.email + ' com uma recomendação individual para o seu cenário. Não é necessário continuar respondendo às perguntas.';
+      document.querySelector('.score-line').style.display='none';
+      document.querySelector('.opportunity-card > .feeds-progress').style.display='none';
+      document.querySelector('.result-actions').style.display='none';
+      $('nextStepMessage').style.display='block';
+      $('nextStepMessage').textContent='Sua coleta foi concluída. Você pode fechar esta página; nossa equipe dará continuidade pelo e-mail informado.';
+      return;
+    }
     const relacoes=r.solucoes&&Array.isArray(r.solucoes.relacoes)?r.solucoes.relacoes:[];
     const best=relacoes.length?relacoes[0]:null;
     const ponte=r.integracao_v63&&r.integracao_v63.resultado_v63;
