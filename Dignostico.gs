@@ -4377,6 +4377,17 @@ function impactoEhEspecificoDiagnostico_(valor) {
   return temConsequencia && (temMedida || texto.length >= 55);
 }
 
+function temDescricaoEtapasProcessoDiagnostico_(historico) {
+  const itens = Array.isArray(historico) ? historico : [];
+  return itens.some(function(item) {
+    if (String(item && item.remetente || '').trim().toUpperCase() !== 'EMPRESARIO') return false;
+    const texto = normalizarTextoDiagnostico_(String(item && item.mensagem || ''));
+    const mencionaEntrada = /\b(email|mensagem|dados|informacoes)\b/.test(texto);
+    const descreveAcaoHumana = /\b(copi|lanc|registr|confer|revis|transcrev|classific|salv|encaminh|digita|cadastr)[a-z]*/.test(texto);
+    return mencionaEntrada && descreveAcaoHumana;
+  });
+}
+
 function selecionarPerguntaObrigatoriaDiagnostico_(diagnostico, analise, contexto) {
   const d = diagnostico || {};
   const a = analise || {};
@@ -4421,8 +4432,7 @@ function selecionarPerguntaObrigatoriaDiagnostico_(diagnostico, analise, context
       pergunta: 'Quando ocorre esse erro ou retrabalho, qual é a consequência concreta: quanto tempo a equipe perde, que atraso acontece ou que informação acaba sendo prejudicada?'
     };
   }
-  if (!/(?:\bemail\b|\bmensagem\b|\bdados\b|\binformacoes\b)/.test(textoHistorico) ||
-      !/\b(copi|lanc|registr|confer|revis|transcrev|classific|salv|encaminh|digita|cadastr)[a-z]*/.test(textoHistorico)) {
+  if (!temDescricaoEtapasProcessoDiagnostico_(historico)) {
     return {
       lacuna: 'etapas do processo atual',
       pergunta: 'Depois que um e-mail com os dados de um cliente chega, quais etapas alguém executa até essas informações ficarem prontas para uso?'
