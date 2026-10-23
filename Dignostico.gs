@@ -4422,7 +4422,7 @@ function selecionarPerguntaObrigatoriaDiagnostico_(diagnostico, analise, context
     };
   }
   if (!/(?:\bemail\b|\bmensagem\b|\bdados\b|\binformacoes\b)/.test(textoHistorico) ||
-      !/\b(copi|lanc|registr|confer|revis|transcrev|classific|salv|encaminh|digita|cadastr|preench|abre|le|consulta)[a-z]*/.test(textoHistorico)) {
+      !/\b(copi|lanc|registr|confer|revis|transcrev|classific|salv|encaminh|digita|cadastr)[a-z]*/.test(textoHistorico)) {
     return {
       lacuna: 'etapas do processo atual',
       pergunta: 'Depois que um e-mail com os dados de um cliente chega, quais etapas alguém executa até essas informações ficarem prontas para uso?'
