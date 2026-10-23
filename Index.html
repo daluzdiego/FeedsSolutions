@@ -514,7 +514,16 @@
       document.querySelector('.opportunity-card > .feeds-progress').style.display='none';
       document.querySelector('.result-actions').style.display='none';
       $('nextStepMessage').style.display='block';
-      $('nextStepMessage').textContent='Sua coleta foi concluída. Você pode fechar esta página; nossa equipe dará continuidade pelo e-mail informado.';
+      const emailEnvio=r.email_conclusao||null;
+      if(emailEnvio&&emailEnvio.sucesso){
+        $('nextStepMessage').textContent=emailEnvio.duplicado
+          ? 'Sua coleta foi concluída. O relatório desta conversa já havia sido enviado para '+(emailEnvio.destinatario||'feedstecnologia@gmail.com')+'. Nossa equipe dará continuidade pelo e-mail informado.'
+          : 'Sua coleta foi concluída e o relatório foi encaminhado por e-mail para '+(emailEnvio.destinatario||'feedstecnologia@gmail.com')+'. Nossa equipe dará continuidade pelo e-mail informado.';
+      }else if(emailEnvio&&emailEnvio.tentado){
+        $('nextStepMessage').textContent='Sua coleta foi concluída, mas o envio do relatório por e-mail falhou. A equipe técnica precisa verificar: '+(emailEnvio.erro||'erro não detalhado')+'. Seu diagnóstico foi registrado.';
+      }else{
+        $('nextStepMessage').textContent='Sua coleta foi concluída. Não foi possível confirmar o envio automático do relatório nesta versão. A equipe técnica precisa verificar a implantação do sistema.';
+      }
       return;
     }
     const relacoes=r.solucoes&&Array.isArray(r.solucoes.relacoes)?r.solucoes.relacoes:[];
