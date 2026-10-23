@@ -143,3 +143,22 @@ O log de 20/10/2026 apontou `TESTAR_SUITE_COMPLETA_INVESTIGACAO_V64 @ TesteEstad
 6. O runner completo inclui a chamada real ao Gemini e pode consumir cota. Mantenha `FEEDS_MOTOR_INVESTIGACAO_V64_ATIVO = false`. Não execute `TESTAR_ACEITACAO_FINAL_V63_RESETAR()`.
 
 Não interpretar uma falha de sincronização como falha do motor de investigação; registrar como `FUNCAO_TESTE_AUSENTE` e corrigir a composição do projeto antes de avaliar a lógica.
+
+
+## Correção de encerramento prematuro — 23/10/2026
+
+O teste comercial real encerrou após duas respostas curtas (“5” e “sim”). O gate legado considerava suficiente a presença de processo, dor, impacto e objetivo, mesmo quando impacto era apenas uma categoria genérica e o volume não tinha período definido.
+
+Arquivos atualizados:
+- `Dignostico.gs`: exige volume com período explícito, frequência, impacto concreto e pelo menos cinco perguntas distintas respondidas; se faltarem evidências, prioriza uma pergunta contextual sobre a lacuna.
+- `TesteProfundidadeComercial.gs`: regressão determinística para encerramento prematuro, esclarecimento de volume, frequência, impacto, etapas do processo, ação automatizada esperada e confirmação de período sem repetir a pergunta de quantidade.
+
+### Validação obrigatória antes de novo teste público
+
+1. Sincronize `Dignostico.gs` e `TesteProfundidadeComercial.gs` do GitHub para o projeto Google Apps Script.
+2. Execute `TESTAR_PROFUNDIDADE_COMERCIAL_DIAGNOSTICO()` no arquivo `TesteProfundidadeComercial.gs`.
+3. Resultado esperado: `sucesso: true`, `total: 9`, `aprovados: 9`, `falhas: 0`.
+4. Se qualquer teste falhar, não execute o teste comercial público; envie o JSON completo do log para correção.
+5. Se passar, faça um novo diagnóstico sintético pela interface. Confirme que o sistema esclarece o período de “5”, não aceita “sim” como impacto específico e continua investigando as etapas e a ação automática esperada antes de enviar o e-mail comercial.
+
+Esta suíte é determinística e não chama Gemini nem altera planilhas. O teste pela interface continua necessário para validar o fluxo real. O motor V6.4 permanece desativado por padrão; esta correção endurece o gate do fluxo legado sem ativar a V6.4.
