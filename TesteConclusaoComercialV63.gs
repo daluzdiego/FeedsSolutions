@@ -73,7 +73,7 @@ function TESTAR_CONCLUSAO_COMERCIAL_V63() {
   var resumo = {
     versao: 'V6.3',
     suite: 'CONCLUSAO_COMERCIAL',
-    sucesso: resultados.length === 5 && aprovados === 5,
+    sucesso: resultados.length === 7 && aprovados === 7,
     total: resultados.length,
     aprovados: aprovados,
     falhas: resultados.filter(function(r) { return !r.passou; }),
