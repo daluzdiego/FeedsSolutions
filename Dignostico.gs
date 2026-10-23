@@ -2402,7 +2402,7 @@ function classificarDimensaoPerguntaDiagnostico_(perguntaNormalizada) {
     !/\bquantas? vezes\b|\bfrequencia\b|\bperiodicidade\b/.test(p);
 
   if (perguntaContaItens &&
-      /\b(pedidos?|vendas?|clientes?|cameras?|publicacoes?|divulgacoes?|postagens?|ordens?|orcamentos?|atendimentos?|pecas?|itens?|unidades?|tarefas?|arquivos?|documentos?|produtos?|chamados?|solicitacoes?)\b/.test(p)) {
+      /\b(pedidos?|vendas?|clientes?|cameras?|publicacoes?|divulgacoes?|postagens?|ordens?|orcamentos?|atendimentos?|pecas?|itens?|unidades?|tarefas?|arquivos?|documentos?|produtos?|chamados?|solicitacoes?|emails?)\b|e-mails?/.test(p)) {
     return 'VOLUME';
   }
 
