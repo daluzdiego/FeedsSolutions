@@ -422,7 +422,7 @@
           return;
         }
         state.lastResult=r;
-        addMessage(r.resposta||'Obrigado. Vamos continuar.','bot');
+        addMessage(r.resposta||'Não consegui formular a próxima pergunta nesta rodada. Sua mensagem foi registrada; tente continuar novamente em alguns instantes.','bot');
         if(r.recuperacao_pendente===true){
           return;
         }
