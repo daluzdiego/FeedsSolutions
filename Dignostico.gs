@@ -4348,14 +4348,16 @@ function determinarEstadoDiagnostico_(
   // ============================================================
 
   if (
-    !possuiFrequencia ||
     !possuiImpacto ||
     !possuiObjetivo
   ) {
-
     return DIAGNOSTICO_ESTADOS.INVESTIGACAO;
-
   }
+
+  // Para triagem comercial, frequência e métricas detalhadas são
+  // complementares: processo + dor + impacto + objetivo já permitem
+  // encaminhar o lead para uma solução personalizada.
+  return DIAGNOSTICO_ESTADOS.PRONTO_PARA_ANALISE;
 
 
   // ============================================================
@@ -4425,6 +4427,13 @@ function obterRespostaConversa_(
    *
    * Não alteramos esse comportamento.
    */
+
+  // O estado pronto encerra a coleta mesmo que a IA proponha
+  // perguntas complementares. O objetivo desta etapa é qualificar
+  // o lead para o comercial, não esgotar toda a investigação técnica.
+  if (estado === DIAGNOSTICO_ESTADOS.PRONTO_PARA_ANALISE) {
+    return 'Obrigado por compartilhar essas informações. Já temos dados suficientes para encaminhar seu caso à equipe comercial da Feeds Solutions. Nossa equipe vai analisar o que você relatou e entrar em contato pelo e-mail informado com uma proposta personalizada para a sua empresa. Você não precisa continuar respondendo às perguntas.';
+  }
 
   if (
     analise &&
