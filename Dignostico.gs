@@ -2159,7 +2159,7 @@ function ajustarContinuidadeDiagnosticoLegado_(
     // Respostas de periodicidade a uma pergunta de quantidade são informação válida:
     // registrar frequência e reformular a pergunta para obter a quantidade.
     const respostaPeriodicidade =
-      /\b(diariamente|diario|diaria|todos os dias|todo dia|semanalmente|semanal|toda semana|mensalmente|mensal|todo mes|todo mês|ocasionalmente|ocasional|eventualmente|as vezes|às vezes|raramente|frequentemente)\b/.test(mensagem);
+      /\b(diariamente|diario|diaria|todos os dias|todo dia|por dia|ao dia|semanalmente|semanal|toda semana|por semana|mensalmente|mensal|todo mes|todo mês|por mes|por mês|ocasionalmente|ocasional|eventualmente|as vezes|às vezes|raramente|frequentemente)\b/.test(mensagem);
 
     if (respostaPeriodicidade) {
       respondeu = true;
@@ -4421,7 +4421,8 @@ function selecionarPerguntaObrigatoriaDiagnostico_(diagnostico, analise, context
       pergunta: 'Quando ocorre esse erro ou retrabalho, qual é a consequência concreta: quanto tempo a equipe perde, que atraso acontece ou que informação acaba sendo prejudicada?'
     };
   }
-  if (!/depois que .*e.?mail|apos .*e.?mail|ap[oó]s .*receb|etapas .*e.?mail|fluxo atual|como .*processo funciona/.test(textoHistorico)) {
+  if (!/(?:\bemail\b|\bmensagem\b|\bdados\b|\binformacoes\b)/.test(textoHistorico) ||
+      !/\b(copi|lanc|registr|confer|revis|transcrev|classific|salv|encaminh|digita|cadastr|preench|abre|le|consulta)[a-z]*/.test(textoHistorico)) {
     return {
       lacuna: 'etapas do processo atual',
       pergunta: 'Depois que um e-mail com os dados de um cliente chega, quais etapas alguém executa até essas informações ficarem prontas para uso?'
