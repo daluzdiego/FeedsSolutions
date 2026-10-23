@@ -799,14 +799,18 @@ const investigacaoV622 =
    */
 
   const resposta =
-    (
-      (!usarMotorV64 || resultadoMotorV64.resultado.status_diagnostico === 'CONCLUIDO') &&
-      integracaoV63 &&
-      integracaoV63.ativada === true &&
-      integracaoV63.resposta_cliente
-    )
-      ? integracaoV63.resposta_cliente
-      : respostaLegada;
+    novoEstado === DIAGNOSTICO_ESTADOS.PRONTO_PARA_ANALISE
+      ? respostaLegada
+      : (
+          (
+            (!usarMotorV64 || resultadoMotorV64.resultado.status_diagnostico === 'CONCLUIDO') &&
+            integracaoV63 &&
+            integracaoV63.ativada === true &&
+            integracaoV63.resposta_cliente
+          )
+            ? integracaoV63.resposta_cliente
+            : respostaLegada
+        );
 
 
   /*
