@@ -934,19 +934,33 @@ const investigacaoV622 =
   }
 
 
-  // Ao concluir a triagem comercial, envie uma única ficha completa
-  // para o e-mail comercial configurado. Falha no e-mail não derruba a conversa.
+  // Ao concluir a triagem comercial, envie uma única ficha completa.
+  // O resultado é devolvido à interface para tornar falhas visíveis no teste real.
+  let envioEmailConclusao = {
+    tentado: false,
+    sucesso: false,
+    destinatario: 'feedstecnologia@gmail.com',
+    erro: ''
+  };
   if (novoEstado === DIAGNOSTICO_ESTADOS.PRONTO_PARA_ANALISE) {
+    envioEmailConclusao.tentado = true;
     try {
       const envioResumo = enviarResumoEmpresaConcluida_(
         empresaId,
         conversaId,
         novoDiagnostico
       );
+      envioEmailConclusao.sucesso = !!(envioResumo && envioResumo.sucesso);
+      envioEmailConclusao.destinatario = envioResumo && envioResumo.destinatario
+        ? envioResumo.destinatario
+        : 'feedstecnologia@gmail.com';
+      envioEmailConclusao.duplicado = !!(envioResumo && envioResumo.duplicado);
       Logger.log('FEEDS_EMAIL_CONCLUSAO: ' + JSON.stringify(envioResumo));
     } catch (erroEmailConclusao) {
-      Logger.log('FEEDS_EMAIL_CONCLUSAO_FALHOU: ' +
-        String(erroEmailConclusao && erroEmailConclusao.message || erroEmailConclusao));
+      envioEmailConclusao.erro = String(
+        erroEmailConclusao && erroEmailConclusao.message || erroEmailConclusao
+      );
+      Logger.log('FEEDS_EMAIL_CONCLUSAO_FALHOU: ' + envioEmailConclusao.erro);
     }
   }
 
@@ -1032,6 +1046,8 @@ const investigacaoV622 =
     estado:
       novoEstado,
 
+    email_conclusao:
+      envioEmailConclusao,
 
     resposta:
       resposta,
