@@ -67,6 +67,14 @@ function TESTAR_PROFUNDIDADE_COMERCIAL_DIAGNOSTICO() {
     assert('investiga distribuição temporal quando frequência está ausente',
       !!perguntaFrequencia && /horários específicos|distribuída ao longo do dia/.test(perguntaFrequencia.pergunta));
 
+    var perguntaDistribuicao = selecionarPerguntaObrigatoriaDiagnostico_(
+      diagnosticoBase,
+      { volume: '5 e-mails por dia', frequencia: 'Diária', impacto: diagnosticoBase.impacto_nivel },
+      { historico: contextoVolume.historico, diagnostico: { volume: '5 e-mails por dia', frequencia: 'Diária' } }
+    );
+    assert('“Diária” derivada do volume não substitui a investigação de horários e picos',
+      !!perguntaDistribuicao && /horários específicos|distribuída ao longo do dia/.test(perguntaDistribuicao.pergunta));
+
     var perguntaImpacto = selecionarPerguntaObrigatoriaDiagnostico_(
       diagnosticoBase,
       { volume: '5 e-mails por dia', frequencia: 'Diária', impacto: diagnosticoBase.impacto_nivel },
@@ -154,7 +162,7 @@ function TESTAR_PROFUNDIDADE_COMERCIAL_DIAGNOSTICO() {
   var resumo = {
     versao: 'V6.4',
     suite: 'PROFUNDIDADE_COMERCIAL_DETERMINISTICA',
-    sucesso: resultados.length === 9 && aprovados === resultados.length,
+    sucesso: resultados.length === 10 && aprovados === resultados.length,
     total: resultados.length,
     aprovados: aprovados,
     falhas: resultados.length - aprovados,
