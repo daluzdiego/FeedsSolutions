@@ -4494,15 +4494,16 @@ function determinarEstadoDiagnostico_(
   const possuiVolumeComPeriodo = !!volume && volumeTemPeriodoExplicitoDiagnostico_(volume);
   const possuiFrequencia = frequenciaTemDistribuicaoTemporalDiagnostico_(dados.frequencia || a.frequencia || (c.diagnostico && c.diagnostico.frequencia) || '');
   const possuiPerguntasSuficientes = contarPerguntasRespondidasDiagnostico_(c.historico) >= 5;
+  const lacunaObrigatoria = selecionarPerguntaObrigatoriaDiagnostico_(dados, a, c);
 
   if (!possuiProcesso && !possuiDor) return DIAGNOSTICO_ESTADOS.INICIO;
   if (!possuiProcesso || !possuiDor) return DIAGNOSTICO_ESTADOS.DESCOBERTA;
 
-  // Não concluir somente porque processo/dor/impacto/objetivo têm texto.
-  // Exige volume com período, frequência, impacto concreto e pelo menos cinco
-  // perguntas investigativas distintas respondidas, além de processo e objetivo.
+  // Não concluir somente porque alguns campos têm texto. Todas as lacunas
+  // operacionais obrigatórias devem ter evidência, inclusive etapas, destino,
+  // ação automática esperada, exceções e critério de sucesso.
   if (!possuiImpacto || !possuiObjetivo || !possuiVolumeComPeriodo ||
-      !possuiFrequencia || !possuiPerguntasSuficientes) {
+      !possuiFrequencia || !possuiPerguntasSuficientes || lacunaObrigatoria) {
     return DIAGNOSTICO_ESTADOS.INVESTIGACAO;
   }
 
