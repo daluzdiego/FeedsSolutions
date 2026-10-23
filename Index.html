@@ -331,7 +331,7 @@
       setError('identityError','Informe seu nome, o nome da empresa e o e-mail de contato para continuar.');
       return;
     }
-    if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)){
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
       setError('identityError','Informe um endereço de e-mail válido para que nossa equipe possa entrar em contato.');
       $('emailContato').focus();
       return;
