@@ -45,6 +45,26 @@ function TESTAR_CONCLUSAO_COMERCIAL_V63() {
     }, DIAGNOSTICO_ESTADOS.INVESTIGACAO);
     verificar('Continua perguntando quando uma dimensão central realmente falta',
       perguntaEmAberto === 'Qual é o impacto financeiro atual?', perguntaEmAberto);
+
+    var perguntaInstagram = construirPerguntaContinuacaoDiagnostico_(
+      { processo_nome: 'Captação de clientes', dor_principal: 'Poucos clientes' },
+      'Fiz 1 post no instagram e ninguem nem curtiu, tenho 693 seguidores',
+      'Quais ações você já tentou?',
+      {}
+    );
+    verificar('Resposta sobre Instagram gera pergunta contextual, não agradecimento genérico',
+      /post gerou alguma mensagem|pedido de orçamento/i.test(perguntaInstagram) &&
+      !/obrigado.*vamos continuar/i.test(perguntaInstagram), perguntaInstagram);
+
+    var perguntaEsclarecimento = construirPerguntaContinuacaoDiagnostico_(
+      { processo_nome: 'Captação de clientes', dor_principal: 'Poucos clientes' },
+      'nao entendi',
+      'Quais ações você já tentou para atrair clientes?',
+      {}
+    );
+    verificar('“Não entendi” recebe reformulação da pergunta anterior',
+      /explicar de outra forma/i.test(perguntaEsclarecimento) &&
+      /Quais ações você já tentou/i.test(perguntaEsclarecimento), perguntaEsclarecimento);
   } catch (e) {
     resultados.push({ teste: 'Exceção não prevista', passou: false, detalhe: String(e && e.stack || e) });
   }
