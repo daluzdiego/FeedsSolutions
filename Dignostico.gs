@@ -4468,16 +4468,13 @@ function enviarResumoEmpresaConcluida_(empresaId, conversaId, diagnostico) {
     return { sucesso: true, duplicado: true, conversa_id: conversaId };
   }
 
-  let destinatario = String(props.getProperty('FEEDS_EMAIL_COMERCIAL') || '').trim();
+  // Destinatário comercial oficial informado pela Feeds Solutions.
+  // A propriedade do script permite alterar o destino sem editar o código.
+  let destinatario = String(
+    props.getProperty('FEEDS_EMAIL_COMERCIAL') || 'feedstecnologia@gmail.com'
+  ).trim();
   if (!destinatario) {
-    try {
-      destinatario = String(Session.getEffectiveUser().getEmail() || '').trim();
-    } catch (e) {
-      destinatario = '';
-    }
-  }
-  if (!destinatario) {
-    throw new Error('Destinatário não configurado. Defina Script Property FEEDS_EMAIL_COMERCIAL.');
+    destinatario = 'feedstecnologia@gmail.com';
   }
 
   function obterRegistroPorId(nomeAba, campoId, valorId) {
