@@ -4373,7 +4373,7 @@ function frequenciaTemDistribuicaoTemporalDiagnostico_(valor) {
   const texto = normalizarTextoDiagnostico_(valor);
   // “Diária/semanal” pode ser apenas o período associado ao volume.
   // Exige evidência adicional sobre horários, picos ou variação entre dias.
-  return /horario|horarios|pico|manha|tarde|noite|madrugada|distribuid[oa] ao longo|concentrad[oa]s? em|dias uteis|finais de semana|fim de semana|variacao entre dias|periodo do dia/.test(texto);
+  return /horario|horarios|pico|manha|tarde|noite|madrugada|distribuid[oa] ao longo|ao longo do dia|ao longo do turno|durante o dia|concentrad[oa]s? em|dias uteis|finais de semana|fim de semana|variacao entre dias|periodo do dia/.test(texto);
 }
 
 function impactoEhEspecificoDiagnostico_(valor) {
