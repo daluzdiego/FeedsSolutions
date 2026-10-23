@@ -4369,6 +4369,13 @@ function volumeTemPeriodoExplicitoDiagnostico_(valor) {
   return /\b(por dia|ao dia|diario|diaria|diariamente|por semana|semanal|semanalmente|por mes|mensal|mensalmente|por hora|por turno|por atendimento|por cliente)\b/.test(texto);
 }
 
+function frequenciaTemDistribuicaoTemporalDiagnostico_(valor) {
+  const texto = normalizarTextoDiagnostico_(valor);
+  // “Diária/semanal” pode ser apenas o período associado ao volume.
+  // Exige evidência adicional sobre horários, picos ou variação entre dias.
+  return /horario|horarios|pico|manha|tarde|noite|madrugada|distribuid[oa] ao longo|concentrad[oa]s? em|dias uteis|finais de semana|fim de semana|variacao entre dias|periodo do dia/.test(texto);
+}
+
 function impactoEhEspecificoDiagnostico_(valor) {
   const texto = normalizarTextoDiagnostico_(valor);
   if (!texto || /^(sim|nao|não|erros retrabalho ou atrasos gerados pelo processo|erros, retrabalho ou atrasos gerados pelo processo)$/.test(texto)) return false;
@@ -4420,7 +4427,7 @@ function selecionarPerguntaObrigatoriaDiagnostico_(diagnostico, analise, context
         : 'Em um dia ou semana típica, aproximadamente quantos e-mails com dados de clientes vocês recebem?'
     };
   }
-  if (!frequencia) {
+  if (!frequenciaTemDistribuicaoTemporalDiagnostico_(frequencia)) {
     return {
       lacuna: 'frequência e distribuição do processo',
       pergunta: 'Além da quantidade, esses e-mails chegam de forma distribuída ao longo do dia ou costumam se concentrar em horários específicos?'
@@ -4485,7 +4492,7 @@ function determinarEstadoDiagnostico_(
   const possuiObjetivo = !!String(dados.objetivo || a.objetivo || '').trim();
   const volume = String(a.volume || (c.diagnostico && c.diagnostico.volume) || '').trim();
   const possuiVolumeComPeriodo = !!volume && volumeTemPeriodoExplicitoDiagnostico_(volume);
-  const possuiFrequencia = !!String(dados.frequencia || a.frequencia || (c.diagnostico && c.diagnostico.frequencia) || '').trim();
+  const possuiFrequencia = frequenciaTemDistribuicaoTemporalDiagnostico_(dados.frequencia || a.frequencia || (c.diagnostico && c.diagnostico.frequencia) || '');
   const possuiPerguntasSuficientes = contarPerguntasRespondidasDiagnostico_(c.historico) >= 5;
 
   if (!possuiProcesso && !possuiDor) return DIAGNOSTICO_ESTADOS.INICIO;
