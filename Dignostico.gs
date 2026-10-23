@@ -2164,9 +2164,9 @@ function ajustarContinuidadeDiagnosticoLegado_(
     if (respostaPeriodicidade) {
       respondeu = true;
       if (!resultado.frequencia) {
-        if (/diari|todos os dias|todo dia/.test(mensagem)) resultado.frequencia = 'Diária';
-        else if (/seman|toda semana/.test(mensagem)) resultado.frequencia = 'Semanal';
-        else if (/mens|todo mes|todo mês/.test(mensagem)) resultado.frequencia = 'Mensal';
+        if (/diari|todos os dias|todo dia|por dia|ao dia/.test(mensagem)) resultado.frequencia = 'Diária';
+        else if (/seman|toda semana|por semana/.test(mensagem)) resultado.frequencia = 'Semanal';
+        else if (/mens|todo mes|todo mês|por mes|por mês/.test(mensagem)) resultado.frequencia = 'Mensal';
         else if (/ocasional|eventualmente|as vezes|às vezes|raramente/.test(mensagem)) resultado.frequencia = 'Ocasional';
         else if (/frequentemente/.test(mensagem)) resultado.frequencia = 'Frequente';
       }
