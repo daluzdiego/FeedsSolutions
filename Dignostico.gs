@@ -4245,166 +4245,30 @@ function determinarEstadoDiagnostico_(
   diagnostico,
   analise
 ) {
+  const dados = diagnostico || {};
+  const possuiProcesso = !!String(dados.processo_nome || '').trim();
+  const possuiDor = !!String(dados.dor_principal || '').trim();
+  const possuiImpacto = !!String(dados.impacto_nivel || '').trim();
+  const possuiObjetivo = !!String(dados.objetivo || '').trim();
 
-  const dados =
-    diagnostico || {};
-
-  const analiseAtual =
-    analise || {};
-
-
-  // ============================================================
-  // PRESENÇA DOS ELEMENTOS FUNDAMENTAIS
-  // ============================================================
-
-  const possuiProcesso =
-    !!String(
-      dados.processo_nome || ''
-    ).trim();
-
-
-  const possuiDor =
-    !!String(
-      dados.dor_principal || ''
-    ).trim();
-
-
-  const possuiFrequencia =
-    !!String(
-      dados.frequencia || ''
-    ).trim();
-
-
-  const possuiImpacto =
-    !!String(
-      dados.impacto_nivel || ''
-    ).trim();
-
-
-  const possuiObjetivo =
-    !!String(
-      dados.objetivo || ''
-    ).trim();
-
-
-  const informacaoFaltante =
-    String(
-      analiseAtual.informacao_faltante || ''
-    ).trim();
-
-
-  // ============================================================
-  // 1. INÍCIO
-  // ============================================================
-  //
-  // Ainda não existe nenhum dos dois elementos fundamentais.
-  //
-  // ============================================================
-
-  if (
-    !possuiProcesso &&
-    !possuiDor
-  ) {
-
+  if (!possuiProcesso && !possuiDor) {
     return DIAGNOSTICO_ESTADOS.INICIO;
-
   }
 
-
-  // ============================================================
-  // 2. DESCOBERTA
-  // ============================================================
-  //
-  // Já existe alguma informação fundamental, mas ainda não
-  // temos PROCESSO + DOR.
-  //
-  // ============================================================
-
-  if (
-    !possuiProcesso ||
-    !possuiDor
-  ) {
-
+  if (!possuiProcesso || !possuiDor) {
     return DIAGNOSTICO_ESTADOS.DESCOBERTA;
-
   }
 
-
-  // ============================================================
-  // 3. INVESTIGAÇÃO — DADOS ESSENCIAIS AUSENTES
-  // ============================================================
-  //
-  // PROCESSO + DOR já existem.
-  //
-  // Porém, para o diagnóstico mínimo ficar pronto, ainda
-  // precisamos de:
-  //
-  // - frequência
-  // - impacto
-  // - objetivo
-  //
-  // O VOLUME NÃO é obrigatório para avançar.
-  //
-  // ============================================================
-
-  if (
-    !possuiImpacto ||
-    !possuiObjetivo
-  ) {
+  // Objetivo desta etapa: coletar informação suficiente para o comercial.
+  // Não exigimos frequência, critérios de aceite ou métricas detalhadas
+  // para encaminhar um lead que já tem processo, dor, impacto e objetivo.
+  if (!possuiImpacto || !possuiObjetivo) {
     return DIAGNOSTICO_ESTADOS.INVESTIGACAO;
   }
 
-  // Para triagem comercial, frequência e métricas detalhadas são
-  // complementares: processo + dor + impacto + objetivo já permitem
-  // encaminhar o lead para uma solução personalizada.
   return DIAGNOSTICO_ESTADOS.PRONTO_PARA_ANALISE;
-
-
-  // ============================================================
-  // 4. INFORMAÇÃO FALTANTE
-  // ============================================================
-  //
-  // Se todos os elementos essenciais já existem, a informação
-  // faltante só deve bloquear o diagnóstico se for realmente
-  // ESSENCIAL.
-  //
-  // Informações complementares não impedem o avanço.
-  //
-  // ============================================================
-
-  if (
-    informacaoFaltante &&
-    informacaoFaltanteEhEssencialDiagnostico_(
-      informacaoFaltante
-    )
-  ) {
-
-    return DIAGNOSTICO_ESTADOS.INVESTIGACAO;
-
-  }
-
-
-  // ============================================================
-  // 5. PRONTO PARA ANÁLISE
-  // ============================================================
-  //
-  // Temos:
-  //
-  // PROCESSO
-  // DOR
-  // FREQUÊNCIA
-  // IMPACTO
-  // OBJETIVO
-  //
-  // E não existe nenhuma lacuna essencial bloqueando o avanço.
-  //
-  // VOLUME continua sendo uma métrica complementar.
-  //
-  // ============================================================
-
-  return DIAGNOSTICO_ESTADOS.PRONTO_PARA_ANALISE;
-
 }
+
 
 /**
  * ============================================================
